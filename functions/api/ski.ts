@@ -163,6 +163,21 @@ async function getResortSnapshot(
     if (cached) return cached as Snapshot;
   }
 
+  // For Vail resorts, try API first, then fall back to HTML scraping
+  if (r.family === "vail") {
+    try {
+      const apiResult = await tryVailAPI(r);
+      if (apiResult && apiResult.scraped) {
+        await ctx.env.SKI_KV.put(key, JSON.stringify(apiResult), {
+          expirationTtl: ttl,
+        });
+        return apiResult;
+      }
+    } catch (e) {
+      console.log(`[${r.id}] Vail API failed, falling back to HTML scraping`);
+    }
+  }
+
   const html = await fetchHtml(r.url);
 
   // Detect bot/captcha blocks early (prevents “false scraped=true”)
@@ -189,30 +204,51 @@ async function getResortSnapshot(
 
   const text = collapseWhitespace(stripTagsForText(html));
 
-  // Parse based on resort family
+  // Parse based on resort family - try multiple strategies
   if (r.family === "camelback_print") {
+    // Camelback uses simpler format
     const openLifts = matchNumberAfter(text, /open\s*lifts/i);
     const openTrails = matchNumberAfter(text, /open\s*trails/i);
     lifts = openLifts != null ? { open: openLifts } : undefined;
     trails = openTrails != null ? { open: openTrails } : undefined;
-  } else if (r.family === "vail" || r.family === "alterra") {
-    lifts = matchFractionNear(text, /lifts?\s*open/i) ?? undefined;
-    trails = matchFractionNear(text, /trails?\s*open/i) ?? undefined;
   } else {
-    lifts = matchFractionNear(text, /lifts?\s*open/i) ?? undefined;
-    trails = matchFractionNear(text, /trails?\s*open/i) ?? undefined;
+    // Vail/Alterra - try multiple pattern strategies
+    
+    // Strategy 1: Standard fraction patterns
+    lifts = matchFractionNear(text, /lifts?\s*(?:open|operating)?/i);
+    trails = matchFractionNear(text, /trails?\s*(?:open|operating)?/i);
+    
+    // Strategy 2: If lifts/trails not found, try reverse patterns
+    if (!lifts) {
+      lifts = matchFractionNear(text, /open\s*lifts?/i);
+    }
+    if (!trails) {
+      trails = matchFractionNear(text, /open\s*trails?/i);
+    }
+    
+    // Strategy 3: Try alternate labels
+    if (!lifts) {
+      lifts = matchFractionNear(text, /lifts?/i);
+    }
+    if (!trails) {
+      trails = matchFractionNear(text, /runs?|trails?/i);
+    }
   }
 
   // Try to extract surface conditions text
   surface_text = extractSurfaceText(text);
 
-  // Try to extract snowfall data (if available on page)
-  snow24_in = matchInchesNear(
-    text,
-    /(24\s*hr|24-hour|past\s*24\s*hours|overnight)/i,
-  );
-  snow48_in = matchInchesNear(text, /(48\s*hr|48-hour|past\s*48\s*hours)/i);
-  snow7d_in = matchInchesNear(text, /(7\s*day|past\s*7\s*days|week)/i);
+  // Try to extract snowfall data (if available on page) - try multiple label variations
+  snow24_in = 
+    matchInchesNear(text, /(24\s*hr|24-hour|24\s*hour|past\s*24\s*hours|overnight|last\s*24)/i) ??
+    matchInchesNear(text, /new\s*snow|fresh\s*snow/i);
+  
+  snow48_in = 
+    matchInchesNear(text, /(48\s*hr|48-hour|48\s*hour|past\s*48\s*hours|last\s*48)/i) ??
+    matchInchesNear(text, /2\s*day/i);
+  
+  snow7d_in = 
+    matchInchesNear(text, /(7\s*day|seven\s*day|past\s*7\s*days|past\s*week|weekly)/i);
 
   const open_pct =
     trails?.open != null && trails?.total != null && trails.total > 0
@@ -236,6 +272,14 @@ async function getResortSnapshot(
     snow48_in != null ||
     snow7d_in != null,
   );
+
+  // Debug logging (helpful for troubleshooting)
+  console.log(`[${r.id}] Scraped=${scraped}`, {
+    lifts: lifts?.open ? `${lifts.open}/${lifts.total}` : 'none',
+    trails: trails?.open ? `${trails.open}/${trails.total}` : 'none',
+    surface: surface_text || 'none',
+    snow: `24h:${snow24_in ?? 'none'} 48h:${snow48_in ?? 'none'} 7d:${snow7d_in ?? 'none'}`
+  });
 
   const snapshot: Snapshot = {
     id: r.id,
@@ -269,6 +313,84 @@ async function fetchHtml(url: string) {
   });
   if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
   return await resp.text();
+}
+
+// Try to fetch from Vail's data API (many Vail resorts have JSON endpoints)
+async function tryVailAPI(r: Resort): Promise<Snapshot | null> {
+  // Vail resorts often have a structured data endpoint
+  // Try common API patterns
+  const apiUrls = [
+    `https://www.${r.id === 'hunter' ? 'huntermtn' : r.id}.com/api/mountain-report`,
+    `https://www.${r.id === 'hunter' ? 'huntermtn' : r.id}.com/data/mountain-report.json`,
+  ];
+
+  for (const apiUrl of apiUrls) {
+    try {
+      const resp = await fetch(apiUrl, {
+        headers: {
+          "user-agent": "Mozilla/5.0 (compatible; IceCoastBot/1.0)",
+          "accept": "application/json",
+        },
+      });
+      
+      if (resp.ok) {
+        const data = await resp.json();
+        // Try to extract data from JSON (structure varies by resort)
+        const lifts = extractFromJSON(data, ['lifts', 'openLifts', 'liftsOpen']);
+        const trails = extractFromJSON(data, ['trails', 'openTrails', 'trailsOpen']);
+        const surface = extractFromJSON(data, ['surface', 'conditions', 'primarySurface', 'snowCondition']);
+        
+        if (lifts || trails || surface) {
+          console.log(`[${r.id}] Successfully used Vail API`);
+          return {
+            id: r.id,
+            resort: r.name,
+            timestamp: new Date().toISOString(),
+            scraped: true,
+            lifts: lifts ? parseLiftsTrails(lifts) : undefined,
+            trails: trails ? parseLiftsTrails(trails) : undefined,
+            signals: {
+              surface_text: typeof surface === 'string' ? surface : undefined,
+            },
+            rating: 'machine_groomed',
+            confidence: 0.85,
+          };
+        }
+      }
+    } catch (e) {
+      // Continue to next API URL
+      continue;
+    }
+  }
+  
+  return null;
+}
+
+function extractFromJSON(obj: any, keys: string[]): any {
+  for (const key of keys) {
+    if (obj && typeof obj === 'object' && key in obj) {
+      return obj[key];
+    }
+    // Deep search
+    for (const k in obj) {
+      if (typeof obj[k] === 'object') {
+        const result = extractFromJSON(obj[k], keys);
+        if (result !== undefined) return result;
+      }
+    }
+  }
+  return undefined;
+}
+
+function parseLiftsTrails(data: any): { open: number; total: number } | undefined {
+  if (typeof data === 'object' && 'open' in data && 'total' in data) {
+    return { open: Number(data.open), total: Number(data.total) };
+  }
+  if (typeof data === 'string') {
+    const match = data.match(/(\d+)\s*\/\s*(\d+)/);
+    if (match) return { open: Number(match[1]), total: Number(match[2]) };
+  }
+  return undefined;
 }
 
 function looksBlocked(html: string): boolean {
@@ -307,39 +429,38 @@ function computeRating(sig: {
   const explicit = mapSurface(surface);
   if (explicit) return { rating: explicit, confidence: 0.9 };
 
-  // 2) Infer from snowfall signals
+  // 2) Infer from snowfall signals - BE AGGRESSIVE ABOUT POWDER DAYS!
   const openPct = sig.open_pct ?? 0;
   const s24 = sig.snow24_in ?? null;
   const s48 = sig.snow48_in ?? null;
   const s7 = sig.snow7d_in ?? null;
 
-  // Limited terrain
-  if (openPct > 0 && openPct < 0.25)
+  // Limited terrain (only use if very restricted)
+  if (openPct > 0 && openPct < 0.15)
     return { rating: "limited", confidence: 0.75 };
 
-  // FRESH POWDER (ungroomed) - requires significant fresh snow
-  if (s24 != null && s24 >= 8) {
-    return { rating: "powder", confidence: 0.85 }; // 8"+ overnight = fresh powder
+  // 🎿 POWDER DAY! (6"+ in 24h OR 10"+ in 48h)
+  if (s24 != null && s24 >= 6) {
+    return { rating: "powder", confidence: 0.95 }; // 6"+ overnight = POWDER!
   }
-  if (s48 != null && s48 >= 12) {
-    return { rating: "powder", confidence: 0.8 }; // 12"+ in 48h = likely still powder
-  }
-
-  // PACKED POWDER (groomed fresh snow) - moderate fresh snow
-  if (s24 != null && s24 >= 4) {
-    return { rating: "packed_powder", confidence: 0.8 }; // 4-7" = packed powder
-  }
-  if (s48 != null && s48 >= 6) {
-    return { rating: "packed_powder", confidence: 0.75 }; // 6-11" in 48h = packed powder
-  }
-  if (s7 != null && s7 >= 10) {
-    return { rating: "packed_powder", confidence: 0.65 }; // Recent snow still around
+  if (s48 != null && s48 >= 10 && (s24 == null || s24 >= 4)) {
+    return { rating: "powder", confidence: 0.9 }; // 10"+ in 48h with recent snow = POWDER
   }
 
-  // MACHINE GROOMED (default) - little to no fresh snow
-  if (openPct >= 0.3) return { rating: "machine_groomed", confidence: 0.6 };
+  // ⛷️ PACKED POWDER (3-5" in 24h OR 6-9" in 48h)
+  if (s24 != null && s24 >= 3) {
+    return { rating: "packed_powder", confidence: 0.85 }; // 3-5" = packed powder
+  }
+  if (s48 != null && s48 >= 6 && (s24 == null || s24 >= 2)) {
+    return { rating: "packed_powder", confidence: 0.8 }; // Recent snow still soft
+  }
+  if (s7 != null && s7 >= 12) {
+    return { rating: "packed_powder", confidence: 0.7 }; // Good week of snow
+  }
 
-  return { rating: "unknown", confidence: 0.4 };
+  // 🏔️ MACHINE GROOMED (default for most days - NO fresh snow)
+  // This is the SAFE DEFAULT - not "variable"
+  return { rating: "machine_groomed", confidence: 0.6 };
 }
 
 function mapSurface(surface: string): string | null {
@@ -372,23 +493,45 @@ function mapSurface(surface: string): string | null {
 }
 
 function extractSurfaceText(text: string): string | undefined {
+  // Common label patterns to search for
   const candidates = [
     /surface\s*conditions?/i,
     /conditions?\s*:/i,
     /snow\s*conditions?/i,
     /primary\s*surface/i,
+    /base\s*conditions?/i,
+    /current\s*conditions?/i,
+    /snow\s*quality/i,
   ];
+
+  // Condition keywords to look for (expanded list)
+  const conditionPattern = /(powder|packed\s*powder|machine\s*groomed|groomed|hard\s*pack|hardpack|firm|spring|icy|ice|frozen\s*granular|granular|corn\s*snow|variable|wet|soft)/i;
 
   for (const re of candidates) {
     const idx = text.search(re);
     if (idx >= 0) {
-      const window = text.slice(idx, idx + 150);
-      const m = window.match(
-        /(powder|packed powder|machine groomed|groomed|hard ?pack|firm|spring|icy)[^\.]{0,40}/i,
-      );
-      if (m) return m[0].trim();
+      // Extract a larger window around the match
+      const window = text.slice(Math.max(0, idx - 50), idx + 200);
+      const m = window.match(conditionPattern);
+      if (m) {
+        // Get more context around the match
+        const matchIdx = window.indexOf(m[0]);
+        const contextStart = Math.max(0, matchIdx - 10);
+        const contextEnd = Math.min(window.length, matchIdx + m[0].length + 30);
+        const context = window.slice(contextStart, contextEnd).trim();
+        
+        // Return the cleanest match
+        return context.split(/[.,;]|snow(?:fall)?/i)[0].trim();
+      }
     }
   }
+
+  // Fallback: search entire text for condition keywords (broader search)
+  const broadMatch = text.match(conditionPattern);
+  if (broadMatch) {
+    return broadMatch[0].trim();
+  }
+
   return undefined;
 }
 
@@ -421,7 +564,7 @@ function matchFractionNear(
   );
   if (m2) return { open: Number(m2[1]), total: Number(m2[2]) };
 
-  // Pattern 3: "11 of 12 lifts open" or "lifts open: 11 of 12"
+  // Pattern 3: "11 of 12 lifts open"
   const m3 = text.match(
     new RegExp(`(\\d+)\\s*of\\s*(\\d+)\\s*${label.source}`, "i"),
   );
@@ -432,6 +575,29 @@ function matchFractionNear(
     new RegExp(`${label.source}\\s*(\\d+)\\s*of\\s*(\\d+)`, "i"),
   );
   if (m4) return { open: Number(m4[1]), total: Number(m4[2]) };
+
+  // Pattern 5: "lifts: 12/15" or "trails: 45/52" (compact format)
+  const m5 = text.match(
+    new RegExp(`${label.source}\\s*:?\\s*(\\d+)\\s*\\/\\s*(\\d+)`, "i"),
+  );
+  if (m5) return { open: Number(m5[1]), total: Number(m5[2]) };
+
+  // Pattern 6: "open lifts 12" with separate "total lifts 15" nearby
+  const openMatch = text.match(
+    new RegExp(`open\\s*${label.source}\\s*(\\d+)`, "i"),
+  );
+  const totalMatch = text.match(
+    new RegExp(`total\\s*${label.source}\\s*(\\d+)`, "i"),
+  );
+  if (openMatch && totalMatch) {
+    return { open: Number(openMatch[1]), total: Number(totalMatch[1]) };
+  }
+
+  // Pattern 7: Just open count "12 lifts open" (no total)
+  const m7 = text.match(
+    new RegExp(`(\\d+)\\s*${label.source}\\s*open`, "i"),
+  );
+  if (m7) return { open: Number(m7[1]), total: Number(m7[1]) }; // Assume all are total
 
   return null;
 }
@@ -444,7 +610,24 @@ function matchNumberAfter(text: string, label: RegExp) {
 function matchInchesNear(text: string, label: RegExp) {
   const idx = text.search(label);
   if (idx < 0) return null;
-  const window = text.slice(idx, idx + 200);
-  const m = window.match(/(\d+(?:\.\d+)?)\s*(?:in|"|inches)/i);
-  return m ? Number(m[1]) : null;
+  
+  // Search in a larger window
+  const window = text.slice(Math.max(0, idx - 50), idx + 250);
+  
+  // Pattern 1: Standard "X inches" or X"
+  const m1 = window.match(/(\d+(?:\.\d+)?)\s*(?:in|"|inches)/i);
+  if (m1) return Number(m1[1]);
+  
+  // Pattern 2: Trace amounts (return 0)
+  if (window.match(/trace|T"/i)) return 0;
+  
+  // Pattern 3: Just a number near the label (e.g., "24hr: 5")
+  const m3 = window.match(/:\s*(\d+(?:\.\d+)?)\s*$/);
+  if (m3) return Number(m3[1]);
+  
+  // Pattern 4: Number without unit (last resort)
+  const m4 = window.match(/(\d+(?:\.\d+)?)\s*(?:new|fresh)?/i);
+  if (m4) return Number(m4[1]);
+  
+  return null;
 }
