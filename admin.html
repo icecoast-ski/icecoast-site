@@ -339,14 +339,18 @@ git push origin main</pre>
         </div>
         
         <div class="instructions">
-            <strong>Quick Instructions:</strong>
+            <strong>⭐ CONDITIONS ARE MOST IMPORTANT! ⭐</strong>
             <ol>
-                <li>Visit each resort's website (links in main site)</li>
-                <li>Enter 24h, 48h, and 7d snow totals</li>
+                <li><strong>First:</strong> Visit each resort's website conditions page</li>
+                <li><strong>Most Important:</strong> Select the current conditions from dropdown</li>
+                <li><strong>Then:</strong> Enter 24h, 48h, and 7d snow totals</li>
                 <li>Skip scraped resorts (marked with green badge) - they auto-update!</li>
                 <li>Click "Generate JSON" when done</li>
-                <li>Follow GitHub workflow above to deploy</li>
+                <li>Follow GitHub workflow to deploy</li>
             </ol>
+            <p style="margin-top: 0.75rem; color: #856404; font-weight: 600;">
+                💡 Tip: Conditions are THE #1 feature skiers look at. Make sure they're accurate!
+            </p>
         </div>
         
         <div class="resort-grid" id="resortGrid"></div>
@@ -447,6 +451,37 @@ git push origin main</pre>
                             This resort auto-updates every 3 hours. No manual entry needed!
                         </p>
                     ` : ''}
+                    <div class="input-group" style="margin-bottom: 0.75rem;">
+                        <label>Current Conditions ⭐ MOST IMPORTANT</label>
+                        <select id="${resort.id}-conditions" 
+                                ${isScraped ? 'disabled' : ''} 
+                                style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; font-weight: 600; ${isScraped ? 'background: #f0f0f0; cursor: not-allowed;' : ''}">
+                            <option value="">-- Select Conditions --</option>
+                            <optgroup label="🎿 FRESH SNOW (Best!)">
+                                <option value="Powder">Powder (Ungroomed fresh snow 6"+)</option>
+                                <option value="Packed Powder">Packed Powder (Groomed fresh snow 3-6")</option>
+                            </optgroup>
+                            <optgroup label="🏔️ GROOMED (No Fresh Snow)">
+                                <option value="Machine Groomed">Machine Groomed (Regular groomed base)</option>
+                            </optgroup>
+                            <optgroup label="❄️ FIRM/ICY">
+                                <option value="Hard Pack">Hard Pack (Firm, wind-affected)</option>
+                                <option value="Firm">Firm (Very hard, frozen)</option>
+                                <option value="Icy">Icy (Ice patches, very hard)</option>
+                                <option value="Frozen Granular">Frozen Granular (Crunchy ice pellets)</option>
+                            </optgroup>
+                            <optgroup label="🌤️ OTHER">
+                                <option value="Spring Conditions">Spring Conditions (Warm, corn snow)</option>
+                                <option value="Variable">Variable (Mixed conditions)</option>
+                            </optgroup>
+                        </select>
+                        <div style="font-size: 0.65rem; color: #666; margin-top: 0.25rem; line-height: 1.3;">
+                            <strong>Powder</strong> = ungroomed fresh snow (6"+) • 
+                            <strong>Packed Powder</strong> = groomed fresh snow (3-6") • 
+                            <strong>Machine Groomed</strong> = regular groomed (no fresh snow)
+                        </div>
+                    </div>
+                    <div class="section-header" style="font-size: 0.65rem; margin-top: 0.5rem; margin-bottom: 0.5rem; padding-bottom: 0.25rem; border-bottom: 1px solid #ddd; color: #666;">SNOWFALL TOTALS</div>
                     <div class="input-row">
                         <div class="input-group">
                             <label>24h Snow</label>
@@ -480,6 +515,7 @@ git push origin main</pre>
             
             resorts.forEach(resort => {
                 const isScraped = SCRAPED_RESORTS.includes(resort.id);
+                const conditions = document.getElementById(`${resort.id}-conditions`).value || '';
                 const snow24h = document.getElementById(`${resort.id}-24h`).value || '0';
                 const snow48h = document.getElementById(`${resort.id}-48h`).value || '0';
                 const snow7d = document.getElementById(`${resort.id}-7d`).value || '0';
@@ -488,6 +524,7 @@ git push origin main</pre>
                     id: resort.id,
                     name: resort.name,
                     scraped: isScraped,
+                    conditions: conditions,
                     snowfall: {
                         '24h': snow24h + '"',
                         '48h': snow48h + '"',
@@ -497,18 +534,29 @@ git push origin main</pre>
             });
             
             // Create formatted output for copy/paste
-            let output = '// Paste these values into your index.html resort data\n\n';
+            let output = '// ========================================\n';
+            output += '// PASTE THESE VALUES INTO index.html\n';
+            output += '// ========================================\n\n';
+            
+            output += '// NON-SCRAPED RESORTS (Manual Updates Required)\n';
+            output += '// Find each resort in index.html and update:\n\n';
+            
             updates.forEach(resort => {
                 if (!resort.scraped) {
                     output += `// ${resort.name}\n`;
+                    if (resort.conditions) {
+                        output += `conditions: '${resort.conditions}',\n`;
+                    }
                     output += `snowfall: { '24h': '${resort.snowfall['24h']}', '48h': '${resort.snowfall['48h']}', '7d': '${resort.snowfall['7d']}' },\n\n`;
                 }
             });
 
-            output += '\n// Scraped resorts (auto-update, ignore these):\n';
+            output += '\n// ========================================\n';
+            output += '// SCRAPED RESORTS (Auto-Update - Ignore)\n';
+            output += '// ========================================\n\n';
             updates.forEach(resort => {
                 if (resort.scraped) {
-                    output += `// ${resort.name} - AUTO-SCRAPED\n`;
+                    output += `// ${resort.name} - AUTO-SCRAPED (lifts, trails, conditions, snow)\n`;
                 }
             });
             
@@ -527,6 +575,7 @@ git push origin main</pre>
             if (confirm('Reset all fields?')) {
                 resorts.forEach(resort => {
                     if (!SCRAPED_RESORTS.includes(resort.id)) {
+                        document.getElementById(`${resort.id}-conditions`).value = '';
                         document.getElementById(`${resort.id}-24h`).value = '';
                         document.getElementById(`${resort.id}-48h`).value = '';
                         document.getElementById(`${resort.id}-7d`).value = '';
