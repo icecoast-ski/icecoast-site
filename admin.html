@@ -81,6 +81,90 @@
             margin-bottom: 2rem;
             font-size: 0.9rem;
         }
+
+        .info-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .info-banner strong {
+            display: block;
+            font-size: 1rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .scraped-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.35rem;
+            padding: 0.25rem 0.5rem;
+            background: rgba(16, 185, 129, 0.15);
+            border: 1px solid rgba(16, 185, 129, 0.5);
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 700;
+            color: #059669;
+            margin-left: 0.5rem;
+        }
+        
+        .instructions {
+            background: #fff3cd;
+            border: 1px solid #ffc107;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            font-size: 0.9rem;
+        }
+        
+        .instructions strong {
+            color: #856404;
+        }
+
+        .instructions ol {
+            margin-left: 1.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .instructions li {
+            margin-bottom: 0.5rem;
+        }
+
+        .workflow-section {
+            background: #e7f3ff;
+            border: 1px solid #0066FF;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 2rem;
+            font-size: 0.85rem;
+        }
+
+        .workflow-section h3 {
+            color: #0066FF;
+            margin-bottom: 0.75rem;
+            font-size: 1rem;
+        }
+
+        .workflow-section code {
+            background: rgba(0, 0, 0, 0.05);
+            padding: 0.15rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+        }
+
+        .workflow-section pre {
+            background: #222;
+            color: #0f0;
+            padding: 0.75rem;
+            border-radius: 4px;
+            overflow-x: auto;
+            margin: 0.5rem 0;
+            font-size: 0.75rem;
+        }
         
         .resort-grid {
             display: grid;
@@ -95,17 +179,24 @@
             padding: 1rem;
             background: #fafafa;
         }
+
+        .resort-card.scraped {
+            border-color: rgba(16, 185, 129, 0.3);
+            background: rgba(16, 185, 129, 0.03);
+        }
         
         .resort-name {
             font-weight: 700;
             font-size: 1.1rem;
             margin-bottom: 0.75rem;
             color: #222;
+            display: flex;
+            align-items: center;
         }
         
         .input-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: 1fr 1fr 1fr;
             gap: 0.5rem;
             margin-bottom: 0.75rem;
         }
@@ -137,17 +228,11 @@
             outline: none;
             border-color: #0066FF;
         }
-        
-        .section-header {
-            font-size: 0.75rem;
-            font-weight: 700;
-            color: #0066FF;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 0.75rem;
-            margin-bottom: 0.5rem;
-            padding-bottom: 0.25rem;
-            border-bottom: 2px solid #0066FF;
+
+        .input-group input:disabled {
+            background: #f0f0f0;
+            color: #999;
+            cursor: not-allowed;
         }
         
         .actions {
@@ -207,26 +292,13 @@
         
         .output textarea {
             width: 100%;
-            height: 200px;
+            height: 300px;
             font-family: monospace;
-            font-size: 0.85rem;
+            font-size: 0.75rem;
             padding: 1rem;
             border: 1px solid #ddd;
             border-radius: 4px;
             resize: vertical;
-        }
-        
-        .instructions {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 2rem;
-            font-size: 0.9rem;
-        }
-        
-        .instructions strong {
-            color: #856404;
         }
     </style>
 </head>
@@ -241,10 +313,40 @@
 
     <div class="container" id="adminPanel">
         <h1>🎿 IceCoast Admin</h1>
-        <p class="subtitle">Update snow, trails, and lift data • Ratings auto-calculate from weather + snow</p>
+        <p class="subtitle">Manual snow updates for non-scraped resorts</p>
+        
+        <div class="info-banner">
+            <strong>🤖 Scraper System Active</strong>
+            7 resorts now auto-update: Hunter, Stowe, Okemo, Mount Snow, Wildcat, Stratton, Camelback<br>
+            You only need to manually update the remaining 21 resorts!
+        </div>
+
+        <div class="workflow-section">
+            <h3>📝 GitHub Update Workflow</h3>
+            <ol style="margin-left: 1.5rem; line-height: 1.8;">
+                <li>Update snow values below for <strong>non-scraped resorts only</strong></li>
+                <li>Click "Generate JSON" and copy the output</li>
+                <li>Open your <code>index.html</code> file in your code editor</li>
+                <li>Find the resort data (search for <code>snowfall: {</code>)</li>
+                <li>Update the snowfall values for each resort</li>
+                <li>Save <code>index.html</code></li>
+                <li>Deploy via GitHub:</li>
+            </ol>
+            <pre>git add index.html
+git commit -m "Update snow data - [date]"
+git push origin main</pre>
+            <p style="margin-top: 0.5rem;">Cloudflare Pages will auto-deploy in ~1 minute!</p>
+        </div>
         
         <div class="instructions">
-            <strong>Instructions:</strong> Enter current data from resort websites. Click "Generate JSON" when done, then copy/paste into your main site.
+            <strong>Quick Instructions:</strong>
+            <ol>
+                <li>Visit each resort's website (links in main site)</li>
+                <li>Enter 24h, 48h, and 7d snow totals</li>
+                <li>Skip scraped resorts (marked with green badge) - they auto-update!</li>
+                <li>Click "Generate JSON" when done</li>
+                <li>Follow GitHub workflow above to deploy</li>
+            </ol>
         </div>
         
         <div class="resort-grid" id="resortGrid"></div>
@@ -256,7 +358,7 @@
         </div>
         
         <div class="output" id="output">
-            <h3 style="margin-bottom: 1rem;">Copy this JSON:</h3>
+            <h3 style="margin-bottom: 1rem;">📋 Copy and paste these values into index.html:</h3>
             <textarea id="jsonOutput" readonly></textarea>
             <button class="btn-primary" style="margin-top: 1rem;" onclick="copyJSON()">Copy to Clipboard</button>
         </div>
@@ -266,6 +368,17 @@
         // PASSWORD PROTECTION - Change this to your own password!
         const ADMIN_PASSWORD = 'icecoast2026';
 
+        // Resorts that are AUTO-SCRAPED (don't need manual updates)
+        const SCRAPED_RESORTS = [
+            'hunter',
+            'stowe', 
+            'okemo',
+            'mountsnow',
+            'wildcat',
+            'stratton',
+            'camelback'
+        ];
+
         const resorts = [
             { id: 'camelback', name: 'Camelback' },
             { id: 'blue', name: 'Blue Mountain' },
@@ -283,93 +396,78 @@
             { id: 'sugarbush', name: 'Sugarbush' },
             { id: 'stratton', name: 'Stratton' },
             { id: 'okemo', name: 'Okemo' },
+            { id: 'mountsnow', name: 'Mount Snow' },
             { id: 'loon', name: 'Loon Mountain' },
             { id: 'waterville', name: 'Waterville Valley' },
             { id: 'cannon', name: 'Cannon Mountain' },
             { id: 'wildcat', name: 'Wildcat Mountain' },
-            { id: 'jaypeak', name: 'Jay Peak' },
-            { id: 'madriverglen', name: 'Mad River Glen' },
-            { id: 'mountsnow', name: 'Mount Snow' },
-            { id: 'sundayriver', name: 'Sunday River' },
-            { id: 'sugarloaf', name: 'Sugarloaf' },
-            { id: 'whiteface', name: 'Whiteface' },
-            { id: 'gore', name: 'Gore Mountain' },
-            { id: 'brettonwoods', name: 'Bretton Woods' }
+            { id: 'attitash', name: 'Attitash' },
+            { id: 'cranmore', name: 'Cranmore' },
+            { id: 'brettonwoods', name: 'Bretton Woods' },
+            { id: 'mtsunapee', name: 'Mount Sunapee' },
+            { id: 'ragged', name: 'Ragged Mountain' },
+            { id: 'sundown', name: 'Sundown Mountain' },
+            { id: 'berkshireeast', name: 'Berkshire East' }
         ];
 
         function checkPassword() {
             const input = document.getElementById('passwordInput').value;
+            const errorMsg = document.getElementById('errorMsg');
+            
             if (input === ADMIN_PASSWORD) {
                 document.getElementById('loginScreen').style.display = 'none';
                 document.getElementById('adminPanel').classList.add('show');
-                sessionStorage.setItem('icecoast_admin', 'true');
+                sessionStorage.setItem('icecoast_admin_auth', 'true');
             } else {
-                document.getElementById('errorMsg').textContent = 'Incorrect password';
+                errorMsg.textContent = 'Incorrect password';
             }
         }
 
         function logout() {
-            sessionStorage.removeItem('icecoast_admin');
-            location.reload();
+            sessionStorage.removeItem('icecoast_admin_auth');
+            document.getElementById('loginScreen').style.display = 'block';
+            document.getElementById('adminPanel').classList.remove('show');
+            document.getElementById('passwordInput').value = '';
         }
-
-        // Check if already logged in
-        if (sessionStorage.getItem('icecoast_admin') === 'true') {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('adminPanel').classList.add('show');
-        }
-
-        // Allow enter key for password
-        document.getElementById('passwordInput')?.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') checkPassword();
-        });
 
         function initForm() {
             const grid = document.getElementById('resortGrid');
             
             resorts.forEach(resort => {
+                const isScraped = SCRAPED_RESORTS.includes(resort.id);
                 const card = document.createElement('div');
-                card.className = 'resort-card';
+                card.className = 'resort-card' + (isScraped ? ' scraped' : '');
                 card.innerHTML = `
-                    <div class="resort-name">${resort.name}</div>
-                    
-                    <div class="section-header">❄️ Snow Totals</div>
+                    <div class="resort-name">
+                        ${resort.name}
+                        ${isScraped ? '<span class="scraped-badge">✓ AUTO-SCRAPED</span>' : ''}
+                    </div>
+                    ${isScraped ? `
+                        <p style="font-size: 0.8rem; color: #059669; margin-bottom: 0.75rem;">
+                            This resort auto-updates every 3 hours. No manual entry needed!
+                        </p>
+                    ` : ''}
                     <div class="input-row">
                         <div class="input-group">
-                            <label>24h (inches)</label>
-                            <input type="text" id="${resort.id}-24h" placeholder='0' />
+                            <label>24h Snow</label>
+                            <input type="text" 
+                                   id="${resort.id}-24h" 
+                                   placeholder='0' 
+                                   ${isScraped ? 'disabled' : ''} />
                         </div>
                         <div class="input-group">
-                            <label>48h (inches)</label>
-                            <input type="text" id="${resort.id}-48h" placeholder='0' />
-                        </div>
-                    </div>
-                    <div class="input-group">
-                        <label>7 Day (inches)</label>
-                        <input type="text" id="${resort.id}-7d" placeholder='0' />
-                    </div>
-                    
-                    <div class="section-header">⛷️ Trails</div>
-                    <div class="input-row">
-                        <div class="input-group">
-                            <label>Open</label>
-                            <input type="text" id="${resort.id}-trails-open" placeholder='0' />
+                            <label>48h Snow</label>
+                            <input type="text" 
+                                   id="${resort.id}-48h" 
+                                   placeholder='0' 
+                                   ${isScraped ? 'disabled' : ''} />
                         </div>
                         <div class="input-group">
-                            <label>Closed</label>
-                            <input type="text" id="${resort.id}-trails-closed" placeholder='0' />
-                        </div>
-                    </div>
-                    
-                    <div class="section-header">🚡 Lifts</div>
-                    <div class="input-row">
-                        <div class="input-group">
-                            <label>Open</label>
-                            <input type="text" id="${resort.id}-lifts-open" placeholder='0' />
-                        </div>
-                        <div class="input-group">
-                            <label>Closed</label>
-                            <input type="text" id="${resort.id}-lifts-closed" placeholder='0' />
+                            <label>7d Snow</label>
+                            <input type="text" 
+                                   id="${resort.id}-7d" 
+                                   placeholder='0' 
+                                   ${isScraped ? 'disabled' : ''} />
                         </div>
                     </div>
                 `;
@@ -378,38 +476,43 @@
         }
 
         function generateJSON() {
-            const data = {};
+            const updates = [];
             
             resorts.forEach(resort => {
+                const isScraped = SCRAPED_RESORTS.includes(resort.id);
                 const snow24h = document.getElementById(`${resort.id}-24h`).value || '0';
                 const snow48h = document.getElementById(`${resort.id}-48h`).value || '0';
                 const snow7d = document.getElementById(`${resort.id}-7d`).value || '0';
-                const trailsOpen = document.getElementById(`${resort.id}-trails-open`).value || '0';
-                const trailsClosed = document.getElementById(`${resort.id}-trails-closed`).value || '0';
-                const liftsOpen = document.getElementById(`${resort.id}-lifts-open`).value || '0';
-                const liftsClosed = document.getElementById(`${resort.id}-lifts-closed`).value || '0';
                 
-                data[resort.id] = {
+                updates.push({
+                    id: resort.id,
+                    name: resort.name,
+                    scraped: isScraped,
                     snowfall: {
                         '24h': snow24h + '"',
                         '48h': snow48h + '"',
                         '7d': snow7d + '"'
-                    },
-                    trails: {
-                        open: parseInt(trailsOpen),
-                        closed: parseInt(trailsClosed),
-                        total: parseInt(trailsOpen) + parseInt(trailsClosed)
-                    },
-                    lifts: {
-                        open: parseInt(liftsOpen),
-                        closed: parseInt(liftsClosed),
-                        total: parseInt(liftsOpen) + parseInt(liftsClosed)
                     }
-                };
+                });
             });
             
-            const json = JSON.stringify(data, null, 2);
-            document.getElementById('jsonOutput').value = json;
+            // Create formatted output for copy/paste
+            let output = '// Paste these values into your index.html resort data\n\n';
+            updates.forEach(resort => {
+                if (!resort.scraped) {
+                    output += `// ${resort.name}\n`;
+                    output += `snowfall: { '24h': '${resort.snowfall['24h']}', '48h': '${resort.snowfall['48h']}', '7d': '${resort.snowfall['7d']}' },\n\n`;
+                }
+            });
+
+            output += '\n// Scraped resorts (auto-update, ignore these):\n';
+            updates.forEach(resort => {
+                if (resort.scraped) {
+                    output += `// ${resort.name} - AUTO-SCRAPED\n`;
+                }
+            });
+            
+            document.getElementById('jsonOutput').value = output;
             document.getElementById('output').classList.add('show');
         }
 
@@ -417,294 +520,34 @@
             const textarea = document.getElementById('jsonOutput');
             textarea.select();
             document.execCommand('copy');
-            alert('JSON copied to clipboard!');
+            alert('✓ Copied to clipboard! Now paste into index.html');
         }
 
         function resetForm() {
             if (confirm('Reset all fields?')) {
                 resorts.forEach(resort => {
-                    document.getElementById(`${resort.id}-24h`).value = '';
-                    document.getElementById(`${resort.id}-48h`).value = '';
-                    document.getElementById(`${resort.id}-7d`).value = '';
-                    document.getElementById(`${resort.id}-trails-open`).value = '';
-                    document.getElementById(`${resort.id}-trails-closed`).value = '';
-                    document.getElementById(`${resort.id}-lifts-open`).value = '';
-                    document.getElementById(`${resort.id}-lifts-closed`).value = '';
+                    if (!SCRAPED_RESORTS.includes(resort.id)) {
+                        document.getElementById(`${resort.id}-24h`).value = '';
+                        document.getElementById(`${resort.id}-48h`).value = '';
+                        document.getElementById(`${resort.id}-7d`).value = '';
+                    }
                 });
                 document.getElementById('output').classList.remove('show');
             }
         }
 
-        // Initialize on load
-        initForm();
-    </script>
-</body>
-</html>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-            background: #f5f5f5;
-            padding: 2rem;
-        }
-        
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-        
-        h1 {
-            font-size: 2rem;
-            margin-bottom: 0.5rem;
-            color: #222;
-        }
-        
-        .subtitle {
-            color: #666;
-            margin-bottom: 2rem;
-            font-size: 0.9rem;
-        }
-        
-        .resort-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .resort-card {
-            border: 2px solid #e5e5e5;
-            border-radius: 8px;
-            padding: 1rem;
-            background: #fafafa;
-        }
-        
-        .resort-name {
-            font-weight: 700;
-            font-size: 1.1rem;
-            margin-bottom: 0.75rem;
-            color: #222;
-        }
-        
-        .input-group {
-            margin-bottom: 0.75rem;
-        }
-        
-        .input-group label {
-            display: block;
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: #666;
-            margin-bottom: 0.25rem;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .input-group input {
-            width: 100%;
-            padding: 0.5rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            font-size: 0.9rem;
-            font-family: monospace;
-        }
-        
-        .input-group input:focus {
-            outline: none;
-            border-color: #0066FF;
-        }
-        
-        .actions {
-            display: flex;
-            gap: 1rem;
-            margin-top: 2rem;
-            padding-top: 2rem;
-            border-top: 2px solid #e5e5e5;
-        }
-        
-        button {
-            padding: 0.75rem 1.5rem;
-            border: none;
-            border-radius: 8px;
-            font-weight: 700;
-            font-size: 0.9rem;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .btn-primary {
-            background: #0066FF;
-            color: white;
-        }
-        
-        .btn-primary:hover {
-            background: #0052CC;
-            transform: translateY(-1px);
-        }
-        
-        .btn-secondary {
-            background: #e5e5e5;
-            color: #222;
-        }
-        
-        .btn-secondary:hover {
-            background: #d5d5d5;
-        }
-        
-        .output {
-            margin-top: 2rem;
-            padding: 1rem;
-            background: #f5f5f5;
-            border-radius: 8px;
-            display: none;
-        }
-        
-        .output.show {
-            display: block;
-        }
-        
-        .output textarea {
-            width: 100%;
-            height: 200px;
-            font-family: monospace;
-            font-size: 0.85rem;
-            padding: 1rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            resize: vertical;
-        }
-        
-        .instructions {
-            background: #fff3cd;
-            border: 1px solid #ffc107;
-            border-radius: 8px;
-            padding: 1rem;
-            margin-bottom: 2rem;
-            font-size: 0.9rem;
-        }
-        
-        .instructions strong {
-            color: #856404;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>🎿 IceCoast Admin</h1>
-        <p class="subtitle">Update snow data • Ratings auto-calculate from weather + snow</p>
-        
-        <div class="instructions">
-            <strong>Instructions:</strong> Enter snow totals from resort websites. Leave blank if no new snow. Click "Generate JSON" when done, then copy/paste into your main site.
-        </div>
-        
-        <div class="resort-grid" id="resortGrid"></div>
-        
-        <div class="actions">
-            <button class="btn-primary" onclick="generateJSON()">Generate JSON</button>
-            <button class="btn-secondary" onclick="resetForm()">Reset</button>
-        </div>
-        
-        <div class="output" id="output">
-            <h3 style="margin-bottom: 1rem;">Copy this JSON:</h3>
-            <textarea id="jsonOutput" readonly></textarea>
-            <button class="btn-primary" style="margin-top: 1rem;" onclick="copyJSON()">Copy to Clipboard</button>
-        </div>
-    </div>
-
-    <script>
-        const resorts = [
-            { id: 'camelback', name: 'Camelback' },
-            { id: 'blue', name: 'Blue Mountain' },
-            { id: 'jackfrost', name: 'Jack Frost' },
-            { id: 'shawnee', name: 'Shawnee' },
-            { id: 'bearcreek', name: 'Bear Creek' },
-            { id: 'elk', name: 'Elk Mountain' },
-            { id: 'bigboulder', name: 'Big Boulder' },
-            { id: 'montage', name: 'Montage Mountain' },
-            { id: 'hunter', name: 'Hunter Mountain' },
-            { id: 'windham', name: 'Windham' },
-            { id: 'belleayre', name: 'Belleayre' },
-            { id: 'killington', name: 'Killington' },
-            { id: 'stowe', name: 'Stowe' },
-            { id: 'sugarbush', name: 'Sugarbush' },
-            { id: 'stratton', name: 'Stratton' },
-            { id: 'okemo', name: 'Okemo' },
-            { id: 'loon', name: 'Loon Mountain' },
-            { id: 'waterville', name: 'Waterville Valley' },
-            { id: 'cannon', name: 'Cannon Mountain' },
-            { id: 'wildcat', name: 'Wildcat Mountain' }
-        ];
-
-        function initForm() {
-            const grid = document.getElementById('resortGrid');
-            
-            resorts.forEach(resort => {
-                const card = document.createElement('div');
-                card.className = 'resort-card';
-                card.innerHTML = `
-                    <div class="resort-name">${resort.name}</div>
-                    <div class="input-group">
-                        <label>24h Snow (inches)</label>
-                        <input type="text" id="${resort.id}-24h" placeholder='0' />
-                    </div>
-                    <div class="input-group">
-                        <label>48h Snow (inches)</label>
-                        <input type="text" id="${resort.id}-48h" placeholder='0' />
-                    </div>
-                    <div class="input-group">
-                        <label>7d Snow (inches)</label>
-                        <input type="text" id="${resort.id}-7d" placeholder='0' />
-                    </div>
-                `;
-                grid.appendChild(card);
-            });
+        // Check if already logged in
+        if (sessionStorage.getItem('icecoast_admin_auth') === 'true') {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('adminPanel').classList.add('show');
         }
 
-        function generateJSON() {
-            const snowData = {};
-            
-            resorts.forEach(resort => {
-                const snow24h = document.getElementById(`${resort.id}-24h`).value || '0';
-                const snow48h = document.getElementById(`${resort.id}-48h`).value || '0';
-                const snow7d = document.getElementById(`${resort.id}-7d`).value || '0';
-                
-                snowData[resort.id] = {
-                    '24h': snow24h + '"',
-                    '48h': snow48h + '"',
-                    '7d': snow7d + '"'
-                };
-            });
-            
-            const json = JSON.stringify(snowData, null, 2);
-            document.getElementById('jsonOutput').value = json;
-            document.getElementById('output').classList.add('show');
-        }
-
-        function copyJSON() {
-            const textarea = document.getElementById('jsonOutput');
-            textarea.select();
-            document.execCommand('copy');
-            alert('JSON copied to clipboard!');
-        }
-
-        function resetForm() {
-            if (confirm('Reset all fields?')) {
-                resorts.forEach(resort => {
-                    document.getElementById(`${resort.id}-24h`).value = '';
-                    document.getElementById(`${resort.id}-48h`).value = '';
-                    document.getElementById(`${resort.id}-7d`).value = '';
-                });
-                document.getElementById('output').classList.remove('show');
+        // Allow Enter key on password field
+        document.getElementById('passwordInput')?.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                checkPassword();
             }
-        }
+        });
 
         // Initialize on load
         initForm();
