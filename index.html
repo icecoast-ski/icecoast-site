@@ -3314,18 +3314,27 @@
                 if (scraperResp.status === 'fulfilled' && scraperResp.value) {
                     const data = scraperResp.value;
                     
+                    console.log('📦 RAW SCRAPER API RESPONSE:', data);
+                    
                     if (data.results && Array.isArray(data.results)) {
+                        console.log(`📊 Scraper returned ${data.results.length} results:`, data.results.map(r => r.id));
+                        
                         scraperData = {};
                         scraperTimestamp = data.generated_at;
                         
                         data.results.forEach(scrapedResort => {
                             if (scrapedResort.id && scrapedResort.scraped) {
+                                console.log(`\n━━━ ${scrapedResort.id.toUpperCase()} ━━━`);
+                                console.log('Full scraper object:', scrapedResort);
                                 scraperData[scrapedResort.id] = scrapedResort;
                                 scraperUpdatedCount++;
+                            } else if (scrapedResort.id) {
+                                console.warn(`⚠️ ${scrapedResort.id} has scraped=false or missing - skipping`);
                             }
                         });
                         
-                        console.log('✅ Scraper API loaded:', scraperUpdatedCount, 'resorts');
+                        console.log(`\n✅ Scraper API loaded: ${scraperUpdatedCount} resorts`);
+                        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
 
                         // Update resorts with scraped data
                         resorts.forEach(resort => {
@@ -3335,63 +3344,136 @@
                                 console.log(`🔍 Processing scraped data for ${resort.name}:`, {
                                     lifts: scraped.lifts,
                                     trails: scraped.trails,
-                                    signals: scraped.signals
+                                    signals: scraped.signals,
+                                    timestamp: scraped.timestamp,
+                                    raw_scraper_object: scraped
                                 });
+                                
+                                // Track what actually got updated for debugging
+                                const updates = {
+                                    lifts: false,
+                                    trails: false,
+                                    conditions: false,
+                                    snowfall: { '24h': false, '48h': false, '7d': false }
+                                };
                                 
                                 // Update lift/trail counts if available
                                 if (scraped.lifts) {
+                                    console.log(`  📊 Lifts data:`, scraped.lifts);
                                     // Use scraped values if they exist (checking for null/undefined, not falsy)
                                     if (scraped.lifts.open !== null && scraped.lifts.open !== undefined) {
+                                        console.log(`    ✓ Setting lifts.open: ${resort.lifts.open} → ${scraped.lifts.open}`);
                                         resort.lifts.open = scraped.lifts.open;
+                                        updates.lifts = true;
+                                    } else {
+                                        console.warn(`    ⚠️ Lifts open is null/undefined - keeping default: ${resort.lifts.open}`);
                                     }
                                     if (scraped.lifts.total !== null && scraped.lifts.total !== undefined) {
+                                        console.log(`    ✓ Setting lifts.total: ${resort.lifts.total} → ${scraped.lifts.total}`);
                                         resort.lifts.total = scraped.lifts.total;
+                                        updates.lifts = true;
+                                    } else {
+                                        console.warn(`    ⚠️ Lifts total is null/undefined - keeping default: ${resort.lifts.total}`);
                                     }
                                     // Recalculate closed based on total - open
                                     resort.lifts.closed = resort.lifts.total - resort.lifts.open;
+                                    console.log(`    → Final: ${resort.lifts.open}/${resort.lifts.total} open (${resort.lifts.closed} closed)`);
+                                } else {
+                                    console.warn(`  ⚠️ No lifts data in scraper response`);
                                 }
                                 
                                 if (scraped.trails) {
+                                    console.log(`  🎿 Trails data:`, scraped.trails);
                                     // Use scraped values if they exist (checking for null/undefined, not falsy)
                                     if (scraped.trails.open !== null && scraped.trails.open !== undefined) {
+                                        console.log(`    ✓ Setting trails.open: ${resort.trails.open} → ${scraped.trails.open}`);
                                         resort.trails.open = scraped.trails.open;
+                                        updates.trails = true;
+                                    } else {
+                                        console.warn(`    ⚠️ Trails open is null/undefined - keeping default: ${resort.trails.open}`);
                                     }
                                     if (scraped.trails.total !== null && scraped.trails.total !== undefined) {
+                                        console.log(`    ✓ Setting trails.total: ${resort.trails.total} → ${scraped.trails.total}`);
                                         resort.trails.total = scraped.trails.total;
+                                        updates.trails = true;
+                                    } else {
+                                        console.warn(`    ⚠️ Trails total is null/undefined - keeping default: ${resort.trails.total}`);
                                     }
                                     // Recalculate closed based on total - open
                                     resort.trails.closed = resort.trails.total - resort.trails.open;
+                                    console.log(`    → Final: ${resort.trails.open}/${resort.trails.total} open (${resort.trails.closed} closed)`);
+                                } else {
+                                    console.warn(`  ⚠️ No trails data in scraper response`);
                                 }
 
                                 // Update conditions if we have surface text
                                 if (scraped.signals && scraped.signals.surface_text) {
                                     // Format conditions properly (Title Case)
+                                    const oldConditions = resort.conditions;
                                     resort.conditions = formatConditions(scraped.signals.surface_text);
-                                    console.log(`  → Updated conditions: ${resort.conditions}`);
+                                    console.log(`  🌨️ Conditions: "${oldConditions}" → "${resort.conditions}" (from: "${scraped.signals.surface_text}")`);
+                                    updates.conditions = true;
                                 } else if (scraped.rating) {
                                     // Fallback: use rating to infer conditions if no surface text
+                                    const oldConditions = resort.conditions;
                                     resort.conditions = ratingToConditions(scraped.rating);
-                                    console.log(`  → Inferred conditions from rating: ${resort.conditions}`);
+                                    console.log(`  🌨️ Conditions: "${oldConditions}" → "${resort.conditions}" (inferred from rating: ${scraped.rating})`);
+                                    updates.conditions = true;
+                                } else {
+                                    console.warn(`  ⚠️ No surface_text or rating - keeping default conditions: "${resort.conditions}"`);
                                 }
 
                                 // Update snowfall if scraped (prefer scraped over manual)
                                 if (scraped.signals) {
+                                    console.log(`  ❄️ Snowfall signals:`, {
+                                        snow24_in: scraped.signals.snow24_in,
+                                        snow48_in: scraped.signals.snow48_in,
+                                        snow7d_in: scraped.signals.snow7d_in
+                                    });
+                                    
                                     if (scraped.signals.snow24_in !== null && scraped.signals.snow24_in !== undefined) {
+                                        const oldValue = resort.snowfall['24h'];
                                         resort.snowfall['24h'] = scraped.signals.snow24_in + '"';
+                                        console.log(`    ✓ 24h: ${oldValue} → ${resort.snowfall['24h']}`);
+                                        updates.snowfall['24h'] = true;
+                                    } else {
+                                        console.warn(`    ⚠️ snow24_in is null/undefined - keeping default: ${resort.snowfall['24h']}`);
                                     }
+                                    
                                     if (scraped.signals.snow48_in !== null && scraped.signals.snow48_in !== undefined) {
+                                        const oldValue = resort.snowfall['48h'];
                                         resort.snowfall['48h'] = scraped.signals.snow48_in + '"';
+                                        console.log(`    ✓ 48h: ${oldValue} → ${resort.snowfall['48h']}`);
+                                        updates.snowfall['48h'] = true;
+                                    } else {
+                                        console.warn(`    ⚠️ snow48_in is null/undefined - keeping default: ${resort.snowfall['48h']}`);
                                     }
+                                    
                                     if (scraped.signals.snow7d_in !== null && scraped.signals.snow7d_in !== undefined) {
+                                        const oldValue = resort.snowfall['7d'];
                                         resort.snowfall['7d'] = scraped.signals.snow7d_in + '"';
+                                        console.log(`    ✓ 7d: ${oldValue} → ${resort.snowfall['7d']}`);
+                                        updates.snowfall['7d'] = true;
+                                    } else {
+                                        console.warn(`    ⚠️ snow7d_in is null/undefined - keeping default: ${resort.snowfall['7d']}`);
                                     }
+                                } else {
+                                    console.warn(`  ⚠️ No signals object in scraper response - no snowfall data available`);
                                 }
 
                                 // Mark as scraped for UI badge
                                 resort.isScraped = true;
                                 resort.scrapedTimestamp = scraped.timestamp;
                                 
-                                console.log(`✓ Updated ${resort.name} with scraped data`);
+                                // Summary of what actually got updated
+                                console.log(`✅ ${resort.name} update summary:`, {
+                                    lifts_updated: updates.lifts,
+                                    trails_updated: updates.trails,
+                                    conditions_updated: updates.conditions,
+                                    snowfall_24h: updates.snowfall['24h'],
+                                    snowfall_48h: updates.snowfall['48h'],
+                                    snowfall_7d: updates.snowfall['7d']
+                                });
                             }
                         });
                     }
@@ -3406,6 +3488,26 @@
 
                 // Re-render with live data
                 renderResorts();
+
+                // Show diagnostic comparison for scraped resorts
+                console.log('\n╔═══════════════════════════════════════╗');
+                console.log('║   SCRAPER DATA DIAGNOSTIC SUMMARY     ║');
+                console.log('╚═══════════════════════════════════════╝\n');
+                
+                console.table(
+                    resorts
+                        .filter(r => r.isScraped)
+                        .map(r => ({
+                            'Resort': r.name,
+                            'Lifts': `${r.lifts.open}/${r.lifts.total}`,
+                            'Trails': `${r.trails.open}/${r.trails.total}`,
+                            'Conditions': r.conditions,
+                            '24h Snow': r.snowfall['24h'],
+                            '48h Snow': r.snowfall['48h'],
+                            '7d Snow': r.snowfall['7d'],
+                            'Timestamp': r.scrapedTimestamp ? new Date(r.scrapedTimestamp).toLocaleString() : 'N/A'
+                        }))
+                );
 
                 // Show success status
                 showDataStatus('fresh', null, weatherUpdatedCount, scraperUpdatedCount);
