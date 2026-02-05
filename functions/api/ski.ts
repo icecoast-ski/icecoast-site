@@ -1,20 +1,32 @@
 export const onRequestGet = async () => {
   const url =
-    "https://www.killington.com/the-mountain/conditions-weather/current-conditions-weather/?gclsrc=aw.ds&&utm_source=google&utm_medium=cpc&utm_content=brand&gad_source=1&gad_campaignid=18419792863";
+    "https://www.killington.com/page-data/the-mountain/conditions-weather/webcam/page-data.json";
 
   const res = await fetch(url, {
-    headers: {
-      // pretend like a real browser so resorts don’t block us
-      "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64)",
-    },
+    headers: { "user-agent": "Mozilla/5.0" },
   });
 
+  const data = await res.json();
+
+  // show a tiny preview so we can see what fields exist
   return new Response(
-    JSON.stringify({
-      ok: res.ok,
-      status: res.status,
-      final_url: res.url,
-    }),
+    JSON.stringify(
+      {
+        ok: res.ok,
+        status: res.status,
+        path: data?.path,
+        componentChunkName: data?.componentChunkName,
+        // keys under result/pageContext are where Gatsby usually stores useful stuff
+        resultKeys: data?.result ? Object.keys(data.result) : null,
+        pageContextKeys: data?.result?.pageContext
+          ? Object.keys(data.result.pageContext)
+          : null,
+        // small snippet
+        snippet: JSON.stringify(data).slice(0, 1200),
+      },
+      null,
+      2,
+    ),
     { headers: { "content-type": "application/json" } },
   );
 };
