@@ -1,28 +1,43 @@
 export const onRequestGet = async () => {
-  const url =
-    "https://www.killington.com/page-data/the-mountain/conditions-weather/webcam/page-data.json";
+  const base = "https://www.killington.com";
 
-  const res = await fetch(url, {
+  const pageDataUrl =
+    base +
+    "/page-data/the-mountain/conditions-weather/current-conditions-weather/page-data.json";
+
+  const pageRes = await fetch(pageDataUrl, {
     headers: { "user-agent": "Mozilla/5.0" },
   });
+  const pageData: any = await pageRes.json();
 
-  const data = await res.json();
+  const hashes: string[] = pageData?.staticQueryHashes || [];
+  const hash = hashes[0];
 
-  // show a tiny preview so we can see what fields exist
+  // Gatsby usually serves static queries here
+  const sqUrls = [
+    `${base}/page-data/sq/d/${hash}.json`,
+    `${base}/_bluedrop/page-data/sq/d/${hash}.json`,
+  ];
+
+  const tries: any[] = [];
+  for (const url of sqUrls) {
+    const r = await fetch(url, { headers: { "user-agent": "Mozilla/5.0" } });
+    const text = await r.text(); // keep as text so we can preview even if not JSON
+    tries.push({
+      url,
+      status: r.status,
+      preview: text.slice(0, 600),
+    });
+    if (r.ok) break;
+  }
+
   return new Response(
     JSON.stringify(
       {
-        ok: res.ok,
-        status: res.status,
-        path: data?.path,
-        componentChunkName: data?.componentChunkName,
-        // keys under result/pageContext are where Gatsby usually stores useful stuff
-        resultKeys: data?.result ? Object.keys(data.result) : null,
-        pageContextKeys: data?.result?.pageContext
-          ? Object.keys(data.result.pageContext)
-          : null,
-        // small snippet
-        snippet: JSON.stringify(data).slice(0, 1200),
+        pageDataOk: pageRes.ok,
+        pageDataStatus: pageRes.status,
+        staticQueryHashes: hashes,
+        staticQueryTries: tries,
       },
       null,
       2,
