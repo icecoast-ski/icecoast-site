@@ -2903,6 +2903,12 @@
                                     <span class="resort-name-text">${resort.name}</span>
                                 </h2>
                                 <p class="resort-location">${resort.location}</p>
+                                ${resort.isScraped ? `
+                                <div style="display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.5rem; background: rgba(16, 185, 129, 0.9); border-radius: 4px; font-size: 0.65rem; font-weight: 700; color: white; margin-top: 0.4rem; border: 1px solid rgba(16, 185, 129, 1);">
+                                    <span>✓</span>
+                                    <span>LIVE DATA</span>
+                                </div>
+                                ` : ''}
                                 ${resort.glades > 0 ? `
                                 <div class="glade-indicator">
                                     <span class="glade-trees glade-${resort.glades}">${'🌲'.repeat(resort.glades)}</span>
@@ -3232,90 +3238,153 @@
         setTimeout(updateGauge, 100);
 
         // ========================================
-        // LIVE WEATHER INTEGRATION
+        // LIVE WEATHER + SCRAPER INTEGRATION
         // ========================================
 
         // Configuration - UPDATE THIS URL AFTER DEPLOYING YOUR WORKER
         const WORKER_URL = 'https://api.icecoast.ski';
+        const SCRAPER_API_URL = '/api/ski'; // Cloudflare Pages Function
         const REFRESH_INTERVAL = 4 * 60 * 60 * 1000; // 4 hours
 
-        // Load live weather with error handling
+        // Scraper data storage
+        let scraperData = {};
+        let scraperTimestamp = null;
+
+        // Load live weather + scraper data with error handling
         async function loadLiveWeather() {
             try {
                 showLoadingIndicator();
 
-                console.log('🌤️ Fetching live weather data...');
-                const response = await fetch(WORKER_URL, {
-                    headers: {
-                        'Cache-Control': 'no-cache'
+                console.log('🎿 Fetching live data from dual API system...');
+                
+                // Fetch both APIs in parallel
+                const [weatherResp, scraperResp] = await Promise.allSettled([
+                    fetch(WORKER_URL, {
+                        headers: { 'Cache-Control': 'no-cache' }
+                    }).then(r => r.ok ? r.json() : null),
+                    fetch(SCRAPER_API_URL, {
+                        headers: { 'Cache-Control': 'no-cache' }
+                    }).then(r => r.ok ? r.json() : null)
+                ]);
+
+                let weatherUpdatedCount = 0;
+                let scraperUpdatedCount = 0;
+
+                // Process weather data
+                if (weatherResp.status === 'fulfilled' && weatherResp.value) {
+                    const result = weatherResp.value;
+                    
+                    if (!result.fallback && !result.error) {
+                        const weatherData = result.data || result;
+                        
+                        console.log('✅ Weather API loaded:', Object.keys(weatherData).length, 'resorts');
+
+                        // Update each resort with live weather
+                        resorts.forEach(resort => {
+                            const liveWeather = weatherData[resort.id];
+
+                            if (liveWeather && liveWeather !== null) {
+                                resort.weather = {
+                                    temp: liveWeather.temp,
+                                    feelsLike: liveWeather.feelsLike,
+                                    wind: liveWeather.wind,
+                                    condition: liveWeather.condition,
+                                    icon: liveWeather.icon
+                                };
+
+                                if (liveWeather.forecast && liveWeather.forecast.length === 3) {
+                                    resort.forecast = liveWeather.forecast;
+                                }
+
+                                weatherUpdatedCount++;
+                            }
+                        });
                     }
-                });
-
-                if (!response.ok) {
-                    throw new Error(`API returned ${response.status}`);
+                } else {
+                    console.warn('⚠️ Weather API failed:', weatherResp.reason);
                 }
 
-                const result = await response.json();
+                // Process scraper data
+                if (scraperResp.status === 'fulfilled' && scraperResp.value) {
+                    const data = scraperResp.value;
+                    
+                    if (data.results && Array.isArray(data.results)) {
+                        scraperData = {};
+                        scraperTimestamp = data.generated_at;
+                        
+                        data.results.forEach(scrapedResort => {
+                            if (scrapedResort.id && scrapedResort.scraped) {
+                                scraperData[scrapedResort.id] = scrapedResort;
+                                scraperUpdatedCount++;
+                            }
+                        });
+                        
+                        console.log('✅ Scraper API loaded:', scraperUpdatedCount, 'resorts');
 
-                // Check if we got fallback/error data
-                if (result.fallback || result.error) {
-                    throw new Error(result.message || 'API temporarily unavailable');
+                        // Update resorts with scraped data
+                        resorts.forEach(resort => {
+                            const scraped = scraperData[resort.id];
+                            
+                            if (scraped) {
+                                // Update lift/trail counts if available
+                                if (scraped.lifts) {
+                                    resort.lifts.open = scraped.lifts.open || resort.lifts.open;
+                                    resort.lifts.total = scraped.lifts.total || (resort.lifts.open + resort.lifts.closed);
+                                    resort.lifts.closed = resort.lifts.total - resort.lifts.open;
+                                }
+                                
+                                if (scraped.trails) {
+                                    resort.trails.open = scraped.trails.open || resort.trails.open;
+                                    resort.trails.total = scraped.trails.total || (resort.trails.open + resort.trails.closed);
+                                    resort.trails.closed = resort.trails.total - resort.trails.open;
+                                }
+
+                                // Update conditions if we have surface text
+                                if (scraped.signals && scraped.signals.surface_text) {
+                                    resort.conditions = scraped.signals.surface_text;
+                                }
+
+                                // Update snowfall if scraped (prefer scraped over manual)
+                                if (scraped.signals) {
+                                    if (scraped.signals.snow24_in !== null && scraped.signals.snow24_in !== undefined) {
+                                        resort.snowfall['24h'] = scraped.signals.snow24_in + '"';
+                                    }
+                                    if (scraped.signals.snow48_in !== null && scraped.signals.snow48_in !== undefined) {
+                                        resort.snowfall['48h'] = scraped.signals.snow48_in + '"';
+                                    }
+                                    if (scraped.signals.snow7d_in !== null && scraped.signals.snow7d_in !== undefined) {
+                                        resort.snowfall['7d'] = scraped.signals.snow7d_in + '"';
+                                    }
+                                }
+
+                                // Mark as scraped for UI badge
+                                resort.isScraped = true;
+                                resort.scrapedTimestamp = scraped.timestamp;
+                                
+                                console.log(`✓ Updated ${resort.name} with scraped data`);
+                            }
+                        });
+                    }
+                } else {
+                    console.warn('⚠️ Scraper API failed:', scraperResp.reason);
                 }
 
-                // Check data status from headers
-                const dataStatus = response.headers.get('X-Data-Status');
-                const timestamp = response.headers.get('X-Timestamp');
-
-                // Extract weather data (handle new structure with metadata)
-                const weatherData = result.data || result;
-
-                console.log('✅ Live weather loaded!', {
-                    status: dataStatus,
-                    timestamp: timestamp,
-                    resorts: Object.keys(weatherData).length
-                });
-
-                // Update each resort with live weather
-                let updatedCount = 0;
+                // Recalculate ratings for all resorts with updated data
                 resorts.forEach(resort => {
-                    const liveWeather = weatherData[resort.id];
-
-                    if (liveWeather && liveWeather !== null) {
-                        // Replace mock weather with live data
-                        resort.weather = {
-                            temp: liveWeather.temp,
-                            feelsLike: liveWeather.feelsLike,
-                            wind: liveWeather.wind,
-                            condition: liveWeather.condition,
-                            icon: liveWeather.icon
-                        };
-
-                        // Replace mock forecast with live forecast
-                        if (liveWeather.forecast && liveWeather.forecast.length === 3) {
-                            resort.forecast = liveWeather.forecast;
-                        }
-
-                        // RECALCULATE RATING based on live weather + snow data
-                        resort.rating = calculateRating(resort.weather, resort.snowfall);
-
-                        updatedCount++;
-                        console.log(`✓ Updated ${resort.name} with live weather (Rating: ${resort.rating})`);
-                    } else {
-                        console.warn(`⚠️ No weather data for ${resort.name}, using mock data`);
-                    }
+                    resort.rating = calculateRating(resort.weather, resort.snowfall);
                 });
 
                 // Re-render with live data
                 renderResorts();
 
                 // Show success status
-                showDataStatus('fresh', timestamp, updatedCount);
+                showDataStatus('fresh', null, weatherUpdatedCount, scraperUpdatedCount);
 
-                console.log(`✅ Live weather complete! Updated ${updatedCount}/${resorts.length} resorts`);
+                console.log(`✅ Data update complete! Weather: ${weatherUpdatedCount}/28 | Scraped: ${scraperUpdatedCount}/7`);
 
             } catch (error) {
-                console.error('❌ Failed to load live weather:', error);
-                showDataStatus('error', null, 0, error.message);
+                console.error('❌ Failed to load live data:', error);
+                showDataStatus('error', null, 0, 0, error.message);
                 console.log('💾 Falling back to mock data - site still functional');
             } finally {
                 hideLoadingIndicator();
@@ -3323,7 +3392,7 @@
         }
 
         // Visual status indicator
-        function showDataStatus(status, timestamp, resortCount, errorMsg) {
+        function showDataStatus(status, timestamp, weatherCount, scraperCount, errorMsg) {
             const existing = document.getElementById('data-status');
             if (existing) existing.remove();
 
@@ -3356,9 +3425,12 @@
                 });
                 statusDiv.innerHTML = `
                     <span style="font-size: 1.2rem;">✓</span>
-                    <span>Live data • Updated ${time}</span>
+                    <div style="line-height: 1.4;">
+                        <div>Live data • Updated ${time}</div>
+                        <div style="font-size: 0.65rem; opacity: 0.9;">Weather: ${weatherCount}/28 • Scraped: ${scraperCount}/7</div>
+                    </div>
                 `;
-                setTimeout(() => statusDiv.remove(), 5000);
+                setTimeout(() => statusDiv.remove(), 6000);
 
             } else if (status === 'stale') {
                 statusDiv.style.background = 'rgba(255, 184, 77, 0.95)';
@@ -3373,7 +3445,7 @@
                 statusDiv.style.color = 'white';
                 statusDiv.innerHTML = `
                     <span style="font-size: 1.2rem;">⚠️</span>
-                    <span>Weather API connecting • Using mock data</span>
+                    <span>APIs connecting • Using mock data</span>
                 `;
                 setTimeout(() => statusDiv.remove(), 10000);
             }
@@ -3439,7 +3511,9 @@
         // Auto-refresh every 4 hours
         setInterval(loadLiveWeather, REFRESH_INTERVAL);
 
-        console.log('🎿 IceCoast initialized. Weather will update every 4 hours.');
+        console.log('🎿 IceCoast initialized with dual API system');
+        console.log('📊 Weather API: All 28 resorts');
+        console.log('🤖 Scraper API: 7 resorts (Tier 1)');
 
         // 🎿 EPIC RAIL SLAM - Click Handler with Delayed Scroll
         document.addEventListener('DOMContentLoaded', () => {
