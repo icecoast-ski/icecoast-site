@@ -599,11 +599,11 @@
             }
         }
 
-        /* Mobile tap effect */
+        /* Mobile scroll effect - same as desktop hover */
         @media (hover: none) and (pointer: coarse) {
-            .rating-text:active {
-                transform: rotate(-3deg) scale(1.05);
-                box-shadow: 6px 6px 0 rgba(0, 0, 0, 0.2);
+            .rating-text.mobile-active {
+                transform: rotate(-5deg) scale(1.15);
+                box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.25);
             }
         }
 
@@ -3125,6 +3125,56 @@
         setInterval(loadLiveWeather, REFRESH_INTERVAL);
 
         console.log('🎿 IceCoast initialized. Weather will update every 4 hours.');
+
+        // Mobile rating bubble scroll activation
+        // Detects when rating bubbles scroll into viewport and activates them
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            const observerOptions = {
+                root: null,
+                rootMargin: '-20% 0px -20% 0px', // Trigger when bubble enters middle 60% of viewport
+                threshold: [0, 0.1, 0.5, 0.9, 1]
+            };
+
+            const bubbleObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const bubble = entry.target;
+                    
+                    // Activate when bubble is visible in the viewport sweet spot
+                    if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
+                        bubble.classList.add('mobile-active');
+                    } else {
+                        bubble.classList.remove('mobile-active');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all rating bubbles (with a slight delay to ensure DOM is ready)
+            const observeRatingBubbles = () => {
+                document.querySelectorAll('.rating-text').forEach(bubble => {
+                    // Only observe if not already observed
+                    if (!bubble.hasAttribute('data-observed')) {
+                        bubble.setAttribute('data-observed', 'true');
+                        bubbleObserver.observe(bubble);
+                    }
+                });
+            };
+
+            // Initial observation
+            setTimeout(observeRatingBubbles, 100);
+
+            // Watch for new bubbles being added (when filters change, etc.)
+            const resortGrid = document.getElementById('resortGrid');
+            if (resortGrid) {
+                const gridObserver = new MutationObserver(() => {
+                    observeRatingBubbles();
+                });
+
+                gridObserver.observe(resortGrid, {
+                    childList: true,
+                    subtree: true
+                });
+            }
+        }
     </script>
     
     <footer class="ski-footer">
