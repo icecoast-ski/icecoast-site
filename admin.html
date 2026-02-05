@@ -452,33 +452,34 @@ git push origin main</pre>
                         </p>
                     ` : ''}
                     <div class="input-group" style="margin-bottom: 0.75rem;">
-                        <label>Current Conditions ⭐ MOST IMPORTANT</label>
+                        <label style="color: #d97706; font-weight: 700;">⭐ CURRENT CONDITIONS - CRITICAL!</label>
                         <select id="${resort.id}-conditions" 
                                 ${isScraped ? 'disabled' : ''} 
-                                style="width: 100%; padding: 0.5rem; border: 1px solid #ddd; border-radius: 4px; font-size: 0.9rem; font-weight: 600; ${isScraped ? 'background: #f0f0f0; cursor: not-allowed;' : ''}">
+                                style="width: 100%; padding: 0.5rem; border: 2px solid #f59e0b; border-radius: 4px; font-size: 0.9rem; font-weight: 600; ${isScraped ? 'background: #f0f0f0; cursor: not-allowed;' : 'background: #fffbeb;'}">
                             <option value="">-- Select Conditions --</option>
-                            <optgroup label="🎿 FRESH SNOW (Best!)">
-                                <option value="Powder">Powder (Ungroomed fresh snow 6"+)</option>
-                                <option value="Packed Powder">Packed Powder (Groomed fresh snow 3-6")</option>
+                            <optgroup label="🎿 FRESH SNOW (6"+ = POWDER DAY!)">
+                                <option value="Powder">🎿 POWDER (Ungroomed 6"+) - BEST!</option>
+                                <option value="Packed Powder">⛷️ PACKED POWDER (Groomed 3-6")</option>
                             </optgroup>
-                            <optgroup label="🏔️ GROOMED (No Fresh Snow)">
-                                <option value="Machine Groomed">Machine Groomed (Regular groomed base)</option>
+                            <optgroup label="🏔️ REGULAR GROOMED (Default for most days)">
+                                <option value="Machine Groomed">🏔️ MACHINE GROOMED (No fresh snow)</option>
                             </optgroup>
-                            <optgroup label="❄️ FIRM/ICY">
+                            <optgroup label="❄️ FIRM/ICY CONDITIONS">
                                 <option value="Hard Pack">Hard Pack (Firm, wind-affected)</option>
                                 <option value="Firm">Firm (Very hard, frozen)</option>
-                                <option value="Icy">Icy (Ice patches, very hard)</option>
-                                <option value="Frozen Granular">Frozen Granular (Crunchy ice pellets)</option>
+                                <option value="Icy">Icy (Ice patches)</option>
+                                <option value="Frozen Granular">Frozen Granular (Crunchy)</option>
                             </optgroup>
-                            <optgroup label="🌤️ OTHER">
-                                <option value="Spring Conditions">Spring Conditions (Warm, corn snow)</option>
-                                <option value="Variable">Variable (Mixed conditions)</option>
+                            <optgroup label="🌤️ SPRING">
+                                <option value="Spring Conditions">Spring Conditions (Warm, corn)</option>
                             </optgroup>
                         </select>
-                        <div style="font-size: 0.65rem; color: #666; margin-top: 0.25rem; line-height: 1.3;">
-                            <strong>Powder</strong> = ungroomed fresh snow (6"+) • 
-                            <strong>Packed Powder</strong> = groomed fresh snow (3-6") • 
-                            <strong>Machine Groomed</strong> = regular groomed (no fresh snow)
+                        <div style="font-size: 0.7rem; color: #b45309; margin-top: 0.35rem; line-height: 1.4; font-weight: 600; background: #fef3c7; padding: 0.5rem; border-radius: 4px; border-left: 3px solid #f59e0b;">
+                            <strong>6"+ overnight = POWDER!</strong> • 
+                            3-6" groomed = Packed Powder • 
+                            0-2" = Machine Groomed
+                            <br>
+                            <span style="color: #dc2626;">⚠️ NEVER use "Variable" - pick the dominant condition!</span>
                         </div>
                     </div>
                     <div class="section-header" style="font-size: 0.65rem; margin-top: 0.5rem; margin-bottom: 0.5rem; padding-bottom: 0.25rem; border-bottom: 1px solid #ddd; color: #666;">SNOWFALL TOTALS</div>
