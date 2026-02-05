@@ -1552,15 +1552,18 @@
         <div class="sub-header-content">
             <p class="sub-tagline">Real-time snow, terrain, and resort conditions—so you know when it's worth the drive.</p>
             <button class="cta-btn" onclick="
-                const filters = document.querySelector('.filters');
-                if (filters) {
-                    const headerHeight = document.querySelector('header').offsetHeight;
-                    const filtersTop = filters.getBoundingClientRect().top + window.pageYOffset;
-                    window.scrollTo({
-                        top: filtersTop - headerHeight - 10,
-                        behavior: 'smooth'
-                    });
-                }
+                // Wait for rail slam animation to complete before scrolling
+                setTimeout(() => {
+                    const filters = document.querySelector('.filters');
+                    if (filters) {
+                        const headerHeight = document.querySelector('header').offsetHeight;
+                        const filtersTop = filters.getBoundingClientRect().top + window.pageYOffset;
+                        window.scrollTo({
+                            top: filtersTop - headerHeight - 10,
+                            behavior: 'smooth'
+                        });
+                    }
+                }, 500); // Delay 500ms to let the slam effect finish (animation is 600ms total)
             ">
                 Check Conditions Now
             </button>
