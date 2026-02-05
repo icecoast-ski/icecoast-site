@@ -3205,20 +3205,36 @@
         let scraperTimestamp = null;
 
         // Load live weather + scraper data with error handling
+        // Timeout wrapper for fetch requests
+        function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
+            return Promise.race([
+                fetch(url, options),
+                new Promise((_, reject) => 
+                    setTimeout(() => reject(new Error('Request timeout')), timeoutMs)
+                )
+            ]);
+        }
+
         async function loadLiveWeather() {
             try {
                 showLoadingIndicator();
 
                 console.log('🎿 Fetching live data from dual API system...');
                 
-                // Fetch both APIs in parallel
+                // Fetch both APIs in parallel with 5 second timeout
                 const [weatherResp, scraperResp] = await Promise.allSettled([
-                    fetch(WORKER_URL, {
+                    fetchWithTimeout(WORKER_URL, {
                         headers: { 'Cache-Control': 'no-cache' }
-                    }).then(r => r.ok ? r.json() : null),
-                    fetch(SCRAPER_API_URL, {
+                    }, 5000).then(r => r.ok ? r.json() : null).catch(e => {
+                        console.warn('Weather API timeout/error:', e.message);
+                        return null;
+                    }),
+                    fetchWithTimeout(SCRAPER_API_URL, {
                         headers: { 'Cache-Control': 'no-cache' }
-                    }).then(r => r.ok ? r.json() : null)
+                    }, 5000).then(r => r.ok ? r.json() : null).catch(e => {
+                        console.warn('Scraper API timeout/error:', e.message);
+                        return null;
+                    })
                 ]);
 
                 let weatherUpdatedCount = 0;
@@ -3346,8 +3362,18 @@
                 console.error('❌ Failed to load live data:', error);
                 showDataStatus('error', null, 0, 0, error.message);
                 console.log('💾 Falling back to mock data - site still functional');
+                hideLoadingIndicator(false, 'Update failed');
             } finally {
-                hideLoadingIndicator();
+                // Only hide if not already showing error
+                if (weatherUpdatedCount > 0 || scraperUpdatedCount > 0) {
+                    hideLoadingIndicator(true, `Updated ${weatherUpdatedCount + scraperUpdatedCount} resorts`);
+                } else {
+                    // If we didn't get error above, hide with timeout message
+                    const loader = document.getElementById('weather-loader');
+                    if (loader) {
+                        hideLoadingIndicator(false, 'Data unavailable');
+                    }
+                }
             }
         }
 
@@ -3464,34 +3490,38 @@
 
         // Loading indicator
         function showLoadingIndicator() {
+            // Remove any existing loader first
+            hideLoadingIndicator();
+            
             const loader = document.createElement('div');
             loader.id = 'weather-loader';
             loader.style.cssText = `
                 position: fixed;
                 top: 20px;
                 right: 20px;
-                padding: 0.75rem 1rem;
+                padding: 0.6rem 0.9rem;
                 background: rgba(0, 102, 255, 0.95);
                 color: white;
                 border-radius: 8px;
-                font-size: 0.75rem;
+                font-size: 0.7rem;
                 font-weight: 600;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
                 z-index: 9999;
                 display: flex;
                 align-items: center;
                 gap: 0.5rem;
+                transition: all 0.3s ease;
             `;
             loader.innerHTML = `
                 <div style="
-                    width: 12px;
-                    height: 12px;
+                    width: 10px;
+                    height: 10px;
                     border: 2px solid rgba(255,255,255,0.3);
                     border-top-color: white;
                     border-radius: 50%;
-                    animation: spin 0.8s linear infinite;
+                    animation: spin 0.6s linear infinite;
                 "></div>
-                <span>Updating weather...</span>
+                <span>Updating...</span>
             `;
 
             if (!document.getElementById('loader-style')) {
@@ -3504,25 +3534,38 @@
             document.body.appendChild(loader);
         }
 
-        function hideLoadingIndicator() {
+        function hideLoadingIndicator(success = true, message = '') {
             const loader = document.getElementById('weather-loader');
-            if (loader) loader.remove();
+            if (loader) {
+                if (message) {
+                    // Show success/error message briefly before hiding
+                    loader.style.background = success ? 'rgba(16, 185, 129, 0.95)' : 'rgba(239, 68, 68, 0.95)';
+                    loader.innerHTML = `
+                        <span>${success ? '✓' : '⚠'}</span>
+                        <span>${message}</span>
+                    `;
+                    setTimeout(() => loader.remove(), 2000);
+                } else {
+                    loader.remove();
+                }
+            }
         }
 
         // Initialize: Render mock data first, then load live data
         renderResorts();
 
-        // Load live weather after page loads
-        setTimeout(() => {
-            loadLiveWeather();
-        }, 1000);
+        // Load live weather immediately in background (non-blocking)
+        loadLiveWeather().catch(err => {
+            console.warn('Initial weather load failed:', err);
+        });
 
         // Auto-refresh every 4 hours
         setInterval(loadLiveWeather, REFRESH_INTERVAL);
 
-        console.log('🎿 IceCoast initialized with dual API system');
-        console.log('📊 Weather API: All 28 resorts');
-        console.log('🤖 Scraper API: 7 resorts (Tier 1)');
+        console.log('🎿 IceCoast initialized - Page ready immediately!');
+        console.log('📊 Weather API: 28 resorts (5s timeout)');
+        console.log('🤖 Scraper API: Limited to working resorts (5s timeout)');
+        console.log('⚡ Live data loads in background - site never blocks');
 
         // 🎿 EPIC RAIL SLAM - Click Handler with Delayed Scroll
         document.addEventListener('DOMContentLoaded', () => {
