@@ -150,6 +150,8 @@
             transition: all 0.2s ease;
             white-space: nowrap;
             box-shadow: 0 2px 4px rgba(74, 144, 164, 0.3);
+            position: relative;
+            overflow: visible;
         }
 
         .cta-btn:hover {
@@ -158,8 +160,100 @@
             box-shadow: 0 4px 8px rgba(74, 144, 164, 0.4);
         }
 
-        .cta-btn:active {
-            transform: translateY(0);
+        /* 🎿 EPIC RAIL SLAM ANIMATION */
+        @keyframes railSlam {
+            0% {
+                transform: translateY(-2px) rotate(0deg);
+            }
+            15% {
+                transform: translateY(8px) rotate(-3deg) scale(0.95);
+            }
+            25% {
+                transform: translateY(-4px) rotate(2deg) scale(1.02);
+            }
+            35% {
+                transform: translateY(4px) rotate(-1deg) scale(0.98);
+            }
+            45% {
+                transform: translateY(-2px) rotate(1deg) scale(1.01);
+            }
+            55% {
+                transform: translateY(2px) rotate(-0.5deg);
+            }
+            65% {
+                transform: translateY(-1px) rotate(0.5deg);
+            }
+            75% {
+                transform: translateY(1px) rotate(-0.2deg);
+            }
+            85% {
+                transform: translateY(-0.5px) rotate(0.1deg);
+            }
+            100% {
+                transform: translateY(0) rotate(0deg) scale(1);
+            }
+        }
+
+        @keyframes impactRipple {
+            0% {
+                transform: scale(0.8);
+                opacity: 0.8;
+            }
+            50% {
+                transform: scale(1.5);
+                opacity: 0.3;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        @keyframes sparkBurst {
+            0% {
+                transform: scale(0) rotate(0deg);
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1.5) rotate(180deg);
+                opacity: 0;
+            }
+        }
+
+        .cta-btn.rail-slam {
+            animation: railSlam 0.6s cubic-bezier(0.36, 0, 0.66, -0.56);
+        }
+
+        .cta-btn::before {
+            content: '';
+            position: absolute;
+            inset: -4px;
+            border-radius: 12px;
+            background: radial-gradient(circle, rgba(0, 102, 255, 0.6) 0%, transparent 70%);
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .cta-btn.rail-slam::before {
+            animation: impactRipple 0.5s ease-out;
+        }
+
+        .cta-btn::after {
+            content: '⚡';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 2rem;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .cta-btn.rail-slam::after {
+            animation: sparkBurst 0.4s ease-out;
         }
 
         .donate-btn {
@@ -3125,6 +3219,27 @@
         setInterval(loadLiveWeather, REFRESH_INTERVAL);
 
         console.log('🎿 IceCoast initialized. Weather will update every 4 hours.');
+
+        // 🎿 EPIC RAIL SLAM - Click Handler
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctaBtn = document.querySelector('.cta-btn');
+            if (ctaBtn) {
+                ctaBtn.addEventListener('click', function(e) {
+                    // Add the slam animation class
+                    this.classList.add('rail-slam');
+                    
+                    // Haptic feedback on mobile
+                    if (navigator.vibrate) {
+                        navigator.vibrate([50, 30, 50, 20, 30]);
+                    }
+                    
+                    // Remove class after animation completes
+                    setTimeout(() => {
+                        this.classList.remove('rail-slam');
+                    }, 600);
+                });
+            }
+        });
 
         // Mobile rating bubble scroll activation
         // Detects when rating bubbles scroll into viewport and activates them
