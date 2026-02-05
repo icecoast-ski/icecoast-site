@@ -302,9 +302,6 @@
         .resort-header {
             padding: 1.5rem 1.5rem 1.25rem;
             border-bottom: 1px solid var(--bg-grey);
-            background-size: 115%;
-            background-position: center;
-            background-repeat: no-repeat;
             margin: 0;
             border-radius: 16px 16px 0 0;
             min-height: 140px;
@@ -323,17 +320,9 @@
             background-repeat: no-repeat;
         }
 
-        /* Text overlay for readability */
-        .resort-header::before {
-            content: "";
-            position: absolute;
-            inset: 0;
-            background: linear-gradient(to bottom, rgba(0,0,0,0.25), rgba(0,0,0,0.55));
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        /* Ensure text and content is above overlay */
+        /* Text overlay removed - images now show with their true colors */
+        
+        /* Ensure text and content is above background */
         .resort-header > * {
             position: relative;
             z-index: 2;
