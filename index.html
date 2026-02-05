@@ -257,7 +257,7 @@
         }
 
         /* 🏔️ BACK TO TOP BUTTON - Send It Energy */
-        /* BACK TO TOP BUTTON - Clean & Simple */
+        /* BACK TO TOP BUTTON - Fixed & Polished */
         .back-to-top {
             position: fixed;
             bottom: 30px;
@@ -283,9 +283,31 @@
             transform: translateY(0) scale(1);
         }
 
-        .back-to-top:hover {
+        /* Sparkle effect on hover - looks like snow! */
+        .back-to-top:hover:not(.launching) {
             transform: translateY(-5px) scale(1.1);
-            box-shadow: 0 8px 30px rgba(0, 102, 255, 0.6);
+            animation: snowSparkle 1.2s ease-in-out infinite;
+        }
+
+        @keyframes snowSparkle {
+            0%, 100% {
+                box-shadow: 
+                    0 4px 20px rgba(0, 102, 255, 0.5),
+                    0 0 15px rgba(255, 255, 255, 0.6),
+                    5px 5px 10px rgba(255, 255, 255, 0.4),
+                    -5px -5px 10px rgba(200, 230, 255, 0.4),
+                    3px -3px 8px rgba(255, 255, 255, 0.3),
+                    -3px 3px 8px rgba(200, 230, 255, 0.3);
+            }
+            50% {
+                box-shadow: 
+                    0 6px 25px rgba(0, 102, 255, 0.6),
+                    0 0 25px rgba(255, 255, 255, 0.9),
+                    8px 8px 15px rgba(255, 255, 255, 0.7),
+                    -8px -8px 15px rgba(200, 230, 255, 0.7),
+                    5px -5px 12px rgba(255, 255, 255, 0.5),
+                    -5px 5px 12px rgba(200, 230, 255, 0.5);
+            }
         }
 
         .back-to-top:active {
@@ -300,15 +322,23 @@
             left: 50%;
             transform: translate(-50%, -50%);
             font-size: 1.8rem;
-            transition: all 0.4s ease;
+            opacity: 1;
+            transition: transform 0.3s ease;
+        }
+
+        /* Reset skier when NOT launching */
+        .back-to-top:not(.launching)::before {
+            transform: translate(-50%, -50%) !important;
+            opacity: 1 !important;
+            animation: none !important;
         }
 
         /* On hover, skier jumps up slightly */
-        .back-to-top:hover::before {
+        .back-to-top:hover:not(.launching)::before {
             transform: translate(-50%, -60%) scale(1.1);
         }
 
-        /* Gondola appears during animation */
+        /* Gondola - hidden by default */
         .back-to-top::after {
             content: '🚡';
             position: absolute;
@@ -320,13 +350,20 @@
             pointer-events: none;
         }
 
-        /* Launching animation */
+        /* Reset gondola when NOT launching */
+        .back-to-top:not(.launching)::after {
+            opacity: 0 !important;
+            transform: translate(-50%, -50%) !important;
+            animation: none !important;
+        }
+
+        /* Launching animations */
         .back-to-top.launching::before {
-            animation: skierJump 0.6s ease-out forwards;
+            animation: skierJump 0.6s ease-out;
         }
 
         .back-to-top.launching::after {
-            animation: gondolaRide 4s ease-out forwards;
+            animation: gondolaRide 4s ease-out;
         }
 
         @keyframes skierJump {
@@ -402,6 +439,16 @@
 
             .back-to-top::after {
                 font-size: 2rem;
+            }
+            
+            /* Disable hover effects on mobile */
+            .back-to-top:hover:not(.launching) {
+                transform: translateY(0) scale(1);
+                animation: none;
+            }
+            
+            .back-to-top:hover:not(.launching)::before {
+                transform: translate(-50%, -50%);
             }
         }
 
@@ -3206,33 +3253,22 @@
 
         // Load live weather + scraper data with error handling
         // Timeout wrapper for fetch requests
-        function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
-            return Promise.race([
-                fetch(url, options),
-                new Promise((_, reject) => 
-                    setTimeout(() => reject(new Error('Request timeout')), timeoutMs)
-                )
-            ]);
-        }
-
         async function loadLiveWeather() {
             try {
-                showLoadingIndicator();
-
                 console.log('🎿 Fetching live data from dual API system...');
                 
-                // Fetch both APIs in parallel with 5 second timeout
+                // Fetch both APIs in parallel - no timeout, let them take as long as needed
                 const [weatherResp, scraperResp] = await Promise.allSettled([
-                    fetchWithTimeout(WORKER_URL, {
+                    fetch(WORKER_URL, {
                         headers: { 'Cache-Control': 'no-cache' }
-                    }, 5000).then(r => r.ok ? r.json() : null).catch(e => {
-                        console.warn('Weather API timeout/error:', e.message);
+                    }).then(r => r.ok ? r.json() : null).catch(e => {
+                        console.warn('Weather API error:', e.message);
                         return null;
                     }),
-                    fetchWithTimeout(SCRAPER_API_URL, {
+                    fetch(SCRAPER_API_URL, {
                         headers: { 'Cache-Control': 'no-cache' }
-                    }, 5000).then(r => r.ok ? r.json() : null).catch(e => {
-                        console.warn('Scraper API timeout/error:', e.message);
+                    }).then(r => r.ok ? r.json() : null).catch(e => {
+                        console.warn('Scraper API error:', e.message);
                         return null;
                     })
                 ]);
@@ -3362,18 +3398,9 @@
                 console.error('❌ Failed to load live data:', error);
                 showDataStatus('error', null, 0, 0, error.message);
                 console.log('💾 Falling back to mock data - site still functional');
-                hideLoadingIndicator(false, 'Update failed');
             } finally {
-                // Only hide if not already showing error
-                if (weatherUpdatedCount > 0 || scraperUpdatedCount > 0) {
-                    hideLoadingIndicator(true, `Updated ${weatherUpdatedCount + scraperUpdatedCount} resorts`);
-                } else {
-                    // If we didn't get error above, hide with timeout message
-                    const loader = document.getElementById('weather-loader');
-                    if (loader) {
-                        hideLoadingIndicator(false, 'Data unavailable');
-                    }
-                }
+                // Silently complete - no loading indicators
+                console.log('🎿 Weather update completed');
             }
         }
 
@@ -3488,69 +3515,6 @@
             document.body.appendChild(statusDiv);
         }
 
-        // Loading indicator
-        function showLoadingIndicator() {
-            // Remove any existing loader first
-            hideLoadingIndicator();
-            
-            const loader = document.createElement('div');
-            loader.id = 'weather-loader';
-            loader.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 0.6rem 0.9rem;
-                background: rgba(0, 102, 255, 0.95);
-                color: white;
-                border-radius: 8px;
-                font-size: 0.7rem;
-                font-weight: 600;
-                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                z-index: 9999;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
-                transition: all 0.3s ease;
-            `;
-            loader.innerHTML = `
-                <div style="
-                    width: 10px;
-                    height: 10px;
-                    border: 2px solid rgba(255,255,255,0.3);
-                    border-top-color: white;
-                    border-radius: 50%;
-                    animation: spin 0.6s linear infinite;
-                "></div>
-                <span>Updating...</span>
-            `;
-
-            if (!document.getElementById('loader-style')) {
-                const style = document.createElement('style');
-                style.id = 'loader-style';
-                style.textContent = `@keyframes spin { to { transform: rotate(360deg); } }`;
-                document.head.appendChild(style);
-            }
-
-            document.body.appendChild(loader);
-        }
-
-        function hideLoadingIndicator(success = true, message = '') {
-            const loader = document.getElementById('weather-loader');
-            if (loader) {
-                if (message) {
-                    // Show success/error message briefly before hiding
-                    loader.style.background = success ? 'rgba(16, 185, 129, 0.95)' : 'rgba(239, 68, 68, 0.95)';
-                    loader.innerHTML = `
-                        <span>${success ? '✓' : '⚠'}</span>
-                        <span>${message}</span>
-                    `;
-                    setTimeout(() => loader.remove(), 2000);
-                } else {
-                    loader.remove();
-                }
-            }
-        }
-
         // Initialize: Render mock data first, then load live data
         renderResorts();
 
@@ -3563,8 +3527,8 @@
         setInterval(loadLiveWeather, REFRESH_INTERVAL);
 
         console.log('🎿 IceCoast initialized - Page ready immediately!');
-        console.log('📊 Weather API: 28 resorts (5s timeout)');
-        console.log('🤖 Scraper API: Limited to working resorts (5s timeout)');
+        console.log('📊 Weather API: 28 resorts');
+        console.log('🤖 Scraper API: Limited to working resorts');
         console.log('⚡ Live data loads in background - site never blocks');
 
         // 🎿 EPIC RAIL SLAM - Click Handler with Delayed Scroll
@@ -3707,6 +3671,13 @@
                 // Remove animation class after gondola ride completes
                 setTimeout(() => {
                     this.classList.remove('launching');
+                    
+                    // Force reset of pseudo-elements (defensive fix for mobile)
+                    const beforeEl = window.getComputedStyle(this, '::before');
+                    const afterEl = window.getComputedStyle(this, '::after');
+                    void beforeEl.transform; // Force reflow
+                    void afterEl.transform;
+                    
                     console.log('🏔️ Arrived at summit!');
                 }, 4000); // Match the 4 second gondola animation
             });
