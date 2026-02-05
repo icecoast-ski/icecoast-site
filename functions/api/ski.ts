@@ -206,11 +206,26 @@ async function getResortSnapshot(
 
   // Parse based on resort family - try multiple strategies
   if (r.family === "camelback_print") {
-    // Camelback uses simpler format
-    const openLifts = matchNumberAfter(text, /open\s*lifts/i);
-    const openTrails = matchNumberAfter(text, /open\s*trails/i);
-    lifts = openLifts != null ? { open: openLifts } : undefined;
-    trails = openTrails != null ? { open: openTrails } : undefined;
+    // Camelback uses simpler format - try multiple patterns
+    const openLifts = matchNumberAfter(text, /open\s*lifts/i) ?? 
+                      matchNumberAfter(text, /lifts?\s*open/i) ??
+                      matchNumberAfter(text, /lifts?:\s*/i);
+    const totalLifts = matchNumberAfter(text, /total\s*lifts/i);
+    const openTrails = matchNumberAfter(text, /open\s*trails/i) ?? 
+                       matchNumberAfter(text, /trails?\s*open/i) ??
+                       matchNumberAfter(text, /trails?:\s*/i);
+    const totalTrails = matchNumberAfter(text, /total\s*trails/i);
+    
+    lifts = openLifts != null ? { 
+      open: openLifts, 
+      total: totalLifts ?? openLifts 
+    } : undefined;
+    trails = openTrails != null ? { 
+      open: openTrails, 
+      total: totalTrails ?? openTrails 
+    } : undefined;
+    
+    console.log(`[${r.id}] Camelback parsing - lifts: ${openLifts}/${totalLifts}, trails: ${openTrails}/${totalTrails}`);
   } else {
     // Vail/Alterra - try multiple pattern strategies
     
@@ -233,6 +248,22 @@ async function getResortSnapshot(
     if (!trails) {
       trails = matchFractionNear(text, /runs?|trails?/i);
     }
+    
+    // Strategy 4: Try finding just open counts (common on mobile-friendly pages)
+    if (!lifts) {
+      const openLifts = matchNumberAfter(text, /(\d+)\s*lifts?\s*open/i);
+      if (openLifts) {
+        lifts = { open: openLifts, total: openLifts };
+      }
+    }
+    if (!trails) {
+      const openTrails = matchNumberAfter(text, /(\d+)\s*(?:trails?|runs?)\s*open/i);
+      if (openTrails) {
+        trails = { open: openTrails, total: openTrails };
+      }
+    }
+    
+    console.log(`[${r.id}] Vail parsing - lifts: ${lifts ? `${lifts.open}/${lifts.total}` : 'none'}, trails: ${trails ? `${trails.open}/${trails.total}` : 'none'}`);
   }
 
   // Try to extract surface conditions text
@@ -263,22 +294,27 @@ async function getResortSnapshot(
     snow7d_in,
   });
 
-  // IMPORTANT FIX: only mark scraped=true when we actually extracted something useful
+  // IMPORTANT FIX: Mark as scraped if we get ANY useful data
+  // Don't be too strict - partial data is better than no data
   const scraped = Boolean(
-    (lifts?.open != null && Number.isFinite(lifts.open)) ||
-    (trails?.open != null && Number.isFinite(trails.open)) ||
-    (surface_text && surface_text.length > 0) ||
-    snow24_in != null ||
-    snow48_in != null ||
-    snow7d_in != null,
+    (lifts?.open != null) ||
+    (lifts?.total != null) ||
+    (trails?.open != null) ||
+    (trails?.total != null) ||
+    surface_text ||
+    (snow24_in != null) ||
+    (snow48_in != null) ||
+    (snow7d_in != null),
   );
 
   // Debug logging (helpful for troubleshooting)
   console.log(`[${r.id}] Scraped=${scraped}`, {
-    lifts: lifts?.open ? `${lifts.open}/${lifts.total}` : 'none',
-    trails: trails?.open ? `${trails.open}/${trails.total}` : 'none',
+    lifts: lifts ? `${lifts.open ?? '?'}/${lifts.total ?? '?'}` : 'none',
+    trails: trails ? `${trails.open ?? '?'}/${trails.total ?? '?'}` : 'none',
     surface: surface_text || 'none',
-    snow: `24h:${snow24_in ?? 'none'} 48h:${snow48_in ?? 'none'} 7d:${snow7d_in ?? 'none'}`
+    snow: `24h:${snow24_in ?? 'none'} 48h:${snow48_in ?? 'none'} 7d:${snow7d_in ?? 'none'}`,
+    htmlLength: html.length,
+    textPreview: text.substring(0, 200)
   });
 
   const snapshot: Snapshot = {
@@ -293,11 +329,21 @@ async function getResortSnapshot(
     signals: { surface_text, open_pct, snow24_in, snow48_in, snow7d_in },
     ...(scraped
       ? {}
-      : { error: "Parsed page but did not find expected fields" }),
+      : { error: "Parsed page but did not find expected fields - check logs for details" }),
   };
 
-  await ctx.env.SKI_KV.put(key, JSON.stringify(snapshot), {
-    expirationTtl: ttl,
+  // If we got SOMETHING useful, cache it
+  // Even partial data is better than nothing
+  if (scraped) {
+    await ctx.env.SKI_KV.put(key, JSON.stringify(snapshot), {
+      expirationTtl: ttl,
+    });
+  } else {
+    // Cache failure for shorter time to retry sooner
+    await ctx.env.SKI_KV.put(key, JSON.stringify(snapshot), {
+      expirationTtl: 900, // 15 minutes instead of 3 hours
+    });
+  }
   });
 
   return snapshot;
@@ -406,8 +452,16 @@ function looksBlocked(html: string): boolean {
     h.includes("please enable javascript") ||
     h.includes("access denied") ||
     h.includes("bot detection") ||
-    (h.includes("cloudflare") && h.includes("attention required"))
+    h.includes("security check") ||
+    h.includes("are you a robot") ||
+    (h.includes("cloudflare") && h.includes("attention required")) ||
+    (h.includes("cloudflare") && h.includes("checking your browser"))
   ) {
+    return true;
+  }
+  
+  // Check if HTML is suspiciously short (likely an error page)
+  if (html.length < 500) {
     return true;
   }
 
@@ -493,20 +547,23 @@ function mapSurface(surface: string): string | null {
 }
 
 function extractSurfaceText(text: string): string | undefined {
-  // Common label patterns to search for
+  // Common label patterns to search for (expanded with more variations)
   const candidates = [
     /surface\s*conditions?/i,
-    /conditions?\s*:/i,
-    /snow\s*conditions?/i,
     /primary\s*surface/i,
     /base\s*conditions?/i,
+    /snow\s*conditions?/i,
     /current\s*conditions?/i,
+    /conditions?\s*:/i,
     /snow\s*quality/i,
+    /surface\s*:/i,
+    /conditions?\s*are/i,
   ];
 
-  // Condition keywords to look for (expanded list)
-  const conditionPattern = /(powder|packed\s*powder|machine\s*groomed|groomed|hard\s*pack|hardpack|firm|spring|icy|ice|frozen\s*granular|granular|corn\s*snow|variable|wet|soft)/i;
+  // Condition keywords to look for (expanded list with common variations)
+  const conditionPattern = /(powder|packed\s*powder|machine\s*groomed|groomed|hard\s*pack|hardpack|firm|spring|icy|ice|frozen\s*granular|granular|corn\s*snow|variable|wet|soft|packed)/i;
 
+  // Try label-based search first
   for (const re of candidates) {
     const idx = text.search(re);
     if (idx >= 0) {
@@ -520,16 +577,24 @@ function extractSurfaceText(text: string): string | undefined {
         const contextEnd = Math.min(window.length, matchIdx + m[0].length + 30);
         const context = window.slice(contextStart, contextEnd).trim();
         
-        // Return the cleanest match
-        return context.split(/[.,;]|snow(?:fall)?/i)[0].trim();
+        // Return the cleanest match - extract just the condition phrase
+        const cleanMatch = context.match(conditionPattern);
+        if (cleanMatch) {
+          return cleanMatch[0].trim();
+        }
       }
     }
   }
 
-  // Fallback: search entire text for condition keywords (broader search)
+  // Fallback 1: Search entire text for condition keywords (broader search)
   const broadMatch = text.match(conditionPattern);
   if (broadMatch) {
     return broadMatch[0].trim();
+  }
+
+  // Fallback 2: Check if text contains any grooming-related words
+  if (/groo|corduroy/i.test(text)) {
+    return "machine groomed";
   }
 
   return undefined;
@@ -603,8 +668,15 @@ function matchFractionNear(
 }
 
 function matchNumberAfter(text: string, label: RegExp) {
+  // Handle both simple patterns and patterns with capture groups
   const m = text.match(new RegExp(`${label.source}\\s*(\\d+)`, "i"));
-  return m ? Number(m[1]) : null;
+  if (m) {
+    // If the label pattern has a capture group with a number, use that
+    // Otherwise use the last captured number
+    const numbers = m.slice(1).filter(n => n && /^\d+$/.test(n));
+    return numbers.length > 0 ? Number(numbers[numbers.length - 1]) : null;
+  }
+  return null;
 }
 
 function matchInchesNear(text: string, label: RegExp) {
