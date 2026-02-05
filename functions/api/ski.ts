@@ -307,42 +307,59 @@ function computeRating(sig: {
   const explicit = mapSurface(surface);
   if (explicit) return { rating: explicit, confidence: 0.9 };
 
-  // 2) Infer from signals
+  // 2) Infer from snowfall signals
   const openPct = sig.open_pct ?? 0;
   const s24 = sig.snow24_in ?? null;
   const s48 = sig.snow48_in ?? null;
   const s7 = sig.snow7d_in ?? null;
 
-  // Limited if barely open
+  // Limited terrain
   if (openPct > 0 && openPct < 0.25)
     return { rating: "limited", confidence: 0.75 };
 
-  // Powder signals
-  if ((s24 != null && s24 >= 6) || (s48 != null && s48 >= 10)) {
-    return { rating: "powder", confidence: 0.8 };
+  // FRESH POWDER (ungroomed) - requires significant fresh snow
+  if (s24 != null && s24 >= 8) {
+    return { rating: "powder", confidence: 0.85 }; // 8"+ overnight = fresh powder
+  }
+  if (s48 != null && s48 >= 12) {
+    return { rating: "powder", confidence: 0.8 }; // 12"+ in 48h = likely still powder
   }
 
-  if (
-    (s24 != null && s24 >= 3) ||
-    (s48 != null && s48 >= 5) ||
-    (s7 != null && s7 >= 10)
-  ) {
-    return { rating: "packed_powder", confidence: 0.7 };
+  // PACKED POWDER (groomed fresh snow) - moderate fresh snow
+  if (s24 != null && s24 >= 4) {
+    return { rating: "packed_powder", confidence: 0.8 }; // 4-7" = packed powder
+  }
+  if (s48 != null && s48 >= 6) {
+    return { rating: "packed_powder", confidence: 0.75 }; // 6-11" in 48h = packed powder
+  }
+  if (s7 != null && s7 >= 10) {
+    return { rating: "packed_powder", confidence: 0.65 }; // Recent snow still around
   }
 
-  // Default: machine groomed (most common east coast)
+  // MACHINE GROOMED (default) - little to no fresh snow
   if (openPct >= 0.3) return { rating: "machine_groomed", confidence: 0.6 };
 
   return { rating: "unknown", confidence: 0.4 };
 }
 
 function mapSurface(surface: string): string | null {
-  if (surface.includes("powder")) {
-    return surface.includes("packed") ? "packed_powder" : "powder";
+  // CRITICAL: Check for POWDER first (before any groomed checks)
+  // "Powder" = ungroomed fresh snow (the best!)
+  // "Packed Powder" = groomed fresh snow (still good)
+  // "Machine Groomed" = groomed base (no fresh snow)
+  
+  // Check for fresh powder FIRST (most important distinction!)
+  if (surface.includes("powder") && !surface.includes("packed")) {
+    return "powder"; // Fresh, ungroomed snow
   }
-  if (surface.includes("packed powder")) return "packed_powder";
+  if (surface.includes("packed powder") || (surface.includes("packed") && surface.includes("powder"))) {
+    return "packed_powder"; // Groomed fresh snow
+  }
+  
+  // Only after checking for powder, check for groomed
   if (surface.includes("machine groomed") || surface.includes("groomed"))
-    return "machine_groomed";
+    return "machine_groomed"; // Regular groomed base
+  
   if (
     surface.includes("hard pack") ||
     surface.includes("hardpack") ||
