@@ -3341,7 +3341,13 @@
 
                                 // Update conditions if we have surface text
                                 if (scraped.signals && scraped.signals.surface_text) {
-                                    resort.conditions = scraped.signals.surface_text;
+                                    // Format conditions properly (Title Case)
+                                    resort.conditions = formatConditions(scraped.signals.surface_text);
+                                    console.log(`  → Updated conditions: ${resort.conditions}`);
+                                } else if (scraped.rating) {
+                                    // Fallback: use rating to infer conditions if no surface text
+                                    resort.conditions = ratingToConditions(scraped.rating);
+                                    console.log(`  → Inferred conditions from rating: ${resort.conditions}`);
                                 }
 
                                 // Update snowfall if scraped (prefer scraped over manual)
@@ -3389,6 +3395,51 @@
             } finally {
                 hideLoadingIndicator();
             }
+        }
+
+        // Helper: Format conditions text to proper Title Case
+        function formatConditions(text) {
+            if (!text) return 'Unknown';
+            
+            // Handle common condition phrases
+            const formatted = text
+                .toLowerCase()
+                .replace(/\b(powder|packed powder|machine groomed|groomed|hard pack|hardpack|firm|spring conditions|icy|ice|frozen granular|corn snow|variable)\b/gi, 
+                    match => {
+                        const titleCaseMap = {
+                            'powder': 'Powder',
+                            'packed powder': 'Packed Powder',
+                            'machine groomed': 'Machine Groomed',
+                            'groomed': 'Machine Groomed',
+                            'hard pack': 'Hard Pack',
+                            'hardpack': 'Hard Pack',
+                            'firm': 'Firm',
+                            'spring conditions': 'Spring Conditions',
+                            'icy': 'Icy',
+                            'ice': 'Icy',
+                            'frozen granular': 'Frozen Granular',
+                            'corn snow': 'Corn Snow',
+                            'variable': 'Variable'
+                        };
+                        return titleCaseMap[match.toLowerCase()] || match.charAt(0).toUpperCase() + match.slice(1);
+                    });
+            
+            return formatted.charAt(0).toUpperCase() + formatted.slice(1);
+        }
+
+        // Helper: Convert rating to conditions when no surface text available
+        function ratingToConditions(rating) {
+            const conditionsMap = {
+                'powder': 'Powder',
+                'packed_powder': 'Packed Powder',
+                'machine_groomed': 'Machine Groomed',
+                'firm_hardpack': 'Hard Pack',
+                'spring_conditions': 'Spring Conditions',
+                'icy': 'Icy',
+                'limited': 'Limited Terrain',
+                'unknown': 'Variable'
+            };
+            return conditionsMap[rating] || 'Machine Groomed';
         }
 
         // Visual status indicator
