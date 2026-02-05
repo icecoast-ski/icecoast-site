@@ -3332,16 +3332,34 @@
                             const scraped = scraperData[resort.id];
                             
                             if (scraped) {
+                                console.log(`🔍 Processing scraped data for ${resort.name}:`, {
+                                    lifts: scraped.lifts,
+                                    trails: scraped.trails,
+                                    signals: scraped.signals
+                                });
+                                
                                 // Update lift/trail counts if available
                                 if (scraped.lifts) {
-                                    resort.lifts.open = scraped.lifts.open || resort.lifts.open;
-                                    resort.lifts.total = scraped.lifts.total || (resort.lifts.open + resort.lifts.closed);
+                                    // Use scraped values if they exist (checking for null/undefined, not falsy)
+                                    if (scraped.lifts.open !== null && scraped.lifts.open !== undefined) {
+                                        resort.lifts.open = scraped.lifts.open;
+                                    }
+                                    if (scraped.lifts.total !== null && scraped.lifts.total !== undefined) {
+                                        resort.lifts.total = scraped.lifts.total;
+                                    }
+                                    // Recalculate closed based on total - open
                                     resort.lifts.closed = resort.lifts.total - resort.lifts.open;
                                 }
                                 
                                 if (scraped.trails) {
-                                    resort.trails.open = scraped.trails.open || resort.trails.open;
-                                    resort.trails.total = scraped.trails.total || (resort.trails.open + resort.trails.closed);
+                                    // Use scraped values if they exist (checking for null/undefined, not falsy)
+                                    if (scraped.trails.open !== null && scraped.trails.open !== undefined) {
+                                        resort.trails.open = scraped.trails.open;
+                                    }
+                                    if (scraped.trails.total !== null && scraped.trails.total !== undefined) {
+                                        resort.trails.total = scraped.trails.total;
+                                    }
+                                    // Recalculate closed based on total - open
                                     resort.trails.closed = resort.trails.total - resort.trails.open;
                                 }
 
