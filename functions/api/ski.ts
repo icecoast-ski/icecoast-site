@@ -5,20 +5,14 @@ export const onRequestGet = async () => {
   const res = await fetch(url, { headers: { "user-agent": "Mozilla/5.0" } });
   const text = await res.text();
 
+  // Find the API endpoint reference inside this JSON blob
   const needles = [
-    "lift",
-    "lifts",
-    "trail",
-    "trails",
-    "open",
-    "closed",
-    "status",
-    "liftStatus",
-    "trailStatus",
-    "dor",
-    "report",
+    "externalEndpoint",
+    "endpoint",
+    "api",
+    "dataUrl",
+    "externalendpoint",
   ];
-
   const hits: any[] = [];
   const lower = text.toLowerCase();
 
@@ -28,16 +22,14 @@ export const onRequestGet = async () => {
       needle: n,
       found: i !== -1,
       index: i,
-      around: i !== -1 ? text.slice(Math.max(0, i - 350), i + 350) : null,
+      around: i !== -1 ? text.slice(Math.max(0, i - 400), i + 600) : null,
     });
   }
 
   return new Response(
-    JSON.stringify(
-      { ok: res.ok, status: res.status, bytes: text.length, hits },
-      null,
-      2,
-    ),
-    { headers: { "content-type": "application/json" } },
+    JSON.stringify({ ok: res.ok, status: res.status, hits }, null, 2),
+    {
+      headers: { "content-type": "application/json" },
+    },
   );
 };
