@@ -1551,20 +1551,7 @@
     <div class="sub-header">
         <div class="sub-header-content">
             <p class="sub-tagline">Real-time snow, terrain, and resort conditions—so you know when it's worth the drive.</p>
-            <button class="cta-btn" onclick="
-                // Wait for rail slam animation to complete before scrolling
-                setTimeout(() => {
-                    const filters = document.querySelector('.filters');
-                    if (filters) {
-                        const headerHeight = document.querySelector('header').offsetHeight;
-                        const filtersTop = filters.getBoundingClientRect().top + window.pageYOffset;
-                        window.scrollTo({
-                            top: filtersTop - headerHeight - 10,
-                            behavior: 'smooth'
-                        });
-                    }
-                }, 500); // Delay 500ms to let the slam effect finish (animation is 600ms total)
-            ">
+            <button class="cta-btn">
                 Check Conditions Now
             </button>
         </div>
@@ -3223,11 +3210,13 @@
 
         console.log('🎿 IceCoast initialized. Weather will update every 4 hours.');
 
-        // 🎿 EPIC RAIL SLAM - Click Handler
+        // 🎿 EPIC RAIL SLAM - Click Handler with Delayed Scroll
         document.addEventListener('DOMContentLoaded', () => {
             const ctaBtn = document.querySelector('.cta-btn');
             if (ctaBtn) {
                 ctaBtn.addEventListener('click', function(e) {
+                    e.preventDefault(); // Prevent any default behavior
+                    
                     // Add the slam animation class
                     this.classList.add('rail-slam');
                     
@@ -3236,7 +3225,20 @@
                         navigator.vibrate([50, 30, 50, 20, 30]);
                     }
                     
-                    // Remove class after animation completes
+                    // Wait for slam effect, then scroll
+                    setTimeout(() => {
+                        const filters = document.querySelector('.filters');
+                        if (filters) {
+                            const headerHeight = document.querySelector('header').offsetHeight;
+                            const filtersTop = filters.getBoundingClientRect().top + window.pageYOffset;
+                            window.scrollTo({
+                                top: filtersTop - headerHeight - 10,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }, 500); // 500ms delay for slam effect (animation is 600ms)
+                    
+                    // Remove animation class after it completes
                     setTimeout(() => {
                         this.classList.remove('rail-slam');
                     }, 600);
