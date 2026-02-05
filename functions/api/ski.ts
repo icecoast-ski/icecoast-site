@@ -1,43 +1,29 @@
 export const onRequestGet = async () => {
-  const base = "https://www.killington.com";
+  const url = "https://www.killington.com/page-data/sq/d/187408592.json";
+  const res = await fetch(url, { headers: { "user-agent": "Mozilla/5.0" } });
+  const text = await res.text();
 
-  const pageDataUrl =
-    base +
-    "/page-data/the-mountain/conditions-weather/current-conditions-weather/page-data.json";
+  // find where open_lifts/open_trails appear (if they do)
+  const needles = ["open_lifts", "open_trails", "lifts", "trails", "terrain"];
+  const hits: any[] = [];
 
-  const pageRes = await fetch(pageDataUrl, {
-    headers: { "user-agent": "Mozilla/5.0" },
-  });
-  const pageData: any = await pageRes.json();
-
-  const hashes: string[] = pageData?.staticQueryHashes || [];
-  const hash = hashes[0];
-
-  // Gatsby usually serves static queries here
-  const sqUrls = [
-    `${base}/page-data/sq/d/${hash}.json`,
-    `${base}/_bluedrop/page-data/sq/d/${hash}.json`,
-  ];
-
-  const tries: any[] = [];
-  for (const url of sqUrls) {
-    const r = await fetch(url, { headers: { "user-agent": "Mozilla/5.0" } });
-    const text = await r.text(); // keep as text so we can preview even if not JSON
-    tries.push({
-      url,
-      status: r.status,
-      preview: text.slice(0, 600),
+  for (const n of needles) {
+    const i = text.toLowerCase().indexOf(n);
+    hits.push({
+      needle: n,
+      found: i !== -1,
+      index: i,
+      around: i !== -1 ? text.slice(Math.max(0, i - 250), i + 250) : null,
     });
-    if (r.ok) break;
   }
 
   return new Response(
     JSON.stringify(
       {
-        pageDataOk: pageRes.ok,
-        pageDataStatus: pageRes.status,
-        staticQueryHashes: hashes,
-        staticQueryTries: tries,
+        ok: res.ok,
+        status: res.status,
+        bytes: text.length,
+        hits,
       },
       null,
       2,
