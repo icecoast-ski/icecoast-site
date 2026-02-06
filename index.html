@@ -3160,7 +3160,7 @@
                                     Lift Ticket
                                 </span>
                                 <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <span class="info-value">$${resort.liftTicket?.weekday || "N/A"} / $${resort.liftTicket?.weekend || "N/A"}</span>
+                                    <span class="info-value">$${(resort.liftTicket?.weekday || 'N/A')} / $${(resort.liftTicket?.weekend || 'N/A')}</span>
                                     ${resort.passes ? resort.passes.map(pass =>
                                         `<span class="pass-badge pass-${pass}">${pass === 'ikon' ? 'Ikon' : 'Epic'}</span>`
                                     ).join('') : ''}
@@ -3387,7 +3387,7 @@
                     filtered.sort((a, b) => (a.liftTicket?.weekend || 999) - (b.liftTicket?.weekend || 999));
                     break;
                 case 'price-high':
-                    filtered.sort((a, b) => (b.liftTicket?.weekend || 0) - (a.liftTicket?.weekend || 0));
+                    filtered.sort((a, b) => (b.liftTicket?.weekend || 999) - (a.liftTicket?.weekend || 999));
                     break;
                 case 'name':
                     filtered.sort((a, b) => a.name.localeCompare(b.name));
