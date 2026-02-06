@@ -1667,6 +1667,55 @@
             margin: 0 auto;
         }
 
+        /* Accordion Toggle Button */
+        .legal-toggle {
+            background: var(--charcoal);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 700;
+            font-size: 0.95rem;
+            margin-bottom: 1.5rem;
+            transition: all 0.3s ease;
+            user-select: none;
+        }
+
+        .legal-toggle:hover {
+            background: #000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .legal-toggle-text {
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .legal-toggle-icon {
+            font-size: 1.2rem;
+            transition: transform 0.3s ease;
+        }
+
+        .legal-toggle.active .legal-toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        /* Accordion Content */
+        .legal-accordion {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease-out;
+        }
+
+        .legal-accordion.open {
+            max-height: 10000px; /* Large enough for all content */
+            transition: max-height 0.8s ease-in;
+        }
+
         .legal-section {
             margin-bottom: 2rem;
         }
@@ -1697,6 +1746,7 @@
             border-top: 1px solid #dee2e6;
             font-size: 0.75rem;
             color: #6c757d;
+            margin-top: 1.5rem;
         }
 
         .legal-simple {
@@ -1709,6 +1759,23 @@
             color: #0066FF;
             text-decoration: underline;
         }
+
+        @media (max-width: 768px) {
+            .legal-footer {
+                padding: 2rem 1rem;
+                font-size: 0.8rem;
+            }
+
+            .legal-toggle {
+                padding: 0.85rem 1rem;
+                font-size: 0.85rem;
+            }
+
+            .legal-section h3 {
+                font-size: 1rem;
+            }
+        }
+
 
         @media (max-width: 768px) {
             .legal-footer {
@@ -3465,7 +3532,14 @@
                 renderResorts();
             });
         });
+        // Legal accordion toggle
+        function toggleLegal() {
+            const accordion = document.getElementById('legalAccordion');
+            const toggle = document.querySelector('.legal-toggle');
 
+            accordion.classList.toggle('open');
+            toggle.classList.toggle('active');
+        }
         // Pass filter buttons
         document.querySelectorAll('[data-pass]').forEach(btn => {
             btn.addEventListener('click', () => {
@@ -3826,93 +3900,106 @@
             </p>
             <div class="legal-footer">
                 <div class="legal-content">
-                    <!-- Copyright Notice -->
-                    <div class="legal-section">
-                        <h3>Copyright & Intellectual Property</h3>
-                        <p>© 2026 icecoast.ski. All rights reserved. The design, code, layout, and compilation of this website, including but not limited to text, graphics, interfaces, and the selection and arrangement thereof, are protected by copyright, trademark, and other intellectual property laws. Unauthorized reproduction, modification, distribution, or commercial use of any materials from this site is strictly prohibited without prior written permission.</p>
+
+                    <!-- Accordion Toggle Button -->
+                    <div class="legal-toggle" onclick="toggleLegal()">
+                        <span class="legal-toggle-text">Legal, Terms & Privacy Policy</span>
+                        <span class="legal-toggle-icon">▼</span>
                     </div>
 
-                    <!-- Data Accuracy Disclaimer -->
-                    <div class="legal-section">
-                        <h3>Data Accuracy & Reliability Disclaimer</h3>
-                        <p><strong>USE AT YOUR OWN RISK.</strong> All ski resort conditions, weather data, lift status, snowfall reports, and other information ("Data") displayed on this website are provided for informational purposes only and should be considered <strong>estimates and approximations</strong>. Data is aggregated from third-party sources and may be delayed, inaccurate, incomplete, or outdated by up to 15-30 minutes or more.</p>
+                    <!-- Collapsible Legal Sections -->
+                    <div class="legal-accordion" id="legalAccordion">
 
-                        <p><strong>We make no representations, warranties, or guarantees</strong> regarding the accuracy, completeness, timeliness, or reliability of any Data presented. Actual resort conditions may differ significantly from those displayed. Users are strongly advised to <strong>verify all information directly with the resort</strong> before making travel or skiing decisions.</p>
+                        <!-- Copyright Notice -->
+                        <div class="legal-section">
+                            <h3>Copyright & Intellectual Property</h3>
+                            <p>© 2026 icecoast.ski. All rights reserved. The design, code, layout, and compilation of this website, including but not limited to text, graphics, interfaces, and the selection and arrangement thereof, are protected by copyright, trademark, and other intellectual property laws. Unauthorized reproduction, modification, distribution, or commercial use of any materials from this site is strictly prohibited without prior written permission.</p>
+                        </div>
 
-                        <p>Ski resort conditions can change rapidly due to weather, temperature, and operational factors. This website is not affiliated with, endorsed by, or operated by any ski resort, and resorts are not responsible for information displayed here.</p>
+                        <!-- Data Accuracy Disclaimer -->
+                        <div class="legal-section">
+                            <h3>Data Accuracy & Reliability Disclaimer</h3>
+                            <p><strong>USE AT YOUR OWN RISK.</strong> All ski resort conditions, weather data, lift status, snowfall reports, and other information ("Data") displayed on this website are provided for informational purposes only and should be considered <strong>estimates and approximations</strong>. Data is aggregated from third-party sources and may be delayed, inaccurate, incomplete, or outdated by up to 15-30 minutes or more.</p>
+
+                            <p><strong>We make no representations, warranties, or guarantees</strong> regarding the accuracy, completeness, timeliness, or reliability of any Data presented. Actual resort conditions may differ significantly from those displayed. Users are strongly advised to <strong>verify all information directly with the resort</strong> before making travel or skiing decisions.</p>
+
+                            <p>Ski resort conditions can change rapidly due to weather, temperature, and operational factors. This website is not affiliated with, endorsed by, or operated by any ski resort, and resorts are not responsible for information displayed here.</p>
+                        </div>
+
+                        <!-- Limitation of Liability -->
+                        <div class="legal-section">
+                            <h3>Limitation of Liability</h3>
+                            <p>TO THE FULLEST EXTENT PERMITTED BY LAW, icecoast.ski, its operators, contributors, and data providers SHALL NOT BE LIABLE for any direct, indirect, incidental, consequential, special, or punitive damages, including but not limited to:</p>
+                            <ul>
+                                <li>Lost time, money, or resources spent traveling to resorts based on Data displayed</li>
+                                <li>Personal injury, property damage, or accidents resulting from reliance on displayed conditions</li>
+                                <li>Inaccurate, outdated, or missing information about lift status, terrain openings, or weather</li>
+                                <li>Service interruptions, data errors, or website downtime</li>
+                                <li>Decisions made based on pricing, pass information, or resort ratings displayed</li>
+                            </ul>
+                            <p>By using this website, you acknowledge and agree that <strong>you assume all risks</strong> associated with skiing, snowboarding, and outdoor winter activities. You are solely responsible for assessing conditions, making safe decisions, and following all resort safety guidelines.</p>
+                        </div>
+
+                        <!-- No Warranty -->
+                        <div class="legal-section">
+                            <h3>No Warranty</h3>
+                            <p>THIS WEBSITE AND ALL DATA ARE PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT ANY WARRANTY OF ANY KIND, either express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, accuracy, or non-infringement. We do not warrant that the website will be uninterrupted, error-free, or free from viruses or other harmful components.</p>
+                        </div>
+
+                        <!-- Third-Party Data Sources -->
+                        <div class="legal-section">
+                            <h3>Third-Party Data & Links</h3>
+                            <p>Data is sourced from third-party APIs including OpenWeather, Liftie, and other public data sources. We are not responsible for the accuracy or availability of third-party data. Links to external websites (ski resorts, pass providers, etc.) are provided for convenience only. We do not endorse or control the content of external sites and are not responsible for their practices or policies.</p>
+                        </div>
+
+                        <!-- Code & Design Protection -->
+                        <div class="legal-section">
+                            <h3>Code Protection & Terms of Use</h3>
+                            <p>The source code, algorithms, API integrations, design elements, and technical implementation of this website are proprietary and protected intellectual property. <strong>Scraping, copying, reverse-engineering, or unauthorized use of this website's code or data is prohibited.</strong></p>
+
+                            <p>Automated access (bots, scrapers, crawlers) that exceeds reasonable personal use is forbidden. Commercial use, redistribution, or republication of Data without written permission is strictly prohibited. Violators may be subject to legal action under copyright and computer fraud laws.</p>
+                        </div>
+
+                        <!-- Privacy & Data Collection -->
+                        <div class="legal-section">
+                            <h3>Privacy Policy</h3>
+                            <p><strong>No Personal Data Collection:</strong> This website does not collect, store, or process personal information. We do not use cookies, tracking pixels, or analytics that identify individual users. Your browsing of this site is anonymous.</p>
+
+                            <p><strong>Third-Party Services:</strong> This website uses Cloudflare for hosting and security. Cloudflare may collect technical information (IP addresses, browser type) for security and performance purposes. Refer to <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare's Privacy Policy</a> for details.</p>
+
+                            <p>External links to ski resort websites, donation platforms, or third-party services are governed by their respective privacy policies.</p>
+                        </div>
+
+                        <!-- Changes to Terms -->
+                        <div class="legal-section">
+                            <h3>Changes & Updates</h3>
+                            <p>We reserve the right to modify these terms, disclaimers, or website features at any time without notice. Continued use of the website constitutes acceptance of any changes. If you do not agree with these terms, discontinue use immediately.</p>
+                        </div>
+
+                        <!-- Contact & Enforcement -->
+                        <div class="legal-section">
+                            <h3>Governing Law & Contact</h3>
+                            <p>These terms are governed by the laws of the State of New Jersey, USA, without regard to conflict of law principles. Any disputes shall be resolved in courts located in New Jersey.</p>
+
+                            <p>For questions, permissions, or legal concerns, contact: <strong>[your email]</strong></p>
+                        </div>
+
                     </div>
+                    <!-- End Accordion -->
 
-                    <!-- Limitation of Liability -->
-                    <div class="legal-section">
-                        <h3>Limitation of Liability</h3>
-                        <p>TO THE FULLEST EXTENT PERMITTED BY LAW, icecoast.ski, its operators, contributors, and data providers SHALL NOT BE LIABLE for any direct, indirect, incidental, consequential, special, or punitive damages, including but not limited to:</p>
-                        <ul>
-                            <li>Lost time, money, or resources spent traveling to resorts based on Data displayed</li>
-                            <li>Personal injury, property damage, or accidents resulting from reliance on displayed conditions</li>
-                            <li>Inaccurate, outdated, or missing information about lift status, terrain openings, or weather</li>
-                            <li>Service interruptions, data errors, or website downtime</li>
-                            <li>Decisions made based on pricing, pass information, or resort ratings displayed</li>
-                        </ul>
-                        <p>By using this website, you acknowledge and agree that <strong>you assume all risks</strong> associated with skiing, snowboarding, and outdoor winter activities. You are solely responsible for assessing conditions, making safe decisions, and following all resort safety guidelines.</p>
-                    </div>
-
-                    <!-- No Warranty -->
-                    <div class="legal-section">
-                        <h3>No Warranty</h3>
-                        <p>THIS WEBSITE AND ALL DATA ARE PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT ANY WARRANTY OF ANY KIND, either express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, accuracy, or non-infringement. We do not warrant that the website will be uninterrupted, error-free, or free from viruses or other harmful components.</p>
-                    </div>
-
-                    <!-- Third-Party Data Sources -->
-                    <div class="legal-section">
-                        <h3>Third-Party Data & Links</h3>
-                        <p>Data is sourced from third-party APIs including OpenWeather, Liftie, and other public data sources. We are not responsible for the accuracy or availability of third-party data. Links to external websites (ski resorts, pass providers, etc.) are provided for convenience only. We do not endorse or control the content of external sites and are not responsible for their practices or policies.</p>
-                    </div>
-
-                    <!-- Code & Design Protection -->
-                    <div class="legal-section">
-                        <h3>Code Protection & Terms of Use</h3>
-                        <p>The source code, algorithms, API integrations, design elements, and technical implementation of this website are proprietary and protected intellectual property. <strong>Scraping, copying, reverse-engineering, or unauthorized use of this website's code or data is prohibited.</strong></p>
-
-                        <p>Automated access (bots, scrapers, crawlers) that exceeds reasonable personal use is forbidden. Commercial use, redistribution, or republication of Data without written permission is strictly prohibited. Violators may be subject to legal action under copyright and computer fraud laws.</p>
-                    </div>
-
-                    <!-- Privacy & Data Collection -->
-                    <div class="legal-section">
-                        <h3>Privacy Policy</h3>
-                        <p><strong>No Personal Data Collection:</strong> This website does not collect, store, or process personal information. We do not use cookies, tracking pixels, or analytics that identify individual users. Your browsing of this site is anonymous.</p>
-
-                        <p><strong>Third-Party Services:</strong> This website uses Cloudflare for hosting and security. Cloudflare may collect technical information (IP addresses, browser type) for security and performance purposes. Refer to <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare's Privacy Policy</a> for details.</p>
-
-                        <p>External links to ski resort websites, donation platforms, or third-party services are governed by their respective privacy policies.</p>
-                    </div>
-
-                    <!-- Changes to Terms -->
-                    <div class="legal-section">
-                        <h3>Changes & Updates</h3>
-                        <p>We reserve the right to modify these terms, disclaimers, or website features at any time without notice. Continued use of the website constitutes acceptance of any changes. If you do not agree with these terms, discontinue use immediately.</p>
-                    </div>
-
-                    <!-- Contact & Enforcement -->
-                    <div class="legal-section">
-                        <h3>Governing Law & Contact</h3>
-                        <p>These terms are governed by the laws of the State of New Jersey, USA, without regard to conflict of law principles. Any disputes shall be resolved in courts located in New Jersey.</p>
-
-                        <p>For questions, permissions, or legal concerns, contact: <strong>[your email]</strong></p>
-                    </div>
-
-                    <!-- Attribution -->
+                    <!-- Attribution (Always Visible) -->
                     <div class="legal-attribution">
                         <p><small>Data sources: OpenWeather API, Liftie API. Resort logos and trademarks are property of their respective owners. This site is not affiliated with Ikon Pass, Epic Pass, or any ski resort.</small></p>
                     </div>
 
-                    <!-- Simple Footer -->
+                    <!-- Simple Footer (Always Visible) -->
                     <div class="legal-simple">
-                        <p>Made with ❄️ for East Coast skiers | <a href="#top">Back to Top</a></p>
+                        <p>Made with 🧊 for East Coast skiers | <a href="#top">Back to Top</a></p>
                         <p><strong>Last Updated:</strong> February 2026</p>
                     </div>
                 </div>
             </div>
-        </div>
+
     </footer>
 
     <script>
