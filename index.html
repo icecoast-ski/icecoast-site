@@ -2121,33 +2121,38 @@
 
         // Mock resort data
         const resorts = [
-            {
-                id: 'camelback',
-                name: 'Camelback',
-                icon: '🚁', // Chair fell off lift 2021
-                location: 'Tannersville, PA',
-                region: 'poconos',
-                rating: 4,
-                glades: 0,
-                conditions: 'Packed Powder',
-                liftTicket: { weekday: 89, weekend: 99 },
-                passes: ['ikon'],
-                parking: 'Free',
-                elevation: { base: 1400, summit: 2133, vertical: 800 },
-                trails: { total: 39, open: 35, closed: 4 },
-                lifts: { total: 8, open: 6, closed: 2 },
-                park: 2,
-                apres: 3,
-                family: 4,
-                familyOwned: false,
-                forecast: [{ day: 'Wed', temp: 30, icon: '☁️', snow: '1"' }, { day: 'Thu', temp: 33, icon: '☀️', snow: '0"' }, { day: 'Fri', temp: 29, icon: '🌨️', snow: '4"' }],
-                weather: { temp: 28, feelsLike: 18, wind: '12 mph', condition: 'Partly Cloudy', icon: '⛅' },
-                snowfall: { '24h': '2"', '48h': '3"', '7d': '8"' },
-                distance: {
-                    'NYC': '1h 45m',
-                    'Philly': '2h 15m',
-                    'N. Jersey': '1h 30m'
-                }
+        {
+            id: 'camelback',
+            name: 'Camelback',
+            icon: '🚁',
+            location: 'Tannersville, PA',
+            region: 'poconos',
+            familyOwned: false,
+
+            // ============ AUTO-GENERATED (APIs) ============
+            forecast: [{ day: 'Wed', temp: 30, icon: '☁️', snow: '1"' }, { day: 'Thu', temp: 33, icon: '☀️', snow: '0"' }, { day: 'Fri', temp: 29, icon: '🌨️', snow: '4"' }],
+            weather: { temp: 28, feelsLike: 18, wind: '12 mph', condition: 'Partly Cloudy', icon: '⛅' },
+            lifts: { total: 8, open: 6, closed: 2 },
+
+            // ============ ADMIN PANEL (paste here) ============
+            snowfall: { '24h': "0"", '48h': "0"", '7d': "0"" },
+            trails: { open: 35, closed: 4, total: 39 },
+            conditions: 'Packed Powder',
+            rating: 3.5,
+            parking: 'Free',
+            glades: 0,
+            liftTicket: { weekday: 89, weekend: 99 },
+            park: 3,
+            apres: 3,
+            family: 4,
+            passes: ['ikon'],
+
+            // ============ STATIC (rarely changes) ============
+            elevation: { base: 1400, summit: 2133, vertical: 800 },
+            distance: {
+                'NYC': '1h 45m',
+                'Philly': '2h 15m',
+                'N. Jersey': '1h 30m'
             },
             {
                 id: 'blue',
