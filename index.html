@@ -1013,7 +1013,7 @@
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.02em;
-            background: linear-gradient(135deg, #FF6B35 0%, #F7931E 100%);
+            background: linear-gradient(135deg, #DC2626 0%, #F43F5E 100%);
             color: white;
             box-shadow: 0 1px 2px rgba(0,0,0,0.15);
             margin-left: 0.4rem;
@@ -3128,11 +3128,11 @@
                                 <span class="info-label">
                                     <span class="info-icon">${icons.ticket}</span>
                                     Lift Ticket
+                                    ${resort.dynamicPricing ? '<span class="dynamic-badge">Dynamic</span>' : ''}
                                 </span>
                                 <div style="display: flex; align-items: center; gap: 0.5rem;">
                                 <span class="info-value">$${resort.liftTicket.weekday}${resort.dynamicPricing ? '+' : ''} / $${resort.liftTicket.weekend}${resort.dynamicPricing ? '+' : ''}</span>
                                     ${resort.passes ? resort.passes.map(pass =>
-                                        `<span class="pass-badge pass-${pass}">${pass === 'ikon' ? 'Ikon' : 'Epic'}${resort.dynamicPricing ? '<span class="dynamic-badge">Dynamic</span>' : ''}</span>`
                                     ).join('') : ''}
                                 </div>
                             </div>
