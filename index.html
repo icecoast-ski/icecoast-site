@@ -3540,8 +3540,17 @@ const WORKER_URL = 'https://liftie-worker.rickt123-0f8.workers.dev';
                 console.log(`✅ Worker returned data for ${Object.keys(apiData).length} resorts`);
 
                 resorts.forEach(resort => {
-                    const live = apiData[getWorkerID(resort.id)];
-                    if (!live) return;
+                    const workerID = getWorkerID(resort.id);
+
+            // Skip metadata
+            if (workerID === '_metadata') return;
+
+            const live = apiData[workerID];
+
+            if (!live) {
+                console.warn(`No data for ${resort.name} (${workerID})`);
+                return;
+            }
 
                     // ── Weather (OpenWeather) ──
                     if (live.weather) {
