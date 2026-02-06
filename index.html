@@ -3123,7 +3123,7 @@
                                 // Show fresh pow badge based on conditions OR snow totals
                                 const isPowder = resort.conditions === 'Powder';
                                 const isPackedPowder = resort.conditions === 'Packed Powder';
-                                const hasSignificantSnow = parseInt(resort.snowfall['24h']) >= 6;
+                                const hasSignificantSnow = parseInt(resort.snowfall?.['24h'] || 0) >= 6;
 
                                 if (isPowder || isPackedPowder || hasSignificantSnow) {
                                     const label = isPowder ? 'POWDER DAY' :
@@ -3131,7 +3131,7 @@
                                                   'FRESH POW';
                                     return `
                                         <div class="snow-alert-badge">
-                                            ❄️ ${resort.snowfall['24h']} ${label}
+                                            ❄️ ${resort.snowfall?.['24h'] || 0} ${label}
                                         </div>
                                     `;
                                 }
@@ -3145,7 +3145,7 @@
                                 <div class="rating-label">Icecoast Rating</div>
                                 <div class="rating-stars">${stars}</div>
                             </div>
-                            <div class="rating-text">${getRatingText(resort.rating, resort.snowfall['24h'], resort)}</div>
+                            <div class="rating-text">${getRatingText(resort.rating, resort.snowfall?.['24h'] || 0, resort)}</div>
                         </div>
 
                         <div class="conditions-highlight">
@@ -3283,7 +3283,7 @@
                             <div class="snow-report">
                                 <div class="snow-stat">
                                     <div class="snow-label">24h</div>
-                                    <div class="snow-value">${resort.snowfall['24h']}</div>
+                                    <div class="snow-value">${resort.snowfall?.['24h'] || 0}</div>
                                 </div>
                                 <div class="snow-stat">
                                     <div class="snow-label">48h</div>
@@ -3291,7 +3291,7 @@
                                 </div>
                                 <div class="snow-stat">
                                     <div class="snow-label">7d</div>
-                                    <div class="snow-value">${resort.snowfall['7d']}</div>
+                                    <div class="snow-value">${resort.snowfall?.['7d'] || 0}</div>
                                 </div>
                             </div>
                         </div>
