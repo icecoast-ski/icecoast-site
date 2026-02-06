@@ -279,7 +279,7 @@
 
         @keyframes snowSparkle {
             0%, 100% {
-                box-shadow: 
+                box-shadow:
                     0 4px 20px rgba(0, 102, 255, 0.5),
                     0 0 15px rgba(255, 255, 255, 0.6),
                     5px 5px 10px rgba(255, 255, 255, 0.4),
@@ -288,7 +288,7 @@
                     -3px 3px 8px rgba(200, 230, 255, 0.3);
             }
             50% {
-                box-shadow: 
+                box-shadow:
                     0 6px 25px rgba(0, 102, 255, 0.6),
                     0 0 25px rgba(255, 255, 255, 0.9),
                     8px 8px 15px rgba(255, 255, 255, 0.7),
@@ -420,7 +420,7 @@
                 bottom: 20px;
                 right: 20px;
             }
-            
+
             .back-to-top::before {
                 font-size: 1.5rem;
             }
@@ -428,13 +428,13 @@
             .back-to-top::after {
                 font-size: 2rem;
             }
-            
+
             /* Disable hover effects on mobile */
             .back-to-top:hover:not(.launching) {
                 transform: translateY(0) scale(1);
                 animation: none;
             }
-            
+
             .back-to-top:hover:not(.launching)::before {
                 transform: translate(-50%, -50%);
             }
@@ -599,7 +599,7 @@
         }
 
         /* Text overlay removed - images now show with their true colors */
-        
+
         /* Ensure text and content is above background */
         .resort-header > * {
             position: relative;
@@ -824,7 +824,7 @@
             position: relative;
             white-space: nowrap;
             box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.15);
-            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), 
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1),
                         box-shadow 0.3s ease;
             animation: bubblePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s;
         }
@@ -1529,9 +1529,9 @@
         .send-it-progress {
             height: 100%;
             width: 0%;
-            background: 
-                linear-gradient(135deg, 
-                    #66B3FF 0%, 
+            background:
+                linear-gradient(135deg,
+                    #66B3FF 0%,
                     #0066FF 100%
                 ),
                 url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path d="M0,50 Q20,30 40,50 T80,50 T100,50 L100,100 L0,100 Z" fill="rgba(255,255,255,0.1)"/><path d="M10,60 L15,55 L12,65 Z M25,58 L30,53 L27,63 Z M45,62 L50,57 L47,67 Z M65,59 L70,54 L67,64 Z M85,61 L90,56 L87,66 Z" fill="rgba(255,255,255,0.15)"/></svg>');
@@ -1548,8 +1548,8 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(180deg, 
-                rgba(255, 255, 255, 0.15) 0%, 
+            background: linear-gradient(180deg,
+                rgba(255, 255, 255, 0.15) 0%,
                 rgba(255, 255, 255, 0) 50%,
                 rgba(0, 0, 0, 0.1) 100%
             );
@@ -2862,7 +2862,7 @@
             const temp = resort.weather?.temp || 25;
             const wind = parseInt(resort.weather?.wind) || 10;
             const condition = (resort.weather?.condition || '').toLowerCase();
-            
+
             // Condition flags
             const heavySnow = snow24h >= 8;
             const freshPow = snow24h >= 4;
@@ -2871,7 +2871,7 @@
             const warm = temp > 35;
             const windy = wind > 20;
             const snowing = condition.includes('snow');
-            
+
             // Smart taglines based on actual conditions
             const taglines = {
                 5: {
@@ -2917,10 +2917,10 @@
                     default: ['Icy AF!', 'Yard Sale Vibes!', 'Just... No!', 'Netflix Day!']
                 }
             };
-            
+
             // Select appropriate tagline set based on conditions
             let options = taglines[rating]?.default || ['Unknown'];
-            
+
             if (rating === 5) {
                 if (heavySnow) options = taglines[5].heavySnow;
                 else if (freshPow) options = taglines[5].freshPow;
@@ -2938,7 +2938,7 @@
                 if (freezing) options = taglines[1].freezing;
                 else if (warm) options = taglines[1].warm;
             }
-            
+
             return options[Math.floor(Math.random() * options.length)];
         }
 
@@ -2946,7 +2946,7 @@
         // Weights: 40% Snow, 20% Temp, 20% Wind, 20% Conditions
         function calculateRating(weather, snowfall) {
             let score = 0;
-            
+
             // 1. SNOW (40% weight) - Most important factor
             const snow24h = parseInt(snowfall['24h']) || 0;
             let snowScore = 0;
@@ -2960,7 +2960,7 @@
                 snowScore = snow48h > 0 ? 2 : 1;
             }
             score += snowScore * 0.4;
-            
+
             // 2. TEMPERATURE (20% weight) - Good skiing temps
             const temp = weather.temp || 20;
             let tempScore = 0;
@@ -2970,7 +2970,7 @@
             else if ((temp >= 0 && temp < 5) || (temp > 40 && temp <= 45)) tempScore = 2;
             else tempScore = 1;
             score += tempScore * 0.2;
-            
+
             // 3. WIND (20% weight) - High wind ruins skiing
             const windSpeed = parseInt(weather.wind) || 0;
             let windScore = 0;
@@ -2980,7 +2980,7 @@
             else if (windSpeed < 30) windScore = 2;
             else windScore = 1;
             score += windScore * 0.2;
-            
+
             // 4. CONDITIONS (20% weight) - Current weather
             const condition = (weather.condition || '').toLowerCase();
             let conditionScore = 3; // Default neutral
@@ -2989,7 +2989,7 @@
             else if (condition.includes('cloud')) conditionScore = 3;
             else if (condition.includes('rain') || condition.includes('drizzle')) conditionScore = 1;
             score += conditionScore * 0.2;
-            
+
             // Round to nearest star (1-5)
             return Math.max(1, Math.min(5, Math.round(score)));
         }
@@ -3028,10 +3028,10 @@
                                 const isPowder = resort.conditions === 'Powder';
                                 const isPackedPowder = resort.conditions === 'Packed Powder';
                                 const hasSignificantSnow = parseInt(resort.snowfall['24h']) >= 6;
-                                
+
                                 if (isPowder || isPackedPowder || hasSignificantSnow) {
-                                    const label = isPowder ? 'POWDER DAY' : 
-                                                  isPackedPowder ? 'PACKED POWDER' : 
+                                    const label = isPowder ? 'POWDER DAY' :
+                                                  isPackedPowder ? 'PACKED POWDER' :
                                                   'FRESH POW';
                                     return `
                                         <div class="snow-alert-badge">
@@ -3129,7 +3129,7 @@
                                 </span>
                             </summary>
                             <div class="lift-list">
-                                ${resort.liftDetails ? 
+                                ${resort.liftDetails ?
                                     Object.entries(resort.liftDetails)
                                         .sort(([,a],[,b]) => {
                                             const order = { open: 0, hold: 1, scheduled: 2, closed: 3 };
@@ -3400,22 +3400,22 @@
         // Resorts NOT on Liftie: elk, bearcreek, jackfrost, bigboulder, montage, belleayre
 
         // Configuration - UPDATE THIS URL AFTER DEPLOYING YOUR WORKER
-        const WORKER_URL = 'https://YOUR-SUBDOMAIN.workers.dev';
+        const WORKER_URL = 'https://liftie-worker.rickt123-0f8.workers.dev';
         const REFRESH_INTERVAL = 15 * 60 * 1000; // 15 min
 
         async function loadLiveData() {
             try {
                 console.log('🎿 Fetching live data (OpenWeather + Liftie)...');
-                
+
                 const resp = await fetch(WORKER_URL, {
                     headers: { 'Cache-Control': 'no-cache' }
                 });
-                
+
                 if (!resp.ok) throw new Error(`Worker returned ${resp.status}`);
-                
+
                 const result = await resp.json();
                 if (result.error || result.fallback) throw new Error(result.error || 'Worker returned fallback');
-                
+
                 const apiData = result.data || {};
                 let weatherUpdatedCount = 0;
                 let liftUpdatedCount = 0;
@@ -3455,7 +3455,7 @@
                         if (live.lifts.details) {
                             resort.liftDetails = live.lifts.details;
                         }
-                        
+
                         console.log(`  🚡 ${resort.name}: ${live.lifts.open}/${live.lifts.total} lifts open`);
                     }
                 });
@@ -3525,15 +3525,15 @@
             if (ctaBtn) {
                 ctaBtn.addEventListener('click', function(e) {
                     e.preventDefault(); // Prevent any default behavior
-                    
+
                     // Add the slam animation class
                     this.classList.add('rail-slam');
-                    
+
                     // Haptic feedback on mobile
                     if (navigator.vibrate) {
                         navigator.vibrate([50, 30, 50, 20, 30]);
                     }
-                    
+
                     // Wait for slam effect, then scroll
                     setTimeout(() => {
                         const filters = document.querySelector('.filters');
@@ -3546,7 +3546,7 @@
                             });
                         }
                     }, 500); // 500ms delay for slam effect (animation is 600ms)
-                    
+
                     // Remove animation class after it completes
                     setTimeout(() => {
                         this.classList.remove('rail-slam');
@@ -3567,7 +3567,7 @@
             const bubbleObserver = new IntersectionObserver((entries) => {
                 entries.forEach(entry => {
                     const bubble = entry.target;
-                    
+
                     // Activate when bubble is visible in the viewport sweet spot
                     if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
                         bubble.classList.add('mobile-active');
@@ -3605,17 +3605,17 @@
             }
         }
     </script>
-    
+
     <!-- 🏔️ BACK TO TOP BUTTON -->
     <button class="back-to-top" id="backToTop" aria-label="Back to top">
         ⛷️
     </button>
-    
+
     <script>
         // 🏔️ BACK TO TOP BUTTON - Show/Hide & Click Handler
         const backToTopBtn = document.getElementById('backToTop');
         console.log('🚡 Back to top button:', backToTopBtn);
-        
+
         if (backToTopBtn) {
             function toggleBackToTop() {
                 const scrolled = window.pageYOffset || document.documentElement.scrollTop;
@@ -3629,7 +3629,7 @@
 
             // Show/hide on scroll
             window.addEventListener('scroll', toggleBackToTop);
-            
+
             // Initial check
             toggleBackToTop();
 
@@ -3637,35 +3637,35 @@
             backToTopBtn.addEventListener('click', function() {
                 console.log('🎿 Gondola launched!');
                 console.log('Button classes before:', this.className);
-                
+
                 // Add launch animation
                 this.classList.add('launching');
-                
+
                 console.log('Button classes after:', this.className);
                 console.log('::before should show gondola 🚡');
                 console.log('::after should show skier ⛷️');
-                
+
                 // Haptic feedback - multiple bumps like loading into gondola
                 if (navigator.vibrate) {
                     navigator.vibrate([40, 30, 40, 30, 40]);
                 }
-                
+
                 // Smooth scroll to top
                 window.scrollTo({
                     top: 0,
                     behavior: 'smooth'
                 });
-                
+
                 // Remove animation class after gondola ride completes
                 setTimeout(() => {
                     this.classList.remove('launching');
-                    
+
                     // Force reset of pseudo-elements (defensive fix for mobile)
                     const beforeEl = window.getComputedStyle(this, '::before');
                     const afterEl = window.getComputedStyle(this, '::after');
                     void beforeEl.transform; // Force reflow
                     void afterEl.transform;
-                    
+
                     console.log('🏔️ Arrived at summit!');
                 }, 4000); // Match the 4 second gondola animation
             });
@@ -3673,7 +3673,7 @@
             console.error('❌ Back to top button not found!');
         }
     </script>
-    
+
     <footer class="ski-footer">
         <div class="gauge-container">
             <h2 class="gauge-title">Send It Meter</h2>
@@ -3689,7 +3689,7 @@
             </p>
         </div>
     </footer>
-    
+
     <script>
         // Send It Meter - Fills on scroll
         const sendItMessages = [
@@ -3700,49 +3700,49 @@
             "Edges mandatory.",
             "Snow = yes. Ice = also yes."
         ];
-        
+
         function updateSendItMeter() {
             const randomMessage = sendItMessages[Math.floor(Math.random() * sendItMessages.length)];
             const messageElement = document.getElementById('sendItMessage');
-            
+
             if (messageElement) {
                 messageElement.textContent = randomMessage;
             }
         }
-        
+
         // Update random message on page load
         updateSendItMeter();
-        
+
         // Fill bar based on scroll position
         function updateSendItProgress() {
             const footer = document.querySelector('.ski-footer');
             if (!footer) return;
-            
+
             const windowHeight = window.innerHeight;
             const documentHeight = document.documentElement.scrollHeight;
             const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
             const footerTop = footer.offsetTop;
-            
+
             // Calculate how far user has scrolled as percentage
             const maxScroll = documentHeight - windowHeight;
             const scrollPercentage = (scrollTop / maxScroll) * 100;
-            
+
             // Update progress bar and percentage text
             const progressBar = document.getElementById('sendItProgress');
             const percentageText = document.getElementById('sendItPercentage');
-            
+
             if (progressBar) {
                 progressBar.style.width = `${Math.min(100, scrollPercentage)}%`;
             }
-            
+
             if (percentageText) {
                 percentageText.textContent = `${Math.min(100, Math.round(scrollPercentage))}%`;
             }
         }
-        
+
         // Listen for scroll events
         window.addEventListener('scroll', updateSendItProgress);
-        
+
         // Initialize on page load
         updateSendItProgress();
     </script>
