@@ -24,7 +24,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IceCoast - East Coast Ski Conditions</title>
+    <title>icecoast - know the snow before you go.</title>
     <style>
         :root {
             --primary-blue: #0066FF;
@@ -1873,13 +1873,14 @@
         END OF REMOVED RESORT-SPECIFIC RULES */
 
     </style>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛷️</text></svg>">
 </head>
 <body>
     <header>
         <div class="header-content">
             <div class="header-top">
                 <div class="header-left">
-                    <h1 class="logo">Ice<span>Coast</span></h1>
+                    <h1 class="logo">ice<span>coast</span></h1>
                     <p class="main-tagline">Know the snow before you go.</p>
                 </div>
             </div>
@@ -2942,7 +2943,7 @@
             return options[Math.floor(Math.random() * options.length)];
         }
 
-        // Calculate IceCoast rating dynamically from live weather + manual snow data
+        // Calculate icecoast rating dynamically from live weather + manual snow data
         // Weights: 40% Snow, 20% Temp, 20% Wind, 20% Conditions
         function calculateRating(weather, snowfall) {
             let score = 0;
@@ -3516,7 +3517,7 @@
         loadLiveData().catch(err => console.warn('Initial load failed:', err));
         setInterval(loadLiveData, REFRESH_INTERVAL);
 
-        console.log('🎿 IceCoast initialized');
+        console.log('🎿 icecoast initialized');
         console.log('🌤️ Weather: OpenWeather • 🚡 Lifts: Liftie (22/28) • ❄️ Snow: Manual');
 
         // 🎿 EPIC RAIL SLAM - Click Handler with Delayed Scroll
