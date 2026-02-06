@@ -24,7 +24,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>icecoast - East Coast Ski Conditions</title>
+    <title>IceCoast - East Coast Ski Conditions</title>
     <style>
         :root {
             --primary-blue: #0066FF;
@@ -1879,7 +1879,7 @@
         <div class="header-content">
             <div class="header-top">
                 <div class="header-left">
-                    <h1 class="logo">ice<span>coast</span></h1>
+                    <h1 class="logo">Ice<span>Coast</span></h1>
                     <p class="main-tagline">Know the snow before you go.</p>
                 </div>
             </div>
@@ -2942,7 +2942,7 @@
             return options[Math.floor(Math.random() * options.length)];
         }
 
-        // Calculate icecoast rating dynamically from live weather + manual snow data
+        // Calculate IceCoast rating dynamically from live weather + manual snow data
         // Weights: 40% Snow, 20% Temp, 20% Wind, 20% Conditions
         function calculateRating(weather, snowfall) {
             let score = 0;
@@ -3046,7 +3046,7 @@
                     <div class="resort-body">
                         <div class="rating-section">
                             <div>
-                                <div class="rating-label">icecoast Rating</div>
+                                <div class="rating-label">Icecoast Rating</div>
                                 <div class="rating-stars">${stars}</div>
                             </div>
                             <div class="rating-text">${getRatingText(resort.rating, resort.snowfall['24h'], resort)}</div>
@@ -3516,7 +3516,7 @@
         loadLiveData().catch(err => console.warn('Initial load failed:', err));
         setInterval(loadLiveData, REFRESH_INTERVAL);
 
-        console.log('🎿 icecoast initialized');
+        console.log('🎿 IceCoast initialized');
         console.log('🌤️ Weather: OpenWeather • 🚡 Lifts: Liftie (22/28) • ❄️ Snow: Manual');
 
         // 🎿 EPIC RAIL SLAM - Click Handler with Delayed Scroll
