@@ -3029,7 +3029,7 @@
                                 const isPackedPowder = resort.conditions === 'Packed Powder';
                                 const hasSignificantSnow = parseInt(resort.snowfall['24h']) >= 6;
 
-                                if (isPowder || isPackedPowder || hasSignificantSnow) {
+                                if (isPowder || hasSignificantSnow) {
                                     const label = isPowder ? 'POWDER DAY' :
                                                   isPackedPowder ? 'PACKED POWDER' :
                                                   'FRESH POW';
@@ -3094,7 +3094,16 @@
                                     <span class="trail-badge closed">${resort.trails.closed} Closed</span>
                                 </div>
                             </div>
-                            <!-- Lifts info removed - now only shown in dropdown -->
+                            <div class="info-item">
+                                <span class="info-label">
+                                    <span class="info-icon">${icons.lift}</span>
+                                    Lifts
+                                </span>
+                                <div class="trail-status">
+                                    <span class="trail-badge open">${resort.lifts.open} Open</span>
+                                    <span class="trail-badge closed">${resort.lifts.closed} Closed</span>
+                                </div>
+                            </div>
                             ${resort.park > 0 ? `
                             <div class="info-item">
                                 <span class="info-label">
