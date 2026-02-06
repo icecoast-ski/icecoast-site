@@ -3521,132 +3521,347 @@ const WORKER_URL = 'https://liftie-worker.rickt123-0f8.workers.dev';
         const REFRESH_INTERVAL = 15 * 60 * 1000; // 15 min
 
         async function loadLiveData() {
-  try {
-    console.log('📡 Fetching live data from KV...');
-    const resp = await fetch(WORKER_URL, {
-      headers: { 'Cache-Control': 'no-cache' },
-    });
+            try {
+                console.log('🎿 Fetching live data (OpenWeather + Liftie)...');
 
-    if (!resp.ok) throw new Error(`Worker returned ${resp.status}`);
-    const result = await resp.json();
+                const resp = await fetch(WORKER_URL, {
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
 
-    if (result.error) {
-      throw new Error(result.error);
-    }
+                if (!resp.ok) throw new Error(`Worker returned ${resp.status}`);
 
-    const apiData = result.data;
-    const metadata = apiData._metadata;
+                const result = await resp.json();
+                if (result.error || result.fallback) throw new Error(result.error || 'Worker returned fallback');
 
-    let weatherUpdatedCount = 0;
-    let liftUpdatedCount = 0;
+                const apiData = result.data || {};
+                let weatherUpdatedCount = 0;
+                let liftUpdatedCount = 0;
 
-    console.log(`KV data loaded - Last updated: ${metadata?.lastUpdated || 'unknown'}`);
+                console.log(`✅ Worker returned data for ${Object.keys(apiData).length} resorts`);
 
-    resorts.forEach(resort => {
-      const live = apiData[getWorkerID(resort.id)];
-      if (!live) return;
+                resorts.forEach(resort => {
+                    const live = apiData[getWorkerID(resort.id)];
+                    if (!live) return;
 
-      // Weather (OpenWeather)
-      if (live.weather) {
-        resort.weather = {
-          temp: live.weather.temp,
-          feelsLike: live.weather.feelsLike,
-          wind: live.weather.wind,
-          condition: live.weather.condition,
-          icon: live.weather.icon,
-        };
-        weatherUpdatedCount++;
-      }
+                    // ── Weather (OpenWeather) ──
+                    if (live.weather) {
+                        resort.weather = {
+                            temp: live.weather.temp,
+                            feelsLike: live.weather.feelsLike,
+                            wind: live.weather.wind,
+                            condition: live.weather.condition,
+                            icon: live.weather.icon
+                        };
+                        weatherUpdatedCount++;
+                    }
 
-      // Forecast (OpenWeather)
-      if (live.forecast && live.forecast.length >= 3) {
-        resort.forecast = live.forecast.slice(0, 3);
-      }
+                    // ── Forecast (OpenWeather) ──
+                    if (live.forecast && live.forecast.length >= 3) {
+                        resort.forecast = live.forecast.slice(0, 3);
+                    }
 
-      // Lift Status (Liftie)
-      if (live.lifts) {
-        resort.lifts.open = live.lifts.open;
-        resort.lifts.total = live.lifts.total;
-        resort.lifts.closed = live.lifts.total - live.lifts.open;
-        resort.hasLiftie = true;
-        liftUpdatedCount++;
+                    // ── Lift Status (Liftie) ──
+                    if (live.lifts) {
+                        resort.lifts.open = live.lifts.open;
+                        resort.lifts.total = live.lifts.total;
+                        resort.lifts.closed = live.lifts.total - live.lifts.open;
+                        resort.hasLiftie = true;
+                        liftUpdatedCount++;
 
-        if (live.lifts.details) {
-          resort.liftDetails = live.lifts.details;
+                        // Store individual lift details for the dropdown
+                        if (live.lifts.details) {
+                            resort.liftDetails = live.lifts.details;
+                        }
+
+                        console.log(`  🚡 ${resort.name}: ${live.lifts.open}/${live.lifts.total} lifts open`);
+                    }
+                });
+
+                // Recalculate ratings
+                resorts.forEach(resort => {
+                    resort.rating = calculateRating(resort.weather, resort.snowfall);
+                });
+
+                renderResorts();
+                showDataStatus('fresh', null, weatherUpdatedCount, liftUpdatedCount);
+                console.log(`✅ Update complete! Weather: ${weatherUpdatedCount}/${resorts.length} | Lifts: ${liftUpdatedCount} via Liftie`);
+
+            } catch (error) {
+                console.error('❌ Failed to load live data:', error);
+                showDataStatus('error', null, 0, 0, error.message);
+            }
         }
-      }
-    });
 
-    // Recalculate ratings
-    resorts.forEach(resort => {
-      resort.rating = calculateRating(resort.weather, resort.snowfall);
-    });
-    renderResorts();
+        function showDataStatus(status, timestamp, weatherCount, liftCount, errorMsg) {
+            const existing = document.getElementById('data-status');
+            if (existing) existing.remove();
 
-    // Show "fresh" popup with last update time
-    const updateTime = metadata?.lastUpdated 
-      ? new Date(metadata.lastUpdated) 
-      : new Date();
-    showDataStatus('fresh', updateTime, weatherUpdatedCount, liftUpdatedCount);
+            const statusDiv = document.createElement('div');
+            statusDiv.id = 'data-status';
+            statusDiv.style.cssText = `
+                position: fixed; bottom: 20px; left: 20px;
+                padding: 0.75rem 1rem; border-radius: 8px;
+                font-size: 0.75rem; font-weight: 600;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 9999; display: flex; align-items: center; gap: 0.5rem;
+                backdrop-filter: blur(10px);
+            `;
 
-    console.log(`✅ Update complete! Weather: ${weatherUpdatedCount}/${resorts.length}, Lifts: ${liftUpdatedCount} via Liftie`);
-  } catch (error) {
-    console.error('Failed to load live data:', error);
-    showDataStatus('error', null, 0, 0, error.message);
-  }
-}
+            if (status === 'fresh') {
+                statusDiv.style.background = 'rgba(0, 166, 153, 0.95)';
+                statusDiv.style.color = 'white';
+                const time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                statusDiv.innerHTML = `
+                    <span style="font-size: 1.2rem;">✓</span>
+                    <div style="line-height: 1.4;">
+                        <div>Live data • ${time}</div>
+                        <div style="font-size: 0.65rem; opacity: 0.9;">Weather: ${weatherCount}/${resorts.length} • Lifts: ${liftCount} via Liftie</div>
+                    </div>
+                `;
+                setTimeout(() => statusDiv.remove(), 6000);
+            } else if (status === 'error') {
+                statusDiv.style.background = 'rgba(255, 90, 95, 0.95)';
+                statusDiv.style.color = 'white';
+                statusDiv.innerHTML = `<span style="font-size: 1.2rem;">⚠️</span><span>APIs connecting • Using defaults</span>`;
+                setTimeout(() => statusDiv.remove(), 10000);
+            }
+            document.body.appendChild(statusDiv);
+        }
 
-function showDataStatus(status, timestamp, weatherCount, liftCount, errorMsg) {
-  const existing = document.getElementById('data-status');
-  if (existing) existing.remove();
+        // Initialize
+        renderResorts();
+        loadLiveData().catch(err => console.warn('Initial load failed:', err));
+        setInterval(loadLiveData, REFRESH_INTERVAL);
 
-  const statusDiv = document.createElement('div');
-  statusDiv.id = 'data-status';
-  statusDiv.style.cssText = `
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    padding: 0.75rem 1rem;
-    border-radius: 8px;
-    font-size: 0.75rem;
-    font-weight: 600;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 9999;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    backdrop-filter: blur(10px);
-  `;
+        console.log('🎿 IceCoast initialized');
+        console.log('🌤️ Weather: OpenWeather • 🚡 Lifts: Liftie (22/28) • ❄️ Snow: Manual');
 
-  if (status === 'fresh') {
-    statusDiv.style.background = 'rgba(0, 166, 153, 0.95)';
-    statusDiv.style.color = 'white';
+        // 🎿 EPIC RAIL SLAM - Click Handler with Delayed Scroll
+        document.addEventListener('DOMContentLoaded', () => {
+            const ctaBtn = document.querySelector('.cta-btn');
+            if (ctaBtn) {
+                ctaBtn.addEventListener('click', function(e) {
+                    e.preventDefault(); // Prevent any default behavior
 
-    const now = new Date();
-    const diff = Math.floor((now - timestamp) / 1000);
-    const timeAgo = diff < 60 ? 'just now' : 
-                    diff < 300 ? `${Math.floor(diff/60)}m ago` :
-                    `${Math.floor(diff/60)}m ago`;
+                    // Add the slam animation class
+                    this.classList.add('rail-slam');
 
-    statusDiv.innerHTML = `
-      <span style="font-size: 1.2rem;">❄️</span>
-      <div style="line-height: 1.4;">
-        <div><strong>Live data updated</strong> ${timeAgo}</div>
-        <div style="font-size: 0.65rem; opacity: 0.9;">Weather: ${weatherCount}/28 • Lifts: ${liftCount} via Liftie</div>
-      </div>
-    `;
-    setTimeout(() => statusDiv.remove(), 6000);
-  } else if (status === 'error') {
-    statusDiv.style.background = 'rgba(255, 90, 95, 0.95)';
-    statusDiv.style.color = 'white';
-    statusDiv.innerHTML = `
-      <span style="font-size: 1.2rem;">⚠️</span>
-      <span>APIs connecting... Using defaults</span>
-    `;
-    setTimeout(() => statusDiv.remove(), 10000);
-  }
+                    // Haptic feedback on mobile
+                    if (navigator.vibrate) {
+                        navigator.vibrate([50, 30, 50, 20, 30]);
+                    }
 
-  document.body.appendChild(statusDiv);
-}
+                    // Wait for slam effect, then scroll
+                    setTimeout(() => {
+                        const filters = document.querySelector('.filters');
+                        if (filters) {
+                            const headerHeight = document.querySelector('header').offsetHeight;
+                            const filtersTop = filters.getBoundingClientRect().top + window.pageYOffset;
+                            window.scrollTo({
+                                top: filtersTop - headerHeight - 10,
+                                behavior: 'smooth'
+                            });
+                        }
+                    }, 500); // 500ms delay for slam effect (animation is 600ms)
 
+                    // Remove animation class after it completes
+                    setTimeout(() => {
+                        this.classList.remove('rail-slam');
+                    }, 600);
+                });
+            }
+        });
 
+        // Mobile rating bubble scroll activation
+        // Detects when rating bubbles scroll into viewport and activates them
+        if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
+            const observerOptions = {
+                root: null,
+                rootMargin: '-20% 0px -20% 0px', // Trigger when bubble enters middle 60% of viewport
+                threshold: [0, 0.1, 0.5, 0.9, 1]
+            };
+
+            const bubbleObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    const bubble = entry.target;
+
+                    // Activate when bubble is visible in the viewport sweet spot
+                    if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
+                        bubble.classList.add('mobile-active');
+                    } else {
+                        bubble.classList.remove('mobile-active');
+                    }
+                });
+            }, observerOptions);
+
+            // Observe all rating bubbles (with a slight delay to ensure DOM is ready)
+            const observeRatingBubbles = () => {
+                document.querySelectorAll('.rating-text').forEach(bubble => {
+                    // Only observe if not already observed
+                    if (!bubble.hasAttribute('data-observed')) {
+                        bubble.setAttribute('data-observed', 'true');
+                        bubbleObserver.observe(bubble);
+                    }
+                });
+            };
+
+            // Initial observation
+            setTimeout(observeRatingBubbles, 100);
+
+            // Watch for new bubbles being added (when filters change, etc.)
+            const resortGrid = document.getElementById('resortGrid');
+            if (resortGrid) {
+                const gridObserver = new MutationObserver(() => {
+                    observeRatingBubbles();
+                });
+
+                gridObserver.observe(resortGrid, {
+                    childList: true,
+                    subtree: true
+                });
+            }
+        }
+    </script>
+
+    <!-- 🏔️ BACK TO TOP BUTTON -->
+    <button class="back-to-top" id="backToTop" aria-label="Back to top">
+        ⛷️
+    </button>
+
+    <script>
+        // 🏔️ BACK TO TOP BUTTON - Show/Hide & Click Handler
+        const backToTopBtn = document.getElementById('backToTop');
+        console.log('🚡 Back to top button:', backToTopBtn);
+
+        if (backToTopBtn) {
+            function toggleBackToTop() {
+                const scrolled = window.pageYOffset || document.documentElement.scrollTop;
+                if (scrolled > 500) { // Show after scrolling 500px
+                    backToTopBtn.classList.add('visible');
+                    console.log('🚡 Button visible - scrolled:', scrolled);
+                } else {
+                    backToTopBtn.classList.remove('visible');
+                }
+            }
+
+            // Show/hide on scroll
+            window.addEventListener('scroll', toggleBackToTop);
+
+            // Initial check
+            toggleBackToTop();
+
+            // Click handler - SKIER JUMPS INTO GONDOLA, RIDES TO TOP
+            backToTopBtn.addEventListener('click', function() {
+                console.log('🎿 Gondola launched!');
+                console.log('Button classes before:', this.className);
+
+                // Add launch animation
+                this.classList.add('launching');
+
+                console.log('Button classes after:', this.className);
+                console.log('::before should show gondola 🚡');
+                console.log('::after should show skier ⛷️');
+
+                // Haptic feedback - multiple bumps like loading into gondola
+                if (navigator.vibrate) {
+                    navigator.vibrate([40, 30, 40, 30, 40]);
+                }
+
+                // Smooth scroll to top
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+
+                // Remove animation class after gondola ride completes
+                setTimeout(() => {
+                    this.classList.remove('launching');
+
+                    // Force reset of pseudo-elements (defensive fix for mobile)
+                    const beforeEl = window.getComputedStyle(this, '::before');
+                    const afterEl = window.getComputedStyle(this, '::after');
+                    void beforeEl.transform; // Force reflow
+                    void afterEl.transform;
+
+                    console.log('🏔️ Arrived at summit!');
+                }, 4000); // Match the 4 second gondola animation
+            });
+        } else {
+            console.error('❌ Back to top button not found!');
+        }
+    </script>
+
+    <footer class="ski-footer">
+        <div class="gauge-container">
+            <h2 class="gauge-title">Send It Meter</h2>
+            <p class="gauge-message" id="sendItMessage">Verdict: Send it.</p>
+            <div class="send-it-bar">
+                <div class="send-it-progress" id="sendItProgress"></div>
+            </div>
+            <p class="send-it-percentage" id="sendItPercentage">0%</p>
+            <p class="coffee-link">
+                <a href="https://ko-fi.com/icecoast" target="_blank" rel="noopener" class="donate-footer">
+                    🍺 Après Me?
+                </a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Send It Meter - Fills on scroll
+        const sendItMessages = [
+            "Verdict: Send it.",
+            "Confidence: Reckless.",
+            "Conditions: Doesn't matter.",
+            "We're going.",
+            "Edges mandatory.",
+            "Snow = yes. Ice = also yes."
+        ];
+
+        function updateSendItMeter() {
+            const randomMessage = sendItMessages[Math.floor(Math.random() * sendItMessages.length)];
+            const messageElement = document.getElementById('sendItMessage');
+
+            if (messageElement) {
+                messageElement.textContent = randomMessage;
+            }
+        }
+
+        // Update random message on page load
+        updateSendItMeter();
+
+        // Fill bar based on scroll position
+        function updateSendItProgress() {
+            const footer = document.querySelector('.ski-footer');
+            if (!footer) return;
+
+            const windowHeight = window.innerHeight;
+            const documentHeight = document.documentElement.scrollHeight;
+            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+            const footerTop = footer.offsetTop;
+
+            // Calculate how far user has scrolled as percentage
+            const maxScroll = documentHeight - windowHeight;
+            const scrollPercentage = (scrollTop / maxScroll) * 100;
+
+            // Update progress bar and percentage text
+            const progressBar = document.getElementById('sendItProgress');
+            const percentageText = document.getElementById('sendItPercentage');
+
+            if (progressBar) {
+                progressBar.style.width = `${Math.min(100, scrollPercentage)}%`;
+            }
+
+            if (percentageText) {
+                percentageText.textContent = `${Math.min(100, Math.round(scrollPercentage))}%`;
+            }
+        }
+
+        // Listen for scroll events
+        window.addEventListener('scroll', updateSendItProgress);
+
+        // Initialize on page load
+        updateSendItProgress();
+    </script>
+</body>
+</html>
