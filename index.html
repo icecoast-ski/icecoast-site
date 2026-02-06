@@ -3124,18 +3124,20 @@
                         </div>
 
                         <div class="info-grid">
-                            <div class="info-item">
-                                <span class="info-label">
-                                    <span class="info-icon">${icons.ticket}</span>
-                                    Lift Ticket
-                                    ${resort.dynamicPricing ? '<span class="dynamic-badge">Dynamic</span>' : ''}
-                                </span>
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
+                        <div class="info-item">
+                            <span class="info-label">
+                                <span class="info-icon">${icons.ticket}</span>
+                                Lift Ticket
+                                ${resort.dynamicPricing ? '<span class="dynamic-badge">Dynamic</span>' : ''}
+                            </span>
+                            <div style="display: flex; align-items: center; gap: 0.5rem">
                                 <span class="info-value">$${resort.liftTicket.weekday}${resort.dynamicPricing ? '+' : ''} / $${resort.liftTicket.weekend}${resort.dynamicPricing ? '+' : ''}</span>
-                                    ${resort.passes ? resort.passes.map(pass =>
-                                    ).join('') : ''}
-                                </div>
+                                ${resort.passes ? resort.passes.map(pass =>
+                                    `<span class="pass-badge pass-${pass}">${pass === 'ikon' ? 'Ikon' : 'Epic'}</span>`
+                                ).join('') : ''}
                             </div>
+                        </div>
+
                             <div class="info-item">
                                 <span class="info-label">
                                     <span class="info-icon">${icons.parking}</span>
