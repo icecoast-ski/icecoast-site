@@ -3,35 +3,23 @@
 <!--
     🎿 ICECOAST - East Coast Ski Conditions
 
-    📝 BEFORE DEPLOYING:
+    📝 SETUP:
     1. Deploy cloudflare-worker.js to Cloudflare Workers
-    2. Get your worker URL (something like: https://icecoast-weather.YOUR-NAME.workers.dev)
-    3. Search this file for "YOUR-SUBDOMAIN" and replace with your actual worker URL
-    4. Test locally by opening this file in browser
+    2. Set OPENWEATHER_API_KEY env var in the worker
+    3. Get your worker URL
+    4. Search this file for "YOUR-SUBDOMAIN" and replace with your worker URL
     5. Deploy to Cloudflare Pages as index.html
 
-    ❄️ UPDATING SNOW DATA DAILY:
-    1. Open admin.html in browser
-    2. Check each resort website for snow totals
-    3. Enter 24h, 48h, and 7d snow totals
-    4. Click "Generate JSON"
-    5. Copy the JSON output
-    6. Search this file for your resort data (like "id: 'killington'")
-    7. Update the snowfall values
-    8. Re-deploy to Cloudflare Pages
-    
-    🎯 RATINGS AUTO-CALCULATE FROM:
-    - 40% Recent snow (manual updates)
-    - 20% Temperature (live from API)
-    - 20% Wind speed (live from API)  
-    - 20% Current conditions (live from API)
+    🌤️ DATA SOURCES:
+    - Weather: OpenWeather API via worker
+    - Lift status + individual lift names: Liftie API via worker (22/28 resorts)
+    - Snowfall: MANUAL updates via admin.html
 
-    ✅ CHECKLIST:
-    [ ] Cloudflare Worker deployed
-    [ ] Worker URL copied
-    [ ] WORKER_URL updated in this file (search for "YOUR-SUBDOMAIN")
-    [ ] Tested locally - console shows "Live weather complete!"
-    [ ] Ready to deploy!
+    🚡 LIFTIE COVERAGE (22/28):
+    ✅ camelback, blue, shawnee, hunter, windham, whiteface, gore
+    ✅ killington, stowe, sugarbush, stratton, okemo, jaypeak, madriverglen, mountsnow
+    ✅ loon, waterville, cannon, wildcat, brettonwoods, sundayriver, sugarloaf
+    ❌ elk, bearcreek, jackfrost, bigboulder, montage, belleayre (keep defaults)
 -->
 <head>
     <meta charset="UTF-8">
@@ -1163,6 +1151,132 @@
             margin-top: 0.2rem;
         }
 
+        /* Lift Status Dropdown */
+        .lift-details {
+            border: 1px solid var(--light-grey);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .lift-toggle {
+            padding: 0.65rem 0.85rem;
+            background: var(--snow);
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.8rem;
+            color: var(--charcoal);
+            list-style: none;
+            user-select: none;
+            transition: background 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .lift-toggle:hover {
+            background: var(--bg-grey);
+        }
+
+        .lift-toggle::-webkit-details-marker {
+            display: none;
+        }
+
+        .lift-toggle-left {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .lift-toggle-counts {
+            display: flex;
+            gap: 0.35rem;
+            align-items: center;
+        }
+
+        .lift-toggle-chevron {
+            width: 16px;
+            height: 16px;
+            color: var(--medium-grey);
+            transition: transform 0.25s ease;
+            flex-shrink: 0;
+        }
+
+        .lift-details[open] .lift-toggle-chevron {
+            transform: rotate(180deg);
+        }
+
+        .lift-list {
+            padding: 0.5rem 0.85rem 0.75rem;
+            background: var(--white);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.25rem 1rem;
+            max-height: 280px;
+            overflow-y: auto;
+        }
+
+        .lift-list::-webkit-scrollbar {
+            width: 4px;
+        }
+        .lift-list::-webkit-scrollbar-thumb {
+            background: var(--light-grey);
+            border-radius: 4px;
+        }
+
+        .lift-item {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.3rem 0;
+            font-size: 0.75rem;
+            line-height: 1.3;
+        }
+
+        .lift-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            flex-shrink: 0;
+        }
+
+        .lift-dot.open {
+            background: var(--forest);
+            box-shadow: 0 0 4px rgba(0, 166, 153, 0.4);
+        }
+
+        .lift-dot.closed {
+            background: var(--coral);
+        }
+
+        .lift-dot.hold {
+            background: #FFB84D;
+        }
+
+        .lift-dot.scheduled {
+            background: var(--light-grey);
+        }
+
+        .lift-name {
+            color: var(--charcoal);
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .lift-name.closed-lift {
+            color: var(--medium-grey);
+        }
+
+        .lift-no-data {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 0.75rem;
+            font-size: 0.75rem;
+            color: var(--medium-grey);
+            font-style: italic;
+        }
+
         /* Weather Section */
         .weather-section {
             margin-top: 1.25rem;
@@ -1611,6 +1725,11 @@
                 grid-template-columns: repeat(3, 1fr);
                 gap: 0.5rem;
                 padding: 0.65rem;
+            }
+
+            .lift-list {
+                grid-template-columns: 1fr;
+                max-height: 220px;
             }
 
             .extra-ratings {
@@ -2996,6 +3115,37 @@
                             ` : ''}
                         </div>
 
+                        <details class="lift-details">
+                            <summary class="lift-toggle">
+                                <span class="lift-toggle-left">
+                                    <span class="info-icon" style="display: inline-flex; vertical-align: middle;">${icons.lift}</span>
+                                    Lift Status
+                                </span>
+                                <span style="display: flex; align-items: center; gap: 0.5rem;">
+                                    <span class="lift-toggle-counts">
+                                        <span class="trail-badge open" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">${resort.lifts.open}/${resort.lifts.total}</span>
+                                    </span>
+                                    <svg class="lift-toggle-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+                                </span>
+                            </summary>
+                            <div class="lift-list">
+                                ${resort.liftDetails ? 
+                                    Object.entries(resort.liftDetails)
+                                        .sort(([,a],[,b]) => {
+                                            const order = { open: 0, hold: 1, scheduled: 2, closed: 3 };
+                                            return (order[a] ?? 4) - (order[b] ?? 4);
+                                        })
+                                        .map(([name, status]) => `
+                                            <div class="lift-item">
+                                                <span class="lift-dot ${status}"></span>
+                                                <span class="lift-name ${status === 'closed' || status === 'scheduled' ? 'closed-lift' : ''}" title="${name}">${name}</span>
+                                            </div>
+                                        `).join('')
+                                    : `<div class="lift-no-data">Detailed lift status unavailable for this resort</div>`
+                                }
+                            </div>
+                        </details>
+
                         <div class="weather-section">
                             <div class="weather-current">
                                 <span class="weather-icon">${resort.weather.icon}</span>
@@ -3239,417 +3389,135 @@
         setTimeout(updateGauge, 100);
 
         // ========================================
-        // LIVE WEATHER + SCRAPER INTEGRATION
+        // LIVE DATA: Liftie (Lifts) + OpenWeather (Weather)
         // ========================================
+        //
+        // DATA SOURCES:
+        //   🌤️ Weather: OpenWeather API via Cloudflare Worker
+        //   🚡 Lifts: Liftie API via Cloudflare Worker (22/28 resorts)
+        //   ❄️ Snowfall: MANUAL updates
+        //
+        // Resorts NOT on Liftie: elk, bearcreek, jackfrost, bigboulder, montage, belleayre
 
         // Configuration - UPDATE THIS URL AFTER DEPLOYING YOUR WORKER
-        const WORKER_URL = 'https://api.icecoast.ski';
-        const SCRAPER_API_URL = '/api/ski'; // Cloudflare Pages Function
-        const REFRESH_INTERVAL = 4 * 60 * 60 * 1000; // 4 hours
+        const WORKER_URL = 'https://YOUR-SUBDOMAIN.workers.dev';
+        const REFRESH_INTERVAL = 15 * 60 * 1000; // 15 min
 
-        // Scraper data storage
-        let scraperData = {};
-        let scraperTimestamp = null;
-
-        // Load live weather + scraper data with error handling
-        // Timeout wrapper for fetch requests
-        async function loadLiveWeather() {
+        async function loadLiveData() {
             try {
-                console.log('🎿 Fetching live data from dual API system...');
+                console.log('🎿 Fetching live data (OpenWeather + Liftie)...');
                 
-                // Fetch both APIs in parallel - no timeout, let them take as long as needed
-                const [weatherResp, scraperResp] = await Promise.allSettled([
-                    fetch(WORKER_URL, {
-                        headers: { 'Cache-Control': 'no-cache' }
-                    }).then(r => r.ok ? r.json() : null).catch(e => {
-                        console.warn('Weather API error:', e.message);
-                        return null;
-                    }),
-                    fetch(SCRAPER_API_URL, {
-                        headers: { 'Cache-Control': 'no-cache' }
-                    }).then(r => r.ok ? r.json() : null).catch(e => {
-                        console.warn('Scraper API error:', e.message);
-                        return null;
-                    })
-                ]);
-
+                const resp = await fetch(WORKER_URL, {
+                    headers: { 'Cache-Control': 'no-cache' }
+                });
+                
+                if (!resp.ok) throw new Error(`Worker returned ${resp.status}`);
+                
+                const result = await resp.json();
+                if (result.error || result.fallback) throw new Error(result.error || 'Worker returned fallback');
+                
+                const apiData = result.data || {};
                 let weatherUpdatedCount = 0;
-                let scraperUpdatedCount = 0;
+                let liftUpdatedCount = 0;
 
-                // Process weather data
-                if (weatherResp.status === 'fulfilled' && weatherResp.value) {
-                    const result = weatherResp.value;
-                    
-                    if (!result.fallback && !result.error) {
-                        const weatherData = result.data || result;
-                        
-                        console.log('✅ Weather API loaded:', Object.keys(weatherData).length, 'resorts');
+                console.log(`✅ Worker returned data for ${Object.keys(apiData).length} resorts`);
 
-                        // Update each resort with live weather
-                        resorts.forEach(resort => {
-                            const liveWeather = weatherData[resort.id];
+                resorts.forEach(resort => {
+                    const live = apiData[resort.id];
+                    if (!live) return;
 
-                            if (liveWeather && liveWeather !== null) {
-                                resort.weather = {
-                                    temp: liveWeather.temp,
-                                    feelsLike: liveWeather.feelsLike,
-                                    wind: liveWeather.wind,
-                                    condition: liveWeather.condition,
-                                    icon: liveWeather.icon
-                                };
-
-                                if (liveWeather.forecast && liveWeather.forecast.length === 3) {
-                                    resort.forecast = liveWeather.forecast;
-                                }
-
-                                weatherUpdatedCount++;
-                            }
-                        });
+                    // ── Weather (OpenWeather) ──
+                    if (live.weather) {
+                        resort.weather = {
+                            temp: live.weather.temp,
+                            feelsLike: live.weather.feelsLike,
+                            wind: live.weather.wind,
+                            condition: live.weather.condition,
+                            icon: live.weather.icon
+                        };
+                        weatherUpdatedCount++;
                     }
-                } else {
-                    console.warn('⚠️ Weather API failed:', weatherResp.reason);
-                }
 
-                // Process scraper data
-                if (scraperResp.status === 'fulfilled' && scraperResp.value) {
-                    const data = scraperResp.value;
-                    
-                    console.log('📦 RAW SCRAPER API RESPONSE:', data);
-                    
-                    if (data.results && Array.isArray(data.results)) {
-                        console.log(`📊 Scraper returned ${data.results.length} results:`, data.results.map(r => r.id));
-                        
-                        scraperData = {};
-                        scraperTimestamp = data.generated_at;
-                        
-                        data.results.forEach(scrapedResort => {
-                            if (scrapedResort.id && scrapedResort.scraped) {
-                                console.log(`\n━━━ ${scrapedResort.id.toUpperCase()} ━━━`);
-                                console.log('Full scraper object:', scrapedResort);
-                                scraperData[scrapedResort.id] = scrapedResort;
-                                scraperUpdatedCount++;
-                            } else if (scrapedResort.id) {
-                                console.warn(`⚠️ ${scrapedResort.id} has scraped=false or missing - skipping`);
-                            }
-                        });
-                        
-                        console.log(`\n✅ Scraper API loaded: ${scraperUpdatedCount} resorts`);
-                        console.log('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n');
-
-                        // Update resorts with scraped data
-                        resorts.forEach(resort => {
-                            const scraped = scraperData[resort.id];
-                            
-                            if (scraped) {
-                                console.log(`🔍 Processing scraped data for ${resort.name}:`, {
-                                    lifts: scraped.lifts,
-                                    trails: scraped.trails,
-                                    signals: scraped.signals,
-                                    timestamp: scraped.timestamp,
-                                    raw_scraper_object: scraped
-                                });
-                                
-                                // Track what actually got updated for debugging
-                                const updates = {
-                                    lifts: false,
-                                    trails: false,
-                                    conditions: false,
-                                    snowfall: { '24h': false, '48h': false, '7d': false }
-                                };
-                                
-                                // Update lift/trail counts if available
-                                if (scraped.lifts) {
-                                    console.log(`  📊 Lifts data:`, scraped.lifts);
-                                    // Use scraped values if they exist (checking for null/undefined, not falsy)
-                                    if (scraped.lifts.open !== null && scraped.lifts.open !== undefined) {
-                                        console.log(`    ✓ Setting lifts.open: ${resort.lifts.open} → ${scraped.lifts.open}`);
-                                        resort.lifts.open = scraped.lifts.open;
-                                        updates.lifts = true;
-                                    } else {
-                                        console.warn(`    ⚠️ Lifts open is null/undefined - keeping default: ${resort.lifts.open}`);
-                                    }
-                                    if (scraped.lifts.total !== null && scraped.lifts.total !== undefined) {
-                                        console.log(`    ✓ Setting lifts.total: ${resort.lifts.total} → ${scraped.lifts.total}`);
-                                        resort.lifts.total = scraped.lifts.total;
-                                        updates.lifts = true;
-                                    } else {
-                                        console.warn(`    ⚠️ Lifts total is null/undefined - keeping default: ${resort.lifts.total}`);
-                                    }
-                                    // Recalculate closed based on total - open
-                                    resort.lifts.closed = resort.lifts.total - resort.lifts.open;
-                                    console.log(`    → Final: ${resort.lifts.open}/${resort.lifts.total} open (${resort.lifts.closed} closed)`);
-                                } else {
-                                    console.warn(`  ⚠️ No lifts data in scraper response`);
-                                }
-                                
-                                if (scraped.trails) {
-                                    console.log(`  🎿 Trails data:`, scraped.trails);
-                                    // Use scraped values if they exist (checking for null/undefined, not falsy)
-                                    if (scraped.trails.open !== null && scraped.trails.open !== undefined) {
-                                        console.log(`    ✓ Setting trails.open: ${resort.trails.open} → ${scraped.trails.open}`);
-                                        resort.trails.open = scraped.trails.open;
-                                        updates.trails = true;
-                                    } else {
-                                        console.warn(`    ⚠️ Trails open is null/undefined - keeping default: ${resort.trails.open}`);
-                                    }
-                                    if (scraped.trails.total !== null && scraped.trails.total !== undefined) {
-                                        console.log(`    ✓ Setting trails.total: ${resort.trails.total} → ${scraped.trails.total}`);
-                                        resort.trails.total = scraped.trails.total;
-                                        updates.trails = true;
-                                    } else {
-                                        console.warn(`    ⚠️ Trails total is null/undefined - keeping default: ${resort.trails.total}`);
-                                    }
-                                    // Recalculate closed based on total - open
-                                    resort.trails.closed = resort.trails.total - resort.trails.open;
-                                    console.log(`    → Final: ${resort.trails.open}/${resort.trails.total} open (${resort.trails.closed} closed)`);
-                                } else {
-                                    console.warn(`  ⚠️ No trails data in scraper response`);
-                                }
-
-                                // Update conditions if we have surface text
-                                if (scraped.signals && scraped.signals.surface_text) {
-                                    // Format conditions properly (Title Case)
-                                    const oldConditions = resort.conditions;
-                                    resort.conditions = formatConditions(scraped.signals.surface_text);
-                                    console.log(`  🌨️ Conditions: "${oldConditions}" → "${resort.conditions}" (from: "${scraped.signals.surface_text}")`);
-                                    updates.conditions = true;
-                                } else if (scraped.rating) {
-                                    // Fallback: use rating to infer conditions if no surface text
-                                    const oldConditions = resort.conditions;
-                                    resort.conditions = ratingToConditions(scraped.rating);
-                                    console.log(`  🌨️ Conditions: "${oldConditions}" → "${resort.conditions}" (inferred from rating: ${scraped.rating})`);
-                                    updates.conditions = true;
-                                } else {
-                                    console.warn(`  ⚠️ No surface_text or rating - keeping default conditions: "${resort.conditions}"`);
-                                }
-
-                                // Update snowfall if scraped (prefer scraped over manual)
-                                if (scraped.signals) {
-                                    console.log(`  ❄️ Snowfall signals:`, {
-                                        snow24_in: scraped.signals.snow24_in,
-                                        snow48_in: scraped.signals.snow48_in,
-                                        snow7d_in: scraped.signals.snow7d_in
-                                    });
-                                    
-                                    if (scraped.signals.snow24_in !== null && scraped.signals.snow24_in !== undefined) {
-                                        const oldValue = resort.snowfall['24h'];
-                                        resort.snowfall['24h'] = scraped.signals.snow24_in + '"';
-                                        console.log(`    ✓ 24h: ${oldValue} → ${resort.snowfall['24h']}`);
-                                        updates.snowfall['24h'] = true;
-                                    } else {
-                                        console.warn(`    ⚠️ snow24_in is null/undefined - keeping default: ${resort.snowfall['24h']}`);
-                                    }
-                                    
-                                    if (scraped.signals.snow48_in !== null && scraped.signals.snow48_in !== undefined) {
-                                        const oldValue = resort.snowfall['48h'];
-                                        resort.snowfall['48h'] = scraped.signals.snow48_in + '"';
-                                        console.log(`    ✓ 48h: ${oldValue} → ${resort.snowfall['48h']}`);
-                                        updates.snowfall['48h'] = true;
-                                    } else {
-                                        console.warn(`    ⚠️ snow48_in is null/undefined - keeping default: ${resort.snowfall['48h']}`);
-                                    }
-                                    
-                                    if (scraped.signals.snow7d_in !== null && scraped.signals.snow7d_in !== undefined) {
-                                        const oldValue = resort.snowfall['7d'];
-                                        resort.snowfall['7d'] = scraped.signals.snow7d_in + '"';
-                                        console.log(`    ✓ 7d: ${oldValue} → ${resort.snowfall['7d']}`);
-                                        updates.snowfall['7d'] = true;
-                                    } else {
-                                        console.warn(`    ⚠️ snow7d_in is null/undefined - keeping default: ${resort.snowfall['7d']}`);
-                                    }
-                                } else {
-                                    console.warn(`  ⚠️ No signals object in scraper response - no snowfall data available`);
-                                }
-
-                                // Mark as scraped for UI badge
-                                resort.isScraped = true;
-                                resort.scrapedTimestamp = scraped.timestamp;
-                                
-                                // Summary of what actually got updated
-                                console.log(`✅ ${resort.name} update summary:`, {
-                                    lifts_updated: updates.lifts,
-                                    trails_updated: updates.trails,
-                                    conditions_updated: updates.conditions,
-                                    snowfall_24h: updates.snowfall['24h'],
-                                    snowfall_48h: updates.snowfall['48h'],
-                                    snowfall_7d: updates.snowfall['7d']
-                                });
-                            }
-                        });
+                    // ── Forecast (OpenWeather) ──
+                    if (live.forecast && live.forecast.length >= 3) {
+                        resort.forecast = live.forecast.slice(0, 3);
                     }
-                } else {
-                    console.warn('⚠️ Scraper API failed:', scraperResp.reason);
-                }
 
-                // Recalculate ratings for all resorts with updated data
+                    // ── Lift Status (Liftie) ──
+                    if (live.lifts) {
+                        resort.lifts.open = live.lifts.open;
+                        resort.lifts.total = live.lifts.total;
+                        resort.lifts.closed = live.lifts.total - live.lifts.open;
+                        resort.hasLiftie = true;
+                        liftUpdatedCount++;
+
+                        // Store individual lift details for the dropdown
+                        if (live.lifts.details) {
+                            resort.liftDetails = live.lifts.details;
+                        }
+                        
+                        console.log(`  🚡 ${resort.name}: ${live.lifts.open}/${live.lifts.total} lifts open`);
+                    }
+                });
+
+                // Recalculate ratings
                 resorts.forEach(resort => {
                     resort.rating = calculateRating(resort.weather, resort.snowfall);
                 });
 
-                // Re-render with live data
                 renderResorts();
-
-                // Show diagnostic comparison for scraped resorts
-                console.log('\n╔═══════════════════════════════════════╗');
-                console.log('║   SCRAPER DATA DIAGNOSTIC SUMMARY     ║');
-                console.log('╚═══════════════════════════════════════╝\n');
-                
-                console.table(
-                    resorts
-                        .filter(r => r.isScraped)
-                        .map(r => ({
-                            'Resort': r.name,
-                            'Lifts': `${r.lifts.open}/${r.lifts.total}`,
-                            'Trails': `${r.trails.open}/${r.trails.total}`,
-                            'Conditions': r.conditions,
-                            '24h Snow': r.snowfall['24h'],
-                            '48h Snow': r.snowfall['48h'],
-                            '7d Snow': r.snowfall['7d'],
-                            'Timestamp': r.scrapedTimestamp ? new Date(r.scrapedTimestamp).toLocaleString() : 'N/A'
-                        }))
-                );
-
-                // Show success status
-                showDataStatus('fresh', null, weatherUpdatedCount, scraperUpdatedCount);
-
-                console.log(`✅ Data update complete! Weather: ${weatherUpdatedCount}/28 | Scraped: ${scraperUpdatedCount}/7`);
+                showDataStatus('fresh', null, weatherUpdatedCount, liftUpdatedCount);
+                console.log(`✅ Update complete! Weather: ${weatherUpdatedCount}/${resorts.length} | Lifts: ${liftUpdatedCount} via Liftie`);
 
             } catch (error) {
                 console.error('❌ Failed to load live data:', error);
                 showDataStatus('error', null, 0, 0, error.message);
-                console.log('💾 Falling back to mock data - site still functional');
-            } finally {
-                // Silently complete - no loading indicators
-                console.log('🎿 Weather update completed');
             }
         }
 
-        // Helper: Format conditions text to proper Title Case
-        function formatConditions(text) {
-            if (!text) return 'Machine Groomed'; // DEFAULT: Never "Unknown"
-            
-            // Handle common condition phrases
-            const formatted = text
-                .toLowerCase()
-                .replace(/\b(powder|packed powder|machine groomed|groomed|hard pack|hardpack|firm|spring conditions|icy|ice|frozen granular|corn snow)\b/gi, 
-                    match => {
-                        const titleCaseMap = {
-                            'powder': 'Powder',
-                            'packed powder': 'Packed Powder',
-                            'machine groomed': 'Machine Groomed',
-                            'groomed': 'Machine Groomed',
-                            'hard pack': 'Hard Pack',
-                            'hardpack': 'Hard Pack',
-                            'firm': 'Firm',
-                            'spring conditions': 'Spring Conditions',
-                            'icy': 'Icy',
-                            'ice': 'Icy',
-                            'frozen granular': 'Frozen Granular',
-                            'corn snow': 'Corn Snow'
-                        };
-                        return titleCaseMap[match.toLowerCase()] || match.charAt(0).toUpperCase() + match.slice(1);
-                    });
-            
-            // If we get "variable" or "unknown", convert to Machine Groomed
-            if (formatted.toLowerCase().includes('variable') || formatted.toLowerCase().includes('unknown')) {
-                return 'Machine Groomed';
-            }
-            
-            return formatted.charAt(0).toUpperCase() + formatted.slice(1);
-        }
-
-        // Helper: Convert rating to conditions when no surface text available
-        function ratingToConditions(rating) {
-            const conditionsMap = {
-                'powder': 'Powder',
-                'packed_powder': 'Packed Powder',
-                'machine_groomed': 'Machine Groomed',
-                'firm_hardpack': 'Hard Pack',
-                'spring_conditions': 'Spring Conditions',
-                'icy': 'Icy',
-                'limited': 'Limited Terrain'
-            };
-            // DEFAULT to Machine Groomed (never "Variable" or "Unknown")
-            return conditionsMap[rating] || 'Machine Groomed';
-        }
-
-        // Visual status indicator
-        function showDataStatus(status, timestamp, weatherCount, scraperCount, errorMsg) {
+        function showDataStatus(status, timestamp, weatherCount, liftCount, errorMsg) {
             const existing = document.getElementById('data-status');
             if (existing) existing.remove();
 
             const statusDiv = document.createElement('div');
             statusDiv.id = 'data-status';
             statusDiv.style.cssText = `
-                position: fixed;
-                bottom: 20px;
-                left: 20px;
-                padding: 0.75rem 1rem;
-                border-radius: 8px;
-                font-size: 0.75rem;
-                font-weight: 600;
+                position: fixed; bottom: 20px; left: 20px;
+                padding: 0.75rem 1rem; border-radius: 8px;
+                font-size: 0.75rem; font-weight: 600;
                 box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-                z-index: 9999;
-                display: flex;
-                align-items: center;
-                gap: 0.5rem;
+                z-index: 9999; display: flex; align-items: center; gap: 0.5rem;
                 backdrop-filter: blur(10px);
             `;
 
             if (status === 'fresh') {
                 statusDiv.style.background = 'rgba(0, 166, 153, 0.95)';
                 statusDiv.style.color = 'white';
-                const now = new Date();
-                const time = now.toLocaleTimeString('en-US', { 
-                    hour: 'numeric', 
-                    minute: '2-digit',
-                    hour12: true 
-                });
+                const time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
                 statusDiv.innerHTML = `
                     <span style="font-size: 1.2rem;">✓</span>
                     <div style="line-height: 1.4;">
-                        <div>Live data • Updated ${time}</div>
-                        <div style="font-size: 0.65rem; opacity: 0.9;">Weather: ${weatherCount}/28 • Scraped: ${scraperCount}/7</div>
+                        <div>Live data • ${time}</div>
+                        <div style="font-size: 0.65rem; opacity: 0.9;">Weather: ${weatherCount}/${resorts.length} • Lifts: ${liftCount} via Liftie</div>
                     </div>
                 `;
                 setTimeout(() => statusDiv.remove(), 6000);
-
-            } else if (status === 'stale') {
-                statusDiv.style.background = 'rgba(255, 184, 77, 0.95)';
-                statusDiv.style.color = 'white';
-                statusDiv.innerHTML = `
-                    <span style="font-size: 1.2rem;">⚠️</span>
-                    <span>Using cached data • Updates soon</span>
-                `;
-
             } else if (status === 'error') {
                 statusDiv.style.background = 'rgba(255, 90, 95, 0.95)';
                 statusDiv.style.color = 'white';
-                statusDiv.innerHTML = `
-                    <span style="font-size: 1.2rem;">⚠️</span>
-                    <span>APIs connecting • Using mock data</span>
-                `;
+                statusDiv.innerHTML = `<span style="font-size: 1.2rem;">⚠️</span><span>APIs connecting • Using defaults</span>`;
                 setTimeout(() => statusDiv.remove(), 10000);
             }
-
             document.body.appendChild(statusDiv);
         }
 
-        // Initialize: Render mock data first, then load live data
+        // Initialize
         renderResorts();
+        loadLiveData().catch(err => console.warn('Initial load failed:', err));
+        setInterval(loadLiveData, REFRESH_INTERVAL);
 
-        // Load live weather immediately in background (non-blocking)
-        loadLiveWeather().catch(err => {
-            console.warn('Initial weather load failed:', err);
-        });
-
-        // Auto-refresh every 4 hours
-        setInterval(loadLiveWeather, REFRESH_INTERVAL);
-
-        console.log('🎿 IceCoast initialized - Page ready immediately!');
-        console.log('📊 Weather API: 28 resorts');
-        console.log('🤖 Scraper API: Limited to working resorts');
-        console.log('⚡ Live data loads in background - site never blocks');
+        console.log('🎿 IceCoast initialized');
+        console.log('🌤️ Weather: OpenWeather • 🚡 Lifts: Liftie (22/28) • ❄️ Snow: Manual');
 
         // 🎿 EPIC RAIL SLAM - Click Handler with Delayed Scroll
         document.addEventListener('DOMContentLoaded', () => {
