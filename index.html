@@ -1588,9 +1588,18 @@
         }
         /* Icecoast Patrol CTA */
         .patrol-cta {
-            max-width 600px;
+            max-width: 600px;
             margin: 2rem auto 3rem;
             text-align: center;
+        }
+
+        .patrol-heading {
+            font-size: 2rem;
+            font-weight: 900;
+            color: var(--charcoal);
+            margin-bottom: 1.5rem;
+            letter-spacing: -0.02em;
+            text-transform: uppercase;
         }
 
         .patrol-link {
@@ -1599,6 +1608,7 @@
             border-radius: 12px;
             overflow: hidden;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            margin-bottom: 1rem;
         }
 
         .patrol-link:hover {
@@ -1613,16 +1623,34 @@
             display: block;
         }
 
+        .patrol-tagline {
+            font-size: 1rem;
+            color: var(--medium-grey);
+            font-weight: 600;
+            margin-top: 1rem;
+            line-height: 1.4;
+        }
+
         @media (max-width: 768px) {
             .patrol-cta {
                 margin: 1.5rem auto 2rem;
                 padding: 0 1rem;
             }
 
+            .patrol-heading {
+                font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
+
             .patrol-image {
                 max-width: 100%;
             }
+
+            .patrol-tagline {
+                font-size: 0.9rem;
+            }
         }
+
 
 
         @keyframes fillBar {
@@ -3929,6 +3957,22 @@
                         <div class="send-it-progress" id="sendItProgress"></div>
                     </div>
                     <p class="send-it-percentage" id="sendItPercentage">0%</p>
+                </div> <!-- End gauge-container -->
+
+                <!-- Icecoast Patrol CTA -->
+                <div class="patrol-cta">
+                    <h2 class="patrol-heading">Join the Icecoast Patrol</h2>
+                    <a href="https://patreon.com/icecoast?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="patrol-link">
+                        <img src="./icecoast_patrol.png" alt="Join the Icecoast Patrol on Patreon" class="patrol-image">
+                    </a>
+                    <p class="patrol-tagline">Your support keeps the servers waxed and the code sending!</p>
+                </div>
+
+                <div class="footer-credits">
+
             <div class="legal-footer">
                 <div class="legal-content">
 
@@ -3939,15 +3983,7 @@
                     </div>
                 </div> <!-- End gauge-container -->
 
-                <!-- Icecoast Patrol CTA -->
-                <div class="patrol-cta">
-                    <a href="https://patreon.com/icecoast?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink"
-                       target="_blank"
-                       rel="noopener noreferrer"
-                       class="patrol-link">
-                        <img src="icecoast_patrol.png" alt="Join the icecoast patrol" class="patrol-image">
-                    </a>
-                </div>
+
 
                 <div class="footer-credits">
 
