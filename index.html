@@ -1586,6 +1586,44 @@
             font-weight: 700;
             color: var(--charcoal);
         }
+        /* Icecoast Patrol CTA */
+        .patrol-cta {
+            max-width 600px;
+            margin: 2rem auto 3rem;
+            text-align: center;
+        }
+
+        .patrol-link {
+            display: inline-block;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+
+        .patrol-link:hover {
+            transform: translateY(-4px) scale(1.02);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+        }
+
+        .patrol-image {
+            width: 100%;
+            max-width: 500px;
+            height: auto;
+            display: block;
+        }
+
+        @media (max-width: 768px) {
+            .patrol-cta {
+                margin: 1.5rem auto 2rem;
+                padding: 0 1rem;
+            }
+
+            .patrol-image {
+                max-width: 100%;
+            }
+        }
+
 
         @keyframes fillBar {
             from { width: 0%; }
@@ -3899,6 +3937,19 @@
                         <span class="legal-toggle-text">Legal, Terms & Privacy Policy</span>
                         <span class="legal-toggle-icon">▼</span>
                     </div>
+                </div> <!-- End gauge-container -->
+
+                <!-- Icecoast Patrol CTA -->
+                <div class="patrol-cta">
+                    <a href="https://patreon.com/icecoast?utm_medium=unknown&utm_source=join_link&utm_campaign=creatorshare_creator&utm_content=copyLink"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="patrol-link">
+                        <img src="icecoast_patrol.jpg" alt="Join the Icecoast Patrol" class="patrol-image">
+                    </a>
+                </div>
+
+                <div class="footer-credits">
 
                     <!-- Collapsible Legal Sections -->
                     <div class="legal-accordion" id="legalAccordion">
