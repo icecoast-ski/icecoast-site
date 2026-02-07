@@ -6,130 +6,501 @@
     <title>icecoast - east coast snow, terrain, and resort conditions</title>
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzAwNjZGRiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMwMDUyQ0MiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDwhLS0gT3V0ZXIgY2lyY2xlIHdpdGggZ3JhZGllbnQgLS0+CiAgPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAiIGZpbGw9InVybCgjYmcpIiAvPgoKICA8IS0tIExlZnQgc2tpIHdpdGggYmluZGluZyAtLT4KICA8cmVjdCB4PSIyOCIgeT0iNiIgd2lkdGg9IjQiIGhlaWdodD0iNTIiIHJ4PSIyIiByeT0iMiIgZmlsbD0iI0ZGRkZGRiIgdHJhbnNmb3JtPSJyb3RhdGUoLTI4IDMyIDMyKSIgLz4KICA8cmVjdCB4PSIyNyIgeT0iNCIgd2lkdGg9IjUiIGhlaWdodD0iMyIgcng9IjEiIGZpbGw9IiNGRjVBNUYiIHRyYW5zZm9ybT0icm90YXRlKC0yOCAzMiAzMikiIC8+CiAgPHJlY3QgeD0iMjgiIHk9IjI5IiB3aWR0aD0iNCIgaGVpZ2h0PSI2IiByeD0iMSIgZmlsbD0iIzAwQTY5OSIgdHJhbnNmb3JtPSJyb3RhdGUoLTI4IDMyIDMyKSIgLz4KCiAgPCEtLSBSaWdodCBza2kgd2l0aCBiaW5kaW5nIC0tPgogIDxyZWN0IHg9IjMyIiB5PSI2IiB3aWR0aD0iNCIgaGVpZ2h0PSI1MiIgcng9IjIiIHJ5PSIyIiBmaWxsPSIjRkZGRkZGIiB0cmFuc2Zvcm09InJvdGF0ZSgyOCAzMiAzMikiIC8+CiAgPHJlY3QgeD0iMzIiIHk9IjQiIHdpZHRoPSI1IiBoZWlnaHQ9IjMiIHJ4PSIxIiBmaWxsPSIjRkY1QTVGIiB0cmFuc2Zvcm09InJvdGF0ZSgyOCAzMiAzMikiIC8+CiAgPHJlY3QgeD0iMzIiIHk9IjI5IiB3aWR0aD0iNCIgaGVpZ2h0PSI2IiByeD0iMSIgZmlsbD0iIzAwQTY5OSIgdHJhbnNmb3JtPSJyb3RhdGUoMjggMzIgMzIpIiAvPgoKICA8IS0tIENlbnRlciBzbm93IGJ1cnN0IC0tPgogIDxjaXJjbGUgY3g9IjMyIiBjeT0iMzIiIHI9IjQiIGZpbGw9IiNGRkZGRkYiIG9wYWNpdHk9IjAuNCIvPgogIDxjaXJjbGUgY3g9IjMyIiBjeT0iMzIiIHI9IjIiIGZpbGw9IiNGRkZGRkYiLz4KPC9zdmc+">
     <style>
-        /* ... [Keep your existing CSS] ... */
-        :root { --primary-blue: #0066FF; --ocean-blue: #0052CC; --bg-grey: #F7F7F7; --charcoal: #222222; --white: #FFFFFF; }
-        body { font-family: system-ui, sans-serif; background: var(--bg-grey); color: var(--charcoal); }
-        .resort-grid { max-width: 1400px; margin: 0 auto; padding: 2rem; display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr)); }
-        .resort-card { background: white; border-radius: 16px; padding: 1.5rem; }
+        :root {
+            --primary-blue: #0066FF; --ocean-blue: #0052CC; --sky-light: #E6F2FF;
+            --coral: #FF5A5F; --forest: #00A699; --charcoal: #222222;
+            --medium-grey: #717171; --light-grey: #DDDDDD; --bg-grey: #F7F7F7;
+            --white: #FFFFFF; --snow: #FAFAFA;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            background: var(--bg-grey); color: var(--charcoal);
+            line-height: 1.5; -webkit-font-smoothing: antialiased;
+        }
+
+        /* Layout & Header */
+        header { background: var(--white); padding: 0.75rem 1.5rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); position: sticky; top: 0; z-index: 100; }
+        .header-content { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: baseline; }
+        .logo { font-size: 1.5rem; font-weight: 800; letter-spacing: -0.02em; color: var(--charcoal); }
+        .logo span { color: var(--primary-blue); }
+        .sub-header { background: var(--off-white); padding: 1rem 1.5rem; border-bottom: 1px solid var(--light-grey); text-align: center; }
+        .sub-tagline { font-size: 0.85rem; color: var(--medium-grey); font-weight: 500; margin: 0; }
+
+        .cta-btn {
+            padding: 0.6rem 1.25rem; background: var(--primary-blue); color: white;
+            border: none; border-radius: 8px; font-size: 0.85rem; font-weight: 700;
+            cursor: pointer; transition: all 0.2s ease; text-decoration: none;
+        }
+        .cta-btn:hover { background: var(--ocean-blue); transform: translateY(-2px); }
+
+        /* Grid & Cards */
+        .resort-grid {
+            max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem;
+            display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); gap: 1.5rem;
+        }
+        .resort-card {
+            background: var(--white); border-radius: 16px; overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .resort-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.12); }
+
+        .resort-header { padding: 1.25rem; border-bottom: 1px solid var(--bg-grey); display: flex; justify-content: space-between; align-items: center; }
+        .resort-name h2 { font-size: 1.2rem; font-weight: 800; margin: 0; }
+        .location { font-size: 0.8rem; color: var(--medium-grey); }
+
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--bg-grey); border-bottom: 1px solid var(--bg-grey); }
+        .stat-box { background: var(--white); padding: 1rem; text-align: center; }
+        .stat-label { display: block; font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.5px; color: var(--medium-grey); margin-bottom: 0.25rem; }
+        .stat-value { font-size: 1.1rem; font-weight: 700; color: var(--charcoal); }
+
+        .weather-row { padding: 0.75rem 1.25rem; background: #Fcfcfc; font-size: 0.85rem; color: var(--medium-grey); border-top: 1px solid #eee; }
+        .loading { opacity: 0.5; font-style: italic; }
+
+        /* Footer */
+        .footer { text-align: center; padding: 3rem 1rem; color: var(--medium-grey); font-size: 0.9rem; }
+        .send-it-bar { position: fixed; bottom: 0; left: 0; right: 0; height: 4px; background: #ddd; z-index: 999; }
+        #sendItProgress { height: 100%; background: var(--primary-blue); width: 0%; transition: width 0.2s; }
     </style>
 </head>
 <body>
+
     <header>
         <div class="header-content">
-            <div class="header-top">
-                <div class="header-left">
-                    <h1 class="logo">icecoast<span>.ski</span></h1>
-                </div>
-                <a href="https://www.patreon.com/icecoastski" target="_blank" class="cta-btn" id="headerCta">Join the Patrol 🚀</a>
-            </div>
+            <h1 class="logo">icecoast<span>.ski</span></h1>
+            <a href="#" class="cta-btn">Join the Patrol 🚀</a>
         </div>
     </header>
 
     <div class="sub-header">
-        <div class="sub-header-content">
-            <p class="sub-tagline">
-                No ads. No clutter. Just the snow data you need.<br>
-                One dev. 25 years on the tray. Hooked on two planks.
-            </p>
-        </div>
+        <p class="sub-tagline">No ads. No clutter. Just the snow data you need.<br>One dev. 25 years on the tray. Hooked on two planks.</p>
     </div>
 
     <div id="resort-container" class="resort-grid">
-        <p style="text-align: center; width: 100%;">Loading Fresh Data...</p>
+        </div>
+
+    <div class="footer">
+        <p>Built for the Ice Coast community. <br> Send bugs to sendit@icecoast.ski</p>
     </div>
+    <div class="send-it-bar"><div id="sendItProgress"></div></div>
 
     <script>
-        // CONFIGURATION
-        const WORKER_URL = "YOUR-SUBDOMAIN"; // ⚠️ REPLACE THIS WITH YOUR WORKER URL
-        
-        let resorts = []; // Will be loaded from JSON
+        // 1. CONFIGURATION
+        // ⚠️ Replace this with your actual Worker URL when you are ready for live data
+        const WORKER_URL = "https://icecoast-worker.YOUR-SUBDOMAIN.workers.dev";
 
-        // 1. Fetch Resort Data
-        async function loadResorts() {
-            try {
-                const response = await fetch('resorts.json');
-                if (!response.ok) throw new Error('Failed to load resorts.json');
-                resorts = await response.json();
-                renderResorts(resorts);
-                // After rendering, fetch dynamic data
-                fetchWeatherData();
-                fetchLiftStatus();
-            } catch (error) {
-                console.error("Error loading resort data:", error);
-                document.getElementById('resort-container').innerHTML = '<p>❄️ Error loading resort data. Check console.</p>';
+        // 2. RESORT DATA (The Source of Truth)
+        // Paste your Admin Tool export BETWEEN the start/end comments below
+        // START RESORT DATA
+        const resorts = [
+          {
+            "id": "killington",
+            "name": "Killington",
+            "location": "Killington, VT",
+            "region": "central-vt",
+            "hasLiftie": true,
+            "snowfall": { "last24": 2, "last48": 4, "season": 120 },
+            "conditions": "Packed Powder",
+            "trails": { "open": 110, "total": 155 },
+            "lifts": { "open": 0, "total": 21 }
+          },
+          {
+            "id": "stowe",
+            "name": "Stowe",
+            "location": "Stowe, VT",
+            "region": "northern-vt",
+            "hasLiftie": true,
+            "snowfall": { "last24": 4, "last48": 6, "season": 145 },
+            "conditions": "Powder",
+            "trails": { "open": 85, "total": 116 },
+            "lifts": { "open": 0, "total": 12 }
+          },
+          {
+            "id": "jaypeak",
+            "name": "Jay Peak",
+            "location": "Jay, VT",
+            "region": "northern-vt",
+            "hasLiftie": true,
+            "snowfall": { "last24": 6, "last48": 12, "season": 210 },
+            "conditions": "Powder",
+            "trails": { "open": 78, "total": 81 },
+            "lifts": { "open": 0, "total": 9 }
+          },
+          {
+            "id": "sugarbush",
+            "name": "Sugarbush",
+            "location": "Warren, VT",
+            "region": "central-vt",
+            "hasLiftie": true,
+            "snowfall": { "last24": 1, "last48": 3, "season": 115 },
+            "conditions": "Packed Powder",
+            "trails": { "open": 90, "total": 111 },
+            "lifts": { "open": 0, "total": 16 }
+          },
+          {
+            "id": "stratton",
+            "name": "Stratton",
+            "location": "Stratton, VT",
+            "region": "southern-vt",
+            "hasLiftie": true,
+            "snowfall": { "last24": 0, "last48": 2, "season": 98 },
+            "conditions": "Machine Groomed",
+            "trails": { "open": 65, "total": 99 },
+            "lifts": { "open": 0, "total": 11 }
+          },
+          {
+            "id": "okemo",
+            "name": "Okemo",
+            "location": "Ludlow, VT",
+            "region": "central-vt",
+            "hasLiftie": true,
+            "snowfall": { "last24": 0, "last48": 1, "season": 90 },
+            "conditions": "Hard Pack",
+            "trails": { "open": 100, "total": 121 },
+            "lifts": { "open": 0, "total": 20 }
+          },
+          {
+            "id": "mountsnow",
+            "name": "Mount Snow",
+            "location": "West Dover, VT",
+            "region": "southern-vt",
+            "hasLiftie": true,
+            "snowfall": { "last24": 2, "last48": 5, "season": 88 },
+            "conditions": "Machine Groomed",
+            "trails": { "open": 55, "total": 86 },
+            "lifts": { "open": 0, "total": 20 }
+          },
+          {
+            "id": "madriverglen",
+            "name": "Mad River Glen",
+            "location": "Fayston, VT",
+            "region": "central-vt",
+            "hasLiftie": true,
+            "snowfall": { "last24": 2, "last48": 4, "season": 105 },
+            "conditions": "Packed Powder",
+            "trails": { "open": 45, "total": 52 },
+            "lifts": { "open": 0, "total": 5 }
+          },
+          {
+            "id": "whiteface",
+            "name": "Whiteface",
+            "location": "Wilmington, NY",
+            "region": "adirondacks",
+            "hasLiftie": true,
+            "snowfall": { "last24": 1, "last48": 2, "season": 95 },
+            "conditions": "Frozen Granular",
+            "trails": { "open": 60, "total": 90 },
+            "lifts": { "open": 0, "total": 11 }
+          },
+          {
+            "id": "gore",
+            "name": "Gore Mountain",
+            "location": "North Creek, NY",
+            "region": "adirondacks",
+            "hasLiftie": true,
+            "snowfall": { "last24": 1, "last48": 3, "season": 100 },
+            "conditions": "Packed Powder",
+            "trails": { "open": 70, "total": 110 },
+            "lifts": { "open": 0, "total": 14 }
+          },
+          {
+            "id": "hunter",
+            "name": "Hunter Mountain",
+            "location": "Hunter, NY",
+            "region": "catskills",
+            "hasLiftie": true,
+            "snowfall": { "last24": 0, "last48": 0, "season": 75 },
+            "conditions": "Hard Pack",
+            "trails": { "open": 45, "total": 67 },
+            "lifts": { "open": 0, "total": 13 }
+          },
+          {
+            "id": "windham",
+            "name": "Windham",
+            "location": "Windham, NY",
+            "region": "catskills",
+            "hasLiftie": true,
+            "snowfall": { "last24": 0, "last48": 0, "season": 70 },
+            "conditions": "Machine Groomed",
+            "trails": { "open": 40, "total": 54 },
+            "lifts": { "open": 0, "total": 11 }
+          },
+          {
+            "id": "belleayre",
+            "name": "Belleayre",
+            "location": "Highmount, NY",
+            "region": "catskills",
+            "hasLiftie": false,
+            "snowfall": { "last24": 0, "last48": 1, "season": 80 },
+            "conditions": "Packed Powder",
+            "trails": { "open": 38, "total": 50 },
+            "lifts": { "open": 6, "total": 8 }
+          },
+          {
+            "id": "camelback",
+            "name": "Camelback",
+            "location": "Tannersville, PA",
+            "region": "poconos",
+            "hasLiftie": true,
+            "snowfall": { "last24": 0, "last48": 0, "season": 45 },
+            "conditions": "Variable",
+            "trails": { "open": 30, "total": 39 },
+            "lifts": { "open": 0, "total": 16 }
+          },
+          {
+            "id": "blue",
+            "name": "Blue Mountain",
+            "location": "Palmerton, PA",
+            "region": "poconos",
+            "hasLiftie": true,
+            "snowfall": { "last24": 0, "last48": 0, "season": 40 },
+            "conditions": "Machine Groomed",
+            "trails": { "open": 28, "total": 40 },
+            "lifts": { "open": 0, "total": 16 }
+          },
+          {
+            "id": "shawnee",
+            "name": "Shawnee",
+            "location": "Shawnee on Delaware, PA",
+            "region": "poconos",
+            "hasLiftie": true,
+            "snowfall": { "last24": 0, "last48": 0, "season": 35 },
+            "conditions": "Machine Groomed",
+            "trails": { "open": 20, "total": 23 },
+            "lifts": { "open": 0, "total": 6 }
+          },
+          {
+            "id": "jackfrost",
+            "name": "Jack Frost",
+            "location": "White Haven, PA",
+            "region": "poconos",
+            "hasLiftie": false,
+            "snowfall": { "last24": 0, "last48": 0, "season": 38 },
+            "conditions": "Hard Pack",
+            "trails": { "open": 18, "total": 20 },
+            "lifts": { "open": 8, "total": 9 }
+          },
+          {
+            "id": "bigboulder",
+            "name": "Big Boulder",
+            "location": "Lake Harmony, PA",
+            "region": "poconos",
+            "hasLiftie": false,
+            "snowfall": { "last24": 0, "last48": 0, "season": 38 },
+            "conditions": "Machine Groomed",
+            "trails": { "open": 12, "total": 15 },
+            "lifts": { "open": 6, "total": 8 }
+          },
+          {
+            "id": "montage",
+            "name": "Montage Mountain",
+            "location": "Scranton, PA",
+            "region": "poconos",
+            "hasLiftie": false,
+            "snowfall": { "last24": 0, "last48": 0, "season": 42 },
+            "conditions": "Packed Powder",
+            "trails": { "open": 22, "total": 26 },
+            "lifts": { "open": 5, "total": 7 }
+          },
+          {
+            "id": "elk",
+            "name": "Elk Mountain",
+            "location": "Union Dale, PA",
+            "region": "poconos",
+            "hasLiftie": false,
+            "snowfall": { "last24": 1, "last48": 1, "season": 50 },
+            "conditions": "Packed Powder",
+            "trails": { "open": 25, "total": 27 },
+            "lifts": { "open": 6, "total": 7 }
+          },
+          {
+            "id": "bearcreek",
+            "name": "Bear Creek",
+            "location": "Macungie, PA",
+            "region": "poconos",
+            "hasLiftie": false,
+            "snowfall": { "last24": 0, "last48": 0, "season": 30 },
+            "conditions": "Variable",
+            "trails": { "open": 15, "total": 23 },
+            "lifts": { "open": 5, "total": 6 }
+          },
+          {
+            "id": "loon",
+            "name": "Loon Mountain",
+            "location": "Lincoln, NH",
+            "region": "white-mountains",
+            "hasLiftie": true,
+            "snowfall": { "last24": 2, "last48": 3, "season": 110 },
+            "conditions": "Packed Powder",
+            "trails": { "open": 50, "total": 61 },
+            "lifts": { "open": 0, "total": 10 }
+          },
+          {
+            "id": "cannon",
+            "name": "Cannon Mountain",
+            "location": "Franconia, NH",
+            "region": "white-mountains",
+            "hasLiftie": true,
+            "snowfall": { "last24": 3, "last48": 5, "season": 115 },
+            "conditions": "Frozen Granular",
+            "trails": { "open": 80, "total": 97 },
+            "lifts": { "open": 0, "total": 11 }
+          },
+          {
+            "id": "brettonwoods",
+            "name": "Bretton Woods",
+            "location": "Carroll, NH",
+            "region": "white-mountains",
+            "hasLiftie": true,
+            "snowfall": { "last24": 3, "last48": 4, "season": 120 },
+            "conditions": "Machine Groomed",
+            "trails": { "open": 58, "total": 63 },
+            "lifts": { "open": 0, "total": 10 }
+          },
+          {
+            "id": "waterville",
+            "name": "Waterville Valley",
+            "location": "Waterville Valley, NH",
+            "region": "white-mountains",
+            "hasLiftie": true,
+            "snowfall": { "last24": 1, "last48": 2, "season": 100 },
+            "conditions": "Packed Powder",
+            "trails": { "open": 55, "total": 62 },
+            "lifts": { "open": 0, "total": 11 }
+          },
+          {
+            "id": "wildcat",
+            "name": "Wildcat Mountain",
+            "location": "Gorham, NH",
+            "region": "white-mountains",
+            "hasLiftie": true,
+            "snowfall": { "last24": 4, "last48": 6, "season": 130 },
+            "conditions": "Wind Scoured",
+            "trails": { "open": 40, "total": 48 },
+            "lifts": { "open": 0, "total": 5 }
+          },
+          {
+            "id": "sugarloaf",
+            "name": "Sugarloaf",
+            "location": "Carrabassett Valley, ME",
+            "region": "maine",
+            "hasLiftie": true,
+            "snowfall": { "last24": 5, "last48": 8, "season": 140 },
+            "conditions": "Powder",
+            "trails": { "open": 140, "total": 162 },
+            "lifts": { "open": 0, "total": 13 }
+          },
+          {
+            "id": "sundayriver",
+            "name": "Sunday River",
+            "location": "Newry, ME",
+            "region": "maine",
+            "hasLiftie": true,
+            "snowfall": { "last24": 3, "last48": 6, "season": 135 },
+            "conditions": "Packed Powder",
+            "trails": { "open": 120, "total": 135 },
+            "lifts": { "open": 0, "total": 18 }
+          }
+        ];
+        // END RESORT DATA
+
+        // 3. RENDER LOGIC
+        function init() {
+            renderCards(resorts);
+
+            // Only fetch live data if WORKER_URL is configured
+            if (!WORKER_URL.includes("YOUR-SUBDOMAIN")) {
+                updateLiveData();
+            } else {
+                console.log("⚠️ Worker URL not configured. Showing manual data only.");
+                document.querySelectorAll('.loading').forEach(el => el.textContent = "--");
             }
         }
 
-        // 2. Render Cards
-        function renderResorts(data) {
+        function renderCards(data) {
             const container = document.getElementById('resort-container');
-            container.innerHTML = data.map(resort => `
-                <div class="resort-card" data-resort="${resort.id}">
+            container.innerHTML = data.map(r => `
+                <div class="resort-card" id="card-${r.id}">
                     <div class="resort-header">
-                        <h2>${resort.name}</h2>
-                        <span class="location">${resort.location}</span>
+                        <div class="resort-name">
+                            <h2>${r.name}</h2>
+                            <span class="location">${r.location}</span>
+                        </div>
                     </div>
+
                     <div class="stats-grid">
                         <div class="stat-box">
-                            <span class="label">24h Snow</span>
-                            <span class="value">${resort.snowfall.last24}"</span>
+                            <span class="stat-label">24h Snow</span>
+                            <span class="stat-value">${r.snowfall.last24}"</span>
                         </div>
                         <div class="stat-box">
-                            <span class="label">Conditions</span>
-                            <span class="value" style="font-size: 0.9rem">${resort.conditions}</span>
+                            <span class="stat-label">Trails</span>
+                            <span class="stat-value">${r.trails.open}/${r.trails.total}</span>
                         </div>
                         <div class="stat-box">
-                            <span class="label">Trails</span>
-                            <span class="value">${resort.trails.open}/${resort.trails.total}</span>
+                            <span class="stat-label">Conditions</span>
+                            <span class="stat-value" style="font-size:0.9rem">${r.conditions}</span>
                         </div>
                         <div class="stat-box">
-                            <span class="label">Lifts</span>
-                            <span class="value" id="lift-${resort.id}">${resort.lifts.open}/${resort.lifts.total}</span>
+                            <span class="stat-label">Lifts</span>
+                            <span class="stat-value" id="lift-${r.id}">
+                                ${r.hasLiftie ? '<span class="loading">Loading...</span>' : `${r.lifts.open}/${r.lifts.total}`}
+                            </span>
                         </div>
                     </div>
-                    <div class="weather-row" id="weather-${resort.id}">
-                        Loading weather...
+
+                    <div class="weather-row" id="weather-${r.id}">
+                        <span class="loading">Loading live weather...</span>
                     </div>
                 </div>
             `).join('');
         }
 
-        // 3. Fetch Weather (Existing Logic)
-        async function fetchWeatherData() {
+        async function updateLiveData() {
             try {
-                const response = await fetch(`${WORKER_URL}/weather`);
-                const weatherData = await response.json();
-                
-                Object.keys(weatherData).forEach(resortId => {
-                    const el = document.getElementById(`weather-${resortId}`);
-                    if (el) {
-                        const w = weatherData[resortId];
-                        el.innerHTML = `🌡️ ${Math.round(w.temp)}°F | 💨 ${Math.round(w.wind)}mph | ${w.description}`;
-                    }
-                });
-            } catch (e) { console.error("Weather fetch failed", e); }
+                // Fetch Weather
+                fetch(`${WORKER_URL}/weather`)
+                    .then(res => res.json())
+                    .then(data => {
+                        Object.keys(data).forEach(id => {
+                            const el = document.getElementById(`weather-${id}`);
+                            if (el && data[id]) {
+                                el.innerHTML = `🌡️ ${Math.round(data[id].temp)}°F | 💨 ${Math.round(data[id].wind)}mph | ${data[id].description}`;
+                            }
+                        });
+                    });
+
+                // Fetch Lifts
+                fetch(`${WORKER_URL}/lifts`)
+                    .then(res => res.json())
+                    .then(data => {
+                        Object.keys(data).forEach(id => {
+                            const el = document.getElementById(`lift-${id}`);
+                            if (el && data[id]) {
+                                const lifts = data[id];
+                                const total = Object.keys(lifts).length;
+                                const open = Object.values(lifts).filter(s => s === 'open').length;
+                                el.textContent = `${open}/${total}`;
+                            }
+                        });
+                    });
+
+            } catch (e) {
+                console.error("Worker fetch failed", e);
+            }
         }
 
-        // 4. Fetch Lifts (Existing Logic)
-        async function fetchLiftStatus() {
-            try {
-                const response = await fetch(`${WORKER_URL}/lifts`);
-                const liftData = await response.json();
-                
-                resorts.forEach(resort => {
-                    if (resort.hasLiftie && liftData[resort.id]) {
-                        const status = liftData[resort.id];
-                        const openLifts = Object.values(status).filter(s => s === 'open').length;
-                        const totalLifts = Object.keys(status).length;
-                        const el = document.getElementById(`lift-${resort.id}`);
-                        if (el) el.textContent = `${openLifts}/${totalLifts}`;
-                    }
-                });
-            } catch (e) { console.error("Lift fetch failed", e); }
-        }
+        // Scroll Progress
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById("sendItProgress").style.width = scrolled + "%";
+        });
 
-        // Initialize
-        document.addEventListener('DOMContentLoaded', loadResorts);
+        // Run it
+        init();
     </script>
 </body>
 </html>
