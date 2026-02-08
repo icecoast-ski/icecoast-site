@@ -786,6 +786,14 @@
             'Call the snow.',
             'Make the call.'
         ];
+        const SENDIT_OUT_OF_RANGE_OPTIONS = [
+            'You are {distance} miles away. Slope Signal voting unlocks within {radius} miles. Time to shuffle over on skinny skis, nordic warrior.',
+            'You are {distance} miles away. Slope Signal voting unlocks within {radius} miles. You are currently in cross-country mode, not chairlift mode.',
+            'You are {distance} miles away. Slope Signal voting unlocks within {radius} miles. Grab the classic wax and start double-poling.',
+            'You are {distance} miles away. Slope Signal voting unlocks within {radius} miles. That is a little too far for a quick bootpack.',
+            'You are {distance} miles away. Slope Signal voting unlocks within {radius} miles. Respectfully: skate-ski closer and then drop your take.',
+            'You are {distance} miles away. Slope Signal voting unlocks within {radius} miles. Patrol says this is a touring mission, not an on-mountain check-in.'
+        ];
 
         function pickRandomLabel(options) {
             return options[Math.floor(Math.random() * options.length)];
@@ -806,6 +814,13 @@
             const minutes = Math.max(1, Math.round(Number(retryAfterMinutes) || 1));
             const template = pickRandomLabel(SENDIT_COOLDOWN_OPTIONS);
             return template.replace('{minutes}', `${minutes}`);
+        }
+
+        function getSendItOutOfRangeMessage(distanceMiles, requiredMiles) {
+            const template = pickRandomLabel(SENDIT_OUT_OF_RANGE_OPTIONS);
+            return template
+                .replace('{distance}', distanceMiles.toFixed(1))
+                .replace('{radius}', formatMiles(requiredMiles));
         }
 
         function getSendItVerifySubtitleParts(resortId) {
@@ -1055,7 +1070,7 @@
                 );
 
                 if (distance > requiredMiles) {
-                    alert(`You are ${distance.toFixed(1)} miles away. Send It voting unlocks within ${formatMiles(requiredMiles)} miles.`);
+                    alert(getSendItOutOfRangeMessage(distance, requiredMiles));
                     return;
                 }
 
