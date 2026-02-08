@@ -2195,6 +2195,9 @@
         <div class="loading">Loading resort data...</div>
     </div>
 
+    <!-- Load resort data from external file -->
+    <script src="resorts.js"></script>
+
     <script>
                 // RESORT ICON SPECIFICATIONS
         // ===========================
@@ -2333,321 +2336,10 @@
             </svg>`
         };
 
-        // Mock resort data
-        const resorts = [
-        {
-            id: 'camelback',
-            name: 'Camelback',
-            icon: '🚁',
-            location: 'Tannersville, PA',
-            region: 'poconos',
-            familyOwned: false,
-        },
-        {
-            id: 'blue-mountain',
-            name: 'Blue Mountain',
-            icon: '🦅',
-            location: 'Palmerton, PA',
-            region: 'poconos',
-            familyOwned: true,
-        },
-        {
-            id: 'jack-frost',
-            name: 'Jack Frost',
-            icon: '❄️',
-            location: 'Blakeslee, PA',
-            region: 'poconos',
-            familyOwned: true,
-        },
-        {
-            id: 'shawnee',
-            name: 'Shawnee',
-            icon: '🏔️',
-            location: 'East Stroudsburg, PA',
-            region: 'poconos',
-            familyOwned: true,
-        },
-        {
-            id: 'bear-creek',
-            name: 'Bear Creek',
-            icon: '🐻',
-            location: 'Macungie, PA',
-            region: 'poconos',
-            familyOwned: true,
-        },
-        {
-            id: 'elk',
-            name: 'Elk Mountain',
-            icon: '🦌',
-            location: 'Union Dale, PA',
-            region: 'poconos',
-            familyOwned: true,
-        },
-        {
-            id: 'big-boulder',
-            name: 'Big Boulder',
-            icon: '🪨',
-            location: 'Lake Harmony, PA',
-            region: 'poconos',
-            familyOwned: false,
-        },
-        {
-            id: 'montage',
-            name: 'Montage Mountain',
-            icon: '⛰️',
-            location: 'Scranton, PA',
-            region: 'poconos',
-            familyOwned: true,
-        },
-        {
-            id: 'hunter',
-            name: 'Hunter Mountain',
-            icon: '🏔️',
-            location: 'Hunter, NY',
-            region: 'catskills',
-            familyOwned: false,
-        },
-        {
-            id: 'windham',
-            name: 'Windham Mountain',
-            icon: '🌬️',
-            location: 'Windham, NY',
-            region: 'catskills',
-            familyOwned: true,
-        },
-        {
-            id: 'belleayre',
-            name: 'Belleayre Mountain',
-            icon: '🏔️',
-            location: 'Highmount, NY',
-            region: 'catskills',
-            familyOwned: false,
-        },
-        {
-            id: 'whiteface',
-            name: 'Whiteface Mountain',
-            icon: '🏔️',
-            location: 'Wilmington, NY',
-            region: 'adirondacks',
-            familyOwned: false,
-        },
-        {
-            id: 'gore-mountain',
-            name: 'Gore Mountain',
-            icon: '⛰️',
-            location: 'North Creek, NY',
-            region: 'adirondacks',
-            familyOwned: false,
-        },
-        {
-            id: 'jiminy-peak',
-            name: 'Jiminy Peak',
-            icon: '🎿',
-            location: 'Hancock, MA',
-            region: 'massachusetts',
-            familyOwned: true,
-        },
-        {
-            id: 'wachusett',
-            name: 'Wachusett Mountain',
-            icon: '⛷️',
-            location: 'Princeton, MA',
-            region: 'massachusetts',
-            familyOwned: true,
-        },
-        {
-            id: 'mohawk',
-            name: 'Mohawk Mountain',
-            icon: '🏔️',
-            location: 'Cornwall, CT',
-            region: 'connecticut',
-            familyOwned: true,
-        },
-        {
-            id: 'stratton',
-            name: 'Stratton Mountain',
-            icon: '🏔️',
-            location: 'Stratton, VT',
-            region: 'vermont-south',
-            familyOwned: false,
-        },
-        {
-            id: 'mount-snow',
-            name: 'Mount Snow',
-            icon: '⛷️',
-            location: 'West Dover, VT',
-            region: 'vermont-south',
-            familyOwned: false,
-        },
-        {
-            id: 'killington',
-            name: 'Killington',
-            icon: '👑',
-            location: 'Killington, VT',
-            region: 'vermont-central',
-            familyOwned: false,
-        },
-        {
-            id: 'okemo',
-            name: 'Okemo Mountain',
-            icon: '🏔️',
-            location: 'Ludlow, VT',
-            region: 'vermont-central',
-            familyOwned: false,
-        },
-        {
-            id: 'pico',
-            name: 'Pico Mountain',
-            icon: '🎿',
-            location: 'Mendon, VT',
-            region: 'vermont-central',
-            familyOwned: false,
-        },
-        {
-            id: 'sugarbush',
-            name: 'Sugarbush',
-            icon: '🌿',
-            location: 'Warren, VT',
-            region: 'vermont-central',
-            familyOwned: true,
-        },
-        {
-            id: 'mad-river-glen',
-            name: 'Mad River Glen',
-            icon: '⛷️',
-            location: 'Waitsfield, VT',
-            region: 'vermont-central',
-            familyOwned: true,
-        },
-        {
-            id: 'stowe',
-            name: 'Stowe Mountain',
-            icon: '⛰️',
-            location: 'Stowe, VT',
-            region: 'vermont-north',
-            familyOwned: false,
-        },
-        {
-            id: 'smugglers-notch',
-            name: "Smugglers' Notch",
-            icon: '🎿',
-            location: 'Jeffersonville, VT',
-            region: 'vermont-north',
-            familyOwned: true,
-        },
-        {
-            id: 'jay-peak',
-            name: 'Jay Peak',
-            icon: '🏔️',
-            location: 'Jay, VT',
-            region: 'vermont-north',
-            familyOwned: false,
-        },
-        {
-            id: 'burke',
-            name: 'Burke Mountain',
-            icon: '⛰️',
-            location: 'East Burke, VT',
-            region: 'vermont-north',
-            familyOwned: true,
-        },
-        {
-            id: 'loon',
-            name: 'Loon Mountain',
-            icon: '🌙',
-            location: 'Lincoln, NH',
-            region: 'white-mountains',
-            familyOwned: false,
-        },
-        {
-            id: 'brettonwoods',
-            name: 'Bretton Woods',
-            icon: '🏔️',
-            location: 'Bretton Woods, NH',
-            region: 'white-mountains',
-            familyOwned: true,
-        },
-        {
-            id: 'waterville',
-            name: 'Waterville Valley',
-            icon: '💧',
-            location: 'Waterville Valley, NH',
-            region: 'white-mountains',
-            familyOwned: true,
-        },
-        {
-            id: 'cannon',
-            name: 'Cannon Mountain',
-            icon: '🏔️',
-            location: 'Franconia, NH',
-            region: 'white-mountains',
-            familyOwned: false,
-        },
-        {
-            id: 'wildcat',
-            name: 'Wildcat Mountain',
-            icon: '🐱',
-            location: 'Pinkham Notch, NH',
-            region: 'white-mountains',
-            familyOwned: true,
-        },
-        {
-            id: 'sunday-river',
-            name: 'Sunday River',
-            icon: '🌊',
-            location: 'Newry, ME',
-            region: 'maine',
-            familyOwned: false,
-        },
-        {
-            id: 'sugarloaf',
-            name: 'Sugarloaf',
-            icon: '🍞',
-            location: 'Carrabassett Valley, ME',
-            region: 'maine',
-            familyOwned: true,
-        },
-        {
-            id: 'saddleback',
-            name: 'Saddleback',
-            icon: '🏔️',
-            location: 'Rangeley, ME',
-            region: 'maine',
-            familyOwned: true,
-        },
-        {
-            id: 'tremblant',
-            name: 'Mont Tremblant',
-            icon: '🇨🇦',
-            location: 'Mont-Tremblant, QC',
-            region: 'canada',
-            familyOwned: false,
-        },
-        {
-            id: 'mont-sainte-anne',
-            name: 'Mont-Sainte-Anne',
-            icon: '⛷️',
-            location: 'Beaupré, QC',
-            region: 'canada',
-            familyOwned: false,
-        },
-        {
-            id: 'le-massif',
-            name: 'Le Massif',
-            icon: '🏔️',
-            location: 'Petite-Rivière-Saint-François, QC',
-            region: 'canada',
-            familyOwned: true,
-        },
-        {
-            id: 'mont-sutton',
-            name: 'Mont Sutton',
-            icon: '⛰️',
-            location: 'Sutton, QC',
-            region: 'canada',
-            familyOwned: true,
-        },
-    ];
+        // Resort data loaded from resorts.js
+        // This script tag must be loaded before this inline script runs
+        // The RESORTS array is now globally available from resorts.js
+        const resorts = RESORTS;
 
         function getRatingText(rating, snowfall24h, resort) {
             const snow24h = parseInt(snowfall24h) || 0;
@@ -3584,7 +3276,7 @@
                             <h3>Governing Law & Contact</h3>
                             <p>These terms are governed by the laws of the State of New Jersey, USA, without regard to conflict of law principles. Any disputes shall be resolved in courts located in New Jersey.</p>
 
-                            <p>For questions, permissions, or legal concerns, contact: <strong>sendit@icecoast.ski</strong></p>
+                            <p>For questions, permissions, or legal concerns, contact: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0a796f646e637e4a63696f69656b797e24796163">[email&#160;protected]</a></strong></p>
                         </div>
                     </div>
                     <!-- End Accordion -->
@@ -3601,7 +3293,7 @@
                 </div>
             </div>
             </footer>
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         // Send It Meter - Fills on scroll
         const sendItMessages = [
             "Verdict: Send it.",
@@ -3647,15 +3339,4 @@
             }
 
             if (percentageText) {
-                percentageText.textContent = `${Math.min(100, Math.round(scrollPercentage))}%`;
-            }
-        }
-
-        // Listen for scroll events
-        window.addEventListener('scroll', updateSendItProgress);
-
-        // Initialize on page load
-        updateSendItProgress();
-    </script>
-</body>
-</html>
+                percentageText.textContent = `${Math.min(100, Math.round(scrollPercentage)
