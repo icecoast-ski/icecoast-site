@@ -3196,7 +3196,7 @@
             background-position: center 30% !important;
         }
 
-        END OF REMOVED RESORT-SPECIFIC RULES */
+        /* END OF REMOVED RESORT-SPECIFIC RULES */
 
 /* Force app.js-provided resort backgrounds (prevents legacy overrides from blank/wrong images). */
 .resort-card .resort-header {
