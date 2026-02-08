@@ -203,6 +203,7 @@
         let sendItRadiusMiles = DEFAULT_SEND_IT_RADIUS_MILES;
         let sendItRadiusOverrides = {};
         let sendItMaxAccuracyMeters = 200;
+        const SENDIT_DEVICE_ID_KEY = 'icecoast_sendit_device_id';
         const sendItUnlockedResorts = new Set();
         const sendItButtonCopyByResort = {};
 
@@ -300,6 +301,24 @@
 
         function formatMiles(miles) {
             return Number.isInteger(miles) ? `${miles}` : `${miles.toFixed(1)}`;
+        }
+
+        function getSendItDeviceId() {
+            try {
+                let id = localStorage.getItem(SENDIT_DEVICE_ID_KEY);
+                if (id && typeof id === 'string' && id.length >= 8) {
+                    return id;
+                }
+                if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+                    id = window.crypto.randomUUID();
+                } else {
+                    id = `sid-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`;
+                }
+                localStorage.setItem(SENDIT_DEVICE_ID_KEY, id);
+                return id;
+            } catch (e) {
+                return null;
+            }
         }
 
         function getSendItState(scoreValue) {
@@ -415,6 +434,7 @@
 
             try {
                 const pos = await getBrowserLocation();
+                const deviceId = getSendItDeviceId();
                 const voteUrl = new URL('sendit/vote', WORKER_URL).toString();
                 const resp = await fetch(voteUrl, {
                     method: 'POST',
@@ -424,7 +444,8 @@
                         score,
                         lat: pos.coords.latitude,
                         lon: pos.coords.longitude,
-                        accuracy: pos.coords.accuracy
+                        accuracy: pos.coords.accuracy,
+                        deviceId
                     })
                 });
 
