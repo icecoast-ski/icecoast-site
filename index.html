@@ -2677,7 +2677,7 @@
                   <div class="weather-current">
                     <span class="weather-icon">${weather.icon || '☁️'}</span>
                     <div>
-                      <div class="weather-temp">${weather.tempF ?? '—'}</div>
+                      <div class="weather-temp">${weather.tempF ?? (typeof weather.temp === 'number' ? `${weather.temp}°` : '—')}</div>
                       <div class="weather-desc">${weather.condition || 'Unknown'}</div>
                     </div>
                   </div>
@@ -2685,7 +2685,7 @@
                     <div class="weather-detail-item">
                       <span class="info-icon">${icons.thermometer}</span>
                       <span class="weather-detail-label">Feels like</span>
-                      <span class="weather-detail-value">${weather.feelsLikeF ?? '—'}</span>
+                      <span class="weather-detail-value">${weather.feelsLikeF ?? (typeof weather.feelsLike === 'number' ? `${weather.feelsLike}°` : '—')}</span>
                     </div>
                     <div class="weather-detail-item">
                       <span class="info-icon">${icons.wind}</span>
@@ -2706,8 +2706,8 @@
                         <div class="forecast-day">
                           <div class="forecast-day-name">${day.day}</div>
                           <div class="forecast-icon">${day.icon}</div>
-                          <div class="forecast-temp">${day.tempF}</div>
-                          <div class="forecast-snow">${day.snow}</div>
+                          <div class="forecast-temp">${day.tempF ?? (typeof day.temp === 'number' ? `${day.temp}°` : '—')}</div>
+                          <div class="forecast-snow">${typeof day.snow === 'number' ? `${day.snow}"` : (day.snow ?? '—')}</div>
                         </div>
                       `).join('')}
                     </div>
@@ -3246,7 +3246,9 @@
                 const result = await resp.json();
                 if (result.error || result.fallback) throw new Error(result.error || 'Worker returned fallback');
 
-                const apiData = result.data || {};
+                const apiData = (result && typeof result === 'object')
+                    ? (result.data && typeof result.data === 'object' ? result.data : result)
+                    : {};
                 let weatherUpdatedCount = 0;
                 let liftUpdatedCount = 0;
 
@@ -3258,9 +3260,13 @@
 
                     // ── Weather (OpenWeather) ──
                     if (live.weather) {
+                        const temp = typeof live.weather.temp === 'number' ? live.weather.temp : null;
+                        const feelsLike = typeof live.weather.feelsLike === 'number' ? live.weather.feelsLike : null;
                         resort.weather = {
-                            temp: live.weather.temp,
-                            feelsLike: live.weather.feelsLike,
+                            temp,
+                            tempF: temp !== null ? `${temp}°` : '—',
+                            feelsLike,
+                            feelsLikeF: feelsLike !== null ? `${feelsLike}°` : '—',
                             wind: live.weather.wind,
                             condition: live.weather.condition,
                             icon: live.weather.icon
@@ -3270,11 +3276,23 @@
 
                     // ── Forecast (OpenWeather) ──
                     if (live.forecast && live.forecast.length >= 3) {
-                        resort.forecast = live.forecast.slice(0, 3);
+                        resort.forecast = live.forecast.slice(0, 3).map(day => {
+                            const dayTemp = typeof day.temp === 'number' ? day.temp : null;
+                            const daySnow = typeof day.snow === 'number' ? day.snow : day.snow;
+                            return {
+                                ...day,
+                                temp: dayTemp,
+                                tempF: day.tempF ?? (dayTemp !== null ? `${dayTemp}°` : '—'),
+                                snow: daySnow
+                            };
+                        });
                     }
 
                     // ── Lift Status (Liftie) ──
                     if (live.lifts) {
+                        if (!resort.lifts || typeof resort.lifts !== 'object') {
+                            resort.lifts = {};
+                        }
                         resort.lifts.open = live.lifts.open;
                         resort.lifts.total = live.lifts.total;
                         resort.lifts.closed = live.lifts.total - live.lifts.open;
