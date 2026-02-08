@@ -838,8 +838,11 @@
                         <span class="sendit-subtitle">${sendItSubtitle}</span>
                       </div>
                     </div>
-                    <div class="sendit-scoreboard ${sendItState.className || sendItScoreClass}" aria-label="Full Send score">
+                    <div class="sendit-scoreboard ${sendItState.className || sendItScoreClass}" style="--sendit-score:${sendItScoreValue === null ? 0 : Math.max(0, Math.min(100, Math.round(sendItScoreValue)))}" aria-label="Full Send score">
                       <span class="sendit-score-kicker">Full Send</span>
+                      <div class="sendit-gauge" aria-hidden="true">
+                        <span class="sendit-gauge-pointer"></span>
+                      </div>
                       <span class="sendit-score-value">${sendItScoreDisplay}</span>
                     </div>
                   </div>

@@ -1020,15 +1020,16 @@
             flex-direction: column;
             align-items: flex-end;
             justify-content: center;
-            gap: 0.08rem;
-            min-width: 88px;
-            padding: 0.44rem 0.62rem;
-            border-radius: 12px;
+            gap: 0.24rem;
+            min-width: 104px;
+            padding: 0.48rem 0.62rem;
+            border-radius: 13px;
             border: 1px solid rgba(18, 30, 48, 0.16);
             background: linear-gradient(170deg, rgba(255, 255, 255, 0.94) 0%, rgba(239, 244, 255, 0.93) 100%);
             box-shadow: 0 6px 16px rgba(16, 26, 40, 0.1);
             position: relative;
             z-index: 1;
+            --sendit-score: 0;
         }
 
         .sendit-score-kicker {
@@ -1039,8 +1040,43 @@
             color: #4f5d71;
         }
 
+        .sendit-gauge {
+            width: 100%;
+            height: 0.54rem;
+            border-radius: 999px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid rgba(17, 24, 39, 0.18);
+            background: linear-gradient(90deg, #cf4b56 0%, #f1be4d 54%, #1dbd73 100%);
+            box-shadow: inset 0 1px 2px rgba(10, 14, 21, 0.22);
+        }
+
+        .sendit-gauge::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: calc(100% - (var(--sendit-score) * 1%));
+            background: rgba(238, 242, 248, 0.88);
+        }
+
+        .sendit-gauge-pointer {
+            position: absolute;
+            top: 50%;
+            left: calc(var(--sendit-score) * 1%);
+            transform: translate(-50%, -50%);
+            width: 0.44rem;
+            height: 0.44rem;
+            border-radius: 50%;
+            border: 2px solid #ffffff;
+            background: #0f172a;
+            box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.26);
+            z-index: 2;
+        }
+
         .sendit-score-value {
-            font-size: 1.12rem;
+            font-size: 1.1rem;
             line-height: 1;
             font-weight: 950;
             letter-spacing: -0.01em;
@@ -2395,8 +2431,13 @@
             }
 
             .sendit-scoreboard {
-                min-width: 74px;
+                min-width: 86px;
                 padding: 0.36rem 0.48rem;
+                gap: 0.2rem;
+            }
+
+            .sendit-gauge {
+                height: 0.5rem;
             }
 
             .sendit-score-value {
