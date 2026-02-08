@@ -302,6 +302,29 @@
             return Number.isInteger(miles) ? `${miles}` : `${miles.toFixed(1)}`;
         }
 
+        function getSendItState(scoreValue) {
+            if (!Number.isFinite(scoreValue)) {
+                return { label: 'Set The Tone', className: '' };
+            }
+            if (scoreValue >= 70) {
+                return { label: 'Full Send', className: 'hot' };
+            }
+            if (scoreValue >= 45) {
+                return { label: 'Could Be Worse', className: 'mid' };
+            }
+            return { label: 'Sharpen Edges', className: 'cold' };
+        }
+
+        function getSendItSocialLine(votesLastHour, votesTotal) {
+            if (votesLastHour > 0) {
+                return `${votesLastHour} local${votesLastHour === 1 ? '' : 's'} voted in the last hour`;
+            }
+            if (votesTotal > 0) {
+                return `No fresh votes in the last hour • ${votesTotal} total`;
+            }
+            return 'Be the first local to call it';
+        }
+
         function haversineMiles(lat1, lon1, lat2, lon2) {
             const toRad = (deg) => (deg * Math.PI) / 180;
             const R = 3958.8;
@@ -383,8 +406,10 @@
             }
 
             const originalText = buttonEl ? buttonEl.textContent : '';
+            const voteRowEl = buttonEl ? buttonEl.closest('.sendit-vote-row') : null;
             if (buttonEl) {
                 buttonEl.disabled = true;
+                buttonEl.classList.add('is-submitting');
                 buttonEl.textContent = 'Submitting...';
             }
 
@@ -414,12 +439,21 @@
                 if (typeof payload?.radiusMiles === 'number') {
                     sendItRadiusOverrides[resortId] = payload.radiusMiles;
                 }
+
+                if (voteRowEl) {
+                    voteRowEl.classList.remove('vote-ack');
+                    void voteRowEl.offsetWidth;
+                    voteRowEl.classList.add('vote-ack');
+                    setTimeout(() => voteRowEl.classList.remove('vote-ack'), 520);
+                }
+
                 renderResorts();
             } catch (e) {
                 alert(e.message || 'Unable to submit vote right now.');
             } finally {
                 if (buttonEl) {
                     buttonEl.disabled = false;
+                    buttonEl.classList.remove('is-submitting');
                     buttonEl.textContent = originalText;
                 }
             }
@@ -453,10 +487,13 @@
             const requiredMiles = getSendItRadiusMilesForResort(resort.id);
             const sendItScore = Number.isFinite(sendIt.score) ? `${sendIt.score}%` : '—';
             const sendItVotes = Number.isFinite(sendIt.votes) ? sendIt.votes : 0;
+            const sendItVotesLastHour = Number.isFinite(sendIt.votesLastHour) ? sendIt.votesLastHour : 0;
             const sendItScoreValue = Number.isFinite(sendIt.score) ? sendIt.score : null;
             const sendItScoreClass = sendItScoreValue === null
                 ? ''
                 : (sendItScoreValue >= 70 ? 'hot' : (sendItScoreValue >= 45 ? 'mid' : 'cold'));
+            const sendItState = getSendItState(sendItScoreValue);
+            const sendItSocialLine = getSendItSocialLine(sendItVotesLastHour, sendItVotes);
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
             const sendItSubtitle = 'Locals on-mountain only';
@@ -647,11 +684,12 @@
                       <span class="sendit-live-text">Locals Live</span>
                     </div>
                   </div>
-                  <div class="sendit-pulse ${sendItScoreClass}">
-                    <span class="sendit-pulse-label">Live pulse</span>
-                    <span class="sendit-pulse-value">${sendItScore}</span>
-                    <span class="sendit-votes">${sendItVotes} vote${sendItVotes === 1 ? '' : 's'}</span>
+                  <div class="sendit-pulse ${sendItState.className || sendItScoreClass}">
+                    <span class="sendit-pulse-label">Slope Signal</span>
+                    <span class="sendit-state">${sendItState.label}</span>
+                    <span class="sendit-votes">${sendItScore} • ${sendItVotes} vote${sendItVotes === 1 ? '' : 's'}</span>
                   </div>
+                  <div class="sendit-social-proof">${sendItSocialLine}</div>
                   ${sendItPrompt}
                   ${sendItControls}
                 </div>
