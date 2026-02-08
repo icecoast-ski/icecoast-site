@@ -1042,37 +1042,58 @@
 
         .sendit-gauge {
             width: 100%;
-            height: 0.54rem;
-            border-radius: 999px;
+            min-width: 92px;
+            height: 3.15rem;
+            border-radius: 999px 999px 0 0;
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(17, 24, 39, 0.18);
-            background: linear-gradient(90deg, #cf4b56 0%, #f1be4d 54%, #1dbd73 100%);
-            box-shadow: inset 0 1px 2px rgba(10, 14, 21, 0.22);
+            border: 1px solid rgba(17, 24, 39, 0.2);
+            border-bottom: 0;
+            background: conic-gradient(from 180deg, #cf4b56 0deg, #f1be4d 90deg, #1dbd73 180deg);
+            box-shadow: inset 0 2px 3px rgba(10, 14, 21, 0.16);
+            align-self: stretch;
         }
 
         .sendit-gauge::after {
             content: '';
             position: absolute;
-            top: 0;
-            right: 0;
+            left: 0.46rem;
+            right: 0.46rem;
+            top: 0.46rem;
             bottom: 0;
-            width: calc(100% - (var(--sendit-score) * 1%));
-            background: rgba(238, 242, 248, 0.88);
+            border-radius: 999px 999px 0 0;
+            border: 1px solid rgba(17, 24, 39, 0.08);
+            border-bottom: 0;
+            background: rgba(248, 250, 253, 0.96);
         }
 
         .sendit-gauge-pointer {
             position: absolute;
-            top: 50%;
-            left: calc(var(--sendit-score) * 1%);
-            transform: translate(-50%, -50%);
-            width: 0.44rem;
-            height: 0.44rem;
+            left: 50%;
+            bottom: 0.1rem;
+            width: 2px;
+            height: 2.02rem;
+            border-radius: 999px;
+            background: #111827;
+            transform-origin: 50% calc(100% - 0.06rem);
+            transform: translateX(-50%) rotate(calc(-90deg + (var(--sendit-score) * 1.8deg)));
+            transition: transform 280ms ease;
+            z-index: 3;
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
+        }
+
+        .sendit-gauge-pointer::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            bottom: -0.15rem;
+            transform: translateX(-50%);
+            width: 0.5rem;
+            height: 0.5rem;
             border-radius: 50%;
             border: 2px solid #ffffff;
-            background: #0f172a;
+            background: #111827;
             box-shadow: 0 0 0 1px rgba(15, 23, 42, 0.26);
-            z-index: 2;
         }
 
         .sendit-score-value {
@@ -2437,7 +2458,12 @@
             }
 
             .sendit-gauge {
-                height: 0.5rem;
+                min-width: 78px;
+                height: 2.48rem;
+            }
+
+            .sendit-gauge-pointer {
+                height: 1.62rem;
             }
 
             .sendit-score-value {
