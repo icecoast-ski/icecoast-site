@@ -1087,7 +1087,7 @@
                 await new Promise(resolve => setTimeout(resolve, 320));
 
                 renderResorts();
-                celebrateSendItVote(resortId);
+                celebrateSendItVote(resortId, score, buttonEl);
                 showSendItToast('Local vote locked in');
             } catch (e) {
                 triggerHaptic([24, 34, 24]);
@@ -2065,58 +2065,3 @@ const backgroundSizeByResort = {
         } else {
             console.error('❌ Back to top button not found!');
         }
-
-        // Send It Meter - Fills on scroll
-        const sendItMessages = [
-            "Verdict: Send it.",
-            "Confidence: Reckless.",
-            "Conditions: Doesn't matter.",
-            "We're going.",
-            "Edges mandatory.",
-            "Snow = yes. Ice = also yes."
-        ];
-
-        function updateSendItMeter() {
-            const randomMessage = sendItMessages[Math.floor(Math.random() * sendItMessages.length)];
-            const messageElement = document.getElementById('sendItMessage');
-
-            if (messageElement) {
-                messageElement.textContent = randomMessage;
-            }
-        }
-
-        // Update random message on page load
-        updateSendItMeter();
-
-        // Fill bar based on scroll position
-        function updateSendItProgress() {
-            const footer = document.querySelector('.ski-footer');
-            if (!footer) return;
-
-            const windowHeight = window.innerHeight;
-            const documentHeight = document.documentElement.scrollHeight;
-            const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-            const footerTop = footer.offsetTop;
-
-            // Calculate how far user has scrolled as percentage
-            const maxScroll = documentHeight - windowHeight;
-            const scrollPercentage = (scrollTop / maxScroll) * 100;
-
-            // Update progress bar and percentage text
-            const progressBar = document.getElementById('sendItProgress');
-            const percentageText = document.getElementById('sendItPercentage');
-
-            if (progressBar) {
-                progressBar.style.width = `${Math.min(100, scrollPercentage)}%`;
-            }
-
-            if (percentageText) {
-                percentageText.textContent = `${Math.min(100, Math.round(scrollPercentage))}%`;
-            }
-        }
-
-        // Listen for scroll events
-        window.addEventListener('scroll', updateSendItProgress);
-
-        // Initialize on page load
-        updateSendItProgress();

@@ -1132,7 +1132,7 @@
             background: #111827;
             transform-origin: 50% calc(100% - 0.06rem);
             transform: translateX(-50%) rotate(calc(-90deg + (var(--sendit-score) * 1.8deg)));
-            transition: none;
+            transition: transform 0.42s cubic-bezier(0.22, 1.02, 0.36, 1);
             z-index: 4;
             box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
         }
@@ -1570,6 +1570,63 @@
             transform: translateY(-1px) rotate(-1.2deg);
         }
 
+
+.sendit-skier-launch {
+    position: absolute;
+    left: var(--launch-x, 50%);
+    top: var(--launch-y, 60%);
+    transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(0deg) scale(0.8);
+    opacity: 0;
+    z-index: 22;
+    pointer-events: none;
+    filter: drop-shadow(0 2px 4px rgba(7, 19, 32, 0.35));
+    will-change: transform, opacity;
+}
+
+.sendit-skier-launch.active {
+    animation: senditSkierLaunch 0.86s cubic-bezier(0.2, 0.86, 0.2, 1) forwards;
+}
+
+.sendit-scoreboard.vote-pop .sendit-gauge-pointer {
+    animation: senditNeedleKick 0.7s cubic-bezier(0.2, 0.9, 0.3, 1.12);
+}
+
+.sendit-vote-btn.vote-success {
+    box-shadow: 0 0 0 3px rgba(29, 173, 115, 0.2), 0 8px 18px rgba(20, 36, 52, 0.16), 2px 2px 0 rgba(0, 0, 0, 0.12);
+}
+
+@keyframes senditSkierLaunch {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(0deg) scale(0.82);
+    }
+    8% {
+        opacity: 1;
+    }
+    58% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translate3d(92px, -108px, 0) rotate(-14deg) scale(1.08);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) translate3d(154px, -166px, 0) rotate(-22deg) scale(0.92);
+    }
+}
+
+@keyframes senditNeedleKick {
+    0% {
+        transform: translateX(-50%) rotate(calc(-90deg + (var(--sendit-score) * 1.8deg)));
+    }
+    35% {
+        transform: translateX(-50%) rotate(calc(-82deg + (var(--sendit-score) * 1.8deg)));
+    }
+    68% {
+        transform: translateX(-50%) rotate(calc(-94deg + (var(--sendit-score) * 1.8deg)));
+    }
+    100% {
+        transform: translateX(-50%) rotate(calc(-90deg + (var(--sendit-score) * 1.8deg)));
+    }
+}
         .sendit-vote-btn[data-score="20"] { order: 1; }
         .sendit-vote-btn[data-score="60"] { order: 2; }
         .sendit-vote-btn[data-score="100"] { order: 3; }
