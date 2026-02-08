@@ -1,0 +1,73 @@
+/**
+ * 🎿 ICECOAST MASTER RESORT DATABASE
+ * This file maps the "ID" from your worker to the "Pretty Name" and "State" on the UI.
+ */
+const RESORT_META = {
+  camelback: { name: "Camelback", state: "PA", region: "poconos" },
+  "blue-mountain": { name: "Blue Mountain", state: "PA", region: "poconos" },
+  "jack-frost": { name: "Jack Frost", state: "PA", region: "poconos" },
+  shawnee: { name: "Shawnee", state: "PA", region: "poconos" },
+  "bear-creek": { name: "Bear Creek", state: "PA", region: "poconos" },
+  elk: { name: "Elk Mountain", state: "PA", region: "poconos" },
+  "big-boulder": { name: "Big Boulder", state: "PA", region: "poconos" },
+  montage: { name: "Montage Mountain", state: "PA", region: "poconos" },
+  hunter: { name: "Hunter Mountain", state: "NY", region: "catskills" },
+  windham: { name: "Windham", state: "NY", region: "catskills" },
+  belleayre: { name: "Belleayre", state: "NY", region: "catskills" },
+  whiteface: { name: "Whiteface", state: "NY", region: "adirondacks" },
+  "gore-mountain": {
+    name: "Gore Mountain",
+    state: "NY",
+    region: "adirondacks",
+  },
+  plattekill: { name: "Plattekill", state: "NY", region: "catskills" },
+  killington: { name: "Killington", state: "VT", region: "central-vt" },
+  stowe: { name: "Stowe", state: "VT", region: "central-vt" },
+  okemo: { name: "Okemo", state: "VT", region: "central-vt" },
+  "mount-snow": { name: "Mount Snow", state: "VT", region: "southern-vt" },
+  stratton: { name: "Stratton", state: "VT", region: "southern-vt" },
+  "jay-peak": { name: "Jay Peak", state: "VT", region: "northern-vt" },
+  sugarbush: { name: "Sugarbush", state: "VT", region: "central-vt" },
+  "mad-river-glen": {
+    name: "Mad River Glen",
+    state: "VT",
+    region: "central-vt",
+  },
+  pico: { name: "Pico", state: "VT", region: "central-vt" },
+  "magic-mountain": {
+    name: "Magic Mountain",
+    state: "VT",
+    region: "southern-vt",
+  },
+  bromley: { name: "Bromley", state: "VT", region: "southern-vt" },
+  "bolton-valley": { name: "Bolton Valley", state: "VT", region: "central-vt" },
+  "smugglers-notch": {
+    name: "Smugglers Notch",
+    state: "VT",
+    region: "northern-vt",
+  },
+  "suicide-six": { name: "Saskadena Six", state: "VT", region: "central-vt" },
+  burke: { name: "Burke Mountain", state: "VT", region: "northern-vt" },
+  loon: { name: "Loon Mountain", state: "NH", region: "white-mountains" },
+  waterville: {
+    name: "Waterville Valley",
+    state: "NH",
+    region: "white-mountains",
+  },
+  cannon: { name: "Cannon Mountain", state: "NH", region: "white-mountains" },
+  wildcat: { name: "Wildcat", state: "NH", region: "white-mountains" },
+  attitash: { name: "Attitash", state: "NH", region: "white-mountains" },
+  brettonwoods: {
+    name: "Bretton Woods",
+    state: "NH",
+    region: "white-mountains",
+  },
+  "mount-sunapee": {
+    name: "Mount Sunapee",
+    state: "NH",
+    region: "white-mountains",
+  },
+  "sunday-river": { name: "Sunday River", state: "ME", region: "maine" },
+  sugarloaf: { name: "Sugarloaf", state: "ME", region: "maine" },
+  saddleback: { name: "Saddleback", state: "ME", region: "maine" },
+};
