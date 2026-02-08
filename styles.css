@@ -1010,8 +1010,8 @@
             height: 0.46rem;
             border-radius: 50%;
             background: #21c468;
-            box-shadow: 0 0 0 4px rgba(33, 196, 104, 0.2);
-            animation: senditPulseDot 1.85s ease-in-out infinite;
+            box-shadow: 0 0 0 3px rgba(33, 196, 104, 0.18);
+            animation: none;
             flex-shrink: 0;
         }
 
@@ -1092,7 +1092,7 @@
             background: #111827;
             transform-origin: 50% calc(100% - 0.06rem);
             transform: translateX(-50%) rotate(calc(-90deg + (var(--sendit-score) * 1.8deg)));
-            transition: transform 280ms ease;
+            transition: none;
             z-index: 3;
             box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.3);
         }
@@ -1353,8 +1353,8 @@
                 box-shadow: 0 0 0 3px rgba(33, 196, 104, 0.2);
             }
             50% {
-                transform: scale(1.08);
-                box-shadow: 0 0 0 6px rgba(33, 196, 104, 0.08);
+                transform: scale(1);
+                box-shadow: 0 0 0 3px rgba(33, 196, 104, 0.2);
             }
         }
 
@@ -2475,6 +2475,11 @@
                 padding: 0.3rem 0.3rem;
                 font-size: clamp(0.62rem, 2.75vw, 0.72rem);
                 letter-spacing: 0.005em;
+                transition: none;
+            }
+
+            .sendit-unlock-btn {
+                transition: none;
             }
 
             .sendit-header {
