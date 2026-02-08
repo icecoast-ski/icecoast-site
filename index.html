@@ -2337,9 +2337,9 @@
         };
 
         // Resort data loaded from resorts.js
-        // This script tag must be loaded before this inline script runs
-        // The RESORTS array is now globally available from resorts.js
+        // The RESORTS array is globally available from the resorts.js script loaded above
         const resorts = RESORTS;
+
 
         function getRatingText(rating, snowfall24h, resort) {
             const snow24h = parseInt(snowfall24h) || 0;
@@ -3276,7 +3276,7 @@
                             <h3>Governing Law & Contact</h3>
                             <p>These terms are governed by the laws of the State of New Jersey, USA, without regard to conflict of law principles. Any disputes shall be resolved in courts located in New Jersey.</p>
 
-                            <p>For questions, permissions, or legal concerns, contact: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="0a796f646e637e4a63696f69656b797e24796163">[email&#160;protected]</a></strong></p>
+                            <p>For questions, permissions, or legal concerns, contact: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="780b1d161c110c38111b1d1b17190b0c560b1311">[email&#160;protected]</a></strong></p>
                         </div>
                     </div>
                     <!-- End Accordion -->
@@ -3339,4 +3339,28 @@
             }
 
             if (percentageText) {
-                percentageText.textContent = `${Math.min(100, Math.round(scrollPercentage)
+                percentageText.textContent = `${Math.min(100, Math.round(scrollPercentage)))}%`;
+            }
+        }
+
+        // Update on scroll
+        window.addEventListener('scroll', updateSendItProgress);
+        window.addEventListener('resize', updateSendItProgress);
+        updateSendItProgress();
+
+        // Legal accordion toggle
+        function toggleLegal() {
+            const accordion = document.getElementById('legalAccordion');
+            const toggleIcon = document.querySelector('.legal-toggle-icon');
+            
+            if (accordion.style.display === 'block') {
+                accordion.style.display = 'none';
+                toggleIcon.textContent = '▼';
+            } else {
+                accordion.style.display = 'block';
+                toggleIcon.textContent = '▲';
+            }
+        }
+    </script>
+</body>
+</html>
