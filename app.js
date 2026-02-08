@@ -719,7 +719,7 @@
         const SENDIT_DEVICE_ID_KEY = 'icecoast_sendit_device_id';
         const sendItUnlockedResorts = new Set();
         const sendItButtonCopyByResort = {};
-        const sendItVerifyCopyByResort = {};
+        const sendItVerifyFlavorByResort = {};
         const SENDIT_TEST_UNLIMITED_RESORTS = new Set(['blue-mountain']);
 
         const SENDIT_LOW_OPTIONS = [
@@ -808,11 +808,14 @@
             return template.replace('{minutes}', `${minutes}`);
         }
 
-        function getSendItVerifySubtitle(resortId) {
-            if (!sendItVerifyCopyByResort[resortId]) {
-                sendItVerifyCopyByResort[resortId] = pickRandomLabel(SENDIT_VERIFY_TAGLINES);
+        function getSendItVerifySubtitleParts(resortId) {
+            if (!sendItVerifyFlavorByResort[resortId]) {
+                sendItVerifyFlavorByResort[resortId] = pickRandomLabel(SENDIT_VERIFY_TAGLINES);
             }
-            return `Verify location to vote on real-time conditions. ${sendItVerifyCopyByResort[resortId]}`;
+            return {
+                primary: 'Verify location to vote on real-time conditions',
+                secondary: sendItVerifyFlavorByResort[resortId]
+            };
         }
 
         function loadSendItUnlockState() {
@@ -897,7 +900,7 @@
             if (votesTotal > 0) {
                 return `No fresh votes in the last hour • ${votesTotal} total`;
             }
-            return 'No local calls yet';
+            return '';
         }
 
         function haversineMiles(lat1, lon1, lat2, lon2) {
@@ -1147,9 +1150,9 @@
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const unlimitedTestMode = isUnlimitedSendItTestResort(resort.id);
             const canVote = hasCoords && (unlimitedTestMode || sendItUnlockedResorts.has(resort.id));
-            const sendItSubtitle = canVote
-                ? 'Vote current conditions now'
-                : getSendItVerifySubtitle(resort.id);
+            const verifySubtitle = getSendItVerifySubtitleParts(resort.id);
+            const sendItSubtitlePrimary = canVote ? 'Vote current conditions now' : verifySubtitle.primary;
+            const sendItSubtitleSecondary = canVote ? '' : verifySubtitle.secondary;
             const sendItPrompt = canVote ? `<div class="sendit-prompt">Tap your call</div>` : '';
             const sendItControls = !hasCoords
                 ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>`
@@ -1333,7 +1336,8 @@
                       <div class="rating-label sendit-title">SLOPE SIGNAL</div>
                     </div>
                     <div class="sendit-subline">
-                      <span class="sendit-subtitle">${sendItSubtitle}</span>
+                      <span class="sendit-subtitle">${sendItSubtitlePrimary}</span>
+                      ${sendItSubtitleSecondary ? `<span class="sendit-subtitle-flavor">${sendItSubtitleSecondary}</span>` : ''}
                     </div>
                     <div class="sendit-result ${sendItState.className || sendItScoreClass}">${sendItState.label}</div>
                   </div>
@@ -1348,7 +1352,7 @@
                     </div>
                     <span class="sendit-score-value">${sendItScoreMarkup}</span>
                   </div>
-                  <div class="sendit-social-proof">${sendItSocialLine}</div>
+                  ${sendItSocialLine ? `<div class="sendit-social-proof">${sendItSocialLine}</div>` : ''}
                   ${sendItPrompt}
                   ${sendItControls}
                 </div>
