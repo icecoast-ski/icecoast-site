@@ -2169,7 +2169,7 @@
             <button class="filter-btn" data-region="connecticut">Connecticut</button>
             <button class="filter-btn" data-region="white-mountains">White Mtns</button>
             <button class="filter-btn" data-region="maine">Maine</button>
-            <button class="filter-btn" data-region="canada">🍁 Canada</button>
+            <button class="filter-btn" data-region="canada">🍁</button>
 
             <span class="filter-label" style="margin-left: 1rem;">Pass:</span>
             <button class="filter-btn active" data-pass="all">All</button>
@@ -2517,16 +2517,39 @@
             }
 
             // Icon handling
-            const iconUrl = (typeof resortIcons !== 'undefined' && resortIcons[resort.id])
-                ? resortIcons[resort.id]
-                : null;
-            const iconMarkup = iconUrl
-                ? `<img src="${iconUrl}" alt="${resort.name} icon" class="resort-icon" />`
-                : `<div class="resort-icon-fallback">${resort.icon || '🎿'}</div>`;
+            // Resort emoji/icons removed from card header by request.
+            const iconMarkup = '';
+
+            // Fallback photo map for resorts that do not yet have their own card background image.
+            const backgroundFallbacks = {
+                // PA/NY
+                'jack-frost': 'blue-mountain',
+                'bear-creek': 'blue-mountain',
+                'big-boulder': 'jack-frost',
+                'montage': 'elk',
+                'belleayre': 'windham',
+                // MA/CT
+                'jiminy-peak': 'stratton',
+                'wachusett': 'okemo',
+                'mohawk': 'shawnee',
+                // VT
+                'pico': 'killington',
+                'smugglers-notch': 'stowe',
+                'burke': 'jay-peak',
+                // ME/NH
+                'saddleback': 'sugarloaf',
+                // Canada
+                'tremblant': 'stowe',
+                'mont-sainte-anne': 'sunday-river',
+                'le-massif': 'sugarloaf',
+                'mont-sutton': 'jay-peak'
+            };
+
+            const backgroundId = backgroundFallbacks[resort.id] || resort.id;
 
             return `
             <div class="resort-card" data-region="${resort.region}" data-resort="${resort.id}">
-              <div class="resort-header" style="--bg: url('resorts/${resort.id}-1280.avif')">
+              <div class="resort-header" style="--bg: url('resorts/${resort.id}-1280.avif'), url('resorts/${backgroundId}-1280.avif'), url('resorts/killington-1280.avif')">
                 ${resort.familyOwned ? `<div class="family-badge">Family-Owned</div>` : ''}
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;">
                   <div style="flex:1;">
