@@ -640,6 +640,10 @@
                     <div>
                       <div class="rating-label">SEND IT METER</div>
                       <div class="sendit-subtitle">${sendItSubtitle}</div>
+                      <div class="sendit-meta">
+                        <span class="sendit-chip">Locals Live</span>
+                        <span class="sendit-votes">${sendItVotes} vote${sendItVotes === 1 ? '' : 's'}</span>
+                      </div>
                     </div>
                     <div class="sendit-score ${sendItScoreClass}">${sendItScore}</div>
                   </div>
