@@ -987,8 +987,8 @@
             skier.style.setProperty('--hop-y', `${Math.round(deltaY - 24)}px`);
             skier.style.setProperty('--grind-x', `${Math.round(deltaX + (targetRect.width * 0.22))}px`);
             skier.style.setProperty('--grind-y', `${Math.round(deltaY - 3)}px`);
-            skier.style.setProperty('--exit-x', `${Math.round(deltaX + (isFullSend ? 148 : 92))}px`);
-            skier.style.setProperty('--exit-y', `${Math.round(deltaY + (isFullSend ? -152 : 168))}px`);
+            skier.style.setProperty('--exit-x', `${Math.round(deltaX + (isFullSend ? 118 : 70))}px`);
+            skier.style.setProperty('--exit-y', `${Math.round(deltaY + (isFullSend ? -116 : 124))}px`);
             document.body.appendChild(skier);
 
             targetButton.classList.add(isFullSend ? 'sendit-grind-epic' : 'sendit-grind-target');
