@@ -978,7 +978,7 @@
             const railEndX = (targetRect.right - 12) - startX;
             const railEndY = (targetRect.top - 10) - startY;
             const maxDrop = Math.max(240, window.innerHeight - startY + 80);
-            const downX = railEndX + (isFullSend ? 42 : 26);
+            const downX = railEndX + (isFullSend ? 14 : 8);
             const downY = Math.min(maxDrop, isFullSend ? 880 : 760);
 
             const skier = document.createElement('span');
@@ -1000,7 +1000,7 @@
             setTimeout(() => {
                 targetButton.classList.remove('sendit-grind-target', 'sendit-grind-epic');
                 skier.remove();
-            }, isFullSend ? 2200 : 1900);
+            }, isFullSend ? 2300 : 2000);
         }
 
         function celebrateSendItVote(resortId, scoreValue, buttonEl) {
