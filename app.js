@@ -155,8 +155,8 @@
             let score = 0;
 
             // 1. SNOW – use 24h/48h from snowfall object if present
-            const snow24h = parseInt(safeSnowfall.snowfall24h ?? 0, 10);
-            const snow48h = parseInt(safeSnowfall.snowfall48h ?? 0, 10);
+            const snow24h = parseInt(safeSnowfall.snowfall24h ?? safeSnowfall['24h'] ?? 0, 10);
+            const snow48h = parseInt(safeSnowfall.snowfall48h ?? safeSnowfall['48h'] ?? 0, 10);
             let snowScore = 0;
             if (snow24h >= 6) snowScore = 5;
             else if (snow24h >= 4) snowScore = 4;
@@ -196,6 +196,102 @@
 
             // Round to 1–5
             return Math.max(1, Math.min(5, Math.round(score)));
+        }
+
+        function parsePriceToNumber(value, fallback = 999) {
+            if (typeof value === 'number' && Number.isFinite(value)) return value;
+            if (typeof value === 'string') {
+                const parsed = parseFloat(value.replace(/[^0-9.]/g, ''));
+                if (Number.isFinite(parsed)) return parsed;
+            }
+            return fallback;
+        }
+
+        function normalizeSnowfall(resort) {
+            if (!resort || typeof resort !== 'object') return;
+            const snow24 = resort.snowfall24h ?? resort.snowfall?.['24h'] ?? 0;
+            const snow48 = resort.snowfall48h ?? resort.snowfall?.['48h'] ?? 0;
+            const snow7d = resort.snowfall7d ?? resort.snowfall?.['7d'] ?? 0;
+            resort.snowfall24h = snow24;
+            resort.snowfall48h = snow48;
+            resort.snowfall7d = snow7d;
+            resort.snowfall = {
+                '24h': snow24,
+                '48h': snow48,
+                '7d': snow7d
+            };
+        }
+
+        function applyManualResortOverrides() {
+            const overrides =
+                (typeof window !== 'undefined' && (window.MANUAL_RESORT_OVERRIDES || window.ICECOAST_MANUAL_OVERRIDES))
+                || {};
+            if (!overrides || typeof overrides !== 'object') return;
+
+            resorts.forEach((resort) => {
+                const patch = overrides[resort.id];
+                if (!patch || typeof patch !== 'object') return;
+
+                if (Number.isFinite(Number(patch.icecoastRating))) {
+                    resort.manualRating = Math.max(1, Math.min(5, Number(patch.icecoastRating)));
+                    resort.rating = resort.manualRating;
+                }
+
+                if (typeof patch.dynamicPricing === 'boolean') {
+                    resort.dynamicPricing = patch.dynamicPricing;
+                }
+
+                if (patch.liftTicket && typeof patch.liftTicket === 'object') {
+                    const weekday = patch.liftTicket.weekday ?? resort.liftTicket?.weekday ?? '—';
+                    const weekend = patch.liftTicket.weekend ?? resort.liftTicket?.weekend ?? weekday;
+                    resort.liftTicket = { weekday, weekend };
+                }
+
+                if (typeof patch.parking === 'string') {
+                    resort.parking = patch.parking;
+                }
+
+                if (Number.isFinite(Number(patch.vertical))) {
+                    resort.elevation = { ...(resort.elevation || {}), vertical: Number(patch.vertical) };
+                }
+
+                if (patch.trails && typeof patch.trails === 'object') {
+                    const open = Number.isFinite(Number(patch.trails.open)) ? Number(patch.trails.open) : (resort.trails?.open ?? 0);
+                    const closed = Number.isFinite(Number(patch.trails.closed)) ? Number(patch.trails.closed) : (resort.trails?.closed ?? 0);
+                    const total = Number.isFinite(Number(patch.trails.total)) ? Number(patch.trails.total) : open + closed;
+                    resort.trails = { open, closed, total };
+                }
+
+                if (patch.lifts && typeof patch.lifts === 'object') {
+                    const open = Number.isFinite(Number(patch.lifts.open)) ? Number(patch.lifts.open) : (resort.lifts?.open ?? 0);
+                    const total = Number.isFinite(Number(patch.lifts.total)) ? Number(patch.lifts.total) : (resort.lifts?.total ?? open);
+                    const closed = Math.max(0, total - open);
+                    resort.lifts = { open, total, closed };
+                }
+
+                if (typeof patch.conditions === 'string' && patch.conditions.trim()) {
+                    resort.conditions = patch.conditions.trim();
+                }
+
+                if (Number.isFinite(Number(patch.snowfall24h))) {
+                    resort.snowfall24h = Number(patch.snowfall24h);
+                }
+                if (Number.isFinite(Number(patch.snowfall48h))) {
+                    resort.snowfall48h = Number(patch.snowfall48h);
+                }
+                if (Number.isFinite(Number(patch.snowfall7d))) {
+                    resort.snowfall7d = Number(patch.snowfall7d);
+                }
+
+                if (Number.isFinite(Number(patch.apres))) {
+                    resort.apres = Math.max(0, Math.min(5, Number(patch.apres)));
+                }
+                if (Number.isFinite(Number(patch.family))) {
+                    resort.family = Math.max(0, Math.min(5, Number(patch.family)));
+                }
+
+                normalizeSnowfall(resort);
+            });
         }
 
         const DEFAULT_SEND_IT_RADIUS_MILES = 1.5;
@@ -1024,15 +1120,15 @@
                     break;
                 case 'price-low':
                     filtered.sort((a, b) => {
-                        const aPrice = a.liftTicket ? a.liftTicket.weekend : 999;
-                        const bPrice = b.liftTicket ? b.liftTicket.weekend : 999;
+                        const aPrice = parsePriceToNumber(a.liftTicket?.weekend, 999);
+                        const bPrice = parsePriceToNumber(b.liftTicket?.weekend, 999);
                         return aPrice - bPrice;
                     });
                     break;
                 case 'price-high':
                     filtered.sort((a, b) => {
-                        const aPrice = a.liftTicket ? a.liftTicket.weekend : 0;
-                        const bPrice = b.liftTicket ? b.liftTicket.weekend : 0;
+                        const aPrice = parsePriceToNumber(a.liftTicket?.weekend, 0);
+                        const bPrice = parsePriceToNumber(b.liftTicket?.weekend, 0);
                         return bPrice - aPrice;
                     });
                     break;
@@ -1162,6 +1258,9 @@
         const WORKER_URL = 'https://cloudflare-worker.rickt123-0f8.workers.dev/';
         const REFRESH_INTERVAL = 15 * 60 * 1000; // 15 min
 
+        resorts.forEach(normalizeSnowfall);
+        applyManualResortOverrides();
+
         loadSendItUnlockState();
         renderResorts();
 
@@ -1274,7 +1373,11 @@
 
                 // Recalculate ratings
                 resorts.forEach(resort => {
-                    resort.rating = calculateRating(resort.weather, resort.snowfall);
+                    if (Number.isFinite(Number(resort.manualRating))) {
+                        resort.rating = Math.max(1, Math.min(5, Number(resort.manualRating)));
+                    } else {
+                        resort.rating = calculateRating(resort.weather, resort.snowfall);
+                    }
                 });
 
                 renderResorts();
