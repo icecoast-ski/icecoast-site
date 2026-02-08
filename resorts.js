@@ -544,3 +544,17 @@ if (typeof exports !== 'undefined') {
     exports.getResortIds = getResortIds;
     exports.getResortCount = getResortCount;
 }
+
+
+// For browsers (make it globally available)
+if (typeof window !== 'undefined') {
+    window.RESORTS = RESORTS;
+    window.resorts = RESORTS;  // lowercase alias for compatibility
+    window.getResortById = getResortById;
+    window.getResortsByRegion = getResortsByRegion;
+    window.getFamilyOwnedResorts = getFamilyOwnedResorts;
+    window.getResortsWithLiftie = getResortsWithLiftie;
+    window.getResortsAsObject = getResortsAsObject;
+    window.getResortIds = getResortIds;
+    window.getResortCount = getResortCount;
+}
