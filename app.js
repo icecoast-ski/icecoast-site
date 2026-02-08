@@ -1247,7 +1247,8 @@
 
             // Unique resort art is now one file per resort id in /v2/resort-art.
 const backgroundImageByResort = {
-    'camelback': 'camelback.jpg'
+    'camelback': 'camelback.jpg',
+    'cannon': 'cannon-alt.jpg'
 };
 const backgroundImageFile = backgroundImageByResort[resort.id] || `${resort.id}.jpg`;
 
