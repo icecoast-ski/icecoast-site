@@ -304,7 +304,7 @@
 
         function getSendItState(scoreValue) {
             if (!Number.isFinite(scoreValue)) {
-                return { label: 'Set The Tone', className: '' };
+                return { label: 'First Chair', className: 'pending' };
             }
             if (scoreValue >= 70) {
                 return { label: 'Full Send', className: 'hot' };
@@ -493,6 +493,10 @@
                 ? ''
                 : (sendItScoreValue >= 70 ? 'hot' : (sendItScoreValue >= 45 ? 'mid' : 'cold'));
             const sendItState = getSendItState(sendItScoreValue);
+            const sendItVotesText = `${sendItVotes} vote${sendItVotes === 1 ? '' : 's'}`;
+            const sendItMetaText = Number.isFinite(sendItScoreValue)
+                ? `${sendItScore} • ${sendItVotesText}`
+                : sendItVotesText;
             const sendItSocialLine = getSendItSocialLine(sendItVotesLastHour, sendItVotes);
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
@@ -687,7 +691,7 @@
                   <div class="sendit-pulse ${sendItState.className || sendItScoreClass}">
                     <span class="sendit-pulse-label">Slope Signal</span>
                     <span class="sendit-state">${sendItState.label}</span>
-                    <span class="sendit-votes">${sendItScore} • ${sendItVotes} vote${sendItVotes === 1 ? '' : 's'}</span>
+                    <span class="sendit-votes">${sendItMetaText}</span>
                   </div>
                   <div class="sendit-social-proof">${sendItSocialLine}</div>
                   ${sendItPrompt}
