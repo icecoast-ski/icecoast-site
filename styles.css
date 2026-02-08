@@ -3205,3 +3205,63 @@
     background-position: var(--bg-pos, center 42%) !important;
     background-repeat: no-repeat !important;
 }
+
+/* Wildcat can run dark; add a heavier top overlay for text readability. */
+.resort-card[data-resort="wildcat"] .resort-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+        to bottom,
+        rgba(8, 14, 28, 0.54) 0%,
+        rgba(8, 14, 28, 0.28) 42%,
+        rgba(8, 14, 28, 0.08) 100%
+    );
+    z-index: 1;
+}
+
+.resort-card[data-resort="wildcat"] .resort-header > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* Sugarloaf can also be low-contrast; boost top text contrast. */
+.resort-card[data-resort="sugarloaf"] .resort-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+        to bottom,
+        rgba(10, 16, 30, 0.52) 0%,
+        rgba(10, 16, 30, 0.24) 44%,
+        rgba(10, 16, 30, 0.06) 100%
+    );
+    z-index: 1;
+}
+
+.resort-card[data-resort="sugarloaf"] .resort-header > * {
+    position: relative;
+    z-index: 2;
+}
+
+/* Montage can run low-contrast; add stronger top shading for readability. */
+.resort-card[data-resort="montage"] .resort-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(
+        to bottom,
+        rgba(8, 12, 24, 0.56) 0%,
+        rgba(8, 12, 24, 0.28) 42%,
+        rgba(8, 12, 24, 0.08) 100%
+    );
+    z-index: 1;
+}
+
+.resort-card[data-resort="montage"] .resort-header > * {
+    position: relative;
+    z-index: 2;
+}
