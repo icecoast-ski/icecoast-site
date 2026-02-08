@@ -719,6 +719,7 @@
         const SENDIT_DEVICE_ID_KEY = 'icecoast_sendit_device_id';
         const sendItUnlockedResorts = new Set();
         const sendItButtonCopyByResort = {};
+        const SENDIT_TEST_UNLIMITED_RESORTS = new Set(['blue-mountain']);
 
         const SENDIT_LOW_OPTIONS = [
             'Yard Sale',
@@ -863,6 +864,10 @@
                 return { label: 'Could Be Worse', className: 'mid' };
             }
             return { label: 'Sharpen Edges', className: 'cold' };
+        }
+
+        function isUnlimitedSendItTestResort(resortId) {
+            return SENDIT_TEST_UNLIMITED_RESORTS.has(resortId);
         }
 
         function getSendItSocialLine(votesLastHour, votesTotal) {
@@ -1014,7 +1019,10 @@
 
             try {
                 const pos = await getBrowserLocation();
-                const deviceId = getSendItDeviceId();
+                const baseDeviceId = getSendItDeviceId();
+                const deviceId = isUnlimitedSendItTestResort(resortId)
+                    ? `${baseDeviceId || 'sid-test'}-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`
+                    : baseDeviceId;
                 const voteUrl = new URL('sendit/vote', WORKER_URL).toString();
                 const resp = await fetch(voteUrl, {
                     method: 'POST',
@@ -1117,7 +1125,8 @@
                 : `<span class="sendit-score-number">${sendItScoreRounded}</span><span class="sendit-score-unit">%</span>`;
             const sendItSocialLine = getSendItSocialLine(sendItVotesLastHour, sendItVotes);
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
-            const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
+            const unlimitedTestMode = isUnlimitedSendItTestResort(resort.id);
+            const canVote = hasCoords && (unlimitedTestMode || sendItUnlockedResorts.has(resort.id));
             const sendItSubtitle = 'Be the first to call it';
             const sendItPrompt = canVote ? `<div class="sendit-prompt">Tap your call</div>` : '';
             const sendItControls = !hasCoords
@@ -1128,7 +1137,7 @@
                         <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="60">${sendItButtonCopy.mid}</button>
                         <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="100">${sendItButtonCopy.high}</button>
                       </div>
-                      <div class="sendit-locked-note">Verified nearby. Local-only voting (${formatMiles(requiredMiles)} mi geofence).</div>`
+                      <div class="sendit-locked-note">${unlimitedTestMode ? 'Blue Mountain test mode: unlimited votes enabled.' : `Verified nearby. Local-only voting (${formatMiles(requiredMiles)} mi geofence).`}</div>`
                     : `<button class="sendit-unlock-btn sendit-unlock-cta" data-sendit-action="unlock" data-resort-id="${resort.id}">⚡ Unlock Nearby Voting</button>
                        <div class="sendit-locked-note">Only users within ${formatMiles(requiredMiles)} miles can vote.</div>`;
 
