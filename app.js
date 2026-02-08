@@ -1306,20 +1306,22 @@
 
                 <div class="sendit-section">
                   <div class="sendit-header">
-                    <div class="sendit-title-wrap">
-                      <div class="rating-label sendit-title">SLOPE SIGNAL <span class="sendit-state ${sendItState.className || sendItScoreClass}">${sendItState.label}</span></div>
-                      <div class="sendit-subline">
-                        <span class="sendit-live-dot"></span>
-                        <span class="sendit-subtitle">${sendItSubtitle}</span>
-                      </div>
+                    <div class="sendit-title-pill">
+                      <span class="sendit-live-dot"></span>
+                      <div class="rating-label sendit-title">SLOPE SIGNAL</div>
                     </div>
+                    <div class="sendit-subline">
+                      <span class="sendit-subtitle">${sendItSubtitle}</span>
+                    </div>
+                    <div class="sendit-result ${sendItState.className || sendItScoreClass}">${sendItState.label}</div>
                   </div>
                   <div class="sendit-scoreboard ${sendItState.className || sendItScoreClass}" style="--sendit-score:${sendItScoreValue === null ? 0 : Math.max(0, Math.min(100, Math.round(sendItScoreValue)))}" aria-label="Full Send score">
                     <div class="sendit-gauge" aria-hidden="true">
                       <span class="sendit-gauge-pointer"></span>
                     </div>
                     <div class="sendit-scale-labels">
-                      <span class="sendit-scale-low">Calculated</span>
+                      <span class="sendit-scale-low">Low Tide</span>
+                      <span class="sendit-scale-mid">Send-ish</span>
                       <span class="sendit-scale-high">Full Send</span>
                     </div>
                     <span class="sendit-score-value">${sendItScoreMarkup}</span>

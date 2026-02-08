@@ -961,10 +961,14 @@
         }
 
         .sendit-header {
-            display: block;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
             margin-bottom: 0.5rem;
             position: relative;
             z-index: 1;
+            text-align: center;
         }
 
         .sendit-title-wrap {
@@ -972,6 +976,18 @@
             flex-direction: column;
             gap: 0.12rem;
             min-width: 0;
+        }
+
+        .sendit-title-pill {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.42rem;
+            padding: 0.34rem 0.65rem;
+            border-radius: 999px;
+            border: 1px solid rgba(30, 94, 255, 0.14);
+            background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 250, 255, 0.98) 100%);
+            box-shadow: 0 2px 6px rgba(17, 24, 39, 0.06);
         }
 
         .sendit-title {
@@ -983,6 +999,7 @@
             align-items: baseline;
             gap: 0.38rem;
             flex-wrap: wrap;
+            margin: 0;
         }
 
         .icecoast-title {
@@ -1008,13 +1025,22 @@
         }
 
         .sendit-live-dot {
-            width: 0.46rem;
-            height: 0.46rem;
+            width: 0.86rem;
+            height: 0.86rem;
             border-radius: 50%;
             background: #21c468;
-            box-shadow: 0 0 0 3px rgba(33, 196, 104, 0.18);
-            animation: none;
+            box-shadow: 0 0 0 4px rgba(33, 196, 104, 0.18);
+            animation: senditPulseDot 1.6s ease-in-out infinite;
             flex-shrink: 0;
+        }
+
+        .sendit-result {
+            margin-top: 0.22rem;
+            font-size: 0.84rem;
+            font-weight: 900;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+            color: #202532;
         }
 
         .sendit-scoreboard {
@@ -1141,7 +1167,11 @@
         }
 
         .sendit-scale-low {
-            color: #3459b3;
+            color: #c2444a;
+        }
+
+        .sendit-scale-mid {
+            color: #2f61d0;
         }
 
         .sendit-scale-high {
@@ -1229,17 +1259,20 @@
         }
 
         .sendit-pulse.hot .sendit-state,
-        .sendit-state.hot {
+        .sendit-state.hot,
+        .sendit-result.hot {
             color: #0f7f77;
         }
 
         .sendit-pulse.mid .sendit-state,
-        .sendit-state.mid {
+        .sendit-state.mid,
+        .sendit-result.mid {
             color: #2256b4;
         }
 
         .sendit-pulse.cold .sendit-state,
-        .sendit-state.cold {
+        .sendit-state.cold,
+        .sendit-result.cold {
             color: #c2444a;
         }
 
@@ -1410,6 +1443,7 @@
             color: #0d6b58;
             box-shadow: 0 0 0 3px rgba(29, 173, 115, 0.18), 2px 2px 0 rgba(0, 0, 0, 0.12);
             transform: translateY(-1px) scale(1.02);
+            animation: senditVoteConfirmSlam 0.46s cubic-bezier(0.28, 0.82, 0.3, 1.08);
         }
 
         .sendit-section.vote-locked {
@@ -1452,6 +1486,21 @@
             100% {
                 opacity: 1;
                 transform: translateY(0);
+            }
+        }
+
+        @keyframes senditVoteConfirmSlam {
+            0% {
+                transform: translateY(0) scale(1) rotate(0deg);
+            }
+            28% {
+                transform: translateY(2px) scale(0.96) rotate(-0.8deg);
+            }
+            62% {
+                transform: translateY(-2px) scale(1.04) rotate(0.7deg);
+            }
+            100% {
+                transform: translateY(-1px) scale(1.02) rotate(0deg);
             }
         }
 
