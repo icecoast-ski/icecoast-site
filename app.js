@@ -478,6 +478,38 @@
             });
         }
 
+        const RESORT_PASS_MEMBERSHIP = {
+            // Epic
+            'hunter': ['epic'],
+            'mount-snow': ['epic'],
+            'okemo': ['epic'],
+            'stowe': ['epic'],
+
+            // Ikon
+            'stratton': ['ikon'],
+            'killington': ['ikon'],
+            'pico': ['ikon'],
+            'sugarbush': ['ikon'],
+            'loon': ['ikon'],
+            'sunday-river': ['ikon'],
+            'sugarloaf': ['ikon'],
+            'tremblant': ['ikon'],
+
+            // Windham is no longer Ikon
+            'windham': []
+        };
+
+        function applyResortPassMembership() {
+            resorts.forEach((resort) => {
+                const membership = RESORT_PASS_MEMBERSHIP[resort.id];
+                if (Array.isArray(membership)) {
+                    resort.passes = membership.slice();
+                } else if (!Array.isArray(resort.passes)) {
+                    resort.passes = [];
+                }
+            });
+        }
+
         const DEFAULT_SEND_IT_RADIUS_MILES = 1.5;
         let sendItSummaryByResort = {};
         let sendItRadiusMiles = DEFAULT_SEND_IT_RADIUS_MILES;
@@ -1452,6 +1484,7 @@
 
         resorts.forEach(normalizeSnowfall);
         applyManualResortOverrides();
+        applyResortPassMembership();
 
         loadSendItUnlockState();
         renderResorts();
