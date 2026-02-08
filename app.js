@@ -1600,6 +1600,19 @@ const backgroundSizeByResort = {
             sort: 'rating-high' // Start with best conditions
         };
 
+        function getSlopeSignalSortScore(resort) {
+            const sendIt = sendItSummaryByResort?.[resort.id];
+            const voteCount = Number.isFinite(Number(sendIt?.votes)) ? Number(sendIt.votes) : 0;
+            const sendItScore = Number.isFinite(Number(sendIt?.score)) ? Number(sendIt.score) : null;
+            const fallbackRating = Number.isFinite(Number(resort.rating))
+                ? Number(resort.rating) * 20
+                : 0;
+            return {
+                score: voteCount > 0 && sendItScore !== null ? sendItScore : fallbackRating,
+                votes: voteCount
+            };
+        }
+
         function applyFilters() {
             let filtered = [...resorts];
 
@@ -1617,9 +1630,16 @@ const backgroundSizeByResort = {
                 filtered = filtered.filter(r => !r.passes || r.passes.length === 0);
             }
 
-            // Vibe filter (rating-based)
+            // Vibe filter
             if (filterState.vibe === 'sendit') {
-                filtered = filtered.filter(r => r.rating >= 4);
+                filtered.sort((a, b) => {
+                    const aSignal = getSlopeSignalSortScore(a);
+                    const bSignal = getSlopeSignalSortScore(b);
+                    if (bSignal.score !== aSignal.score) return bSignal.score - aSignal.score; // best first
+                    if (bSignal.votes !== aSignal.votes) return bSignal.votes - aSignal.votes;
+                    return (Number(b.rating) || 0) - (Number(a.rating) || 0);
+                });
+                return filtered;
             } else if (filterState.vibe === 'avoid') {
                 filtered = filtered.filter(r => r.rating === 0); // Impossible - will always show no results
             }
