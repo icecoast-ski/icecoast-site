@@ -721,6 +721,22 @@
         const sendItButtonCopyByResort = {};
         const sendItVerifyFlavorByResort = {};
         const SENDIT_TEST_UNLIMITED_RESORTS = new Set();
+        const DEFAULT_LIFT_CLOSE_HOUR = 16;
+        const NIGHT_SKI_CLOSE_HOURS = {
+            camelback: { weekday: 21, weekend: 21 },
+            'blue-mountain': { weekday: 21, weekend: 22 },
+            'jack-frost': { weekday: 21, weekend: 21 },
+            shawnee: { weekday: 21, weekend: 21 },
+            'bear-creek': { weekday: 21, weekend: 21 },
+            'big-boulder': { weekday: 20, weekend: 20 },
+            montage: { weekday: 21, weekend: 21 },
+            hunter: { weekday: 20, weekend: 21 },
+            windham: { weekday: 20, weekend: 21 },
+            belleayre: { weekday: 20, weekend: 20 },
+            wachusett: { weekday: 21, weekend: 21 },
+            mohawk: { weekday: 21, weekend: 21 },
+            'jiminy-peak': { weekday: 21, weekend: 22 }
+        };
 
         const SENDIT_LOW_OPTIONS = [
             'Yard Sale',
@@ -875,6 +891,38 @@
 
         function formatMiles(miles) {
             return Number.isInteger(miles) ? `${miles}` : `${miles.toFixed(1)}`;
+        }
+
+        function getEasternNowParts() {
+            const parts = new Intl.DateTimeFormat('en-US', {
+                timeZone: 'America/New_York',
+                weekday: 'short',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            }).formatToParts(new Date());
+            const get = (type) => parts.find(p => p.type === type)?.value || '';
+            return {
+                weekday: get('weekday'),
+                hour: Number(get('hour')),
+                minute: Number(get('minute'))
+            };
+        }
+
+        function getLiftCloseHourForResort(resortId, isWeekend) {
+            const config = NIGHT_SKI_CLOSE_HOURS[resortId];
+            if (config && Number.isFinite(Number(isWeekend ? config.weekend : config.weekday))) {
+                return Number(isWeekend ? config.weekend : config.weekday);
+            }
+            return DEFAULT_LIFT_CLOSE_HOUR;
+        }
+
+        function isAfterLiftClose(resortId) {
+            const now = getEasternNowParts();
+            const isWeekend = now.weekday === 'Sat' || now.weekday === 'Sun';
+            const closeHour = getLiftCloseHourForResort(resortId, isWeekend);
+            const nowDecimal = (Number(now.hour) || 0) + ((Number(now.minute) || 0) / 60);
+            return nowDecimal >= closeHour;
         }
 
         function getSendItDeviceId() {
@@ -1196,6 +1244,7 @@
             }).join('');
 
             const sendIt = sendItSummaryByResort[resort.id] || {};
+            const showLiftMoon = isAfterLiftClose(resort.id);
             const sendItButtonCopy = getSendItButtonCopy(resort.id);
             const requiredMiles = getSendItRadiusMilesForResort(resort.id);
             const sendItVotes = Number.isFinite(sendIt.votes) ? sendIt.votes : 0;
@@ -1248,7 +1297,7 @@
             // Unique resort art is now one file per resort id in /v2/resort-art.
 const backgroundImageByResort = {
     'camelback': 'camelback.jpg',
-    'cannon': 'cannon-alt.jpg'
+    'cannon': 'cannon.jpg?v=20260208ab'
 };
 const backgroundImageFile = backgroundImageByResort[resort.id] || `${resort.id}.jpg`;
 
@@ -1408,7 +1457,7 @@ const backgroundSizeByResort = {
                     <div style="display:flex;align-items:center;gap:0.5rem;">
                       <span class="info-value">
                         ${resort.liftTicket?.weekday ?? '—'}
-                        ${resort.dynamicPricing ? '–' : ''}
+                        ${resort.dynamicPricing ? ' / ' : ''}
                       </span>
                       ${resort.dynamicPricing && resort.liftTicket?.weekend
                           ? `<span class="info-value">${resort.liftTicket.weekend}</span>`
@@ -1476,7 +1525,7 @@ const backgroundSizeByResort = {
                   <summary class="lift-toggle">
                     <span class="lift-toggle-left">
                       <span class="info-icon" style="display:inline-flex;vertical-align:middle;">${icons.lift}</span>
-                      Lift Status
+                      Lift Status${showLiftMoon ? ' 🌙' : ''}
                     </span>
                     <span style="display:flex;align-items:center;gap:0.5rem;">
                       <span class="trail-badge open" style="font-size:0.7rem;padding:0.2rem 0.5rem;">
