@@ -763,7 +763,7 @@
             'Zero Hesitation'
         ];
         const SENDIT_COOLDOWN_OPTIONS = [
-            'Easy, legend. Patrol says wait {minutes}m before your next call.',
+            'Easy, legend. icecoast patrol says wait {minutes}m before your next call.',
             'You already dropped your vote. Take a hot-lap and check back in {minutes}m.',
             'Apres timeout: bar tab open, voting tab paused for {minutes}m.',
             'Chairlift gossip is still processing your vote. Try again in {minutes}m.',
@@ -792,7 +792,7 @@
             'You are {distance} miles away. Slope Signal voting unlocks within {radius} miles. Grab the classic wax and start double-poling.',
             'You are {distance} miles away. Slope Signal voting unlocks within {radius} miles. That is a little too far for a quick bootpack.',
             'You are {distance} miles away. Slope Signal voting unlocks within {radius} miles. Respectfully: skate-ski closer and then drop your take.',
-            'You are {distance} miles away. Slope Signal voting unlocks within {radius} miles. Patrol says this is a touring mission, not an on-mountain check-in.'
+            'You are {distance} miles away. Slope Signal voting unlocks within {radius} miles. icecoast patrol says this is a touring mission, not an on-mountain check-in.'
         ];
 
         function pickRandomLabel(options) {
