@@ -64,7 +64,8 @@
             const snow24h = parseInt(snowfall24h) || 0;
             const temp = resort.weather?.temp || 25;
             const wind = parseInt(resort.weather?.wind) || 10;
-            const condition = (resort.weather?.condition || '').toLowerCase();
+            const condition = (resort.weather?.condition || "").toLowerCase();
+            const isCanada = resort.region === "canada";
 
             // Condition flags
             const heavySnow = snow24h >= 8;
@@ -73,75 +74,258 @@
             const freezing = temp < 20;
             const warm = temp > 35;
             const windy = wind > 20;
-            const snowing = condition.includes('snow');
+            const snowing = condition.includes("snow");
 
-            // Smart taglines based on actual conditions
             const taglines = {
                 5: {
-                    // 5 stars + nuking snow
-                    heavySnow: ['Nuking!', 'Dumping!', 'Blower Pow!', 'Cold Smoke!', 'Face Shot City!', 'Refill Mode!', 'Deep Day!', 'Pow Emergency!'],
-                    // 5 stars + fresh powder
-                    freshPow: ['Powder Dreams!', 'Freshies!', 'Send It!', 'Shred The Gnar!', 'Stacking Laps!', 'First Chair Vibes!', 'Top Sheet Glow!', 'Glade Time!'],
-                    // 5 stars + snowing now
-                    snowing: ['Peak Season!', 'All-Time!', 'Full Send!', 'Primo!', 'Storm Laps!', 'No Brake Day!', 'Legit Send!', 'White Room Lite!'],
-                    // 5 stars + perfect blue day
-                    default: ['Bluebird!', 'Hero Snow!', 'Dialed In!', "Chef's Kiss!", 'Carve Fest!', 'Magic Carpet Legs!', 'Smooth Sailing!', 'Dream Cord!']
+                    heavySnow: ["Nuking!", "Dumping!", "Blower Pow!", "Cold Smoke!", "Face Shot City!", "Refill Mode!", "Deep Day!", "Pow Emergency!"],
+                    freshPow: ["Powder Dreams!", "Freshies!", "Send It!", "Shred The Gnar!", "Stacking Laps!", "First Chair Vibes!", "Top Sheet Glow!", "Glade Time!"],
+                    snowing: ["Peak Season!", "All-Time!", "Full Send!", "Primo!", "Storm Laps!", "No Brake Day!", "Legit Send!", "White Room Lite!"],
+                    default: ["Bluebird!", "Hero Snow!", "Dialed In!", "Chef's Kiss!", "Carve Fest!", "Magic Carpet Legs!", "Smooth Sailing!", "Dream Cord!"]
                 },
                 4: {
-                    // 4 stars + some fresh
-                    freshPow: ['Shredable!', 'Solid Send!', 'Worth It!', 'Pretty Sendy!', 'Good Laps Ahead!', 'Sneaky Good!', 'Go Get Some!', 'Get After It!'],
-                    // 4 stars + warm temps
-                    warm: ['Spring Skiing!', 'Corn Snow!', 'Gets It Done!', 'Not Mad At It!', 'Soft Turn Season!', 'Slush Hero Time!', 'Patio Then Laps!', 'Sun And Turns!'],
-                    // 4 stars standard
-                    default: ['Pretty Good!', 'Decent Cord!', 'Rippable!', 'Respectable!', 'Plenty To Love!', 'Good Enough To Rip!', 'Chairlift Smiles!', 'Type 2 Approved!']
+                    freshPow: ["Shredable!", "Solid Send!", "Worth It!", "Pretty Sendy!", "Good Laps Ahead!", "Sneaky Good!", "Go Get Some!", "Get After It!"],
+                    warm: ["Spring Skiing!", "Corn Snow!", "Gets It Done!", "Not Mad At It!", "Soft Turn Season!", "Slush Hero Time!", "Patio Then Laps!", "Sun And Turns!"],
+                    default: ["Pretty Good!", "Decent Cord!", "Rippable!", "Respectable!", "Plenty To Love!", "Good Enough To Rip!", "Chairlift Smiles!", "Type 2 Approved!"]
                 },
                 3: {
-                    // 3 stars + freezing = firm
-                    freezing: ['Firm AF!', 'Hardpack City!', 'Chalky!', 'East Coast Classic!', 'Edge Work Day!', 'Steel Edge Season!', 'Carve Carefully!', 'Grip It And Rip It!'],
-                    // 3 stars + windy
-                    windy: ['Breezy...', 'Wind Affected!', 'Chunder!', 'Hold Your Line!', 'Chair Sway Mode!', 'Wind Check Required!', 'Stay Centered!', 'Battle The Gusts!'],
-                    // 3 stars standard
-                    default: ['Mid Vibes!', 'Standard Issue!', "It's... Fine!", 'Meh-diocre!', 'Skiable For Sure!', 'Locals Will Know!', 'Could Be Worse!', 'Laps Are Laps!']
+                    freezing: ["Firm AF!", "Hardpack City!", "Chalky!", "East Coast Classic!", "Edge Work Day!", "Steel Edge Season!", "Carve Carefully!", "Grip It And Rip It!"],
+                    windy: ["Breezy...", "Wind Affected!", "Chunder!", "Hold Your Line!", "Chair Sway Mode!", "Wind Check Required!", "Stay Centered!", "Battle The Gusts!"],
+                    default: ["Mid Vibes!", "Standard Issue!", "It's... Fine!", "Meh-diocre!", "Skiable For Sure!", "Locals Will Know!", "Could Be Worse!", "Laps Are Laps!"]
                 },
                 2: {
-                    // 2 stars + freezing = icy
-                    freezing: ['Blue Ice!', 'Crunchy!', 'Firm And Fast!', 'Chatter City!', 'Edge Tune Day!', 'Hockey Stop Practice!', 'Knees Stay Soft!', 'Grip Test!'],
-                    // 2 stars + warm = slushy
-                    warm: ['Slushy!', 'Wet & Heavy!', 'Spring Mashed Potatoes!', 'Soft Bumps!', 'Mashed Potato Laps!', 'Soggy Send!', 'Heavy Legs Ahead!', 'Absorber Mode!'],
-                    // 2 stars standard
-                    default: ['Spicy Snow!', 'Edge Alert!', 'Technical Day!', 'Firm Challenge!', 'Earn Your Turns!', 'Character Builder!', 'Pick Your Lines!', 'Stay Loose!']
+                    freezing: ["Blue Ice!", "Crunchy!", "Firm And Fast!", "Chatter City!", "Edge Tune Day!", "Hockey Stop Practice!", "Knees Stay Soft!", "Grip Test!"],
+                    warm: ["Slushy!", "Wet & Heavy!", "Spring Mashed Potatoes!", "Soft Bumps!", "Mashed Potato Laps!", "Soggy Send!", "Heavy Legs Ahead!", "Absorber Mode!"],
+                    default: ["Spicy Snow!", "Edge Alert!", "Technical Day!", "Firm Challenge!", "Earn Your Turns!", "Character Builder!", "Pick Your Lines!", "Stay Loose!"]
                 },
                 1: {
-                    // 1 star + freezing = worst ice
-                    freezing: ['Boilerplate!', 'Ice Coast AF!', 'Straight Ice!', 'Skating Rink!', 'Edge Sharpener!', 'Puck Drop Conditions!', 'Steel Edge Session!', 'Dialed Carves Only!'],
-                    // 1 star + warm = terrible slush
-                    warm: ['Slush Pit!', 'Mashed Potatoes!', 'Chunky Snowpack!', 'Heavy Soup!', 'Leg Day Deluxe!', 'Wet Cement Turns!', 'Slow Motion Send!', 'Mogul Mash!'],
-                    // 1 star standard
-                    default: ['Icy AF!', 'Yard Sale Vibes!', 'Teeth Chatter!', 'Edge Control Day!', 'Respect The Ice!', 'Low Tide Turns!', 'Battle Laps!', 'Skills Pay Bills!']
+                    freezing: ["Boilerplate!", "Ice Coast AF!", "Straight Ice!", "Skating Rink!", "Edge Sharpener!", "Puck Drop Conditions!", "Steel Edge Session!", "Dialed Carves Only!"],
+                    warm: ["Slush Pit!", "Mashed Potatoes!", "Chunky Snowpack!", "Heavy Soup!", "Leg Day Deluxe!", "Wet Cement Turns!", "Slow Motion Send!", "Mogul Mash!"],
+                    default: ["Icy AF!", "Yard Sale Vibes!", "Teeth Chatter!", "Edge Control Day!", "Respect The Ice!", "Low Tide Turns!", "Battle Laps!", "Skills Pay Bills!"]
                 }
             };
 
-            // Select appropriate tagline set based on conditions
-            let options = taglines[rating]?.default || ['Unknown'];
+            const canadaTaglines = {
+                5: {
+                    heavySnow: ["Maple Powder Party!", "Leaf It All Out There!", "Cold Smoke, Eh!", "Poutine-Pow Combo!", "Storm Day In Quebec!", "True North Refill!", "Deep Turns, Big Grins!", "Passport To Face Shots!"],
+                    freshPow: ["Fresh Tracks, Eh!", "Maple Laps!", "Northern Hero Snow!", "Sorry, We're Sending!", "Top Sheet Stoked!", "Peak Leaf Energy!", "Corduroy To Glades!", "Legit Quebec Send!"],
+                    snowing: ["Snow Globe Mode!", "Nuking North!", "Lift, Lap, Repeat!", "True North Stoke!", "Storm Chair Vibes!", "White Room, Eh!", "Big Mountain Mood!", "All Gas, No Brake!"],
+                    default: ["Bluebird In The North!", "Maple Carve Day!", "Chef's Kiss, Quebec!", "Perfect Lap Energy!", "Sunny Send Session!", "Ski, Sip, Repeat!", "Polite In Line, Wild On Snow!", "Iconic Day, Eh!"]
+                },
+                4: {
+                    freshPow: ["Sneaky Good, Eh!", "Maple Freshies!", "Pretty Dang Sendy!", "Worth The Border Drive!", "Loonie Well Spent!", "Good Legs, Good Laps!", "Northbound Stoke!", "Solid Quebec Turns!"],
+                    warm: ["Soft And Sendy!", "Spring Corn Canada!", "Patio Then Piste!", "Sun On The Slopes!", "Mellow But Fun!", "Soft Turns, Big Smiles!", "Après Then More Laps!", "Gets It Done, Eh!"],
+                    default: ["Very Skiable!", "Good Vibes Up North!", "Respectable Snow Day!", "Dialed Enough To Rip!", "Plenty Of Fun Here!", "Chairlift Banter Approved!", "Carve First, Snack Later!", "Leaf It Better Than Expected!"]
+                },
+                3: {
+                    freezing: ["Firm But Friendly!", "Edge Game On!", "Quebec Chalk Day!", "Sharpen And Rip!", "Carve Class In Session!", "Grip It, Don't Quit!", "North Ice, Nice!", "Still Sending, Eh!"],
+                    windy: ["Breezy Ridge Laps!", "Windy But Worth It!", "Hold The Line, Eh!", "Gusty Chair Chat!", "North Wind Challenge!", "Stance Strong!", "Patience, Then Send!", "Choppy But Skiable!"],
+                    default: ["Could Be Worse, Eh!", "Middle Lane Send!", "Laps Are Still Laps!", "Decent Day Out!", "Earned Every Turn!", "Maple Mid-Pack!", "Ski It Anyway!", "Type 2 Preview!"]
+                },
+                2: {
+                    freezing: ["Firm North Special!", "Edge Tune Reward Day!", "Slide, Grip, Smile!", "Crunchy But Chargeable!", "Carve Clean, Stay Loose!", "Ice? We Ski It!", "Chatter With Character!", "Steel Edges Save Days!", "Spicy Quebec Cord!", "Cold, Fast, Doable!"],
+                    warm: ["Mashed Potato Mission!", "Soupy But Sendable!", "Soft Legs, Strong Heart!", "Bumps For Breakfast!", "Heavy Snow Hustle!", "Slush Surf Session!", "Absorber Mode, Eh!", "Wet Snow, Dry Humor!", "Soggy But Smiling!", "Spring Chaos Laps!"],
+                    default: ["Not Hero Snow, Still Hero Energy!", "Today Is A Skills Day!", "Technical Turns Only!", "Find The Goods!", "Keep It Playful!", "Sharp Edges, Big Laughs!", "Character Builder North!", "One Good Run At A Time!", "Dig Deep, Keep Lapping!", "Could Be Way Worse, Eh!"]
+                },
+                1: {
+                    freezing: ["Edge Sharpener Day!", "Polished But Skiable!", "Boilerplate Ballet!", "Micro-Carve Masterclass!", "Slow Is Smooth Today!", "Grip Game Finals!", "No Panic, Just Edges!", "Rink Vibes, Still Ripping!", "Steel Edges, Warm Hearts!", "North Ice Challenge!", "One Run, Then One More!", "Stay Centered And Send Small!"],
+                    warm: ["Heavy Soup Service!", "Mashed Potato Madness!", "Slop But We Drop!", "Wet Snow Warriors!", "Leg Day Deluxe North!", "Soggy Glove Energy!", "Absorb Everything!", "Messy Turns, Good Stories!", "Slow Motion Send!", "Chowder Conditions, Still Skiing!", "Slush Circus!", "Find The Stash Pockets!"],
+                    default: ["Low Tide, High Stoke!", "Rough Snow, Good Crew!", "Not Pretty, Still Plenty!", "Skill Builder Session!", "Dial It Back, Keep Lapping!", "Today's A Technique Arc!", "Respect The Surface!", "Short Turns, Big Wins!", "No Complaints, More Laps!", "Keep It Fun, Keep It Safe!", "We Still Ski, Always!", "Edges Out, Spirits Up!"]
+                }
+            };
 
-            if (rating === 5) {
-                if (heavySnow) options = taglines[5].heavySnow;
-                else if (freshPow) options = taglines[5].freshPow;
-                else if (snowing) options = taglines[5].snowing;
-            } else if (rating === 4) {
-                if (freshPow || someSnow) options = taglines[4].freshPow;
-                else if (warm) options = taglines[4].warm;
-            } else if (rating === 3) {
-                if (freezing) options = taglines[3].freezing;
-                else if (windy) options = taglines[3].windy;
-            } else if (rating === 2) {
-                if (freezing) options = taglines[2].freezing;
-                else if (warm) options = taglines[2].warm;
-            } else if (rating === 1) {
-                if (freezing) options = taglines[1].freezing;
-                else if (warm) options = taglines[1].warm;
+            const resortCultureTaglines = {
+                'tremblant': {
+                    5: {
+                        default: ['Pedestrian Village Flex!', 'Euro Après, East Coast Legs!', 'Tremblant Top To Bottom!'],
+                        freshPow: ['Tremblant Glades Are On!', 'Village To Summit Send!']
+                    },
+                    4: {
+                        default: ['Tremblant Cruisers, Big Smiles!', 'Worth Every Border Minute!']
+                    },
+                    3: {
+                        default: ['Tremblant Still Delivers Laps!', 'Cruise, Snack, Repeat!']
+                    },
+                    2: {
+                        default: ['Tremblant Technique Day!', 'Still Better Than Staying Home!']
+                    },
+                    1: {
+                        default: ['Tremblant Tune-Up Session!', 'Short Turns, Long Stories Tonight!']
+                    }
+                },
+                'mont-sainte-anne': {
+                    5: {
+                        heavySnow: ['Saint-Anne Storm Mode!', 'Beaupre Face Shot Shift!'],
+                        default: ['River Views, Big Sends!', 'Saint-Anne Is Cooking!']
+                    },
+                    4: {
+                        default: ['Saint-Anne Is In Form!', 'Steeps And Smiles!']
+                    },
+                    3: {
+                        windy: ['St. Lawrence Wind, Still Sending!', 'Hold It High On The Ridge!'],
+                        default: ['Saint-Anne Grit Day!', 'Good Legs Needed, Good Times Earned!']
+                    },
+                    2: {
+                        default: ['Saint-Anne Edge Clinic!', 'Stay Loose, Stack Laps!']
+                    },
+                    1: {
+                        default: ['Saint-Anne Survival Carves!', 'Technical, But We Ski It!']
+                    }
+                },
+                'le-massif': {
+                    5: {
+                        heavySnow: ['Le Massif Is Nuking!', 'St. Lawrence Drop-In Day!'],
+                        default: ['River-To-Ridge Rocket!', 'Le Massif Big Mountain Energy!']
+                    },
+                    4: {
+                        default: ['Le Massif Legs Required!', 'Scenery And Speed!']
+                    },
+                    3: {
+                        freezing: ['Massif Edge Work Masterclass!', 'Firm But Fast Above The River!'],
+                        default: ['Le Massif Still Hits!', 'Earned Turns, Worth It!']
+                    },
+                    2: {
+                        default: ['Le Massif Skills Session!', 'Steep + Spicy = Respect!']
+                    },
+                    1: {
+                        default: ['Massif Micro-Carve Mission!', 'Dial It In And Keep Dropping!']
+                    }
+                },
+                'mont-sutton': {
+                    5: {
+                        freshPow: ['Sutton Tree Skiing Jackpot!', 'Glade Day At Sutton!'],
+                        default: ['Sutton Soul Day!', 'Old-School Vibes, New-School Send!']
+                    },
+                    4: {
+                        default: ['Sutton Is Quietly Firing!', 'Glade Hunters Rejoice!']
+                    },
+                    3: {
+                        default: ['Sutton Still Has Stashes!', 'Find The Woods, Find The Joy!']
+                    },
+                    2: {
+                        default: ['Sutton Scavenger Hunt Day!', 'Tree Lines Or Bust!']
+                    },
+                    1: {
+                        default: ['Sutton Soul-Builder Conditions!', 'Tight Lines, Light Feet!']
+                    }
+                }
+            };
+
+            const regionFilterTaglines = {
+                'poconos': {
+                    freshPow: ['Poconos Powder Party!', 'PA Freshies Found!', 'Poconos Is Firing!'],
+                    freezing: ['Poconos Edge Day!', 'Firm But Fun In PA!', 'Poconos Carve Clinic!'],
+                    warm: ['Poconos Spring Laps!', 'Soft Snow In The Poconos!', 'Sun And Slush, Still Sending!'],
+                    windy: ['Poconos Wind Shift!', 'Hold Your Line In PA!', 'Breezy But Skiable!'],
+                    default: ['Poconos Lap Factory!', 'Quick Drive, Big Stoke!', 'Pennsylvania Send Session!']
+                },
+                'catskills': {
+                    freshPow: ['Catskills Fresh Track Energy!', 'Catskills Tree Stash Time!', 'Hunter To Windham Stoke!'],
+                    freezing: ['Catskills Firm Classic!', 'Edge Game In The Catskills!', 'Cold Carves Upstate!'],
+                    warm: ['Catskills Spring Hero Snow!', 'Soft Turns In The Catskills!', 'Patio Then Laps Upstate!'],
+                    windy: ['Catskills Ridge Wind Mode!', 'Gusty But Worth It!', 'Hold Strong Upstate!'],
+                    default: ['Catskills Doing Catskills Things!', 'Upstate Laps, Good Vibes!', 'Catskills Still Delivers!']
+                },
+                'adirondacks': {
+                    heavySnow: ['Adirondacks Storm Cycle!', 'High Peak Refill!', 'ADK Deep Day!'],
+                    freshPow: ['Adirondacks Freshies!', 'Adirondack Stoke Meter High!', 'North Country Powder!'],
+                    freezing: ['ADK Firm And Fast!', 'Adirondack Edge Work!', 'Cold Mountain, Hot Laps!'],
+                    windy: ['Adirondack Wind Check!', 'High Peak Gusts, Still Sending!', 'ADK Ridge Battle!'],
+                    default: ['Adirondacks Big Mountain Mood!', 'North Country Carve Day!', 'Adirondack Laps On!']
+                },
+                'vermont-south': {
+                    freshPow: ['Southern VT Is Cooking!', 'Green Mountain Freshies!', 'South VT Send Window Open!'],
+                    freezing: ['Southern VT Chalk Mission!', 'Vermont Edge Day!', 'Carve It Clean In South VT!'],
+                    warm: ['Southern VT Spring Corn!', 'Soft Turns, Maple Air!', 'Patio Laps In South VT!'],
+                    default: ['Southern Vermont Still Hits!', 'Green Mountain Glide!', 'South VT Chairlift Smiles!']
+                },
+                'vermont-central': {
+                    heavySnow: ['Central VT Storm Alert!', 'Killington Corridor Refill!', 'Central VT Is Nuking!'],
+                    freshPow: ['Central VT Fresh Track Hunt!', 'Vermont Core Day!', 'Central Green Mountains Sending!'],
+                    freezing: ['Central VT Technical Carves!', 'Firm, Fast, Vermont!', 'Edges Up In Central VT!'],
+                    default: ['Central Vermont Means Business!', 'Big Vert, Big Legs!', 'Central VT Laps Stack Up!']
+                },
+                'vermont-north': {
+                    heavySnow: ['Northern VT Snow Globe!', 'Jay Zone Refill!', 'North VT Deep Day!'],
+                    freshPow: ['Northern VT Powder Chase!', 'Cold Smoke Up North!', 'North VT Tree Day!'],
+                    freezing: ['Northern VT Ice IQ Test!', 'Firm But Legit Up North!', 'North VT Edge Masterclass!'],
+                    windy: ['Northern VT Wind Hold Energy!', 'Gusts Up High, Send Down Low!', 'Ridge Wind, Still Worth It!'],
+                    default: ['Northern Vermont Is On Brand!', 'North VT Core Laps!', 'Green Mountains Going Off!']
+                },
+                'massachusetts': {
+                    freshPow: ['Mass Freshies!', 'Berkshire Stoke!', 'Mass Laps Looking Good!'],
+                    freezing: ['Mass Edge Day!', 'Firm Turns In MA!', 'Wachusett Carve Session!'],
+                    warm: ['Mass Spring Ski Vibes!', 'Soft Snow In The Berkshires!', 'Corn Snow Commute!'],
+                    default: ['Massachusetts After-Work Send!', 'MA Laps, Full Heart!', 'Berkshire Turns Delivered!']
+                },
+                'connecticut': {
+                    freshPow: ['Connecticut Sneaky Freshies!', 'CT Turns Are On!', 'Nutmeg State Send!'],
+                    freezing: ['CT Carve Day!', 'Firm But Fun In Connecticut!', 'Sharp Edges, Small Hill Flow!'],
+                    warm: ['Connecticut Spring Laps!', 'Soft Snow CT Session!', 'Quick CT Send Window!'],
+                    default: ['Connecticut Still Skiing!', 'Local Hill, Big Vibes!', 'CT Laps Count Too!']
+                },
+                'white-mountains': {
+                    heavySnow: ['White Mountains Refill!', 'Presidential Powder Pulse!', 'NH Storm Laps!'],
+                    freshPow: ['White Mountains Freshies!', 'NH Glade Day!', 'Granite State Send!'],
+                    freezing: ['White Mountains Ice Skills!', 'NH Firm And Fast!', 'Carve Hard In The Whites!'],
+                    windy: ['White Mountains Wind Hold Mood!', 'Gusty Up Top, Send Down Low!', 'NH Ridge Wind Battle!'],
+                    default: ['White Mountains Classic Day!', 'New Hampshire Laps, No Notes!', 'The Whites Are Delivering!']
+                },
+                'maine': {
+                    heavySnow: ['Maine Storm Chaser Day!', 'Pine Tree Powder Party!', 'Maine Is Dumping!'],
+                    freshPow: ['Maine Fresh Track Heaven!', 'Big Maine Energy!', 'Pine State Powder Turns!'],
+                    freezing: ['Maine Edge Clinic!', 'Cold Air, Clean Carves!', 'Firm Maine Morning!'],
+                    windy: ['Maine Wind And Weather!', 'Tough Weather, Tougher Skiers!', 'Coastal Gusts, Mountain Grit!'],
+                    default: ['Maine Mountain Soul!', 'Pine Tree State Sends!', 'Maine Laps, Maine Legends!']
+                },
+                'canada': {
+                    heavySnow: ['Quebec Storm Session!', 'True North Refill Cycle!'],
+                    freshPow: ['Quebec Fresh Track Frenzy!', 'Maple Laps Activated!'],
+                    freezing: ['Quebec Edge Tech Day!', 'Firm North, Fun North!'],
+                    warm: ['Quebec Spring Corn Groove!', 'Soft North Turns!'],
+                    default: ['Quebec Culture + Laps!', 'Leaf Country Stoke!']
+                }
+            };
+
+            function pickTaglineSet(pool, resortId, resortRegion) {
+                let bucket = 'default';
+                if (rating === 5) {
+                    if (heavySnow) bucket = 'heavySnow';
+                    else if (freshPow) bucket = 'freshPow';
+                    else if (snowing) bucket = 'snowing';
+                } else if (rating === 4) {
+                    if (freshPow || someSnow) bucket = 'freshPow';
+                    else if (warm) bucket = 'warm';
+                } else if (rating === 3) {
+                    if (freezing) bucket = 'freezing';
+                    else if (windy) bucket = 'windy';
+                } else if (rating === 2) {
+                    if (freezing) bucket = 'freezing';
+                    else if (warm) bucket = 'warm';
+                } else if (rating === 1) {
+                    if (freezing) bucket = 'freezing';
+                    else if (warm) bucket = 'warm';
+                }
+
+                const base = pool[rating]?.[bucket] || pool[rating]?.default || ['Unknown'];
+                const options = [...base];
+                const resortExtras = resortCultureTaglines[resortId]?.[rating];
+                const extra = resortExtras?.[bucket] || resortExtras?.default;
+                if (Array.isArray(extra) && extra.length) {
+                    options.push(...extra);
+                }
+
+                const regionExtras = regionFilterTaglines[resortRegion]?.[bucket]
+                    || regionFilterTaglines[resortRegion]?.default;
+                if (Array.isArray(regionExtras) && regionExtras.length) {
+                    options.push(...regionExtras);
+                }
+
+                return options;
             }
 
+            const selectedPool = isCanada ? canadaTaglines : taglines;
+            const options = pickTaglineSet(selectedPool, resort.id, resort.region);
             return options[Math.floor(Math.random() * options.length)];
         }
 
