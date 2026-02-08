@@ -3676,4 +3676,15 @@
             }
 
             if (percentageText) {
-                percentageText.textContent = `${Math.min(100, Math.round(scrollPercentage)
+                percentageText.textContent = `${Math.min(100, Math.round(scrollPercentage))}%`;
+            }
+        }
+
+        // Listen for scroll events
+        window.addEventListener('scroll', updateSendItProgress);
+
+        // Initialize on page load
+        updateSendItProgress();
+    </script>
+</body>
+</html>
