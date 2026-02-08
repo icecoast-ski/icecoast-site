@@ -1018,7 +1018,7 @@
         .sendit-scoreboard {
             display: inline-flex;
             flex-direction: column;
-            align-items: flex-end;
+            align-items: center;
             justify-content: center;
             gap: 0.24rem;
             min-width: 104px;
@@ -1033,6 +1033,8 @@
         }
 
         .sendit-score-kicker {
+            width: 100%;
+            text-align: center;
             font-size: 0.58rem;
             font-weight: 850;
             letter-spacing: 0.055em;
@@ -1054,6 +1056,24 @@
             align-self: stretch;
         }
 
+        .sendit-gauge::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            top: 0;
+            height: 0.92rem;
+            background:
+                repeating-linear-gradient(
+                    90deg,
+                    rgba(255, 255, 255, 0.6) 0 1px,
+                    transparent 1px 12px
+                ),
+                linear-gradient(180deg, rgba(255, 255, 255, 0.5), rgba(255, 255, 255, 0));
+            z-index: 1;
+            pointer-events: none;
+        }
+
         .sendit-gauge::after {
             content: '';
             position: absolute;
@@ -1065,6 +1085,7 @@
             border: 1px solid rgba(17, 24, 39, 0.08);
             border-bottom: 0;
             background: rgba(248, 250, 253, 0.96);
+            z-index: 2;
         }
 
         .sendit-gauge-pointer {
@@ -1097,6 +1118,9 @@
         }
 
         .sendit-score-value {
+            width: 100%;
+            text-align: center;
+            padding-top: 0.12rem;
             font-size: 1.1rem;
             line-height: 1;
             font-weight: 950;
