@@ -958,7 +958,9 @@
 
         function launchSendItSkier(resortId, buttonEl) {
             const card = document.querySelector(`.resort-card[data-resort="${resortId}"]`);
-            const anchor = buttonEl || (card ? card.querySelector('.sendit-vote-btn[data-score="100"]') : null);
+            const liveButton = card ? card.querySelector('.sendit-vote-btn[data-score="100"]') : null;
+            const fallbackAnchor = card ? card.querySelector('.sendit-scoreboard') : null;
+            const anchor = (buttonEl && buttonEl.isConnected) ? buttonEl : (liveButton || fallbackAnchor);
             if (!anchor) return;
 
             const rect = anchor.getBoundingClientRect();
@@ -987,7 +989,7 @@
                 prompt.textContent = isFullSend ? 'Full send locked ⚡' : 'Vote locked in ⚡';
                 prompt.classList.add('vote-payoff');
             }
-            if (isFullSend) launchSendItSkier(resortId, buttonEl);
+            launchSendItSkier(resortId, buttonEl);
 
             setTimeout(() => {
                 if (section) section.classList.remove('vote-locked');
