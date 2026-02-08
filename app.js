@@ -1182,8 +1182,8 @@
 
             // Icon handling
             // Resort emoji/icons removed from card header by request, except Windham fox badge.
-            const iconMarkup = resort.id === 'windham'
-                ? `<img class="windham-fox-icon" src="icons/windham-fox.png" alt="Windham fox icon" loading="lazy" decoding="async" style="width:9px;height:9px;">`
+            const windhamHeaderIconMarkup = resort.id === 'windham'
+                ? `<img class="windham-fox-icon" src="icons/windham-fox.png" alt="Windham fox icon" loading="lazy" decoding="async">`
                 : '';
 
             // Unique resort art is now one file per resort id in /v2/resort-art.
@@ -1257,7 +1257,7 @@
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;">
                   <div style="flex:1;">
                     <h2 class="resort-name">
-                      <span class="resort-name-text">${resort.name}</span>
+                      <span class="resort-name-text">${resort.name}${windhamHeaderIconMarkup}</span>
                       ${resort.isScraped ? `<span class="live-data-badge"><span><span>LIVE</span></span></span>` : ''}
                     </h2>
                     <p class="resort-location">${resort.location}</p>
@@ -1269,7 +1269,6 @@
                         </span>
                       </div>` : ''}
                   </div>
-                  ${iconMarkup}
                 </div>
                 ${snowBadge}
               </div>
