@@ -2419,8 +2419,28 @@
             }
 
             .extra-ratings {
-                flex-direction: column;
-                gap: 0.75rem;
+                flex-direction: row;
+                gap: 0.6rem;
+                justify-content: space-between;
+            }
+
+            .extra-rating-item {
+                flex: 1 1 0;
+                min-width: 0;
+                justify-content: space-between;
+                padding: 0.45rem 0.55rem;
+                border: 1px solid rgba(30, 94, 255, 0.14);
+                border-radius: 10px;
+                background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(246, 250, 255, 0.98) 100%);
+                box-shadow: 0 2px 6px rgba(17, 24, 39, 0.06);
+            }
+
+            .extra-label {
+                font-size: 0.72rem;
+            }
+
+            .extra-value {
+                font-size: 0.82rem;
             }
 
             .gauge-title {
