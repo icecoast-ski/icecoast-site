@@ -920,11 +920,14 @@
 
         .sendit-section {
             margin-bottom: 1.25rem;
-            padding: 0.95rem;
-            border: 2px solid #1e1e1e;
-            border-radius: 14px;
-            background: linear-gradient(160deg, #fbfdff 0%, #f2f7ff 45%, #fff8f1 100%);
-            box-shadow: 0 5px 0 rgba(16, 16, 16, 0.25);
+            padding: 0.9rem;
+            border: 1px solid rgba(30, 30, 30, 0.14);
+            border-radius: 16px;
+            background: linear-gradient(165deg, rgba(255, 255, 255, 0.95) 0%, rgba(246, 250, 255, 0.94) 100%);
+            box-shadow:
+                0 8px 24px rgba(21, 34, 50, 0.08),
+                0 1px 0 rgba(255, 255, 255, 0.85) inset;
+            backdrop-filter: blur(10px);
             position: relative;
             overflow: hidden;
         }
@@ -962,90 +965,115 @@
             align-items: center;
             justify-content: space-between;
             gap: 0.75rem;
-            margin-bottom: 0.6rem;
+            margin-bottom: 0.45rem;
             position: relative;
             z-index: 1;
+        }
+
+        .sendit-title-wrap {
+            display: flex;
+            flex-direction: column;
+            gap: 0.08rem;
+        }
+
+        .sendit-title {
+            letter-spacing: 0.01em;
+            font-size: 0.84rem;
+            font-weight: 900;
+            color: #121212;
         }
 
         .sendit-subtitle {
-            font-size: 0.72rem;
-            color: #4c4c4c;
-            font-weight: 700;
+            font-size: 0.68rem;
+            color: #616a76;
+            font-weight: 650;
             text-transform: uppercase;
-            letter-spacing: 0.03em;
+            letter-spacing: 0.045em;
         }
 
-        .sendit-meta {
-            margin-top: 0.3rem;
-            display: flex;
+        .sendit-live {
+            display: inline-flex;
             align-items: center;
-            gap: 0.42rem;
-            flex-wrap: wrap;
+            gap: 0.35rem;
+            padding: 0.18rem 0.48rem;
+            border-radius: 999px;
+            border: 1px solid rgba(31, 36, 44, 0.14);
+            background: rgba(255, 255, 255, 0.8);
             position: relative;
             z-index: 1;
         }
 
-        .sendit-chip {
-            display: inline-flex;
-            align-items: center;
-            padding: 0.16rem 0.45rem;
-            border-radius: 999px;
-            border: 2px solid #1e1e1e;
-            background: #fffef5;
-            color: #1e1e1e;
+        .sendit-live-dot {
+            width: 0.4rem;
+            height: 0.4rem;
+            border-radius: 50%;
+            background: #21c468;
+            box-shadow: 0 0 0 4px rgba(33, 196, 104, 0.2);
+            animation: senditPulseDot 2.1s ease-in-out infinite;
+        }
+
+        .sendit-live-text {
+            color: #2b2f36;
             font-size: 0.62rem;
             font-weight: 800;
             letter-spacing: 0.04em;
             text-transform: uppercase;
-            box-shadow: 1px 1px 0 rgba(0, 0, 0, 0.2);
         }
 
-        .sendit-votes {
+        .sendit-pulse {
+            position: relative;
+            z-index: 1;
+            margin-bottom: 0.48rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.45rem;
+            padding: 0.14rem 0.5rem;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.72);
+            border: 1px solid rgba(31, 36, 44, 0.1);
+            color: #5b6270;
             font-size: 0.68rem;
-            color: #4d4d4d;
             font-weight: 700;
         }
 
-        .sendit-score {
-            min-width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            border: 3px solid #1e1e1e;
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 0.95rem;
+        .sendit-pulse-label {
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            opacity: 0.9;
+        }
+
+        .sendit-pulse-value {
+            color: #202532;
             font-weight: 900;
-            color: #1e1e1e;
-            background: radial-gradient(circle at 28% 24%, #ffffff 0%, #f7fbff 58%, #edf3ff 100%);
-            box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.2);
-            transform: rotate(-4deg);
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            letter-spacing: 0.01em;
+        }
+
+        .sendit-votes {
+            color: #6b7380;
+            font-size: 0.64rem;
+            font-weight: 700;
+        }
+
+        .sendit-pulse.hot .sendit-pulse-value {
+            color: #0f7f77;
+        }
+
+        .sendit-pulse.mid .sendit-pulse-value {
+            color: #2256b4;
+        }
+
+        .sendit-pulse.cold .sendit-pulse-value {
+            color: #c2444a;
+        }
+
+        .sendit-prompt {
             position: relative;
             z-index: 1;
-        }
-
-        .sendit-section:hover .sendit-score {
-            transform: rotate(-2deg) translateY(-1px);
-            box-shadow: 4px 4px 0 rgba(0, 0, 0, 0.22);
-        }
-
-        .sendit-score.hot {
-            border-color: #0f7f77;
-            color: #0f7f77;
-            background: linear-gradient(135deg, #e8fffb 0%, #ffffff 100%);
-        }
-
-        .sendit-score.mid {
-            border-color: #2256b4;
-            color: #2256b4;
-            background: linear-gradient(135deg, #eef4ff 0%, #ffffff 100%);
-        }
-
-        .sendit-score.cold {
-            border-color: #c2444a;
-            color: #c2444a;
-            background: linear-gradient(135deg, #fff0f1 0%, #ffffff 100%);
+            margin-bottom: 0.38rem;
+            color: #343c49;
+            font-size: 0.69rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
         }
 
         .sendit-locked-note {
@@ -1131,6 +1159,17 @@
         .sendit-vote-btn[data-score="20"] { order: 1; }
         .sendit-vote-btn[data-score="60"] { order: 2; }
         .sendit-vote-btn[data-score="100"] { order: 3; }
+
+        @keyframes senditPulseDot {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 3px rgba(33, 196, 104, 0.2);
+            }
+            50% {
+                transform: scale(1.08);
+                box-shadow: 0 0 0 6px rgba(33, 196, 104, 0.08);
+            }
+        }
 
         .resort-icon {
             width: 64px;
@@ -2251,14 +2290,26 @@
                 letter-spacing: 0.005em;
             }
 
-            .sendit-score {
-                min-width: 54px;
-                height: 54px;
-                font-size: 0.84rem;
+            .sendit-live {
+                padding: 0.14rem 0.4rem;
+            }
+
+            .sendit-live-text {
+                font-size: 0.58rem;
+            }
+
+            .sendit-pulse {
+                gap: 0.35rem;
+                padding: 0.12rem 0.42rem;
+                margin-bottom: 0.38rem;
+            }
+
+            .sendit-pulse-value {
+                font-size: 0.72rem;
             }
 
             .sendit-votes {
-                font-size: 0.64rem;
+                font-size: 0.6rem;
             }
         }
 

@@ -460,6 +460,7 @@
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
             const sendItSubtitle = 'Locals on-mountain only';
+            const sendItPrompt = canVote ? `<div class="sendit-prompt">Tap your call</div>` : '';
             const sendItControls = !hasCoords
                 ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>`
                 : canVote
@@ -468,7 +469,7 @@
                         <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="60">${sendItButtonCopy.mid}</button>
                         <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="100">${sendItButtonCopy.high}</button>
                       </div>
-                      <div class="sendit-locked-note">Location verified. Your vote is local-only (${formatMiles(requiredMiles)} mi geofence).</div>`
+                      <div class="sendit-locked-note">Verified nearby. Local-only voting (${formatMiles(requiredMiles)} mi geofence).</div>`
                     : `<button class="sendit-unlock-btn" data-sendit-action="unlock" data-resort-id="${resort.id}">Unlock Nearby Voting</button>
                        <div class="sendit-locked-note">Only users within ${formatMiles(requiredMiles)} miles can vote.</div>`;
 
@@ -637,16 +638,21 @@
 
                 <div class="sendit-section">
                   <div class="sendit-header">
-                    <div>
-                      <div class="rating-label">SEND IT METER</div>
+                    <div class="sendit-title-wrap">
+                      <div class="rating-label sendit-title">SEND IT METER</div>
                       <div class="sendit-subtitle">${sendItSubtitle}</div>
-                      <div class="sendit-meta">
-                        <span class="sendit-chip">Locals Live</span>
-                        <span class="sendit-votes">${sendItVotes} vote${sendItVotes === 1 ? '' : 's'}</span>
-                      </div>
                     </div>
-                    <div class="sendit-score ${sendItScoreClass}">${sendItScore}</div>
+                    <div class="sendit-live" aria-label="Local votes status">
+                      <span class="sendit-live-dot"></span>
+                      <span class="sendit-live-text">Locals Live</span>
+                    </div>
                   </div>
+                  <div class="sendit-pulse ${sendItScoreClass}">
+                    <span class="sendit-pulse-label">Live pulse</span>
+                    <span class="sendit-pulse-value">${sendItScore}</span>
+                    <span class="sendit-votes">${sendItVotes} vote${sendItVotes === 1 ? '' : 's'}</span>
+                  </div>
+                  ${sendItPrompt}
                   ${sendItControls}
                 </div>
 
