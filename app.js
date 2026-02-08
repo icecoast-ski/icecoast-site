@@ -247,6 +247,18 @@
             'Maximum Stoke',
             'Zero Hesitation'
         ];
+        const SENDIT_COOLDOWN_OPTIONS = [
+            'Easy, legend. Patrol says wait {minutes}m before your next call.',
+            'You already dropped your vote. Take a hot-lap and check back in {minutes}m.',
+            'Apres timeout: bar tab open, voting tab paused for {minutes}m.',
+            'Chairlift gossip is still processing your vote. Try again in {minutes}m.',
+            'Save some ammo for second chair. You can vote again in {minutes}m.',
+            'Boots still clicking at the lodge. Next vote opens in {minutes}m.',
+            'No double-dipping the nachos or the votes. Retry in {minutes}m.',
+            'Wax room says chill for {minutes}m, then fire another take.',
+            'Apres committee heard you loud and clear. Come back in {minutes}m.',
+            'One vote per lap, boss. Next lap opens in {minutes}m.'
+        ];
 
         function pickRandomLabel(options) {
             return options[Math.floor(Math.random() * options.length)];
@@ -261,6 +273,12 @@
                 };
             }
             return sendItButtonCopyByResort[resortId];
+        }
+
+        function getSendItCooldownMessage(retryAfterMinutes) {
+            const minutes = Math.max(1, Math.round(Number(retryAfterMinutes) || 1));
+            const template = pickRandomLabel(SENDIT_COOLDOWN_OPTIONS);
+            return template.replace('{minutes}', `${minutes}`);
         }
 
         function loadSendItUnlockState() {
@@ -463,6 +481,12 @@
 
                 const payload = await resp.json();
                 if (!resp.ok) {
+                    if (resp.status === 429 && Number.isFinite(payload?.retryAfterMinutes)) {
+                        const cooldownError = new Error(payload?.error || 'Cooldown active');
+                        cooldownError.code = 'SENDIT_COOLDOWN';
+                        cooldownError.retryAfterMinutes = payload.retryAfterMinutes;
+                        throw cooldownError;
+                    }
                     throw new Error(payload?.error || `Vote failed (${resp.status})`);
                 }
 
@@ -478,6 +502,10 @@
                 renderResorts();
             } catch (e) {
                 triggerHaptic([24, 34, 24]);
+                if (e?.code === 'SENDIT_COOLDOWN') {
+                    alert(getSendItCooldownMessage(e.retryAfterMinutes));
+                    return;
+                }
                 alert(e.message || 'Unable to submit vote right now.');
             } finally {
                 if (buttonEl) {
