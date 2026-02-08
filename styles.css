@@ -80,6 +80,7 @@
             font-weight: 600;
             margin: 0;
             padding-bottom: 0.08rem;
+            white-space: nowrap;
         }
 
         .patreon-chip {
@@ -2822,7 +2823,7 @@
             }
 
             .header-left {
-                flex-wrap: wrap;
+                flex-wrap: nowrap;
                 gap: 0.5rem;
             }
 
