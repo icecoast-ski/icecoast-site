@@ -2496,7 +2496,7 @@
 
             const stars = Array.from({ length: 5 }, (_, i) => {
                 const isFilled = i < (resort.rating || 0);
-                return `<span class="star ${isFilled ? 'filled' : 'empty'}"></span>`;
+                return `<span class="star ${isFilled ? 'filled' : 'empty'}">★</span>`;
             }).join('');
 
             // POWDER / FRESH badges safely
