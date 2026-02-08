@@ -1155,31 +1155,9 @@
                 color 0.18s ease;
         }
 
-        .sendit-vote-btn::after {
-            content: '';
-            position: absolute;
-            left: -150%;
-            top: 0;
-            width: 58%;
-            height: 100%;
-            transform: skewX(-18deg);
-            background: linear-gradient(
-                90deg,
-                rgba(255, 255, 255, 0),
-                rgba(255, 255, 255, 0.65),
-                rgba(255, 255, 255, 0)
-            );
-            pointer-events: none;
-            transition: left 0.35s ease;
-        }
-
-        .sendit-vote-btn:hover::after {
-            left: 130%;
-        }
-
         .sendit-vote-btn:hover {
             transform: translateY(-1px);
-            box-shadow: 3px 4px 10px rgba(0, 0, 0, 0.12);
+            box-shadow: 2px 4px 10px rgba(0, 0, 0, 0.1);
             filter: saturate(1.04);
         }
 
@@ -1192,10 +1170,6 @@
             opacity: 0.82;
             pointer-events: none;
             filter: grayscale(0.15);
-        }
-
-        .sendit-vote-row.vote-ack .sendit-vote-btn {
-            animation: senditVoteAck 0.5s ease;
         }
 
         .sendit-vote-btn:hover,
@@ -1238,18 +1212,6 @@
             50% {
                 transform: scale(1.08);
                 box-shadow: 0 0 0 6px rgba(33, 196, 104, 0.08);
-            }
-        }
-
-        @keyframes senditVoteAck {
-            0% {
-                transform: translateY(0) scale(1);
-            }
-            35% {
-                transform: translateY(-1px) scale(1.02);
-            }
-            100% {
-                transform: translateY(0) scale(1);
             }
         }
 

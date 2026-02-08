@@ -371,6 +371,16 @@
             });
         }
 
+        function triggerHaptic(pattern) {
+            try {
+                if (navigator && typeof navigator.vibrate === 'function') {
+                    navigator.vibrate(pattern);
+                }
+            } catch (e) {
+                // Ignore haptics failures silently.
+            }
+        }
+
         async function unlockSendItForResort(resortId, buttonEl) {
             const resortCoords = getResortCoords(resortId);
             if (!resortCoords) {
@@ -383,6 +393,7 @@
                 buttonEl.disabled = true;
                 buttonEl.textContent = 'Checking location...';
             }
+            triggerHaptic(8);
 
             try {
                 const pos = await getBrowserLocation();
@@ -401,6 +412,7 @@
 
                 sendItUnlockedResorts.add(resortId);
                 persistSendItUnlockState();
+                triggerHaptic([12, 24, 12]);
                 renderResorts();
             } catch (e) {
                 alert('Could not verify your location. Please allow location access and try again.');
@@ -425,12 +437,12 @@
             }
 
             const originalText = buttonEl ? buttonEl.textContent : '';
-            const voteRowEl = buttonEl ? buttonEl.closest('.sendit-vote-row') : null;
             if (buttonEl) {
                 buttonEl.disabled = true;
                 buttonEl.classList.add('is-submitting');
                 buttonEl.textContent = 'Submitting...';
             }
+            triggerHaptic(10);
 
             try {
                 const pos = await getBrowserLocation();
@@ -461,15 +473,11 @@
                     sendItRadiusOverrides[resortId] = payload.radiusMiles;
                 }
 
-                if (voteRowEl) {
-                    voteRowEl.classList.remove('vote-ack');
-                    void voteRowEl.offsetWidth;
-                    voteRowEl.classList.add('vote-ack');
-                    setTimeout(() => voteRowEl.classList.remove('vote-ack'), 520);
-                }
+                triggerHaptic([14, 26, 14]);
 
                 renderResorts();
             } catch (e) {
+                triggerHaptic([24, 34, 24]);
                 alert(e.message || 'Unable to submit vote right now.');
             } finally {
                 if (buttonEl) {
