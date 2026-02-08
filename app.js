@@ -1286,7 +1286,7 @@ const backgroundPositionByResort = {
     'cannon': 'center 24%',
     'wildcat': 'center 30%',
     'sunday-river': 'center 38%',
-    'sugarloaf': 'center 23%',
+    'sugarloaf': 'center 48%',
     'saddleback': 'center 27%',
     'tremblant': 'center 29%',
     'mont-sainte-anne': 'center 37%',
