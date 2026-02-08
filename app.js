@@ -510,6 +510,74 @@
             });
         }
 
+        // Static social scores from recurring reviews/lists; manual admin overrides can still replace these.
+        const RESORT_APRES_FAMILY_SCORE = {
+            // Poconos / PA
+            'camelback': { apres: 3, family: 5 },
+            'blue-mountain': { apres: 3, family: 4 },
+            'jack-frost': { apres: 2, family: 3 },
+            'shawnee': { apres: 2, family: 4 },
+            'bear-creek': { apres: 2, family: 4 },
+            'elk': { apres: 2, family: 3 },
+            'big-boulder': { apres: 3, family: 3 },
+            'montage': { apres: 3, family: 3 },
+
+            // NY
+            'hunter': { apres: 4, family: 3 },
+            'windham': { apres: 4, family: 4 },
+            'belleayre': { apres: 2, family: 4 },
+            'whiteface': { apres: 3, family: 3 },
+            'gore-mountain': { apres: 2, family: 4 },
+
+            // MA / CT
+            'jiminy-peak': { apres: 3, family: 5 },
+            'wachusett': { apres: 2, family: 5 },
+            'mohawk': { apres: 2, family: 4 },
+
+            // Vermont
+            'stratton': { apres: 4, family: 4 },
+            'mount-snow': { apres: 4, family: 4 },
+            'killington': { apres: 5, family: 3 },
+            'okemo': { apres: 3, family: 5 },
+            'pico': { apres: 2, family: 4 },
+            'sugarbush': { apres: 4, family: 4 },
+            'mad-river-glen': { apres: 2, family: 3 },
+            'stowe': { apres: 4, family: 4 },
+            'smugglers-notch': { apres: 2, family: 5 },
+            'jay-peak': { apres: 3, family: 3 },
+            'burke': { apres: 2, family: 3 },
+
+            // NH / ME
+            'loon': { apres: 4, family: 4 },
+            'brettonwoods': { apres: 3, family: 5 },
+            'waterville': { apres: 3, family: 4 },
+            'cannon': { apres: 2, family: 3 },
+            'wildcat': { apres: 2, family: 3 },
+            'sunday-river': { apres: 4, family: 4 },
+            'sugarloaf': { apres: 4, family: 4 },
+            'saddleback': { apres: 3, family: 4 },
+
+            // Canada
+            'tremblant': { apres: 5, family: 4 },
+            'mont-sainte-anne': { apres: 3, family: 4 },
+            'le-massif': { apres: 3, family: 3 },
+            'mont-sutton': { apres: 3, family: 4 }
+        };
+
+        function applyResortApresFamilyScores() {
+            resorts.forEach((resort) => {
+                const score = RESORT_APRES_FAMILY_SCORE[resort.id];
+                if (!score) return;
+
+                if (Number.isFinite(Number(score.apres))) {
+                    resort.apres = Math.max(0, Math.min(5, Number(score.apres)));
+                }
+                if (Number.isFinite(Number(score.family))) {
+                    resort.family = Math.max(0, Math.min(5, Number(score.family)));
+                }
+            });
+        }
+
         // Static glade score: 3 = best glades, 2 = decent glades, 1 = some glades
         const RESORT_GLADE_SCORE = {
             // Poconos / PA
@@ -1365,7 +1433,7 @@
                       <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.25rem;">
                         ${icons.apres}
                       </span>
-                      Apres
+                      Après
                     </span>
                     <span class="extra-value">${'⭐'.repeat(Math.min(apres, 3))}</span>
                   </div>
@@ -1594,6 +1662,7 @@
         const REFRESH_INTERVAL = 15 * 60 * 1000; // 15 min
 
         resorts.forEach(normalizeSnowfall);
+        applyResortApresFamilyScores();
         applyManualResortOverrides();
         applyResortPassMembership();
         applyResortGladeScores();
