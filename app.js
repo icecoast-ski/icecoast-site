@@ -575,6 +575,52 @@
             });
         }
 
+        // Static drive-time data: 3 closest major cities (approximate, non-live)
+        const REGION_DRIVE_TIMES = {
+            'poconos': { 'NYC': '1h 50m', 'Philadelphia': '1h 45m', 'Newark': '1h 35m' },
+            'catskills': { 'NYC': '2h 30m', 'Albany': '1h 10m', 'Newark': '2h 40m' },
+            'adirondacks': { 'Albany': '1h 50m', 'Montreal': '2h 10m', 'NYC': '5h 10m' },
+            'massachusetts': { 'Boston': '2h 20m', 'NYC': '3h 15m', 'Albany': '1h 00m' },
+            'connecticut': { 'Hartford': '1h 10m', 'NYC': '2h 15m', 'Boston': '2h 30m' },
+            'vermont-south': { 'NYC': '4h 00m', 'Boston': '3h 00m', 'Albany': '2h 20m' },
+            'vermont-central': { 'Boston': '3h 25m', 'NYC': '4h 45m', 'Montreal': '2h 30m' },
+            'vermont-north': { 'Montreal': '1h 40m', 'Boston': '3h 45m', 'NYC': '5h 25m' },
+            'white-mountains': { 'Boston': '2h 20m', 'Portland': '1h 35m', 'NYC': '5h 10m' },
+            'maine': { 'Portland': '1h 45m', 'Boston': '3h 20m', 'Montreal': '4h 25m' },
+            'canada': { 'Montreal': '1h 35m', 'Quebec City': '1h 20m', 'Burlington': '2h 35m' }
+        };
+
+        const RESORT_DRIVE_TIME_OVERRIDES = {
+            'whiteface': { 'Montreal': '2h 15m', 'Albany': '2h 20m', 'NYC': '5h 20m' },
+            'gore-mountain': { 'Albany': '1h 30m', 'NYC': '4h 10m', 'Montreal': '3h 30m' },
+            'killington': { 'NYC': '4h 45m', 'Boston': '3h 10m', 'Montreal': '3h 15m' },
+            'stowe': { 'Montreal': '2h 20m', 'Boston': '3h 10m', 'NYC': '5h 10m' },
+            'jay-peak': { 'Montreal': '1h 50m', 'Burlington': '1h 30m', 'Boston': '3h 55m' },
+            'sunday-river': { 'Portland': '1h 30m', 'Boston': '3h 20m', 'Montreal': '4h 35m' },
+            'sugarloaf': { 'Portland': '2h 25m', 'Boston': '4h 00m', 'Montreal': '4h 20m' },
+            'tremblant': { 'Montreal': '1h 45m', 'Ottawa': '2h 10m', 'Burlington': '2h 50m' },
+            'mont-sainte-anne': { 'Quebec City': '0h 40m', 'Montreal': '3h 10m', 'Burlington': '3h 20m' },
+            'le-massif': { 'Quebec City': '1h 05m', 'Montreal': '4h 10m', 'Burlington': '4h 20m' },
+            'mont-sutton': { 'Montreal': '1h 25m', 'Burlington': '1h 10m', 'Boston': '4h 10m' }
+        };
+
+        function applyResortDriveTimes() {
+            resorts.forEach((resort) => {
+                const override = RESORT_DRIVE_TIME_OVERRIDES[resort.id];
+                if (override && typeof override === 'object') {
+                    resort.distance = { ...override };
+                    return;
+                }
+
+                const regional = REGION_DRIVE_TIMES[resort.region];
+                if (regional && typeof regional === 'object') {
+                    resort.distance = { ...regional };
+                } else if (!resort.distance || typeof resort.distance !== 'object') {
+                    resort.distance = {};
+                }
+            });
+        }
+
         const DEFAULT_SEND_IT_RADIUS_MILES = 1.5;
         let sendItSummaryByResort = {};
         let sendItRadiusMiles = DEFAULT_SEND_IT_RADIUS_MILES;
@@ -1551,6 +1597,7 @@
         applyManualResortOverrides();
         applyResortPassMembership();
         applyResortGladeScores();
+        applyResortDriveTimes();
 
         loadSendItUnlockState();
         renderResorts();
