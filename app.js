@@ -406,6 +406,28 @@
             };
         }
 
+        function applyStaticMountainMetrics() {
+            resorts.forEach((resort) => {
+                const vertical = Number(resort.vertical);
+                if (Number.isFinite(vertical)) {
+                    resort.elevation = { ...(resort.elevation || {}), vertical: Math.round(vertical) };
+                }
+
+                const liftsTotal = Number(resort.liftsTotal);
+                if (Number.isFinite(liftsTotal) && liftsTotal > 0) {
+                    if (!resort.lifts || typeof resort.lifts !== 'object') {
+                        resort.lifts = {};
+                    }
+                    if (!Number.isFinite(Number(resort.lifts.total))) {
+                        resort.lifts.total = Math.round(liftsTotal);
+                    }
+                    if (Number.isFinite(Number(resort.lifts.open)) && !Number.isFinite(Number(resort.lifts.closed))) {
+                        resort.lifts.closed = Math.max(0, Number(resort.lifts.total) - Number(resort.lifts.open));
+                    }
+                }
+            });
+        }
+
         function applyManualResortOverrides() {
             const overrides =
                 (typeof window !== 'undefined' && (window.MANUAL_RESORT_OVERRIDES || window.ICECOAST_MANUAL_OVERRIDES))
@@ -1665,6 +1687,7 @@
         const REFRESH_INTERVAL = 15 * 60 * 1000; // 15 min
 
         resorts.forEach(normalizeSnowfall);
+        applyStaticMountainMetrics();
         applyResortApresFamilyScores();
         applyManualResortOverrides();
         applyResortPassMembership();

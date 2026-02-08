@@ -17,6 +17,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 41.0525,
         lon: -75.3560,
+        vertical: 800,
+        liftsTotal: 16,
         liftie: 'camelback'
     },
     {
@@ -28,6 +30,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 40.8101,
         lon: -75.5209,
+        vertical: 1082,
+        liftsTotal: 16,
         liftie: 'bluemountain'
     },
     {
@@ -39,6 +43,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 41.0910,
         lon: -75.4690,
+        vertical: 600,
+        liftsTotal: 9,
         liftie: 'null'
     },
     {
@@ -50,6 +56,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 41.0380,
         lon: -75.0770,
+        vertical: 700,
+        liftsTotal: 11,
         liftie: 'shawnee'
     },
     {
@@ -61,6 +69,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 40.7434,
         lon: -76.0493,
+        vertical: 510,
+        liftsTotal: 7,
         liftie: 'null'
     },
     {
@@ -72,6 +82,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 41.6523,
         lon: -75.5643,
+        vertical: 1000,
+        liftsTotal: 7,
         liftie: 'null'
     },
     {
@@ -83,6 +95,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 41.1046,
         lon: -75.5554,
+        vertical: 475,
+        liftsTotal: 8,
         liftie: 'null'
     },
     {
@@ -94,6 +108,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 41.1812,
         lon: -75.5590,
+        vertical: 1000,
+        liftsTotal: 7,
         liftie: 'null'
     },
 
@@ -107,6 +123,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 42.2080,
         lon: -74.2116,
+        vertical: 1600,
+        liftsTotal: 13,
         liftie: 'hunter'
     },
     {
@@ -118,6 +136,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 42.2985,
         lon: -74.2627,
+        vertical: 1600,
+        liftsTotal: 11,
         liftie: 'windham'
     },
     {
@@ -129,6 +149,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 42.1344,
         lon: -74.5121,
+        vertical: 1404,
+        liftsTotal: 8,
         liftie: 'belleayre'
     },
     {
@@ -140,6 +162,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 44.3611,
         lon: -73.8865,
+        vertical: 3430,
+        liftsTotal: 11,
         liftie: 'whiteface'
     },
     {
@@ -151,6 +175,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 43.6774,
         lon: -74.0116,
+        vertical: 2537,
+        liftsTotal: 14,
         liftie: 'gore-mountain'
     },
 
@@ -164,6 +190,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 42.5386,
         lon: -73.2928,
+        vertical: 1150,
+        liftsTotal: 9,
         liftie: 'jiminy-peak'
     },
     {
@@ -175,6 +203,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 42.5153,
         lon: -71.8900,
+        vertical: 1000,
+        liftsTotal: 8,
         liftie: 'wachusett'
     },
     {
@@ -186,6 +216,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 41.6892,
         lon: -73.3148,
+        vertical: 650,
+        liftsTotal: 8,
         liftie: 'mohawk-mountain'
     },
 
@@ -199,6 +231,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 43.1172,
         lon: -72.9094,
+        vertical: 2003,
+        liftsTotal: 14,
         liftie: 'stratton'
     },
     {
@@ -210,6 +244,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 42.9714,
         lon: -72.8963,
+        vertical: 1700,
+        liftsTotal: 20,
         liftie: 'mount-snow'
     },
     {
@@ -221,6 +257,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 43.6317,
         lon: -72.8057,
+        vertical: 3050,
+        liftsTotal: 21,
         liftie: 'killington'
     },
     {
@@ -232,6 +270,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 43.4057,
         lon: -72.7196,
+        vertical: 2200,
+        liftsTotal: 20,
         liftie: 'okemo'
     },
     {
@@ -243,6 +283,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 43.6597,
         lon: -72.8521,
+        vertical: 1967,
+        liftsTotal: 7,
         liftie: 'pico'
     },
     {
@@ -254,6 +296,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 44.1513,
         lon: -72.8821,
+        vertical: 2600,
+        liftsTotal: 16,
         liftie: 'sugarbush'
     },
     {
@@ -265,6 +309,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 44.2056,
         lon: -72.9215,
+        vertical: 2037,
+        liftsTotal: 5,
         liftie: 'mad-river-glen'
     },
     {
@@ -276,6 +322,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 44.5385,
         lon: -72.7844,
+        vertical: 2360,
+        liftsTotal: 12,
         liftie: 'stowe'
     },
     {
@@ -287,6 +335,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 44.5414,
         lon: -72.7847,
+        vertical: 2610,
+        liftsTotal: 8,
         liftie: 'smugglers-notch'
     },
     {
@@ -298,6 +348,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 44.9338,
         lon: -72.5049,
+        vertical: 2153,
+        liftsTotal: 9,
         liftie: 'jay-peak'
     },
     {
@@ -309,6 +361,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 44.5770,
         lon: -71.9212,
+        vertical: 2011,
+        liftsTotal: 5,
         liftie: 'burke'
     },
 
@@ -322,6 +376,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 44.0400,
         lon: -71.6239,
+        vertical: 2100,
+        liftsTotal: 13,
         liftie: 'loon'
     },
     {
@@ -333,6 +389,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 44.0798,
         lon: -71.3435,
+        vertical: 1500,
+        liftsTotal: 10,
         liftie: 'brettonwoods'
     },
     {
@@ -344,6 +402,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 43.9686,
         lon: -71.5292,
+        vertical: 2020,
+        liftsTotal: 11,
         liftie: 'waterville'
     },
     {
@@ -355,6 +415,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 44.1593,
         lon: -71.7012,
+        vertical: 2180,
+        liftsTotal: 10,
         liftie: 'cannon'
     },
     {
@@ -366,6 +428,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 44.2665,
         lon: -71.2420,
+        vertical: 2112,
+        liftsTotal: 5,
         liftie: 'wildcat'
     },
     {
@@ -377,6 +441,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 44.4768,
         lon: -70.8601,
+        vertical: 2340,
+        liftsTotal: 15,
         liftie: 'sunday-river'
     },
     {
@@ -388,6 +454,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 45.0359,
         lon: -70.3166,
+        vertical: 2820,
+        liftsTotal: 13,
         liftie: 'sugarloaf'
     },
     {
@@ -399,6 +467,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 44.9345,
         lon: -70.5130,
+        vertical: 2000,
+        liftsTotal: 6,
         liftie: 'saddleback'
     },
 
@@ -412,6 +482,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 46.2094,
         lon: -74.5903,
+        vertical: 2116,
+        liftsTotal: 14,
         liftie: 'mont-tremblant'
     },
     {
@@ -423,6 +495,8 @@ const RESORTS = [
         familyOwned: false,
         lat: 47.0711,
         lon: -70.9061,
+        vertical: 2050,
+        liftsTotal: 11,
         liftie: 'mont-sainte-anne'
     },
     {
@@ -434,6 +508,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 47.3292,
         lon: -70.6489,
+        vertical: 2526,
+        liftsTotal: 7,
         liftie: 'le-massif'
     },
     {
@@ -445,6 +521,8 @@ const RESORTS = [
         familyOwned: true,
         lat: 45.0769,
         lon: -72.4561,
+        vertical: 1500,
+        liftsTotal: 9,
         liftie: 'mont-sutton'
     }
 ];
