@@ -1022,6 +1022,7 @@
 
             const passes = resort.passes || [];
             const distance = resort.distance || {};
+            const distanceEntries = Object.entries(distance);
             const weather = resort.weather || {};
             const forecast = resort.forecast || [];
 
@@ -1456,9 +1457,11 @@
                     Drive Time
                   </div>
                   <div class="distance-list">
-                    ${Object.entries(distance).map(([city, time]) => `
-                      <div class="distance-item"><strong>${city}</strong> ${time}</div>
-                    `).join('')}
+                    ${distanceEntries.length
+                        ? distanceEntries.map(([city, time]) => `
+                            <div class="distance-item"><strong>${city}</strong> ${time}</div>
+                          `).join('')
+                        : '<div class="distance-item">Drive time unavailable</div>'}
                   </div>
                 </div>
               </div>
