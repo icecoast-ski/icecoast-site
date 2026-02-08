@@ -451,6 +451,7 @@
             resorts.forEach((resort) => {
                 const patch = overrides[resort.id];
                 if (!patch || typeof patch !== 'object') return;
+                resort.hasPatrolUpdate = true;
 
                 if (Number.isFinite(Number(patch.icecoastRating))) {
                     resort.manualRating = Math.max(1, Math.min(5, Number(patch.icecoastRating)));
@@ -939,6 +940,17 @@
             return nowDecimal >= closeHour;
         }
 
+        function formatSnapshotBadge(iso) {
+            if (!iso) return 'Last Updated —';
+            const dt = new Date(iso);
+            if (Number.isNaN(dt.getTime())) return 'Last Updated —';
+            const time = dt.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+            return `Last Updated ${time}`;
+        }
+
         function getSendItDeviceId() {
             try {
                 let id = localStorage.getItem(SENDIT_DEVICE_ID_KEY);
@@ -1259,6 +1271,7 @@
 
             const sendIt = sendItSummaryByResort[resort.id] || {};
             const showLiftMoon = isAfterLiftClose(resort.id);
+            const lastUpdatedBadge = formatSnapshotBadge(snapshotLastUpdatedIso);
             const sendItButtonCopy = getSendItButtonCopy(resort.id);
             const requiredMiles = getSendItRadiusMilesForResort(resort.id);
             const sendItVotes = Number.isFinite(sendIt.votes) ? sendIt.votes : 0;
@@ -1293,6 +1306,13 @@
                       <div class="sendit-locked-note">Verified nearby. Local-only voting (${formatMiles(requiredMiles)} mi geofence).</div>`
                     : `<button class="sendit-unlock-btn sendit-unlock-cta" data-sendit-action="unlock" data-resort-id="${resort.id}">⚡ Unlock Nearby Voting</button>
                        <div class="sendit-locked-note">Only users within ${formatMiles(requiredMiles)} miles can vote.</div>`;
+            const dataBadges = `
+                <div class="data-provenance-row">
+                  ${resort.hasLiveUpdate ? '<span class="data-provenance-badge live">Live</span>' : ''}
+                  ${resort.hasPatrolUpdate ? '<span class="data-provenance-badge patrol">Patrol Updated</span>' : ''}
+                  <span class="data-provenance-badge updated">${lastUpdatedBadge}</span>
+                </div>
+            `;
 
             // POWDER / FRESH badges safely
             const isPowder = resort.conditions === 'Powder';
@@ -1403,9 +1423,9 @@ const backgroundSizeByResort = {
                   <div style="flex:1;">
                     <h2 class="resort-name">
                       <span class="resort-name-text">${resort.name}</span>
-                      ${resort.isScraped ? `<span class="live-data-badge"><span><span>LIVE</span></span></span>` : ''}
                     </h2>
                     <p class="resort-location">${resort.location}</p>
+                    ${dataBadges}
                     ${resort.glades > 0 ? `
                       <div class="glade-indicator">
                         <span class="glade-trees">${'🌲'.repeat(Math.min(glades, 3))}</span>
@@ -1860,6 +1880,7 @@ const backgroundSizeByResort = {
         // Configuration - UPDATE THIS URL AFTER DEPLOYING YOUR WORKER
         const WORKER_URL = 'https://cloudflare-worker.rickt123-0f8.workers.dev/';
         const REFRESH_INTERVAL = 15 * 60 * 1000; // 15 min
+        let snapshotLastUpdatedIso = null;
 
         resorts.forEach(normalizeSnowfall);
         applyStaticMountainMetrics();
@@ -1911,6 +1932,10 @@ const backgroundSizeByResort = {
                     ? (result.data && typeof result.data === 'object' ? result.data : result)
                     : {};
                 if (result && typeof result === 'object') {
+                    snapshotLastUpdatedIso =
+                        result?.snapshot?.lastUpdated
+                        || result?.data?._metadata?.lastUpdated
+                        || snapshotLastUpdatedIso;
                     if (result.senditSummary && typeof result.senditSummary === 'object') {
                         sendItSummaryByResort = result.senditSummary;
                     }
@@ -1930,6 +1955,9 @@ const backgroundSizeByResort = {
                 }
                 let weatherUpdatedCount = 0;
                 let liftUpdatedCount = 0;
+                resorts.forEach((resort) => {
+                    resort.hasLiveUpdate = false;
+                });
 
                 resorts.forEach(resort => {
                     const live = apiData[resort.id];
@@ -1949,6 +1977,7 @@ const backgroundSizeByResort = {
                             icon: live.weather.icon
                         };
                         weatherUpdatedCount++;
+                        resort.hasLiveUpdate = true;
                     }
 
                     // ── Forecast (OpenWeather) ──
@@ -1975,6 +2004,7 @@ const backgroundSizeByResort = {
                         resort.lifts.closed = live.lifts.total - live.lifts.open;
                         resort.hasLiftie = true;
                         liftUpdatedCount++;
+                        resort.hasLiveUpdate = true;
 
                         // Store individual lift details for the dropdown
                         if (live.lifts.details) {

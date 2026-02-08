@@ -2005,6 +2005,45 @@
             margin-left: 0.5rem;
         }
 
+        .data-provenance-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem;
+            margin-top: 0.35rem;
+        }
+
+        .data-provenance-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.18rem 0.45rem;
+            border-radius: 999px;
+            font-size: 0.58rem;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+            text-transform: uppercase;
+            border: 1px solid transparent;
+            backdrop-filter: blur(2px);
+        }
+
+        .data-provenance-badge.live {
+            color: #e8fff5;
+            background: rgba(13, 148, 95, 0.7);
+            border-color: rgba(110, 231, 183, 0.75);
+        }
+
+        .data-provenance-badge.patrol {
+            color: #eef4ff;
+            background: rgba(37, 99, 235, 0.58);
+            border-color: rgba(147, 197, 253, 0.75);
+        }
+
+        .data-provenance-badge.updated {
+            color: #f4f7fb;
+            background: rgba(15, 23, 42, 0.5);
+            border-color: rgba(203, 213, 225, 0.5);
+            text-transform: none;
+        }
+
         @keyframes pulse {
             0%, 100% { transform: scale(1); }
             50% { transform: scale(1.05); }
