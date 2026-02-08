@@ -978,7 +978,14 @@
 
         .sendit-title {
             letter-spacing: 0.01em;
-            font-size: 0.84rem;
+            font-size: 0.92rem;
+            font-weight: 900;
+            color: #121212;
+        }
+
+        .icecoast-title {
+            letter-spacing: 0.01em;
+            font-size: 0.92rem;
             font-weight: 900;
             color: #121212;
         }
@@ -1066,17 +1073,6 @@
 
         .sendit-pulse.cold .sendit-state {
             color: #c2444a;
-        }
-
-        .sendit-pulse.pending .sendit-state {
-            color: #4e5968;
-            font-size: 0.71rem;
-            font-weight: 780;
-            letter-spacing: 0.025em;
-        }
-
-        .sendit-pulse.pending .sendit-votes {
-            color: #7a8391;
         }
 
         .sendit-social-proof {

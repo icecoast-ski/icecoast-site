@@ -323,7 +323,7 @@
 
         function getSendItState(scoreValue) {
             if (!Number.isFinite(scoreValue)) {
-                return { label: 'First Chair', className: 'pending' };
+                return { label: 'First Chair', className: '' };
             }
             if (scoreValue >= 70) {
                 return { label: 'Full Send', className: 'hot' };
@@ -690,7 +690,7 @@
               <div class="resort-body">
                 <div class="rating-section">
                   <div>
-                    <div class="rating-label">Icecoast Rating</div>
+                    <div class="rating-label icecoast-title">Icecoast Rating</div>
                     <div class="rating-stars">${stars}</div>
                   </div>
                   <div class="rating-text">
