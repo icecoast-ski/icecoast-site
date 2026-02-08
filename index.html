@@ -595,8 +595,8 @@
 
         .resort-header {
             background-image: var(--bg);
-            background-size: 125%;
-            background-position: center;
+            background-size: var(--bg-size, 108%);
+            background-position: var(--bg-pos, center 42%);
             background-repeat: no-repeat;
         }
 
@@ -2052,13 +2052,11 @@
             background-position: center 40%;
         }
 
-        /* Mad River Glen */
+        /* Mad River Glen - use mapped background source */
         .resort-card[data-resort="mad-river-glen"] .resort-header {
-            background-image:
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                url('./images/madriverglen.jpg');
-            background-size: cover;
-            background-position: center 30%;
+            background-image: var(--bg) !important;
+            background-size: var(--bg-size, 108%) !important;
+            background-position: var(--bg-pos, center 42%) !important;
         }
 
         /* Sugarloaf */
@@ -2072,11 +2070,9 @@
 
         /* Whiteface */
         .resort-card[data-resort="whiteface"] .resort-header {
-            background-image:
-                linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                url('./images/whiteface.jpg');
-            background-size: cover;
-            background-position: center 30%;
+            background-image: var(--bg) !important;
+            background-size: var(--bg-size, 108%) !important;
+            background-position: var(--bg-pos, center 42%) !important;
         }
 
         /* Gore */
@@ -2572,9 +2568,67 @@
 
             const backgroundImage = backgroundImageByResort[resort.id] || 'killington';
 
+            // Fine-tuned focal points so peaks/bases are framed better per resort.
+            const backgroundPositionByResort = {
+                'camelback': 'center 38%',
+                'blue-mountain': 'center 46%',
+                'jack-frost': 'center 52%',
+                'shawnee': 'center 50%',
+                'bear-creek': 'center 54%',
+                'elk': 'center 44%',
+                'big-boulder': 'center 55%',
+                'montage': 'center 48%',
+                'hunter': 'center 34%',
+                'windham': 'center 40%',
+                'belleayre': 'center 42%',
+                'whiteface': 'center 26%',
+                'gore-mountain': 'center 30%',
+                'jiminy-peak': 'center 45%',
+                'wachusett': 'center 52%',
+                'mohawk': 'center 52%',
+                'stratton': 'center 43%',
+                'mount-snow': 'center 41%',
+                'killington': 'center 38%',
+                'okemo': 'center 44%',
+                'pico': 'center 40%',
+                'sugarbush': 'center 33%',
+                'mad-river-glen': 'center 34%',
+                'stowe': 'center 30%',
+                'smugglers-notch': 'center 31%',
+                'jay-peak': 'center 28%',
+                'burke': 'center 32%',
+                'loon': 'center 42%',
+                'brettonwoods': 'center 40%',
+                'waterville': 'center 44%',
+                'cannon': 'center 36%',
+                'wildcat': 'center 27%',
+                'sunday-river': 'center 40%',
+                'sugarloaf': 'center 34%',
+                'saddleback': 'center 35%',
+                'tremblant': 'center 34%',
+                'mont-sainte-anne': 'center 39%',
+                'le-massif': 'center 30%',
+                'mont-sutton': 'center 38%'
+            };
+
+            // Keep a slight zoom to hide white borders in source art without heavy pixelation.
+            const backgroundSizeByResort = {
+                'whiteface': '112%',
+                'gore-mountain': '112%',
+                'stowe': '112%',
+                'wildcat': '112%',
+                'jay-peak': '112%',
+                'sugarbush': '110%',
+                'sugarloaf': '110%',
+                'le-massif': '112%'
+            };
+
+            const backgroundPos = backgroundPositionByResort[resort.id] || 'center 42%';
+            const backgroundSize = backgroundSizeByResort[resort.id] || '106%';
+
             return `
             <div class="resort-card" data-region="${resort.region}" data-resort="${resort.id}">
-              <div class="resort-header" style="--bg: url('resorts/${backgroundImage}-1280.avif')">
+              <div class="resort-header" style="--bg: url('resorts/${backgroundImage}-1280.avif'); --bg-pos: ${backgroundPos}; --bg-size: ${backgroundSize};">
                 ${resort.familyOwned ? `<div class="family-badge">Family-Owned</div>` : ''}
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;">
                   <div style="flex:1;">
