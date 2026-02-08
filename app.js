@@ -719,6 +719,7 @@
         const SENDIT_DEVICE_ID_KEY = 'icecoast_sendit_device_id';
         const sendItUnlockedResorts = new Set();
         const sendItButtonCopyByResort = {};
+        const sendItVerifyCopyByResort = {};
         const SENDIT_TEST_UNLIMITED_RESORTS = new Set(['blue-mountain']);
 
         const SENDIT_LOW_OPTIONS = [
@@ -773,6 +774,18 @@
             'Apres committee heard you loud and clear. Come back in {minutes}m.',
             'One vote per lap, boss. Next lap opens in {minutes}m.'
         ];
+        const SENDIT_VERIFY_TAGLINES = [
+            'Call your line.',
+            'Let it rip.',
+            'Drop your take.',
+            'Point em downhill.',
+            'Send your call.',
+            'Choose your line.',
+            'Set your edge.',
+            'Claim your lap.',
+            'Call the snow.',
+            'Make the call.'
+        ];
 
         function pickRandomLabel(options) {
             return options[Math.floor(Math.random() * options.length)];
@@ -793,6 +806,13 @@
             const minutes = Math.max(1, Math.round(Number(retryAfterMinutes) || 1));
             const template = pickRandomLabel(SENDIT_COOLDOWN_OPTIONS);
             return template.replace('{minutes}', `${minutes}`);
+        }
+
+        function getSendItVerifySubtitle(resortId) {
+            if (!sendItVerifyCopyByResort[resortId]) {
+                sendItVerifyCopyByResort[resortId] = pickRandomLabel(SENDIT_VERIFY_TAGLINES);
+            }
+            return `Verify location to vote on real-time conditions. ${sendItVerifyCopyByResort[resortId]}`;
         }
 
         function loadSendItUnlockState() {
@@ -1129,7 +1149,7 @@
             const canVote = hasCoords && (unlimitedTestMode || sendItUnlockedResorts.has(resort.id));
             const sendItSubtitle = canVote
                 ? 'Vote current conditions now'
-                : 'Verify location to vote';
+                : getSendItVerifySubtitle(resort.id);
             const sendItPrompt = canVote ? `<div class="sendit-prompt">Tap your call</div>` : '';
             const sendItControls = !hasCoords
                 ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>`
