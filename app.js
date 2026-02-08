@@ -65,7 +65,9 @@
             const temp = resort.weather?.temp || 25;
             const wind = parseInt(resort.weather?.wind) || 10;
             const condition = (resort.weather?.condition || "").toLowerCase();
+            const manualCondition = (resort.conditions || "").toLowerCase();
             const isCanada = resort.region === "canada";
+            const isArcticAlert = manualCondition.includes('arctic blast');
 
             // Condition flags
             const heavySnow = snow24h >= 8;
@@ -286,6 +288,18 @@
                     default: ['Quebec Culture + Laps!', 'Leaf Country Stoke!']
                 }
             };
+
+            if (isArcticAlert) {
+                const arcticTaglines = {
+                    5: ['Arctic Hero Day ⚠️', 'Cold Smoke + Windproof Layers ⚠️', 'Face Tape Full Send ⚠️'],
+                    4: ['Arctic But Rippable ⚠️', 'Bundle Up, Still Worth It ⚠️', 'Cold Air, Hot Laps ⚠️'],
+                    3: ['Arctic Edge Session ⚠️', 'Frosty And Fast ⚠️', 'Neck Gaiter Game On ⚠️'],
+                    2: ['Arctic Challenge Mode ⚠️', 'Windproof Everything ⚠️', 'Short Laps, Strong Coffee ⚠️'],
+                    1: ['Arctic Survival Carves ⚠️', 'Goggle Ice Build-Up Day ⚠️', 'Face Mask Mandatory ⚠️']
+                };
+                const options = arcticTaglines[rating] || arcticTaglines[3];
+                return options[Math.floor(Math.random() * options.length)];
+            }
 
             function pickTaglineSet(pool, resortId, resortRegion) {
                 let bucket = 'default';

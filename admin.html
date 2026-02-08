@@ -186,6 +186,7 @@
               <option value="Loose Granular">Loose Granular</option>
               <option value="Spring Corn">Spring Corn</option>
               <option value="Wet / Heavy">Wet / Heavy</option>
+              <option value="Arctic Blast ⚠️">Arctic Blast ⚠️</option>
               <option value="Thin Cover">Thin Cover</option>
               <option value="Icy in Spots">Icy in Spots</option>
               <option value="Mixed Conditions">Mixed Conditions</option>
@@ -290,6 +291,7 @@
           <button class="good" id="downloadBtn">Download manual-data.js</button>
           <button class="outline" id="copyBtn">Copy to Clipboard</button>
           <button class="outline" id="refreshBtn">Refresh Output</button>
+          <button class="primary" id="openConditionsBtn">Open Conditions Tabs</button>
         </div>
         <div class="meta">
           Upload this file to:
@@ -380,6 +382,7 @@
       downloadBtn: document.getElementById('downloadBtn'),
       copyBtn: document.getElementById('copyBtn'),
       refreshBtn: document.getElementById('refreshBtn'),
+      openConditionsBtn: document.getElementById('openConditionsBtn'),
       exportStatus: document.getElementById('exportStatus')
     };
 
@@ -609,6 +612,112 @@
       }
     }
 
+    const CONDITIONS_URL_BY_RESORT = {
+      'camelback': 'https://conditions.camelbackresort.com/conditions/snow-report/',
+      'blue-mountain': 'https://www.skibluemt.com/winter-sports/skiing-snowboarding/',
+      'jack-frost': 'https://www.jfbb.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx',
+      'shawnee': 'https://www.shawneemt.com/snow-report/',
+      'bear-creek': 'https://www.bcmountainresort.com/activities/ski-snowboarding/ski-conditions/',
+      'elk': 'https://www.elkskier.com/conditions/',
+      'big-boulder': 'https://www.jfbb.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx',
+      'montage': 'https://www.montagemountainresorts.com/trails/',
+      'hunter': 'https://www.huntermtn.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx',
+      'windham': 'https://www.windhammountainclub.com/mountain-report/',
+      'belleayre': 'https://www.belleayre.com/mountain/snow-report/',
+      'whiteface': 'https://whiteface.com/mountain/conditions/',
+      'gore-mountain': 'https://goremountain.com/the-mountain/conditions/',
+      'jiminy-peak': 'https://www.jiminypeak.com/the-mountain/mountain-information/snow-report/',
+      'wachusett': 'https://www.wachusett.com/the-mountain/your-visit/snow-report/',
+      'mohawk': 'https://www.mohawkmtn.com/snow-report/',
+      'stratton': 'https://www.stratton.com/the-mountain/mountain-report',
+      'mount-snow': 'https://www.mountsnow.com/ski-ride/snow-report/',
+      'killington': 'https://map.killington.com/conditions/snow-report/printable-report/',
+      'okemo': 'https://www.okemo.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx',
+      'pico': 'https://map.picomountain.com/conditions/snow-report/printable-report/',
+      'sugarbush': 'https://www.sugarbush.com/mountain/conditions',
+      'mad-river-glen': 'https://www.madriverglen.com/conditions/',
+      'stowe': 'https://www.stowe.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx',
+      'smugglers-notch': 'https://www.smuggs.com/conditions/winter-report',
+      'jay-peak': 'https://digital.jaypeakresort.com/conditions/snow-report/',
+      'burke': 'https://skiburke.com/the-mountain/weather-conditions/',
+      'loon': 'https://www.loonmtn.com/mountain-report',
+      'brettonwoods': 'https://www.brettonwoods.com/snow-trail-report/',
+      'waterville': 'https://www.waterville.com/snow-report-maps/',
+      'cannon': 'https://www.cannonmt.com/mountain-report',
+      'wildcat': 'https://www.skiwildcat.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx',
+      'sunday-river': 'https://www.sundayriver.com/mountain-report',
+      'sugarloaf': 'https://www.sugarloaf.com/mountain-report',
+      'saddleback': 'https://www.saddlebackmaine.com/mountain-report/',
+      'tremblant': 'https://www.tremblant.ca/mountain-village/mountain-report',
+      'mont-sainte-anne': 'https://mont-sainte-anne.com/en/alpine-skiing-snow-conditions/',
+      'le-massif': 'https://www.lemassif.com/fr/montagne/hiver/neige-meteo-et-webcams/',
+      'mont-sutton': 'https://montsutton.com/en/the-mountain/ski-conditions-2/'
+    };
+
+    function getDropdownOrderResorts() {
+      const byId = new Map(resorts.map(r => [r.id, r]));
+      const ordered = [];
+      const seen = new Set();
+
+      tierGroups.forEach((group) => {
+        group.ids.forEach((id) => {
+          const resort = byId.get(id);
+          if (!resort || seen.has(id)) return;
+          seen.add(id);
+          ordered.push(resort);
+        });
+      });
+
+      resorts
+        .filter((r) => !seen.has(r.id))
+        .sort((a, b) => a.name.localeCompare(b.name))
+        .forEach((r) => ordered.push(r));
+
+      return ordered;
+    }
+
+    function buildConditionsUrls() {
+      const urls = [];
+      const seen = new Set();
+      const dropdownOrdered = getDropdownOrderResorts();
+      dropdownOrdered.forEach((resort) => {
+        if (!resort || !resort.id || seen.has(resort.id)) return;
+        seen.add(resort.id);
+        const direct = CONDITIONS_URL_BY_RESORT[resort.id];
+        if (direct) {
+          urls.push(direct);
+        } else {
+          const q = encodeURIComponent(`${resort.name} ski resort snow report`);
+          urls.push(`https://www.google.com/search?q=${q}`);
+        }
+      });
+      return urls;
+    }
+
+    async function openConditionsTabs() {
+      const urls = buildConditionsUrls();
+      if (!urls.length) {
+        setStatus(el.exportStatus, 'No resort URLs found.', 'warn');
+        return;
+      }
+
+      let opened = 0;
+      for (let i = 0; i < urls.length; i += 1) {
+        const win = window.open(urls[i], '_blank');
+        if (win) opened += 1;
+        // Preserve strict left-to-right tab order in Brave.
+        await new Promise((resolve) => setTimeout(resolve, 90));
+      }
+
+      if (opened === 0) {
+        setStatus(el.exportStatus, 'Popup blocker stopped tabs. Allow popups for this page and click again.', 'warn');
+      } else if (opened < urls.length) {
+        setStatus(el.exportStatus, `Opened ${opened}/${urls.length} tabs. Allow popups for all tabs.`, 'warn');
+      } else {
+        setStatus(el.exportStatus, `Opened ${opened} condition tabs in admin order.`, 'ok');
+      }
+    }
+
     el.resortSelect.addEventListener('change', () => {
       loadFormForResort(el.resortSelect.value);
       setStatus(el.editStatus, '', '');
@@ -629,6 +738,7 @@
     el.downloadBtn.addEventListener('click', downloadExport);
     el.copyBtn.addEventListener('click', copyExport);
     el.refreshBtn.addEventListener('click', renderExportText);
+    el.openConditionsBtn.addEventListener('click', openConditionsTabs);
 
     populateResortSelect();
     if (el.resortSelect.options.length > 0) {
