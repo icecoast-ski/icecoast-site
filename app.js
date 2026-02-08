@@ -956,19 +956,38 @@
             }, 1500);
         }
 
-        function celebrateSendItVote(resortId) {
+        function launchSendItSkier(resortId, buttonEl) {
+            const card = document.querySelector(`.resort-card[data-resort="${resortId}"]`);
+            const anchor = buttonEl || (card ? card.querySelector('.sendit-vote-btn[data-score="100"]') : null);
+            if (!anchor) return;
+
+            const rect = anchor.getBoundingClientRect();
+            const skier = document.createElement('span');
+            skier.className = 'sendit-skier-launch';
+            skier.textContent = '\u26f7\ufe0f';
+            skier.style.left = `${Math.round(rect.left + rect.width * 0.78)}px`;
+            skier.style.top = `${Math.round(rect.top + rect.height * 0.55)}px`;
+            document.body.appendChild(skier);
+
+            requestAnimationFrame(() => skier.classList.add('active'));
+            setTimeout(() => skier.remove(), 1100);
+        }
+
+        function celebrateSendItVote(resortId, scoreValue, buttonEl) {
             const card = document.querySelector(`.resort-card[data-resort="${resortId}"]`);
             if (!card) return;
             const section = card.querySelector('.sendit-section');
             const score = card.querySelector('.sendit-scoreboard');
             const prompt = card.querySelector('.sendit-prompt');
+            const isFullSend = Number(scoreValue) >= 100;
 
             if (section) section.classList.add('vote-locked');
             if (score) score.classList.add('vote-pop');
             if (prompt) {
-                prompt.textContent = 'Vote locked in ⚡';
+                prompt.textContent = isFullSend ? 'Full send locked ⚡' : 'Vote locked in ⚡';
                 prompt.classList.add('vote-payoff');
             }
+            if (isFullSend) launchSendItSkier(resortId, buttonEl);
 
             setTimeout(() => {
                 if (section) section.classList.remove('vote-locked');
