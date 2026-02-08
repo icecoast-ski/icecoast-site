@@ -1572,19 +1572,42 @@
 
 
 .sendit-skier-launch {
-    position: absolute;
-    left: var(--launch-x, 50%);
-    top: var(--launch-y, 60%);
-    transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(0deg) scale(0.8);
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(0deg) scale(0.88);
     opacity: 0;
-    z-index: 22;
+    z-index: 10060;
     pointer-events: none;
-    filter: drop-shadow(0 2px 4px rgba(7, 19, 32, 0.35));
+    font-size: 28px;
+    line-height: 1;
+    filter: drop-shadow(0 4px 10px rgba(7, 19, 32, 0.42));
     will-change: transform, opacity;
 }
 
-.sendit-skier-launch.active {
-    animation: senditSkierLaunch 0.86s cubic-bezier(0.2, 0.86, 0.2, 1) forwards;
+.sendit-skier-launch.active.normal {
+    animation: senditSkierRide 1.48s cubic-bezier(0.22, 0.9, 0.2, 1) forwards;
+}
+
+.sendit-skier-launch.active.fullsend {
+    font-size: 32px;
+    animation: senditSkierRideEpic 1.8s cubic-bezier(0.22, 0.9, 0.2, 1) forwards;
+}
+
+.sendit-vote-btn.sendit-grind-target {
+    box-shadow:
+        0 0 0 3px rgba(79, 139, 230, 0.26),
+        0 10px 20px rgba(20, 36, 52, 0.22),
+        2px 2px 0 rgba(0, 0, 0, 0.14);
+    animation: senditGrindTarget 0.7s ease;
+}
+
+.sendit-vote-btn.sendit-grind-epic {
+    box-shadow:
+        0 0 0 4px rgba(46, 197, 162, 0.34),
+        0 12px 24px rgba(20, 36, 52, 0.24),
+        2px 2px 0 rgba(0, 0, 0, 0.14);
+    animation: senditGrindEpic 0.86s ease;
 }
 
 .sendit-scoreboard.vote-pop .sendit-gauge-pointer {
@@ -1595,22 +1618,69 @@
     box-shadow: 0 0 0 3px rgba(29, 173, 115, 0.2), 0 8px 18px rgba(20, 36, 52, 0.16), 2px 2px 0 rgba(0, 0, 0, 0.12);
 }
 
-@keyframes senditSkierLaunch {
+@keyframes senditSkierRide {
     0% {
         opacity: 0;
-        transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(0deg) scale(0.82);
+        transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(-4deg) scale(0.84);
     }
     8% {
         opacity: 1;
     }
-    58% {
+    34% {
         opacity: 1;
-        transform: translate(-50%, -50%) translate3d(92px, -108px, 0) rotate(-14deg) scale(1.08);
+        transform: translate(-50%, -50%) translate3d(var(--hop-x), var(--hop-y), 0) rotate(-18deg) scale(1.02);
+    }
+    56% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translate3d(var(--grind-x), var(--grind-y), 0) rotate(4deg) scale(1.06);
+    }
+    72% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translate3d(calc(var(--grind-x) + 12px), calc(var(--grind-y) + 1px), 0) rotate(7deg) scale(1.04);
     }
     100% {
         opacity: 0;
-        transform: translate(-50%, -50%) translate3d(154px, -166px, 0) rotate(-22deg) scale(0.92);
+        transform: translate(-50%, -50%) translate3d(var(--exit-x), var(--exit-y), 0) rotate(20deg) scale(0.94);
     }
+}
+
+@keyframes senditSkierRideEpic {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(-6deg) scale(0.88);
+    }
+    8% {
+        opacity: 1;
+    }
+    30% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translate3d(var(--hop-x), var(--hop-y), 0) rotate(-22deg) scale(1.08);
+    }
+    52% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translate3d(var(--grind-x), var(--grind-y), 0) rotate(6deg) scale(1.12);
+    }
+    68% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translate3d(calc(var(--grind-x) + 18px), calc(var(--grind-y) - 8px), 0) rotate(12deg) scale(1.14);
+    }
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) translate3d(var(--exit-x), var(--exit-y), 0) rotate(34deg) scale(0.9);
+    }
+}
+
+@keyframes senditGrindTarget {
+    0% { transform: translateY(0) scale(1); }
+    40% { transform: translateY(-2px) scale(1.03); }
+    100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes senditGrindEpic {
+    0% { transform: translateY(0) scale(1); }
+    32% { transform: translateY(-3px) scale(1.05) rotate(-0.6deg); }
+    70% { transform: translateY(-1px) scale(1.03) rotate(0.4deg); }
+    100% { transform: translateY(0) scale(1); }
 }
 
 @keyframes senditNeedleKick {

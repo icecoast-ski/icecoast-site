@@ -956,23 +956,48 @@
             }, 1500);
         }
 
-        function launchSendItSkier(resortId, buttonEl) {
+        function launchSendItSkier(resortId, scoreValue) {
             const card = document.querySelector(`.resort-card[data-resort="${resortId}"]`);
-            const liveButton = card ? card.querySelector('.sendit-vote-btn[data-score="100"]') : null;
-            const fallbackAnchor = card ? card.querySelector('.sendit-scoreboard') : null;
-            const anchor = (buttonEl && buttonEl.isConnected) ? buttonEl : (liveButton || fallbackAnchor);
-            if (!anchor) return;
+            if (!card) return;
 
-            const rect = anchor.getBoundingClientRect();
+            const scoreNum = Number(scoreValue);
+            const sourceScore = scoreNum >= 100 ? 100 : (scoreNum >= 60 ? 60 : 20);
+            const targetScore = sourceScore >= 100 ? 100 : (sourceScore >= 60 ? 100 : 60);
+            const isFullSend = sourceScore >= 100;
+
+            const sourceButton = card.querySelector(`.sendit-vote-btn[data-score="${sourceScore}"]`);
+            const targetButton = card.querySelector(`.sendit-vote-btn[data-score="${targetScore}"]`) || sourceButton;
+            if (!sourceButton || !targetButton) return;
+
+            const sourceRect = sourceButton.getBoundingClientRect();
+            const targetRect = targetButton.getBoundingClientRect();
+            const startX = sourceRect.left + (sourceRect.width * 0.5);
+            const startY = sourceRect.top + (sourceRect.height * 0.3);
+            const targetX = targetRect.left + (targetRect.width * 0.52);
+            const targetY = targetRect.top + (targetRect.height * 0.28);
+            const deltaX = targetX - startX;
+            const deltaY = targetY - startY;
+
             const skier = document.createElement('span');
-            skier.className = 'sendit-skier-launch';
+            skier.className = `sendit-skier-launch ${isFullSend ? 'fullsend' : 'normal'}`;
             skier.textContent = '\u26f7\ufe0f';
-            skier.style.left = `${Math.round(rect.left + rect.width * 0.78)}px`;
-            skier.style.top = `${Math.round(rect.top + rect.height * 0.55)}px`;
+            skier.style.left = `${Math.round(startX)}px`;
+            skier.style.top = `${Math.round(startY)}px`;
+            skier.style.setProperty('--hop-x', `${Math.round(deltaX * 0.62)}px`);
+            skier.style.setProperty('--hop-y', `${Math.round(deltaY - 24)}px`);
+            skier.style.setProperty('--grind-x', `${Math.round(deltaX + (targetRect.width * 0.22))}px`);
+            skier.style.setProperty('--grind-y', `${Math.round(deltaY - 3)}px`);
+            skier.style.setProperty('--exit-x', `${Math.round(deltaX + (isFullSend ? 148 : 92))}px`);
+            skier.style.setProperty('--exit-y', `${Math.round(deltaY + (isFullSend ? -152 : 168))}px`);
             document.body.appendChild(skier);
 
+            targetButton.classList.add(isFullSend ? 'sendit-grind-epic' : 'sendit-grind-target');
             requestAnimationFrame(() => skier.classList.add('active'));
-            setTimeout(() => skier.remove(), 1100);
+
+            setTimeout(() => {
+                targetButton.classList.remove('sendit-grind-target', 'sendit-grind-epic');
+                skier.remove();
+            }, isFullSend ? 1850 : 1550);
         }
 
         function celebrateSendItVote(resortId, scoreValue, buttonEl) {
@@ -989,7 +1014,7 @@
                 prompt.textContent = isFullSend ? 'Full send locked ⚡' : 'Vote locked in ⚡';
                 prompt.classList.add('vote-payoff');
             }
-            launchSendItSkier(resortId, buttonEl);
+            launchSendItSkier(resortId, scoreValue);
 
             setTimeout(() => {
                 if (section) section.classList.remove('vote-locked');
