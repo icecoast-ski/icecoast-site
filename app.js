@@ -646,9 +646,12 @@
                 : (sendItScoreValue >= 70 ? 'hot' : (sendItScoreValue >= 45 ? 'mid' : 'cold'));
             const sendItState = getSendItState(sendItScoreValue);
             const sendItVotesText = `${sendItVotes} vote${sendItVotes === 1 ? '' : 's'}`;
-            const sendItScoreDisplay = Number.isFinite(sendItScoreValue)
-                ? `${Math.round(sendItScoreValue)}%`
-                : '—';
+            const sendItScoreRounded = Number.isFinite(sendItScoreValue)
+                ? Math.round(sendItScoreValue)
+                : null;
+            const sendItScoreMarkup = sendItScoreRounded === null
+                ? '<span class="sendit-score-empty">—</span>'
+                : `<span class="sendit-score-number">${sendItScoreRounded}</span><span class="sendit-score-unit">%</span>`;
             const sendItSocialLine = getSendItSocialLine(sendItVotesLastHour, sendItVotes);
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
@@ -843,7 +846,7 @@
                       <div class="sendit-gauge" aria-hidden="true">
                         <span class="sendit-gauge-pointer"></span>
                       </div>
-                      <span class="sendit-score-value">${sendItScoreDisplay}</span>
+                      <span class="sendit-score-value">${sendItScoreMarkup}</span>
                     </div>
                   </div>
                   <div class="sendit-pulse ${sendItState.className || sendItScoreClass}">
