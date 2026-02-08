@@ -2476,245 +2476,297 @@
         }
 
         function createResortCard(resort) {
-            const stars = Array.from({length: 5}, (_, i) => {
-                const isFilled = i < resort.rating;
-                return `<span class="star ${isFilled ? 'filled' : 'empty'}">★</span>`;
+            // ── Safe fallbacks for nested data ──
+            const vertical = resort.elevation?.vertical ?? '—';
+            const trailsOpen = resort.trails?.open ?? '—';
+            const trailsClosed = resort.trails?.closed ?? '—';
+            const liftsOpen = resort.lifts?.open ?? '—';
+            const liftsClosed = resort.lifts?.closed ?? '—';
+
+            const park = resort.park ?? 0;
+            const glades = resort.glades ?? 0;
+            const apres = resort.apres ?? 0;
+            const family = resort.family ?? 0;
+
+            const passes = resort.passes || [];
+            const distance = resort.distance || {};
+            const weather = resort.weather || {};
+            const forecast = resort.forecast || [];
+
+            const stars = Array.from({ length: 5 }, (_, i) => {
+                const isFilled = i < (resort.rating || 0);
+                return `<span class="star ${isFilled ? 'filled' : 'empty'}"></span>`;
             }).join('');
 
+            // POWDER / FRESH badges safely
+            const isPowder = resort.conditions === 'Powder';
+            const isPackedPowder = resort.conditions === 'Packed Powder';
+            const hasSignificantSnow = parseInt(resort.snowfall24h || '0', 10) >= 6;
+            let snowBadge = '';
+            if (isPowder || isPackedPowder || hasSignificantSnow) {
+                const label = isPowder
+                    ? 'POWDER DAY'
+                    : isPackedPowder
+                    ? 'PACKED POWDER'
+                    : 'FRESH POW';
+                snowBadge = `<div class="snow-alert-badge">${resort.snowfall24h || 0}″ ${label}</div>`;
+            }
+
+            // Icon handling
+            const iconUrl = (typeof resortIcons !== 'undefined' && resortIcons[resort.id])
+                ? resortIcons[resort.id]
+                : null;
+            const iconMarkup = iconUrl
+                ? `<img src="${iconUrl}" alt="${resort.name} icon" class="resort-icon" />`
+                : `<div class="resort-icon-fallback">${resort.icon || '🎿'}</div>`;
+
             return `
-                <div class="resort-card" data-region="${resort.region}" data-resort="${resort.id}">
-                    <div class="resort-header" style="--bg: url('/resorts/${resort.id}-1280.avif'); position: relative;">
-                        ${resort.familyOwned ? '<div class="family-badge">🏡 Family-Owned</div>' : ''}
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; width: 100%;">
-                            <div style="flex: 1;">
-                                <h2 class="resort-name">
-                                    <span class="resort-name-text">${resort.name}</span>
-                                    ${resort.isScraped ? `
-                                    <span class="live-data-badge">
-                                        <span>✓</span>
-                                        <span>LIVE</span>
-                                    </span>
-                                    ` : ''}
-                                </h2>
-                                <p class="resort-location">${resort.location}</p>
-                                ${resort.glades > 0 ? `
-                                <div class="glade-indicator">
-                                    <span class="glade-trees glade-${resort.glades}">${'🌲'.repeat(resort.glades)}</span>
-                                    <span class="glade-label">${resort.glades === 3 ? 'Elite Glades' : resort.glades === 2 ? 'Excellent Glades' : 'Some Glades'}</span>
-                                </div>
-                                ` : ''}
-                            </div>
-                            ${(() => {
-                                // Show fresh pow badge based on conditions OR snow totals
-                                const isPowder = resort.conditions === 'Powder';
-                                const isPackedPowder = resort.conditions === 'Packed Powder';
-                                const hasSignificantSnow = resort.snowfall && resort.snowfall['24h'] && parseInt(resort.snowfall['24h']) >= 6;
-
-                                if (isPowder || isPackedPowder || hasSignificantSnow) {
-                                    const label = isPowder ? 'POWDER DAY' :
-                                                  isPackedPowder ? 'PACKED POWDER' :
-                                                  'FRESH POW';
-                                    return `
-                                        <div class="snow-alert-badge">
-                                            ❄️ ${resort.snowfall ? resort.snowfall['24h'] : '0'} ${label}
-                                        </div>
-                                    `;
-                                }
-                                return '';
-                            })()}
-                        </div>
-                    </div>
-                    <div class="resort-body">
-                        <div class="rating-section">
-                            <div>
-                                <div class="rating-label">Icecoast Rating</div>
-                                <div class="rating-stars">${stars}</div>
-                            </div>
-                            <div class="rating-text">${getRatingText(resort.rating, resort.snowfall ? resort.snowfall['24h'] : '0', resort)}</div>
-                        </div>
-
-                        <div class="conditions-highlight">
-                            <div class="conditions-label">Current Conditions</div>
-                            <div class="conditions-value">${resort.conditions}</div>
-                        </div>
-
-                        <div class="info-grid">
-                        <div class="info-item">
-                            <span class="info-label">
-                                <span class="info-icon">${icons.ticket}</span>
-                                Lift Ticket
-                                ${resort.dynamicPricing ? '<span class="dynamic-badge">Dynamic</span>' : ''}
-                            </span>
-                            <div style="display: flex; align-items: center; gap: 0.5rem">
-                                <span class="info-value">${resort.liftTicket ? `$${resort.liftTicket.weekday}${resort.dynamicPricing ? '+' : ''} / $${resort.liftTicket.weekend}${resort.dynamicPricing ? '+' : ''}` : 'N/A'}</span>
-                                ${resort.passes ? resort.passes.map(pass =>
-                                    `<span class="pass-badge pass-${pass}">${pass === 'ikon' ? 'Ikon' : 'Epic'}</span>`
-                                ).join('') : ''}
-                            </div>
-                        </div>
-
-                            <div class="info-item">
-                                <span class="info-label">
-                                    <span class="info-icon">${icons.parking}</span>
-                                    Parking
-                                </span>
-                                <span class="info-value">${resort.parking}</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">
-                                    <span class="info-icon">${icons.mountain}</span>
-                                    Vertical Drop
-                                </span>
-                                <span class="info-value">${resort.elevation.vertical}ft</span>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">
-                                    <span class="info-icon">${icons.trail}</span>
-                                    Trails
-                                </span>
-                                <div class="trail-status">
-                                    <span class="trail-badge open">${resort.trails ? resort.trails.open : 0} Open</span>
-                                    <span class="trail-badge closed">${resort.trails ? resort.trails.closed : 0} Closed</span>
-                                </div>
-                            </div>
-                            <div class="info-item">
-                                <span class="info-label">
-                                    <span class="info-icon">${icons.lift}</span>
-                                    Lifts
-                                </span>
-                                <div class="trail-status">
-                                    <span class="trail-badge open">${resort.lifts ? resort.lifts.open : 0} Open</span>
-                                    <span class="trail-badge closed">${resort.lifts ? resort.lifts.closed : 0} Closed</span>
-                                </div>
-                            </div>
-                            ${resort.park > 0 ? `
-                            <div class="info-item">
-                                <span class="info-label">
-                                    <span class="info-icon">${icons.park}</span>
-                                    Park
-                                </span>
-                                <span class="info-value">${'🔥'.repeat(resort.park)} ${resort.park === 3 ? 'Epic' : resort.park === 2 ? 'Solid' : 'Basic'}</span>
-                            </div>
-                            ` : ''}
-                        </div>
-
-                        <details class="lift-details">
-                            <summary class="lift-toggle">
-                                <span class="lift-toggle-left">
-                                    <span class="info-icon" style="display: inline-flex; vertical-align: middle;">${icons.lift}</span>
-                                    Lift Status
-                                </span>
-                                <span style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <span class="lift-toggle-counts">
-                                        <span class="trail-badge open" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">${resort.lifts ? `${resort.lifts.open}/${resort.lifts.total}` : '0/0'}</span>
-                                    </span>
-                                    <svg class="lift-toggle-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-                                </span>
-                            </summary>
-                            <div class="lift-list">
-                                ${resort.liftDetails ?
-                                    Object.entries(resort.liftDetails)
-                                        .sort(([,a],[,b]) => {
-                                            const order = { open: 0, hold: 1, scheduled: 2, closed: 3 };
-                                            return (order[a] ?? 4) - (order[b] ?? 4);
-                                        })
-                                        .map(([name, status]) => `
-                                            <div class="lift-item">
-                                                <span class="lift-dot ${status}"></span>
-                                                <span class="lift-name ${status === 'closed' || status === 'scheduled' ? 'closed-lift' : ''}" title="${name}">${name}</span>
-                                            </div>
-                                        `).join('')
-                                    : `<div class="lift-no-data">Detailed lift status unavailable for this resort</div>`
-                                }
-                            </div>
-                        </details>
-
-                        <div class="weather-section">
-                            <div class="weather-current">
-                                <span class="weather-icon">${resort.weather ? resort.weather.icon : '🌡️'}</span>
-                                <div>
-                                    <div class="weather-temp">${resort.weather ? resort.weather.temp : '--'}°F</div>
-                                    <div class="weather-desc">${resort.weather ? resort.weather.condition : 'N/A'}</div>
-                                </div>
-                            </div>
-                            <div class="weather-details">
-                                <div class="weather-detail-item">
-                                    <span class="info-icon">${icons.thermometer}</span>
-                                    <span class="weather-detail-label">Feels like</span>
-                                    <span class="weather-detail-value">${resort.weather ? resort.weather.feelsLike : '--'}°F</span>
-                                </div>
-                                <div class="weather-detail-item">
-                                    <span class="info-icon">${icons.wind}</span>
-                                    <span class="weather-detail-label">Wind</span>
-                                    <span class="weather-detail-value">${resort.weather ? resort.weather.wind : 'N/A'}</span>
-                                </div>
-                            </div>
-
-                            <details class="forecast-details" style="margin-top: 0.75rem;">
-                                <summary class="forecast-toggle">
-                                    <span class="info-icon" style="display: inline-flex; vertical-align: middle; margin-right: 0.5rem;">${icons.calendar}</span>
-                                    3-Day Forecast
-                                </summary>
-                                <div class="forecast-grid">
-                                    ${resort.forecast ? resort.forecast.map(day => `
-                                        <div class="forecast-day">
-                                            <div class="forecast-day-name">${day.day}</div>
-                                            <div class="forecast-icon">${day.icon}</div>
-                                            <div class="forecast-temp">${day.temp}°F</div>
-                                            <div class="forecast-snow">${day.snow}</div>
-                                        </div>
-                                    `).join('') : '<div style="padding: 0.5rem; text-align: center; color: var(--text-secondary);">Forecast unavailable</div>'}
-                                </div>
-                            </details>
-
-                            <div class="snow-report">
-                                <div class="snow-stat">
-                                    <div class="snow-label">24h</div>
-                                    <div class="snow-value">${resort.snowfall && resort.snowfall['24h'] ? resort.snowfall['24h'] : '0"'}</div>
-                                </div>
-                                <div class="snow-stat">
-                                    <div class="snow-label">48h</div>
-                                    <div class="snow-value">${resort.snowfall && resort.snowfall['48h'] ? resort.snowfall['48h'] : '0"'}</div>
-                                </div>
-                                <div class="snow-stat">
-                                    <div class="snow-label">7d</div>
-                                    <div class="snow-value">${resort.snowfall && resort.snowfall['7d'] ? resort.snowfall['7d'] : '0"'}</div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="extra-ratings">
-                            <div class="extra-rating-item">
-                                <span class="extra-label">
-                                    <span class="info-icon" style="display: inline-flex; vertical-align: middle; margin-right: 0.25rem;">${icons.apres}</span>
-                                    Apres
-                                </span>
-                                <span class="extra-value">${'⭐'.repeat(resort.apres)}</span>
-                            </div>
-                            <div class="extra-rating-item">
-                                <span class="extra-label">
-                                    <span class="info-icon" style="display: inline-flex; vertical-align: middle; margin-right: 0.25rem;">${icons.family}</span>
-                                    Family
-                                </span>
-                                <span class="extra-value">${'⭐'.repeat(resort.family)}</span>
-                            </div>
-                        </div>
-
-                        <div class="distance-info">
-                            <div class="distance-title">
-                                <span class="info-icon" style="display: inline-flex; vertical-align: middle; margin-right: 0.5rem;">${icons.car}</span>
-                                Drive Time
-                            </div>
-                            <div class="distance-list">
-                                ${Object.entries(resort.distance).map(([city, time]) =>
-                                    `<div class="distance-item"><strong>${city}</strong> ${time}</div>`
-                                ).join('')}
-                            </div>
-                        </div>
-                    </div>
+            <div class="resort-card" data-region="${resort.region}" data-resort="${resort.id}">
+              <div class="resort-header" style="--bg: url('resorts/${resort.id}-1280.avif')">
+                ${resort.familyOwned ? `<div class="family-badge">Family-Owned</div>` : ''}
+                <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;">
+                  <div style="flex:1;">
+                    <h2 class="resort-name">
+                      <span class="resort-name-text">${resort.name}</span>
+                      ${resort.isScraped ? `<span class="live-data-badge"><span><span>LIVE</span></span></span>` : ''}
+                    </h2>
+                    <p class="resort-location">${resort.location}</p>
+                    ${resort.glades > 0 ? `
+                      <div class="glade-indicator">
+                        <span class="glade-trees">${'🌲'.repeat(Math.min(glades, 3))}</span>
+                        <span class="glade-label">
+                          ${glades >= 3 ? 'Elite Glades' : glades === 2 ? 'Excellent Glades' : 'Some Glades'}
+                        </span>
+                      </div>` : ''}
+                  </div>
+                  ${iconMarkup}
                 </div>
-            `;
+                ${snowBadge}
+              </div>
+
+              <div class="resort-body">
+                <div class="rating-section">
+                  <div>
+                    <div class="rating-label">Icecoast Rating</div>
+                    <div class="rating-stars">${stars}</div>
+                  </div>
+                  <div class="rating-text">
+                    ${getRatingText(resort.rating, resort.snowfall24h, resort)}
+                  </div>
+                </div>
+
+                <div class="conditions-highlight">
+                  <div class="conditions-label">Current Conditions</div>
+                  <div class="conditions-value">${resort.conditions || 'Unknown'}</div>
+                </div>
+
+                <div class="info-grid">
+                  <div class="info-item">
+                    <span class="info-label">
+                      <span class="info-icon">${icons.ticket}</span>
+                      Lift Ticket ${resort.dynamicPricing ? '<span class="dynamic-badge">Dynamic</span>' : ''}
+                    </span>
+                    <div style="display:flex;align-items:center;gap:0.5rem;">
+                      <span class="info-value">
+                        ${resort.liftTicket?.weekday ?? '—'}
+                        ${resort.dynamicPricing ? '–' : ''}
+                      </span>
+                      ${resort.dynamicPricing && resort.liftTicket?.weekend
+                          ? `<span class="info-value">${resort.liftTicket.weekend}</span>`
+                          : ''}
+                      ${passes.length
+                          ? passes.map(pass =>
+                              `<span class="pass-badge pass-${pass}">${pass === 'ikon' ? 'Ikon' : 'Epic'}</span>`
+                            ).join('')
+                          : ''}
+                    </div>
+                  </div>
+
+                  <div class="info-item">
+                    <span class="info-label">
+                      <span class="info-icon">${icons.parking}</span>
+                      Parking
+                    </span>
+                    <span class="info-value">${resort.parking || 'Unknown'}</span>
+                  </div>
+
+                  <div class="info-item">
+                    <span class="info-label">
+                      <span class="info-icon">${icons.mountain}</span>
+                      Vertical Drop
+                    </span>
+                    <span class="info-value">${vertical}ft</span>
+                  </div>
+
+                  <div class="info-item">
+                    <span class="info-label">
+                      <span class="info-icon">${icons.trail}</span>
+                      Trails
+                    </span>
+                    <div class="trail-status">
+                      <span class="trail-badge open">${trailsOpen} Open</span>
+                      <span class="trail-badge closed">${trailsClosed} Closed</span>
+                    </div>
+                  </div>
+
+                  <div class="info-item">
+                    <span class="info-label">
+                      <span class="info-icon">${icons.lift}</span>
+                      Lifts
+                    </span>
+                    <div class="trail-status">
+                      <span class="trail-badge open">${liftsOpen} Open</span>
+                      <span class="trail-badge closed">${liftsClosed} Closed</span>
+                    </div>
+                  </div>
+
+                  ${park > 0 ? `
+                  <div class="info-item">
+                    <span class="info-label">
+                      <span class="info-icon">${icons.park}</span>
+                      Park
+                    </span>
+                    <span class="info-value">
+                      ${'⭐'.repeat(Math.min(park, 3))}
+                      ${park >= 3 ? 'Epic' : park === 2 ? 'Solid' : 'Basic'}
+                    </span>
+                  </div>` : ''}
+                </div>
+
+                <details class="lift-details">
+                  <summary class="lift-toggle">
+                    <span class="lift-toggle-left">
+                      <span class="info-icon" style="display:inline-flex;vertical-align:middle;">${icons.lift}</span>
+                      Lift Status
+                    </span>
+                    <span style="display:flex;align-items:center;gap:0.5rem;">
+                      <span class="trail-badge open" style="font-size:0.7rem;padding:0.2rem 0.5rem;">
+                        ${liftsOpen}/${(resort.lifts?.total ?? liftsOpen || '—')}
+                      </span>
+                      <span>
+                        <svg class="lift-toggle-chevron" viewBox="0 0 24 24" fill="none"
+                             stroke="currentColor" stroke-width="2.5"
+                             stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                      </span>
+                    </span>
+                  </summary>
+                  <div class="lift-list">
+                    ${resort.liftDetails
+                        ? Object.entries(resort.liftDetails)
+                            .sort(([, a], [, b]) => {
+                              const order = { open: 0, hold: 1, scheduled: 2, closed: 3 };
+                              return (order[a] ?? 4) - (order[b] ?? 4);
+                            })
+                            .map(([name, status]) => `
+                              <div class="lift-item">
+                                <span class="lift-dot ${status}"></span>
+                                <span class="lift-name ${status === 'closed' || status === 'scheduled'
+                                    ? 'closed-lift' : ''}" title="${name}">${name}</span>
+                                <span class="lift-status">${status}</span>
+                              </div>
+                            `).join('')
+                        : `<div class="lift-no-data">Detailed lift status unavailable for this resort</div>`
+                    }
+                  </div>
+                </details>
+
+                <div class="weather-section">
+                  <div class="weather-current">
+                    <span class="weather-icon">${weather.icon || '☁️'}</span>
+                    <div>
+                      <div class="weather-temp">${weather.tempF ?? '—'}</div>
+                      <div class="weather-desc">${weather.condition || 'Unknown'}</div>
+                    </div>
+                  </div>
+                  <div class="weather-details">
+                    <div class="weather-detail-item">
+                      <span class="info-icon">${icons.thermometer}</span>
+                      <span class="weather-detail-label">Feels like</span>
+                      <span class="weather-detail-value">${weather.feelsLikeF ?? '—'}</span>
+                    </div>
+                    <div class="weather-detail-item">
+                      <span class="info-icon">${icons.wind}</span>
+                      <span class="weather-detail-label">Wind</span>
+                      <span class="weather-detail-value">${weather.wind ?? '—'}</span>
+                    </div>
+                  </div>
+
+                  <details class="forecast-details" style="margin-top:0.75rem;">
+                    <summary class="forecast-toggle">
+                      <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.5rem;">
+                        ${icons.calendar}
+                      </span>
+                      3-Day Forecast
+                    </summary>
+                    <div class="forecast-grid">
+                      ${forecast.map(day => `
+                        <div class="forecast-day">
+                          <div class="forecast-day-name">${day.day}</div>
+                          <div class="forecast-icon">${day.icon}</div>
+                          <div class="forecast-temp">${day.tempF}</div>
+                          <div class="forecast-snow">${day.snow}</div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </details>
+                </div>
+
+                <div class="snow-report">
+                  <div class="snow-stat">
+                    <div class="snow-label">24h</div>
+                    <div class="snow-value">${resort.snowfall24h ?? '—'}</div>
+                  </div>
+                  <div class="snow-stat">
+                    <div class="snow-label">48h</div>
+                    <div class="snow-value">${resort.snowfall48h ?? '—'}</div>
+                  </div>
+                  <div class="snow-stat">
+                    <div class="snow-label">7d</div>
+                    <div class="snow-value">${resort.snowfall7d ?? '—'}</div>
+                  </div>
+                </div>
+
+                <div class="extra-ratings">
+                  <div class="extra-rating-item">
+                    <span class="extra-label">
+                      <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.25rem;">
+                        ${icons.apres}
+                      </span>
+                      Apres
+                    </span>
+                    <span class="extra-value">${'⭐'.repeat(Math.min(apres, 3))}</span>
+                  </div>
+                  <div class="extra-rating-item">
+                    <span class="extra-label">
+                      <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.25rem;">
+                        ${icons.family}
+                      </span>
+                      Family
+                    </span>
+                    <span class="extra-value">${'⭐'.repeat(Math.min(family, 3))}</span>
+                  </div>
+                </div>
+
+                <div class="distance-info">
+                  <div class="distance-title">
+                    <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.5rem;">
+                      ${icons.car}
+                    </span>
+                    Drive Time
+                  </div>
+                  <div class="distance-list">
+                    ${Object.entries(distance).map(([city, time]) => `
+                      <div class="distance-item"><strong>${city}</strong> ${time}</div>
+                    `).join('')}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
         }
+
 
         // Filter state
         let filterState = {
