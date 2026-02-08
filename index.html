@@ -2558,45 +2558,45 @@
             const taglines = {
                 5: {
                     // 5 stars + nuking snow
-                    heavySnow: ['Nuking!', 'Dumping!', 'Blower Pow!', 'Cold Smoke!'],
+                    heavySnow: ['Nuking!', 'Dumping!', 'Blower Pow!', 'Cold Smoke!', 'Face Shot City!', 'Refill Mode!', 'Deep Day!', 'Pow Emergency!'],
                     // 5 stars + fresh powder
-                    freshPow: ['Powder Dreams!', 'Freshies!', 'Send It!', 'Shred The Gnar!'],
+                    freshPow: ['Powder Dreams!', 'Freshies!', 'Send It!', 'Shred The Gnar!', 'Stacking Laps!', 'First Chair Vibes!', 'Top Sheet Glow!', 'Glade Time!'],
                     // 5 stars + snowing now
-                    snowing: ['Peak Season!', 'All-Time!', 'Full Send!', 'Primo!'],
+                    snowing: ['Peak Season!', 'All-Time!', 'Full Send!', 'Primo!', 'Storm Laps!', 'No Brake Day!', 'Legit Send!', 'White Room Lite!'],
                     // 5 stars + perfect blue day
-                    default: ['Bluebird!', 'Hero Snow!', 'Dialed In!', "Chef's Kiss!"]
+                    default: ['Bluebird!', 'Hero Snow!', 'Dialed In!', "Chef's Kiss!", 'Carve Fest!', 'Magic Carpet Legs!', 'Smooth Sailing!', 'Dream Cord!']
                 },
                 4: {
                     // 4 stars + some fresh
-                    freshPow: ['Shredable!', 'Solid Send!', 'Worth It!', 'Pretty Sendy!'],
+                    freshPow: ['Shredable!', 'Solid Send!', 'Worth It!', 'Pretty Sendy!', 'Good Laps Ahead!', 'Sneaky Good!', 'Go Get Some!', 'Get After It!'],
                     // 4 stars + warm temps
-                    warm: ['Spring Skiing!', 'Corn Snow!', 'Gets It Done!', 'Not Mad At It!'],
+                    warm: ['Spring Skiing!', 'Corn Snow!', 'Gets It Done!', 'Not Mad At It!', 'Soft Turn Season!', 'Slush Hero Time!', 'Patio Then Laps!', 'Sun And Turns!'],
                     // 4 stars standard
-                    default: ['Pretty Good!', 'Decent Cord!', 'Rippable!', 'Respectable!']
+                    default: ['Pretty Good!', 'Decent Cord!', 'Rippable!', 'Respectable!', 'Plenty To Love!', 'Good Enough To Rip!', 'Chairlift Smiles!', 'Type 2 Approved!']
                 },
                 3: {
                     // 3 stars + freezing = firm
-                    freezing: ['Firm AF!', 'Hardpack City!', 'Chalky!', 'East Coast Classic!'],
+                    freezing: ['Firm AF!', 'Hardpack City!', 'Chalky!', 'East Coast Classic!', 'Edge Work Day!', 'Steel Edge Season!', 'Carve Carefully!', 'Grip It And Rip It!'],
                     // 3 stars + windy
-                    windy: ['Breezy...', 'Wind Affected!', 'Chunder!', 'Hold Your Line!'],
+                    windy: ['Breezy...', 'Wind Affected!', 'Chunder!', 'Hold Your Line!', 'Chair Sway Mode!', 'Wind Check Required!', 'Stay Centered!', 'Battle The Gusts!'],
                     // 3 stars standard
-                    default: ['Mid Vibes!', 'Standard Issue!', "It's... Fine!", 'Meh-diocre!']
+                    default: ['Mid Vibes!', 'Standard Issue!', "It's... Fine!", 'Meh-diocre!', 'Skiable For Sure!', 'Locals Will Know!', 'Could Be Worse!', 'Laps Are Laps!']
                 },
                 2: {
                     // 2 stars + freezing = icy
-                    freezing: ['Blue Ice!', 'Crunchy!', 'Survival Mode!', 'Chatter City!'],
+                    freezing: ['Blue Ice!', 'Crunchy!', 'Firm And Fast!', 'Chatter City!', 'Edge Tune Day!', 'Hockey Stop Practice!', 'Knees Stay Soft!', 'Grip Test!'],
                     // 2 stars + warm = slushy
-                    warm: ['Slushy!', 'Wet & Heavy!', 'Spring Mashed Potatoes!', 'Sketch City!'],
+                    warm: ['Slushy!', 'Wet & Heavy!', 'Spring Mashed Potatoes!', 'Soft Bumps!', 'Mashed Potato Laps!', 'Soggy Send!', 'Heavy Legs Ahead!', 'Absorber Mode!'],
                     // 2 stars standard
-                    default: ['Sketchy!', 'Yikes!', 'Oof!', 'Questionable!']
+                    default: ['Spicy Snow!', 'Edge Alert!', 'Technical Day!', 'Firm Challenge!', 'Earn Your Turns!', 'Character Builder!', 'Pick Your Lines!', 'Stay Loose!']
                 },
                 1: {
                     // 1 star + freezing = worst ice
-                    freezing: ['Boilerplate!', 'Ice Coast AF!', 'Straight Ice!', 'Skating Rink!'],
+                    freezing: ['Boilerplate!', 'Ice Coast AF!', 'Straight Ice!', 'Skating Rink!', 'Edge Sharpener!', 'Puck Drop Conditions!', 'Steel Edge Session!', 'Dialed Carves Only!'],
                     // 1 star + warm = terrible slush
-                    warm: ['Slush Pit!', 'Mashed Potatoes!', 'Grenade Conditions!', 'Bail Now!'],
+                    warm: ['Slush Pit!', 'Mashed Potatoes!', 'Chunky Snowpack!', 'Heavy Soup!', 'Leg Day Deluxe!', 'Wet Cement Turns!', 'Slow Motion Send!', 'Mogul Mash!'],
                     // 1 star standard
-                    default: ['Icy AF!', 'Yard Sale Vibes!', 'Just... No!', 'Netflix Day!']
+                    default: ['Icy AF!', 'Yard Sale Vibes!', 'Teeth Chatter!', 'Edge Control Day!', 'Respect The Ice!', 'Low Tide Turns!', 'Battle Laps!', 'Skills Pay Bills!']
                 }
             };
 
@@ -3419,6 +3419,22 @@
             const filtered = applyFilters();
 
             if (filtered.length === 0) {
+                if (filterState.vibe === 'avoid') {
+                    const avoidMessages = [
+                        "Avoid mode says low tide, but a few firm laps still count as skiing.",
+                        "Avoid mode found chatter city. Tune the edges and farm the side hits.",
+                        "Avoid mode says boilerplate vibes. Keep it technical and stack clean turns.",
+                        "Avoid mode picked spicy snow. Ski smart, stay loose, and grab the best pockets.",
+                        "Avoid mode says survival-carve weather, not no-ski weather.",
+                        "Avoid mode found crunchy cord. Bring sharp steel and make it a skills day.",
+                        "Avoid mode says sketchy in spots. Locals still get quality laps with good line choice.",
+                        "Avoid mode called it firm and fast. Time to polish technique and send controlled."
+                    ];
+                    const randomMessage = avoidMessages[Math.floor(Math.random() * avoidMessages.length)];
+                    grid.innerHTML = `<div class="loading" style="grid-column: 1/-1;">${randomMessage}</div>`;
+                    return;
+                }
+
                 const snarkMessages = [
                     "No resorts match your filters. Ice builds character.",
                     "No resorts match your filters. Conditions: Character-building.",
