@@ -1181,8 +1181,10 @@
             }
 
             // Icon handling
-            // Resort emoji/icons removed from card header by request.
-            const iconMarkup = '';
+            // Resort emoji/icons removed from card header by request, except Windham fox badge.
+            const iconMarkup = resort.id === 'windham'
+                ? `<img class="windham-fox-icon" src="icons/windham-fox.png" alt="Windham fox icon" loading="lazy" decoding="async">`
+                : '';
 
             // Unique resort art is now one file per resort id in /v2/resort-art.
             const backgroundImageFile = `${resort.id}.jpg`;
