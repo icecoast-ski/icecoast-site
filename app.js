@@ -638,7 +638,6 @@
             const sendIt = sendItSummaryByResort[resort.id] || {};
             const sendItButtonCopy = getSendItButtonCopy(resort.id);
             const requiredMiles = getSendItRadiusMilesForResort(resort.id);
-            const sendItScore = Number.isFinite(sendIt.score) ? `${sendIt.score}%` : '—';
             const sendItVotes = Number.isFinite(sendIt.votes) ? sendIt.votes : 0;
             const sendItVotesLastHour = Number.isFinite(sendIt.votesLastHour) ? sendIt.votesLastHour : 0;
             const sendItScoreValue = Number.isFinite(sendIt.score) ? sendIt.score : null;
@@ -647,9 +646,9 @@
                 : (sendItScoreValue >= 70 ? 'hot' : (sendItScoreValue >= 45 ? 'mid' : 'cold'));
             const sendItState = getSendItState(sendItScoreValue);
             const sendItVotesText = `${sendItVotes} vote${sendItVotes === 1 ? '' : 's'}`;
-            const sendItMetaText = Number.isFinite(sendItScoreValue)
-                ? `${sendItScore} • ${sendItVotesText}`
-                : sendItVotesText;
+            const sendItScoreDisplay = Number.isFinite(sendItScoreValue)
+                ? `${Math.round(sendItScoreValue)}%`
+                : '—';
             const sendItSocialLine = getSendItSocialLine(sendItVotesLastHour, sendItVotes);
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
@@ -834,17 +833,20 @@
                   <div class="sendit-header">
                     <div class="sendit-title-wrap">
                       <div class="rating-label sendit-title">SEND IT METER</div>
-                      <div class="sendit-subtitle">${sendItSubtitle}</div>
+                      <div class="sendit-subline">
+                        <span class="sendit-live-dot"></span>
+                        <span class="sendit-subtitle">${sendItSubtitle}</span>
+                      </div>
                     </div>
-                    <div class="sendit-live" aria-label="Local votes status">
-                      <span class="sendit-live-dot"></span>
-                      <span class="sendit-live-text">Locals Live</span>
+                    <div class="sendit-scoreboard ${sendItState.className || sendItScoreClass}" aria-label="Full Send score">
+                      <span class="sendit-score-kicker">Full Send</span>
+                      <span class="sendit-score-value">${sendItScoreDisplay}</span>
                     </div>
                   </div>
                   <div class="sendit-pulse ${sendItState.className || sendItScoreClass}">
                     <span class="sendit-pulse-label">Slope Signal</span>
                     <span class="sendit-state">${sendItState.label}</span>
-                    <span class="sendit-votes">${sendItMetaText}</span>
+                    <span class="sendit-votes">${sendItVotesText}</span>
                   </div>
                   <div class="sendit-social-proof">${sendItSocialLine}</div>
                   ${sendItPrompt}
