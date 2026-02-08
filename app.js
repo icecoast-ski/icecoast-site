@@ -1232,18 +1232,21 @@
 
             // Keep a slight zoom to hide white borders in source art without heavy pixelation.
             const backgroundSizeByResort = {
-                'whiteface': '112%',
-                'gore-mountain': '112%',
-                'stowe': '112%',
-                'wildcat': '112%',
-                'jay-peak': '112%',
-                'sugarbush': '110%',
-                'sugarloaf': '110%',
-                'le-massif': '112%'
+                'whiteface': '104%',
+                'gore-mountain': '104%',
+                'stowe': '104%',
+                'wildcat': '103%',
+                'jay-peak': '104%',
+                'sugarbush': '103%',
+                'sugarloaf': '103%',
+                'le-massif': '104%',
+                'mad-river-glen': '103%',
+                'killington': '103%',
+                'tremblant': '103%'
             };
 
             const backgroundPos = backgroundPositionByResort[resort.id] || 'center 42%';
-            const backgroundSize = backgroundSizeByResort[resort.id] || '112%';
+            const backgroundSize = backgroundSizeByResort[resort.id] || '101%';
 
             return `
             <div class="resort-card" data-region="${resort.region}" data-resort="${resort.id}">
