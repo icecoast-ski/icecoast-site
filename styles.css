@@ -992,7 +992,7 @@
 
         .sendit-title {
             letter-spacing: 0.012em;
-            font-size: 0.96rem;
+            font-size: 0.92rem;
             font-weight: 900;
             color: #121212;
             display: inline-flex;
@@ -2731,7 +2731,7 @@
             }
 
             .sendit-title {
-                font-size: 0.94rem;
+                font-size: 0.92rem;
                 gap: 0.26rem;
             }
 

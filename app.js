@@ -1128,8 +1128,8 @@
             const unlimitedTestMode = isUnlimitedSendItTestResort(resort.id);
             const canVote = hasCoords && (unlimitedTestMode || sendItUnlockedResorts.has(resort.id));
             const sendItSubtitle = canVote
-                ? 'On-mountain locals only'
-                : 'Unlock nearby voting to cast your call';
+                ? 'Vote current conditions now'
+                : 'Verify location to vote';
             const sendItPrompt = canVote ? `<div class="sendit-prompt">Tap your call</div>` : '';
             const sendItControls = !hasCoords
                 ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>`
