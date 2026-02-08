@@ -1235,7 +1235,6 @@ const backgroundPositionByResort = {
     'mont-sutton': 'center 36%'
 };
 
-            };
 
             // Keep a slight zoom to hide white borders in source art without heavy pixelation.
 const backgroundSizeByResort = {
@@ -1269,7 +1268,6 @@ const backgroundSizeByResort = {
     'tremblant': '102%'
 };
 
-            };
 
             const backgroundPos = backgroundPositionByResort[resort.id] || 'center 42%';
             const backgroundSize = backgroundSizeByResort[resort.id] || '101%';
