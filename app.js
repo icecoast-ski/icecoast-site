@@ -510,6 +510,71 @@
             });
         }
 
+        // Static glade score: 3 = best glades, 2 = decent glades, 1 = some glades
+        const RESORT_GLADE_SCORE = {
+            // Poconos / PA
+            'camelback': 1,
+            'blue-mountain': 1,
+            'jack-frost': 0,
+            'shawnee': 1,
+            'bear-creek': 0,
+            'elk': 1,
+            'big-boulder': 0,
+            'montage': 1,
+
+            // NY
+            'hunter': 2,
+            'windham': 2,
+            'belleayre': 2,
+            'whiteface': 3,
+            'gore-mountain': 2,
+
+            // MA / CT
+            'jiminy-peak': 1,
+            'wachusett': 0,
+            'mohawk': 1,
+
+            // Vermont
+            'stratton': 2,
+            'mount-snow': 1,
+            'killington': 2,
+            'okemo': 1,
+            'pico': 2,
+            'sugarbush': 3,
+            'mad-river-glen': 3,
+            'stowe': 3,
+            'smugglers-notch': 3,
+            'jay-peak': 3,
+            'burke': 2,
+
+            // NH / ME
+            'loon': 2,
+            'brettonwoods': 2,
+            'waterville': 2,
+            'cannon': 2,
+            'wildcat': 3,
+            'sunday-river': 2,
+            'sugarloaf': 3,
+            'saddleback': 3,
+
+            // Canada
+            'tremblant': 2,
+            'mont-sainte-anne': 2,
+            'le-massif': 3,
+            'mont-sutton': 3
+        };
+
+        function applyResortGladeScores() {
+            resorts.forEach((resort) => {
+                const mapped = RESORT_GLADE_SCORE[resort.id];
+                if (Number.isFinite(mapped)) {
+                    resort.glades = mapped;
+                } else if (!Number.isFinite(resort.glades)) {
+                    resort.glades = 0;
+                }
+            });
+        }
+
         const DEFAULT_SEND_IT_RADIUS_MILES = 1.5;
         let sendItSummaryByResort = {};
         let sendItRadiusMiles = DEFAULT_SEND_IT_RADIUS_MILES;
@@ -1485,6 +1550,7 @@
         resorts.forEach(normalizeSnowfall);
         applyManualResortOverrides();
         applyResortPassMembership();
+        applyResortGladeScores();
 
         loadSendItUnlockState();
         renderResorts();
