@@ -1998,6 +1998,14 @@
                     void afterEl.transform;
                 }, 3900); // Match gondola ascent duration
             });
+
+            const keepTipsUpLink = document.getElementById('keepTipsUpLink');
+            if (keepTipsUpLink) {
+                keepTipsUpLink.addEventListener('click', function(event) {
+                    event.preventDefault();
+                    backToTopBtn.click();
+                });
+            }
         } else {
             console.error('❌ Back to top button not found!');
         }
