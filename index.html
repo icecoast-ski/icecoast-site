@@ -2426,24 +2426,25 @@
         // Calculate IceCoast rating dynamically from live weather + manual snow data
         // Weights: 40% Snow, 20% Temp, 20% Wind, 20% Conditions
         function calculateRating(weather, snowfall) {
+            // Fallbacks when live data is missing
+            const safeWeather = weather || {};
+            const safeSnowfall = snowfall || {};
+
             let score = 0;
 
-            // 1. SNOW (40% weight) - Most important factor
-            const snow24h = (snowfall && snowfall['24h']) ? parseInt(snowfall['24h']) : 0;
+            // 1. SNOW – use 24h/48h from snowfall object if present
+            const snow24h = parseInt(safeSnowfall.snowfall24h ?? 0, 10);
+            const snow48h = parseInt(safeSnowfall.snowfall48h ?? 0, 10);
             let snowScore = 0;
             if (snow24h >= 6) snowScore = 5;
             else if (snow24h >= 4) snowScore = 4;
             else if (snow24h >= 2) snowScore = 3;
             else if (snow24h >= 1) snowScore = 2;
-            else {
-                // Check 48h if no 24h snow
-                const snow48h = (snowfall && snowfall['48h']) ? parseInt(snowfall['48h']) : 0;
-                snowScore = snow48h > 0 ? 2 : 1;
-            }
+            else snowScore = snow48h > 0 ? 2 : 1;
             score += snowScore * 0.4;
 
-            // 2. TEMPERATURE (20% weight) - Good skiing temps
-            const temp = weather.temp || 20;
+            // 2. TEMPERATURE – guard weather.temp
+            const temp = typeof safeWeather.temp === 'number' ? safeWeather.temp : 25; // neutral default
             let tempScore = 0;
             if (temp >= 15 && temp <= 30) tempScore = 5;
             else if ((temp >= 10 && temp < 15) || (temp > 30 && temp <= 35)) tempScore = 4;
@@ -2452,26 +2453,26 @@
             else tempScore = 1;
             score += tempScore * 0.2;
 
-            // 3. WIND (20% weight) - High wind ruins skiing
-            const windSpeed = parseInt(weather.wind) || 0;
+            // 3. WIND – guard weather.wind
+            const windSpeed = parseInt(safeWeather.wind ?? 0, 10);
             let windScore = 0;
-            if (windSpeed < 10) windScore = 5;
-            else if (windSpeed < 15) windScore = 4;
-            else if (windSpeed < 20) windScore = 3;
-            else if (windSpeed < 30) windScore = 2;
+            if (windSpeed <= 10) windScore = 5;
+            else if (windSpeed <= 15) windScore = 4;
+            else if (windSpeed <= 20) windScore = 3;
+            else if (windSpeed <= 30) windScore = 2;
             else windScore = 1;
             score += windScore * 0.2;
 
-            // 4. CONDITIONS (20% weight) - Current weather
-            const condition = (weather.condition || '').toLowerCase();
-            let conditionScore = 3; // Default neutral
+            // 4. CONDITIONS – guard weather.condition
+            const condition = (safeWeather.condition || '').toLowerCase();
+            let conditionScore = 3;
             if (condition.includes('snow')) conditionScore = 5;
             else if (condition.includes('clear') || condition.includes('sun')) conditionScore = 4;
             else if (condition.includes('cloud')) conditionScore = 3;
             else if (condition.includes('rain') || condition.includes('drizzle')) conditionScore = 1;
             score += conditionScore * 0.2;
 
-            // Round to nearest star (1-5)
+            // Round to 1–5
             return Math.max(1, Math.min(5, Math.round(score)));
         }
 
