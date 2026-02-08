@@ -2520,36 +2520,61 @@
             // Resort emoji/icons removed from card header by request.
             const iconMarkup = '';
 
-            // Fallback photo map for resorts that do not yet have their own card background image.
-            const backgroundFallbacks = {
-                // PA/NY
-                'jack-frost': 'blue-mountain',
-                'bear-creek': 'blue-mountain',
-                'big-boulder': 'jack-frost',
-                'montage': 'elk',
-                'belleayre': 'windham',
-                // MA/CT
+            // Explicit resort -> image mapping using available files in /v2/resorts.
+            // Filenames in that folder use legacy stems (e.g. blue, jackfrost, sundayriver).
+            const backgroundImageByResort = {
+                // Pennsylvania
+                'camelback': 'camelback',
+                'blue-mountain': 'blue',
+                'jack-frost': 'jackfrost',
+                'shawnee': 'shawnee',
+                'bear-creek': 'bearcreek',
+                'elk': 'elk',
+                'big-boulder': 'bigboulder',
+                'montage': 'montage',
+                // New York
+                'hunter': 'hunter',
+                'windham': 'windham',
+                'belleayre': 'belleayre',
+                'whiteface': 'wildcat',
+                'gore-mountain': 'cannon',
+                // Massachusetts & Connecticut
                 'jiminy-peak': 'stratton',
-                'wachusett': 'okemo',
+                'wachusett': 'waterville',
                 'mohawk': 'shawnee',
-                // VT
+                // Vermont
+                'stratton': 'stratton',
+                'mount-snow': 'stratton',
+                'killington': 'killington',
+                'okemo': 'okemo',
                 'pico': 'killington',
+                'sugarbush': 'sugarbush',
+                'mad-river-glen': 'sugarbush',
+                'stowe': 'stowe',
                 'smugglers-notch': 'stowe',
-                'burke': 'jay-peak',
-                // ME/NH
-                'saddleback': 'sugarloaf',
+                'jay-peak': 'wildcat',
+                'burke': 'wildcat',
+                // New Hampshire & Maine
+                'loon': 'loon',
+                'brettonwoods': 'waterville',
+                'waterville': 'waterville',
+                'cannon': 'cannon',
+                'wildcat': 'wildcat',
+                'sunday-river': 'sundayriver',
+                'sugarloaf': 'sundayriver',
+                'saddleback': 'sundayriver',
                 // Canada
                 'tremblant': 'stowe',
-                'mont-sainte-anne': 'sunday-river',
-                'le-massif': 'sugarloaf',
-                'mont-sutton': 'jay-peak'
+                'mont-sainte-anne': 'sundayriver',
+                'le-massif': 'wildcat',
+                'mont-sutton': 'sugarbush'
             };
 
-            const backgroundId = backgroundFallbacks[resort.id] || resort.id;
+            const backgroundImage = backgroundImageByResort[resort.id] || 'killington';
 
             return `
             <div class="resort-card" data-region="${resort.region}" data-resort="${resort.id}">
-              <div class="resort-header" style="--bg: url('resorts/${resort.id}-1280.avif'), url('resorts/${backgroundId}-1280.avif'), url('resorts/killington-1280.avif')">
+              <div class="resort-header" style="--bg: url('resorts/${backgroundImage}-1280.avif')">
                 ${resort.familyOwned ? `<div class="family-badge">Family-Owned</div>` : ''}
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;">
                   <div style="flex:1;">
