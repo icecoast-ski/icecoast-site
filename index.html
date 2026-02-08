@@ -10,7 +10,6 @@
             rel="icon"
             href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎿</text></svg>"
         />
-
         <script src="resorts.js"></script>
         <link rel="stylesheet" href="styles.css" />
         <link rel="stylesheet" href="inline-styles.css" />
@@ -33,41 +32,11 @@
                     Real-time snow, terrain, and resort conditions—so you know
                     when it's worth the drive.
                 </p>
-                <button class="cta-btn">Check Conditions Now</button>
-            </div>
-        </div>
-
-        <div class="filters">
-            <div class="filter-group">
-                <span class="filter-label">Region:</span>
-                <button class="filter-btn active" data-region="all">All</button>
-                <button class="filter-btn" data-region="poconos">
-                    Poconos
-                </button>
-                <button class="filter-btn" data-region="catskills">
-                    Catskills
-                </button>
-                <button class="filter-btn" data-region="adirondacks">
-                    Adirondacks
-                </button>
-                <button class="filter-btn" data-region="southern-vt">
-                    Stratton Area
-                </button>
-                <button class="filter-btn" data-region="central-vt">
-                    Mad River Valley
-                </button>
-                <button class="filter-btn" data-region="northern-vt">
-                    Jay Peak
-                </button>
-                <button class="filter-btn" data-region="white-mountains">
-                    White Mtns
-                </button>
-                <button class="filter-btn" data-region="maine">Maine</button>
             </div>
         </div>
 
         <div class="resort-grid" id="resortGrid">
-            <div class="loading">Loading 40+ Resorts...</div>
+            <div class="loading">Loading Resort Data...</div>
         </div>
 
         <footer class="ski-footer">
@@ -81,8 +50,7 @@
         </footer>
 
         <script>
-            // Use the metadata from resorts.js. If missing, this is the fallback.
-            const fallbackIcons = {
+            const fallbackEmojis = {
                 camelback: "🚡",
                 "blue-mountain": "🚪",
                 "jack-frost": "❄️",
@@ -95,72 +63,77 @@
 
             async function updateDashboard() {
                 try {
-                    // REPLACE with your actual Worker URL
                     const response = await fetch(
                         "https://cloudflare-worker.rickt123-0f8.workers.dev/",
                     );
                     const data = await response.json();
                     const grid = document.getElementById("resortGrid");
+                    grid.innerHTML = "";
 
-                    grid.innerHTML = ""; // Clear loading text
+                    // The KV data is usually nested under a 'data' key or is the root object
+                    const resortsData = data.data || data;
 
-                    // Loop through EVERY resort found in the Worker data
-                    Object.entries(data).forEach(([id, resort]) => {
-                        if (id.startsWith("_")) return; // Skip metadata
+                    Object.entries(resortsData).forEach(([id, resort]) => {
+                        if (id.startsWith("_")) return;
 
-                        // Get metadata from resorts.js (RESORT_META)
                         const meta =
                             typeof RESORT_META !== "undefined"
                                 ? RESORT_META[id]
                                 : null;
                         const displayName = meta ? meta.name : id;
-                        const displayState = meta ? meta.state : "---";
+                        const region = meta ? meta.region : "all";
 
                         const card = document.createElement("div");
                         card.className = "resort-card";
                         card.setAttribute("data-resort", id);
-                        card.setAttribute("data-region", meta?.region || "all");
+                        card.setAttribute("data-region", region);
 
-                        // Calculate status
-                        const openLifts = resort.lifts?.open || 0;
-                        const totalLifts = resort.lifts?.total || 0;
-                        const isOpen = openLifts > 0;
+                        // FIXED ICON LOGIC: Using double quotes for the attribute to avoid SyntaxError
+                        const emoji = fallbackEmojis[id] || "🏔️";
+                        const iconHtml = `<img src="./icons/${id}.png" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" class="resort-icon"><span class="fallback-emoji" style="display:none; font-size: 40px;">${emoji}</span>`;
 
+                        // RESTORED ORIGINAL CSS STRUCTURE
                         card.innerHTML = `
                         <div class="resort-header">
-                            <div class="header-top">
-                                <div class="resort-icon-container">
-                                    <img src="./icons/${id}.png" onerror="this.outerHTML='<span class=\'fallback-emoji\'>${fallbackIcons[id] || "🏔️"}</span>'" class="resort-icon">
-                                </div>
-                                <div class="name-block">
-                                    <h2 class="resort-name">${displayName}</h2>
-                                    <span class="state-badge">${displayState}</span>
-                                </div>
+                            <div class="resort-icon-container">
+                                ${iconHtml}
+                            </div>
+                            <div class="name-block">
+                                <h2 class="resort-name">${displayName}</h2>
+                                <p class="location">${meta ? meta.state : ""}</p>
                             </div>
                         </div>
                         <div class="resort-stats">
-                            <div class="stat-box">
+                            <div class="stat">
+                                <span class="stat-label">Trails</span>
+                                <span class="stat-value">${resort.trails?.open || 0}/${resort.trails?.total || "--"}</span>
+                            </div>
+                            <div class="stat">
                                 <span class="stat-label">Lifts</span>
-                                <span class="stat-value">${openLifts}/${totalLifts}</span>
+                                <span class="stat-value">${resort.lifts?.open || 0}/${resort.lifts?.total || "--"}</span>
                             </div>
-                            <div class="stat-box">
-                                <span class="stat-label">Temp</span>
-                                <span class="stat-value">${resort.weather?.temp || "--"}°</span>
+                            <div class="stat">
+                                <span class="stat-label">Snow 24h</span>
+                                <span class="stat-value">${resort.snowfall?.["24h"] || '0"'}</span>
                             </div>
+                        </div>
+                        <div class="weather-strip">
+                            <span>${resort.weather?.temp || "--"}°F</span>
+                            <span>${resort.weather?.condition || "---"}</span>
+                            <span>Wind: ${resort.weather?.wind || "--"}</span>
                         </div>
                     `;
                         grid.appendChild(card);
                     });
 
-                    updateSendItProgress(); // Re-calculate meter height
+                    updateSendItProgress();
                 } catch (e) {
-                    console.error("Data Load Error:", e);
+                    console.error("Load Error:", e);
                     document.getElementById("resortGrid").innerHTML =
-                        "Failed to load resort data.";
+                        "Error loading data.";
                 }
             }
 
-            // Scroll Meter Logic
             function updateSendItProgress() {
                 const documentHeight =
                     document.documentElement.scrollHeight - window.innerHeight;
