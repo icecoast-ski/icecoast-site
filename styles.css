@@ -1586,12 +1586,12 @@
 }
 
 .sendit-skier-launch.active.normal {
-    animation: senditSkierRide 1.62s cubic-bezier(0.24, 0.78, 0.22, 1) forwards;
+    animation: senditSkierRailRide 1.92s cubic-bezier(0.22, 0.78, 0.24, 1) forwards;
 }
 
 .sendit-skier-launch.active.fullsend {
     font-size: 32px;
-    animation: senditSkierRideEpic 1.96s cubic-bezier(0.24, 0.78, 0.22, 1) forwards;
+    animation: senditSkierRailRideEpic 2.2s cubic-bezier(0.22, 0.78, 0.24, 1) forwards;
 }
 
 .sendit-vote-btn.sendit-grind-target {
@@ -1618,63 +1618,59 @@
     box-shadow: 0 0 0 3px rgba(29, 173, 115, 0.2), 0 8px 18px rgba(20, 36, 52, 0.16), 2px 2px 0 rgba(0, 0, 0, 0.12);
 }
 
-@keyframes senditSkierRide {
-    0% {
-        opacity: 0;
-        transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(-4deg) scale(0.84);
-    }
-    8% {
-        opacity: 1;
-    }
-    30% {
-        opacity: 1;
-        transform: translate(-50%, -50%) translate3d(var(--hop-x), var(--hop-y), 0) rotate(-16deg) scale(1.01);
-    }
-    52% {
-        opacity: 1;
-        transform: translate(-50%, -50%) translate3d(var(--grind-x), var(--grind-y), 0) rotate(3deg) scale(1.05);
-    }
-    66% {
-        opacity: 1;
-        transform: translate(-50%, -50%) translate3d(calc(var(--grind-x) + 12px), calc(var(--grind-y) + 1px), 0) rotate(6deg) scale(1.03);
-    }
-    82% {
-        opacity: 1;
-        transform: translate(-50%, -50%) translate3d(calc(var(--grind-x) + 36px), calc(var(--grind-y) + 28px), 0) rotate(10deg) scale(0.99);
-    }
-    100% {
-        opacity: 0;
-        transform: translate(-50%, -50%) translate3d(var(--exit-x), var(--exit-y), 0) rotate(14deg) scale(0.9);
-    }
-}
-
-@keyframes senditSkierRideEpic {
+@keyframes senditSkierRailRide {
     0% {
         opacity: 0;
         transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(-6deg) scale(0.88);
     }
-    8% {
+    6% {
         opacity: 1;
     }
     28% {
         opacity: 1;
-        transform: translate(-50%, -50%) translate3d(var(--hop-x), var(--hop-y), 0) rotate(-20deg) scale(1.06);
+        transform: translate(-50%, -50%) translate3d(var(--land-x), var(--land-y), 0) rotate(-14deg) scale(1.03);
     }
-    48% {
+    58% {
         opacity: 1;
-        transform: translate(-50%, -50%) translate3d(var(--grind-x), var(--grind-y), 0) rotate(5deg) scale(1.1);
+        transform: translate(-50%, -50%) translate3d(var(--rail-end-x), var(--rail-end-y), 0) rotate(5deg) scale(1.05);
     }
-    62% {
+    72% {
         opacity: 1;
-        transform: translate(-50%, -50%) translate3d(calc(var(--grind-x) + 18px), calc(var(--grind-y) - 8px), 0) rotate(11deg) scale(1.12);
-    }
-    80% {
-        opacity: 1;
-        transform: translate(-50%, -50%) translate3d(calc(var(--grind-x) + 52px), calc(var(--grind-y) - 48px), 0) rotate(20deg) scale(1.05);
+        transform: translate(-50%, -50%) translate3d(calc(var(--rail-end-x) + 10px), calc(var(--rail-end-y) + 2px), 0) rotate(8deg) scale(1.02);
     }
     100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translate3d(var(--down-x), var(--down-y), 0) rotate(20deg) scale(0.9);
+    }
+}
+
+@keyframes senditSkierRailRideEpic {
+    0% {
         opacity: 0;
-        transform: translate(-50%, -50%) translate3d(var(--exit-x), var(--exit-y), 0) rotate(28deg) scale(0.86);
+        transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(-8deg) scale(0.9);
+    }
+    6% {
+        opacity: 1;
+    }
+    24% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translate3d(var(--land-x), var(--land-y), 0) rotate(-16deg) scale(1.08);
+    }
+    52% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translate3d(var(--rail-end-x), var(--rail-end-y), 0) rotate(8deg) scale(1.12);
+    }
+    68% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translate3d(calc(var(--rail-end-x) + 14px), calc(var(--rail-end-y) - 6px), 0) rotate(12deg) scale(1.1);
+    }
+    82% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translate3d(calc(var(--rail-end-x) + 26px), calc(var(--rail-end-y) + 6px), 0) rotate(16deg) scale(1.06);
+    }
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) translate3d(var(--down-x), var(--down-y), 0) rotate(24deg) scale(0.92);
     }
 }
 

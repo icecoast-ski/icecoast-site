@@ -973,22 +973,25 @@
             const targetRect = targetButton.getBoundingClientRect();
             const startX = sourceRect.left + (sourceRect.width * 0.5);
             const startY = sourceRect.top + (sourceRect.height * 0.3);
-            const targetX = targetRect.left + (targetRect.width * 0.52);
-            const targetY = targetRect.top + (targetRect.height * 0.28);
-            const deltaX = targetX - startX;
-            const deltaY = targetY - startY;
+            const railStartX = (targetRect.left + 10) - startX;
+            const railStartY = (targetRect.top - 8) - startY;
+            const railEndX = (targetRect.right - 12) - startX;
+            const railEndY = (targetRect.top - 10) - startY;
+            const maxDrop = Math.max(240, window.innerHeight - startY + 80);
+            const downX = railEndX + (isFullSend ? 42 : 26);
+            const downY = Math.min(maxDrop, isFullSend ? 880 : 760);
 
             const skier = document.createElement('span');
             skier.className = `sendit-skier-launch ${isFullSend ? 'fullsend' : 'normal'}`;
             skier.textContent = '\u26f7\ufe0f';
             skier.style.left = `${Math.round(startX)}px`;
             skier.style.top = `${Math.round(startY)}px`;
-            skier.style.setProperty('--hop-x', `${Math.round(deltaX * 0.62)}px`);
-            skier.style.setProperty('--hop-y', `${Math.round(deltaY - 24)}px`);
-            skier.style.setProperty('--grind-x', `${Math.round(deltaX + (targetRect.width * 0.22))}px`);
-            skier.style.setProperty('--grind-y', `${Math.round(deltaY - 3)}px`);
-            skier.style.setProperty('--exit-x', `${Math.round(deltaX + (isFullSend ? 118 : 70))}px`);
-            skier.style.setProperty('--exit-y', `${Math.round(deltaY + (isFullSend ? -116 : 124))}px`);
+            skier.style.setProperty('--land-x', `${Math.round(railStartX)}px`);
+            skier.style.setProperty('--land-y', `${Math.round(railStartY)}px`);
+            skier.style.setProperty('--rail-end-x', `${Math.round(railEndX)}px`);
+            skier.style.setProperty('--rail-end-y', `${Math.round(railEndY)}px`);
+            skier.style.setProperty('--down-x', `${Math.round(downX)}px`);
+            skier.style.setProperty('--down-y', `${Math.round(downY)}px`);
             document.body.appendChild(skier);
 
             targetButton.classList.add(isFullSend ? 'sendit-grind-epic' : 'sendit-grind-target');
@@ -997,7 +1000,7 @@
             setTimeout(() => {
                 targetButton.classList.remove('sendit-grind-target', 'sendit-grind-epic');
                 skier.remove();
-            }, isFullSend ? 1850 : 1550);
+            }, isFullSend ? 2200 : 1900);
         }
 
         function celebrateSendItVote(resortId, scoreValue, buttonEl) {
