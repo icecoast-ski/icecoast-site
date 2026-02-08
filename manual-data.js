@@ -3,9 +3,23 @@
  * Generated from admin.html
  */
 window.MANUAL_RESORT_OVERRIDES = {
+  "hunter": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 4,
+    "dynamicPricing": false,
+    "trails": {
+      "open": 59
+    },
+    "lifts": {
+      "total": 13
+    },
+    "snowfall24h": 1,
+    "snowfall48h": 3,
+    "snowfall7d": 3
+  },
   "jay-peak": {
-    "conditions": "Powder",
-    "icecoastRating": 1,
+    "conditions": "Arctic Blast ⚠️",
+    "icecoastRating": 3,
     "liftTicket": {
       "weekday": "$99",
       "weekend": "$119"
@@ -39,6 +53,24 @@ window.MANUAL_RESORT_OVERRIDES = {
     "snowfall24h": 0,
     "snowfall48h": 6,
     "snowfall7d": 9
+  },
+  "loon": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 4,
+    "liftTicket": {
+      "weekday": "$82+",
+      "weekend": "$127+"
+    },
+    "parking": "Free",
+    "dynamicPricing": true,
+    "trails": {
+      "open": 73
+    },
+    "lifts": {
+      "total": 13
+    },
+    "snowfall24h": 1,
+    "snowfall7d": 4
   },
   "mount-snow": {
     "conditions": "Machine Groomed",
@@ -77,6 +109,23 @@ window.MANUAL_RESORT_OVERRIDES = {
     "snowfall24h": 1,
     "snowfall48h": 2,
     "snowfall7d": 2
+  },
+  "smugglers-notch": {
+    "conditions": "Packed Powder",
+    "icecoastRating": 4,
+    "liftTicket": {
+      "weekday": "$69",
+      "weekend": "$99"
+    },
+    "parking": "Free",
+    "dynamicPricing": false,
+    "trails": {
+      "open": 74
+    },
+    "lifts": {
+      "total": 8
+    },
+    "snowfall24h": 1
   },
   "stowe": {
     "conditions": "Variable",
@@ -133,5 +182,77 @@ window.MANUAL_RESORT_OVERRIDES = {
     "snowfall24h": 2,
     "snowfall48h": 6,
     "snowfall7d": 7
+  },
+  "sugarloaf": {
+    "conditions": "Packed Powder",
+    "icecoastRating": 4,
+    "liftTicket": {
+      "weekday": "$68+",
+      "weekend": "$86+"
+    },
+    "parking": "Free",
+    "dynamicPricing": true,
+    "trails": {
+      "open": 150
+    },
+    "lifts": {
+      "total": 13
+    },
+    "snowfall24h": 1,
+    "snowfall48h": 2,
+    "snowfall7d": 2
+  },
+  "sunday-river": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 4,
+    "liftTicket": {
+      "weekday": "$92+",
+      "weekend": "$130+"
+    },
+    "parking": "Free",
+    "dynamicPricing": true,
+    "trails": {
+      "open": 129
+    },
+    "lifts": {
+      "total": 15
+    },
+    "snowfall24h": 1,
+    "snowfall48h": 1,
+    "snowfall7d": 1
+  },
+  "whiteface": {
+    "conditions": "Frozen Granular",
+    "icecoastRating": 3,
+    "liftTicket": {
+      "weekday": "$80+",
+      "weekend": "$107+"
+    },
+    "parking": "Free",
+    "dynamicPricing": false,
+    "trails": {
+      "open": 75
+    },
+    "lifts": {
+      "total": 11
+    },
+    "snowfall24h": 1,
+    "snowfall7d": 15
+  },
+  "windham": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 3,
+    "liftTicket": {
+      "weekday": "$115+",
+      "weekend": "$155+"
+    },
+    "parking": "Free",
+    "dynamicPricing": true,
+    "trails": {
+      "open": 52
+    },
+    "lifts": {
+      "total": 11
+    }
   }
 };
