@@ -881,10 +881,100 @@
 
         /* Mobile scroll effect - same as desktop hover */
         @media (hover: none) and (pointer: coarse) {
-            .rating-text.mobile-active {
+        .rating-text.mobile-active {
                 transform: rotate(-5deg) scale(1.15);
                 box-shadow: 8px 8px 0 rgba(0, 0, 0, 0.25);
             }
+        }
+
+        .sendit-section {
+            margin-bottom: 1.25rem;
+            padding: 0.9rem;
+            border: 1px solid var(--light-grey);
+            border-radius: 12px;
+            background: var(--snow);
+        }
+
+        .sendit-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.75rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .sendit-subtitle {
+            font-size: 0.75rem;
+            color: var(--medium-grey);
+            font-weight: 600;
+        }
+
+        .sendit-score {
+            min-width: 58px;
+            height: 58px;
+            border-radius: 50%;
+            border: 3px solid var(--light-grey);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 800;
+            color: var(--charcoal);
+            background: var(--white);
+        }
+
+        .sendit-score.hot {
+            border-color: var(--forest);
+            color: var(--forest);
+        }
+
+        .sendit-score.mid {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
+        }
+
+        .sendit-score.cold {
+            border-color: var(--coral);
+            color: var(--coral);
+        }
+
+        .sendit-locked-note {
+            font-size: 0.72rem;
+            color: var(--medium-grey);
+            margin-top: 0.45rem;
+            font-weight: 600;
+        }
+
+        .sendit-unlock-btn,
+        .sendit-vote-btn {
+            border: 1px solid var(--light-grey);
+            background: var(--white);
+            color: var(--charcoal);
+            border-radius: 8px;
+            font-size: 0.75rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        .sendit-unlock-btn {
+            padding: 0.45rem 0.65rem;
+        }
+
+        .sendit-vote-row {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+        }
+
+        .sendit-vote-btn {
+            padding: 0.35rem 0.55rem;
+        }
+
+        .sendit-vote-btn:hover,
+        .sendit-unlock-btn:hover {
+            border-color: var(--primary-blue);
+            color: var(--primary-blue);
         }
 
         .resort-icon {
@@ -2475,6 +2565,176 @@
             return Math.max(1, Math.min(5, Math.round(score)));
         }
 
+        const DEFAULT_SEND_IT_RADIUS_MILES = 1.5;
+        let sendItSummaryByResort = {};
+        let sendItRadiusMiles = DEFAULT_SEND_IT_RADIUS_MILES;
+        let sendItRadiusOverrides = {};
+        let sendItMaxAccuracyMeters = 200;
+        const sendItUnlockedResorts = new Set();
+
+        function loadSendItUnlockState() {
+            try {
+                const raw = localStorage.getItem('icecoast_sendit_unlocked');
+                if (!raw) return;
+                const ids = JSON.parse(raw);
+                if (Array.isArray(ids)) {
+                    ids.forEach(id => sendItUnlockedResorts.add(id));
+                }
+            } catch (e) {
+                console.warn('Could not load Send It unlock state:', e);
+            }
+        }
+
+        function persistSendItUnlockState() {
+            try {
+                localStorage.setItem(
+                    'icecoast_sendit_unlocked',
+                    JSON.stringify(Array.from(sendItUnlockedResorts))
+                );
+            } catch (e) {
+                console.warn('Could not persist Send It unlock state:', e);
+            }
+        }
+
+        function getResortCoords(resortId) {
+            const resort = (resorts || []).find(r => r.id === resortId);
+            if (!resort) return null;
+            if (typeof resort.lat !== 'number' || typeof resort.lon !== 'number') return null;
+            return { lat: resort.lat, lon: resort.lon };
+        }
+
+        function getSendItRadiusMilesForResort(resortId) {
+            const override = sendItRadiusOverrides?.[resortId];
+            return typeof override === 'number' ? override : sendItRadiusMiles;
+        }
+
+        function formatMiles(miles) {
+            return Number.isInteger(miles) ? `${miles}` : `${miles.toFixed(1)}`;
+        }
+
+        function haversineMiles(lat1, lon1, lat2, lon2) {
+            const toRad = (deg) => (deg * Math.PI) / 180;
+            const R = 3958.8;
+            const dLat = toRad(lat2 - lat1);
+            const dLon = toRad(lon2 - lon1);
+            const a =
+                Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+                Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+                Math.sin(dLon / 2) * Math.sin(dLon / 2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+            return R * c;
+        }
+
+        function getBrowserLocation() {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject(new Error('Geolocation not supported'));
+                    return;
+                }
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    enableHighAccuracy: true,
+                    timeout: 12000,
+                    maximumAge: 60000
+                });
+            });
+        }
+
+        async function unlockSendItForResort(resortId, buttonEl) {
+            const resortCoords = getResortCoords(resortId);
+            if (!resortCoords) {
+                alert('This resort is missing coordinates, so Send It voting is unavailable.');
+                return;
+            }
+
+            const originalText = buttonEl ? buttonEl.textContent : '';
+            if (buttonEl) {
+                buttonEl.disabled = true;
+                buttonEl.textContent = 'Checking location...';
+            }
+
+            try {
+                const pos = await getBrowserLocation();
+                const requiredMiles = getSendItRadiusMilesForResort(resortId);
+                const distance = haversineMiles(
+                    pos.coords.latitude,
+                    pos.coords.longitude,
+                    resortCoords.lat,
+                    resortCoords.lon
+                );
+
+                if (distance > requiredMiles) {
+                    alert(`You are ${distance.toFixed(1)} miles away. Send It voting unlocks within ${formatMiles(requiredMiles)} miles.`);
+                    return;
+                }
+
+                sendItUnlockedResorts.add(resortId);
+                persistSendItUnlockState();
+                renderResorts();
+            } catch (e) {
+                alert('Could not verify your location. Please allow location access and try again.');
+            } finally {
+                if (buttonEl) {
+                    buttonEl.disabled = false;
+                    buttonEl.textContent = originalText;
+                }
+            }
+        }
+
+        async function submitSendItVote(resortId, score, buttonEl) {
+            const resortCoords = getResortCoords(resortId);
+            if (!resortCoords) {
+                alert('This resort is missing coordinates, so Send It voting is unavailable.');
+                return;
+            }
+
+            if (!Number.isFinite(score) || score < 0 || score > 100) {
+                alert('Invalid Send It score.');
+                return;
+            }
+
+            const originalText = buttonEl ? buttonEl.textContent : '';
+            if (buttonEl) {
+                buttonEl.disabled = true;
+                buttonEl.textContent = 'Submitting...';
+            }
+
+            try {
+                const pos = await getBrowserLocation();
+                const voteUrl = new URL('sendit/vote', WORKER_URL).toString();
+                const resp = await fetch(voteUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        resortId,
+                        score,
+                        lat: pos.coords.latitude,
+                        lon: pos.coords.longitude,
+                        accuracy: pos.coords.accuracy
+                    })
+                });
+
+                const payload = await resp.json();
+                if (!resp.ok) {
+                    throw new Error(payload?.error || `Vote failed (${resp.status})`);
+                }
+
+                if (payload?.summary) {
+                    sendItSummaryByResort[resortId] = payload.summary;
+                }
+                if (typeof payload?.radiusMiles === 'number') {
+                    sendItRadiusOverrides[resortId] = payload.radiusMiles;
+                }
+                renderResorts();
+            } catch (e) {
+                alert(e.message || 'Unable to submit vote right now.');
+            } finally {
+                if (buttonEl) {
+                    buttonEl.disabled = false;
+                    buttonEl.textContent = originalText;
+                }
+            }
+        }
+
         function createResortCard(resort) {
             // ── Safe fallbacks for nested data ──
             const vertical = resort.elevation?.vertical ?? '—';
@@ -2497,6 +2757,31 @@
                 const isFilled = i < (resort.rating || 0);
                 return `<span class="star ${isFilled ? 'filled' : 'empty'}">★</span>`;
             }).join('');
+
+            const sendIt = sendItSummaryByResort[resort.id] || {};
+            const requiredMiles = getSendItRadiusMilesForResort(resort.id);
+            const sendItScore = Number.isFinite(sendIt.score) ? `${sendIt.score}%` : '—';
+            const sendItVotes = Number.isFinite(sendIt.votes) ? sendIt.votes : 0;
+            const sendItScoreValue = Number.isFinite(sendIt.score) ? sendIt.score : null;
+            const sendItScoreClass = sendItScoreValue === null
+                ? ''
+                : (sendItScoreValue >= 70 ? 'hot' : (sendItScoreValue >= 45 ? 'mid' : 'cold'));
+            const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
+            const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
+            const sendItSubtitle = sendItVotes > 0
+                ? `${sendItVotes} local vote${sendItVotes === 1 ? '' : 's'}`
+                : 'No local votes yet';
+            const sendItControls = !hasCoords
+                ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>`
+                : canVote
+                    ? `<div class="sendit-vote-row">
+                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="20">Not Today</button>
+                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="60">Maybe</button>
+                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="100">Send It</button>
+                      </div>
+                      <div class="sendit-locked-note">Location verified. Your vote is local-only (${formatMiles(requiredMiles)} mi geofence).</div>`
+                    : `<button class="sendit-unlock-btn" data-sendit-action="unlock" data-resort-id="${resort.id}">Unlock Nearby Voting</button>
+                       <div class="sendit-locked-note">Only users within ${formatMiles(requiredMiles)} miles can vote.</div>`;
 
             // POWDER / FRESH badges safely
             const isPowder = resort.conditions === 'Powder';
@@ -2659,6 +2944,17 @@
                   <div class="rating-text">
                     ${getRatingText(resort.rating, resort.snowfall24h, resort)}
                   </div>
+                </div>
+
+                <div class="sendit-section">
+                  <div class="sendit-header">
+                    <div>
+                      <div class="rating-label">Send It Meter</div>
+                      <div class="sendit-subtitle">${sendItSubtitle}</div>
+                    </div>
+                    <div class="sendit-score ${sendItScoreClass}">${sendItScore}</div>
+                  </div>
+                  ${sendItControls}
                 </div>
 
                 <div class="conditions-highlight">
@@ -3338,6 +3634,28 @@
         const WORKER_URL = 'https://cloudflare-worker.rickt123-0f8.workers.dev/';
         const REFRESH_INTERVAL = 15 * 60 * 1000; // 15 min
 
+        loadSendItUnlockState();
+        renderResorts();
+
+        document.addEventListener('click', async (event) => {
+            const target = event.target.closest('[data-sendit-action]');
+            if (!target) return;
+
+            const action = target.dataset.senditAction;
+            const resortId = target.dataset.resortId;
+            if (!resortId) return;
+
+            if (action === 'unlock') {
+                await unlockSendItForResort(resortId, target);
+                return;
+            }
+
+            if (action === 'vote') {
+                const score = Number(target.dataset.score);
+                await submitSendItVote(resortId, score, target);
+            }
+        });
+
         async function loadLiveData() {
             try {
                 console.log('🎿 Fetching live data (OpenWeather + Liftie)...');
@@ -3354,6 +3672,24 @@
                 const apiData = (result && typeof result === 'object')
                     ? (result.data && typeof result.data === 'object' ? result.data : result)
                     : {};
+                if (result && typeof result === 'object') {
+                    if (result.senditSummary && typeof result.senditSummary === 'object') {
+                        sendItSummaryByResort = result.senditSummary;
+                    }
+                    if (result.senditConfig && typeof result.senditConfig === 'object') {
+                        if (typeof result.senditConfig.defaultRadiusMiles === 'number') {
+                            sendItRadiusMiles = result.senditConfig.defaultRadiusMiles;
+                        } else if (typeof result.senditConfig.radiusMiles === 'number') {
+                            sendItRadiusMiles = result.senditConfig.radiusMiles;
+                        }
+                        if (result.senditConfig.resortRadiusMiles && typeof result.senditConfig.resortRadiusMiles === 'object') {
+                            sendItRadiusOverrides = result.senditConfig.resortRadiusMiles;
+                        }
+                        if (typeof result.senditConfig.maxAccuracyMeters === 'number') {
+                            sendItMaxAccuracyMeters = result.senditConfig.maxAccuracyMeters;
+                        }
+                    }
+                }
                 let weatherUpdatedCount = 0;
                 let liftUpdatedCount = 0;
 
