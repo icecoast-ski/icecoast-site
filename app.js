@@ -1941,11 +1941,13 @@ const backgroundSizeByResort = {
                 statusDiv.style.background = 'rgba(0, 166, 153, 0.95)';
                 statusDiv.style.color = 'white';
                 const time = new Date().toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+                const totalResorts = resorts.length;
+                const manualLiftCount = Math.max(0, totalResorts - liftCount);
                 statusDiv.innerHTML = `
                     <span style="font-size: 1.2rem;">✓</span>
                     <div style="line-height: 1.4;">
                         <div>Live data • ${time}</div>
-                        <div style="font-size: 0.65rem; opacity: 0.9;">Weather: ${weatherCount}/${resorts.length} • Lifts: ${liftCount} via Liftie</div>
+                        <div style="font-size: 0.65rem; opacity: 0.9;">Weather: ${weatherCount}/${totalResorts} • Lifts: ${liftCount} live + ${manualLiftCount} patrol-updated (${totalResorts} total)</div>
                     </div>
                 `;
                 setTimeout(() => statusDiv.remove(), 6000);
