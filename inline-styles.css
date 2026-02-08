@@ -1,0 +1,85 @@
+/* Generated CSS classes from inline styles */
+
+.inline-style-1 {
+    margin-left: 1rem;
+}
+
+.inline-style-2 {
+    margin-left: 1rem;
+}
+
+.inline-style-3 {
+    margin-left: 1rem;
+}
+
+.inline-style-4 {
+    font-size: 1.2rem; display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px;
+}
+
+.inline-style-5 {
+    --bg: url('/resorts/${resort.id}-1280.avif'); position: relative;
+}
+
+.inline-style-6 {
+    display: flex; justify-content: space-between; align-items: flex-start; width: 100%;
+}
+
+.inline-style-7 {
+    flex: 1;
+}
+
+.inline-style-8 {
+    display: flex; align-items: center; gap: 0.5rem
+}
+
+.inline-style-9 {
+    display: inline-flex; vertical-align: middle;
+}
+
+.inline-style-10 {
+    display: flex; align-items: center; gap: 0.5rem;
+}
+
+.inline-style-11 {
+    font-size: 0.7rem; padding: 0.2rem 0.5rem;
+}
+
+.inline-style-12 {
+    margin-top: 0.75rem;
+}
+
+.inline-style-13 {
+    display: inline-flex; vertical-align: middle; margin-right: 0.5rem;
+}
+
+.inline-style-14 {
+    display: inline-flex; vertical-align: middle; margin-right: 0.25rem;
+}
+
+.inline-style-15 {
+    display: inline-flex; vertical-align: middle; margin-right: 0.25rem;
+}
+
+.inline-style-16 {
+    display: inline-flex; vertical-align: middle; margin-right: 0.5rem;
+}
+
+.inline-style-17 {
+    grid-column: 1/-1;
+}
+
+.inline-style-18 {
+    font-size: 1.2rem;
+}
+
+.inline-style-19 {
+    line-height: 1.4;
+}
+
+.inline-style-20 {
+    font-size: 0.65rem; opacity: 0.9;
+}
+
+.inline-style-21 {
+    font-size: 1.2rem;
+}
