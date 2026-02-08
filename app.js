@@ -1073,7 +1073,7 @@
             const sendItSocialLine = getSendItSocialLine(sendItVotesLastHour, sendItVotes);
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
-            const sendItSubtitle = 'Locals on-mountain only';
+            const sendItSubtitle = 'Be the first to call it';
             const sendItPrompt = canVote ? `<div class="sendit-prompt">Tap your call</div>` : '';
             const sendItControls = !hasCoords
                 ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>`
@@ -1084,7 +1084,7 @@
                         <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="100">${sendItButtonCopy.high}</button>
                       </div>
                       <div class="sendit-locked-note">Verified nearby. Local-only voting (${formatMiles(requiredMiles)} mi geofence).</div>`
-                    : `<button class="sendit-unlock-btn" data-sendit-action="unlock" data-resort-id="${resort.id}">Unlock Nearby Voting</button>
+                    : `<button class="sendit-unlock-btn sendit-unlock-cta" data-sendit-action="unlock" data-resort-id="${resort.id}">⚡ Unlock Nearby Voting</button>
                        <div class="sendit-locked-note">Only users within ${formatMiles(requiredMiles)} miles can vote.</div>`;
 
             // POWDER / FRESH badges safely
@@ -1253,24 +1253,22 @@
                 <div class="sendit-section">
                   <div class="sendit-header">
                     <div class="sendit-title-wrap">
-                      <div class="rating-label sendit-title">SEND IT METER</div>
+                      <div class="rating-label sendit-title">SLOPE SIGNAL <span class="sendit-state ${sendItState.className || sendItScoreClass}">${sendItState.label}</span></div>
                       <div class="sendit-subline">
                         <span class="sendit-live-dot"></span>
                         <span class="sendit-subtitle">${sendItSubtitle}</span>
                       </div>
                     </div>
-                    <div class="sendit-scoreboard ${sendItState.className || sendItScoreClass}" style="--sendit-score:${sendItScoreValue === null ? 0 : Math.max(0, Math.min(100, Math.round(sendItScoreValue)))}" aria-label="Full Send score">
-                      <span class="sendit-score-kicker">Full Send</span>
-                      <div class="sendit-gauge" aria-hidden="true">
-                        <span class="sendit-gauge-pointer"></span>
-                      </div>
-                      <span class="sendit-score-value">${sendItScoreMarkup}</span>
-                    </div>
                   </div>
-                  <div class="sendit-pulse ${sendItState.className || sendItScoreClass}">
-                    <span class="sendit-pulse-label">Slope Signal</span>
-                    <span class="sendit-state">${sendItState.label}</span>
-                    <span class="sendit-votes">${sendItVotesText}</span>
+                  <div class="sendit-scoreboard ${sendItState.className || sendItScoreClass}" style="--sendit-score:${sendItScoreValue === null ? 0 : Math.max(0, Math.min(100, Math.round(sendItScoreValue)))}" aria-label="Full Send score">
+                    <div class="sendit-gauge" aria-hidden="true">
+                      <span class="sendit-gauge-pointer"></span>
+                    </div>
+                    <div class="sendit-scale-labels">
+                      <span class="sendit-scale-low">Measured</span>
+                      <span class="sendit-scale-high">Full Send</span>
+                    </div>
+                    <span class="sendit-score-value">${sendItScoreMarkup}</span>
                   </div>
                   <div class="sendit-social-proof">${sendItSocialLine}</div>
                   ${sendItPrompt}
@@ -1706,6 +1704,11 @@
             if (!resortId) return;
 
             if (action === 'unlock') {
+                target.classList.add('rail-slam');
+                if (navigator.vibrate) {
+                    navigator.vibrate([50, 30, 50, 20, 30]);
+                }
+                setTimeout(() => target.classList.remove('rail-slam'), 600);
                 await unlockSendItForResort(resortId, target);
                 return;
             }
