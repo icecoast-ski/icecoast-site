@@ -992,7 +992,7 @@
 
         .sendit-title {
             letter-spacing: 0.012em;
-            font-size: 1.06rem;
+            font-size: 0.96rem;
             font-weight: 900;
             color: #121212;
             display: inline-flex;
@@ -1080,7 +1080,7 @@
             position: relative;
             overflow: clip;
             border: none;
-            background: conic-gradient(from 180deg, #d14b5a 0deg, #2b60d8 92deg, #1cad6d 180deg);
+            background: linear-gradient(90deg, #d14b5a 0%, #2b60d8 52%, #1cad6d 100%);
             box-shadow: inset 0 1px 2px rgba(10, 14, 21, 0.1);
             align-self: stretch;
         }

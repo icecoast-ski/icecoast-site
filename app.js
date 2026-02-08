@@ -877,7 +877,7 @@
             if (votesTotal > 0) {
                 return `No fresh votes in the last hour • ${votesTotal} total`;
             }
-            return 'Be the first local to call it';
+            return 'No local calls yet';
         }
 
         function haversineMiles(lat1, lon1, lat2, lon2) {
@@ -1127,7 +1127,9 @@
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const unlimitedTestMode = isUnlimitedSendItTestResort(resort.id);
             const canVote = hasCoords && (unlimitedTestMode || sendItUnlockedResorts.has(resort.id));
-            const sendItSubtitle = 'Be the first to call it';
+            const sendItSubtitle = canVote
+                ? 'On-mountain locals only'
+                : 'Unlock nearby voting to cast your call';
             const sendItPrompt = canVote ? `<div class="sendit-prompt">Tap your call</div>` : '';
             const sendItControls = !hasCoords
                 ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>`
