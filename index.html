@@ -2622,6 +2622,55 @@
         let sendItRadiusOverrides = {};
         let sendItMaxAccuracyMeters = 200;
         const sendItUnlockedResorts = new Set();
+        const sendItButtonCopyByResort = {};
+
+        const SENDIT_LOW_OPTIONS = [
+            'Yard Sale',
+            'Core Shot Day',
+            'Lap And Bail',
+            'Skate To Car',
+            'Lift Ride Home',
+            'Rain Check',
+            'Tuned Edges Only',
+            'Not The Day'
+        ];
+
+        const SENDIT_MID_OPTIONS = [
+            'Type 2 Fun',
+            'Soft Send',
+            'Send-ish',
+            'Firm But Fun',
+            'Edge It Out',
+            'Still Worth It',
+            'Mid Stoke',
+            'Ski It Anyway'
+        ];
+
+        const SENDIT_HIGH_OPTIONS = [
+            'Full Send',
+            'Drop In',
+            'All Gas',
+            'Top To Bottom',
+            'No Friends Day',
+            'Laps On Laps',
+            'Nuking Vibes',
+            'Ride Till Last Chair'
+        ];
+
+        function pickRandomLabel(options) {
+            return options[Math.floor(Math.random() * options.length)];
+        }
+
+        function getSendItButtonCopy(resortId) {
+            if (!sendItButtonCopyByResort[resortId]) {
+                sendItButtonCopyByResort[resortId] = {
+                    low: pickRandomLabel(SENDIT_LOW_OPTIONS),
+                    mid: pickRandomLabel(SENDIT_MID_OPTIONS),
+                    high: pickRandomLabel(SENDIT_HIGH_OPTIONS)
+                };
+            }
+            return sendItButtonCopyByResort[resortId];
+        }
 
         function loadSendItUnlockState() {
             try {
@@ -2810,6 +2859,7 @@
             }).join('');
 
             const sendIt = sendItSummaryByResort[resort.id] || {};
+            const sendItButtonCopy = getSendItButtonCopy(resort.id);
             const requiredMiles = getSendItRadiusMilesForResort(resort.id);
             const sendItScore = Number.isFinite(sendIt.score) ? `${sendIt.score}%` : '—';
             const sendItVotes = Number.isFinite(sendIt.votes) ? sendIt.votes : 0;
@@ -2819,16 +2869,14 @@
                 : (sendItScoreValue >= 70 ? 'hot' : (sendItScoreValue >= 45 ? 'mid' : 'cold'));
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
-            const sendItSubtitle = sendItVotes > 0
-                ? `${sendItVotes} local vote${sendItVotes === 1 ? '' : 's'}`
-                : 'No local votes yet';
+            const sendItSubtitle = 'Locals on-mountain only';
             const sendItControls = !hasCoords
                 ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>`
                 : canVote
                     ? `<div class="sendit-vote-row">
-                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="20">Yard Sale</button>
-                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="60">Could Be Worse</button>
-                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="100">Full Send</button>
+                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="20">${sendItButtonCopy.low}</button>
+                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="60">${sendItButtonCopy.mid}</button>
+                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="100">${sendItButtonCopy.high}</button>
                       </div>
                       <div class="sendit-locked-note">Location verified. Your vote is local-only (${formatMiles(requiredMiles)} mi geofence).</div>`
                     : `<button class="sendit-unlock-btn" data-sendit-action="unlock" data-resort-id="${resort.id}">Unlock Nearby Voting</button>
@@ -3000,7 +3048,7 @@
                 <div class="sendit-section">
                   <div class="sendit-header">
                     <div>
-                      <div class="rating-label">Locals Send It Meter</div>
+                      <div class="rating-label">SEND IT METER</div>
                       <div class="sendit-subtitle">${sendItSubtitle}</div>
                     </div>
                     <div class="sendit-score ${sendItScoreClass}">${sendItScore}</div>
