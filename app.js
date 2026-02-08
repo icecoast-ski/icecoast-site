@@ -1601,6 +1601,9 @@ const backgroundSizeByResort = {
         };
 
         function getSlopeSignalSortScore(resort) {
+            if (!resort || typeof resort !== 'object') {
+                return { score: 0, votes: 0 };
+            }
             const sendIt = sendItSummaryByResort?.[resort.id];
             const voteCount = Number.isFinite(Number(sendIt?.votes)) ? Number(sendIt.votes) : 0;
             const sendItScore = Number.isFinite(Number(sendIt?.score)) ? Number(sendIt.score) : null;
@@ -1614,7 +1617,7 @@ const backgroundSizeByResort = {
         }
 
         function applyFilters() {
-            let filtered = [...resorts];
+            let filtered = Array.isArray(resorts) ? resorts.filter(Boolean) : [];
 
             // Region filter
             if (filterState.region !== 'all') {
@@ -1632,14 +1635,15 @@ const backgroundSizeByResort = {
 
             // Vibe filter
             if (filterState.vibe === 'sendit') {
-                filtered.sort((a, b) => {
+                const ranked = (filtered.length > 0 ? [...filtered] : [...(Array.isArray(resorts) ? resorts.filter(Boolean) : [])]);
+                ranked.sort((a, b) => {
                     const aSignal = getSlopeSignalSortScore(a);
                     const bSignal = getSlopeSignalSortScore(b);
                     if (bSignal.score !== aSignal.score) return bSignal.score - aSignal.score; // best first
                     if (bSignal.votes !== aSignal.votes) return bSignal.votes - aSignal.votes;
                     return (Number(b.rating) || 0) - (Number(a.rating) || 0);
                 });
-                return filtered;
+                return ranked;
             } else if (filterState.vibe === 'avoid') {
                 filtered = filtered.filter(r => r.rating === 0); // Impossible - will always show no results
             }
