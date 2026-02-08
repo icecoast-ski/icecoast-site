@@ -1766,35 +1766,6 @@ const backgroundSizeByResort = {
             renderResorts();
         });
 
-        // Simple bar fill animation based on scroll
-        function updateGauge() {
-            const barFill = document.getElementById('barFill');
-            if (!barFill) return;
-
-            // Calculate scroll percentage
-            const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
-            const scrollPosition = window.scrollY;
-            const scrollPercent = Math.max(0, Math.min(scrollPosition / scrollHeight, 1));
-
-            // Update bar width (0% to 100%)
-            barFill.style.width = `${scrollPercent * 100}%`;
-        }
-
-        // Update on scroll (smooth and responsive)
-        let ticking = false;
-        window.addEventListener('scroll', () => {
-            if (!ticking) {
-                window.requestAnimationFrame(() => {
-                    updateGauge();
-                    ticking = false;
-                });
-                ticking = true;
-            }
-        }, { passive: true });
-
-        // Initial state
-        setTimeout(updateGauge, 100);
-
         // ========================================
         // LIVE DATA: Liftie (Lifts) + OpenWeather (Weather)
         // ========================================

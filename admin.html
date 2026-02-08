@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>icecoast admin - manual updates</title>
+  <style>
+    :root {
+      --bg: #f4f7fb;
+      --card: #ffffff;
+      --ink: #111827;
+      --muted: #5b6472;
+      --line: #d8dee8;
+      --blue: #1e5eff;
+      --blue-dark: #1144c6;
+      --green: #0f8a5f;
+      --danger: #c0362c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    .wrap {
+      max-width: 1060px;
+      margin: 0 auto;
+      padding: 1.25rem 1rem 2rem;
+    }
+    h1 {
+      margin: 0 0 .35rem;
+      font-size: 1.4rem;
+      letter-spacing: .01em;
+    }
+    .sub {
+      margin: 0 0 1rem;
+      color: var(--muted);
+      font-size: .92rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 1rem;
+      box-shadow: 0 8px 20px rgba(17, 24, 39, .04);
+    }
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: .75rem;
+      margin-bottom: .75rem;
+    }
+    .row-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: .75rem;
+      margin-bottom: .75rem;
+    }
+    .row-4 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr 1fr;
+      gap: .75rem;
+      margin-bottom: .75rem;
+    }
+    label {
+      display: block;
+      font-size: .76rem;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: var(--muted);
+      margin-bottom: .3rem;
+      font-weight: 700;
+    }
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: .56rem .62rem;
+      font-size: .93rem;
+      background: #fff;
+      color: var(--ink);
+    }
+    textarea {
+      min-height: 220px;
+      resize: vertical;
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: .82rem;
+      line-height: 1.35;
+    }
+    .btns {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .5rem;
+      margin-top: .65rem;
+    }
+    button {
+      border: 0;
+      border-radius: 8px;
+      padding: .55rem .8rem;
+      font-weight: 700;
+      cursor: pointer;
+      font-size: .86rem;
+    }
+    .primary { background: var(--blue); color: #fff; }
+    .primary:hover { background: var(--blue-dark); }
+    .good { background: var(--green); color: #fff; }
+    .outline {
+      background: #fff;
+      color: #17202e;
+      border: 1px solid var(--line);
+    }
+    .danger {
+      background: #fff4f3;
+      color: var(--danger);
+      border: 1px solid #f0cbc6;
+    }
+    .meta {
+      margin-top: .7rem;
+      font-size: .82rem;
+      color: var(--muted);
+    }
+    .status {
+      margin-top: .65rem;
+      font-size: .84rem;
+      font-weight: 700;
+    }
+    .status.ok { color: var(--green); }
+    .status.warn { color: #8a5a0f; }
+    .pill {
+      display: inline-block;
+      padding: .12rem .45rem;
+      border-radius: 999px;
+      background: #ffe9e7;
+      color: #a1241b;
+      border: 1px solid #f3c9c4;
+      font-size: .72rem;
+      margin-left: .45rem;
+      font-weight: 700;
+    }
+    .split {
+      display: grid;
+      grid-template-columns: 1.45fr .95fr;
+      gap: 1rem;
+    }
+    @media (max-width: 920px) {
+      .split, .row, .row-3, .row-4 { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>icecoast Manual Update Panel</h1>
+    <p class="sub">Update morning manual data (including conditions and lifts), then export one <code>manual-data.js</code> file and upload it to GitHub.</p>
+
+    <div class="split">
+      <section class="card">
+        <div class="row">
+          <div>
+            <label for="resortSelect">Resort</label>
+            <select id="resortSelect"></select>
+          </div>
+          <div>
+            <label for="regionView">Region</label>
+            <input id="regionView" type="text" disabled />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="liftieView">Liftie API</label>
+            <input id="liftieView" type="text" disabled />
+          </div>
+          <div>
+            <label for="conditions">Current Conditions</label>
+            <select id="conditions">
+              <option value="">Select condition...</option>
+              <option value="Powder">Powder</option>
+              <option value="Packed Powder">Packed Powder</option>
+              <option value="Machine Groomed">Machine Groomed</option>
+              <option value="Variable">Variable</option>
+              <option value="Hardpack">Hardpack</option>
+              <option value="Firm">Firm</option>
+              <option value="Frozen Granular">Frozen Granular</option>
+              <option value="Granular">Granular</option>
+              <option value="Loose Granular">Loose Granular</option>
+              <option value="Spring Corn">Spring Corn</option>
+              <option value="Wet / Heavy">Wet / Heavy</option>
+              <option value="Thin Cover">Thin Cover</option>
+              <option value="Icy in Spots">Icy in Spots</option>
+              <option value="Mixed Conditions">Mixed Conditions</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row-4">
+          <div>
+            <label for="icecoastRating">Icecoast Rating (1-5)</label>
+            <input id="icecoastRating" type="number" min="1" max="5" step="1" />
+          </div>
+          <div>
+            <label for="apres">Apres (0-5)</label>
+            <input id="apres" type="number" min="0" max="5" step="1" />
+          </div>
+          <div>
+            <label for="family">Family (0-5)</label>
+            <input id="family" type="number" min="0" max="5" step="1" />
+          </div>
+          <div>
+            <label for="vertical">Vertical Drop (ft)</label>
+            <input id="vertical" type="number" min="0" step="1" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="weekdayTicket">Lift Ticket (weekday)</label>
+            <input id="weekdayTicket" type="text" placeholder="$89 or $89+" />
+          </div>
+          <div>
+            <label for="weekendTicket">Lift Ticket (weekend/peak)</label>
+            <input id="weekendTicket" type="text" placeholder="$99 or $99+" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="parking">Parking</label>
+            <input id="parking" type="text" placeholder="Free or $20" />
+          </div>
+          <div>
+            <label for="dynamicPricing">Dynamic Pricing</label>
+            <select id="dynamicPricing">
+              <option value="false">No</option>
+              <option value="true">Yes (show red Dynamic badge)</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="trailsOpen">Trails Open</label>
+            <input id="trailsOpen" type="number" min="0" step="1" />
+          </div>
+          <div>
+            <label for="trailsClosed">Trails Closed</label>
+            <input id="trailsClosed" type="number" min="0" step="1" />
+          </div>
+        </div>
+
+        <div class="row">
+          <div>
+            <label for="liftsOpen">Lifts Open</label>
+            <input id="liftsOpen" type="number" min="0" step="1" />
+          </div>
+          <div>
+            <label for="liftsTotal">Lifts Total</label>
+            <input id="liftsTotal" type="number" min="0" step="1" />
+          </div>
+        </div>
+
+        <div class="row-3">
+          <div>
+            <label for="snow24">24h Snow (inches)</label>
+            <input id="snow24" type="number" min="0" step="1" />
+          </div>
+          <div>
+            <label for="snow48">48h Snow (inches)</label>
+            <input id="snow48" type="number" min="0" step="1" />
+          </div>
+          <div>
+            <label for="snow7d">7d Snow (inches)</label>
+            <input id="snow7d" type="number" min="0" step="1" />
+          </div>
+        </div>
+
+        <div class="btns">
+          <button class="primary" id="saveResortBtn">Save This Resort</button>
+          <button class="outline" id="saveNextBtn">Save + Next Resort</button>
+          <button class="danger" id="clearResortBtn">Clear This Resort Override</button>
+        </div>
+        <div class="meta" id="resortMeta"></div>
+        <div class="status" id="editStatus"></div>
+      </section>
+
+      <section class="card">
+        <label for="exportText">Generated manual-data.js</label>
+        <textarea id="exportText" readonly></textarea>
+        <div class="btns">
+          <button class="good" id="downloadBtn">Download manual-data.js</button>
+          <button class="outline" id="copyBtn">Copy to Clipboard</button>
+          <button class="outline" id="refreshBtn">Refresh Output</button>
+        </div>
+        <div class="meta">
+          Upload this file to:
+          <code>manual-data.js</code>
+          <br />
+          Then commit to GitHub and redeploy.
+        </div>
+        <div class="status" id="exportStatus"></div>
+      </section>
+    </div>
+  </div>
+
+  <script src="resorts.js"></script>
+  <script src="manual-data.js"></script>
+  <script>
+    const resorts = Array.isArray(window.RESORTS) ? window.RESORTS.slice() : [];
+    const tierGroups = [
+      {
+        label: 'Tier 1 - Daily Full',
+        ids: [
+          'killington', 'stowe', 'sugarbush', 'stratton', 'mount-snow', 'okemo', 'jay-peak',
+          'smugglers-notch', 'sunday-river', 'sugarloaf', 'loon', 'whiteface', 'hunter',
+          'windham', 'gore-mountain', 'tremblant', 'camelback', 'blue-mountain'
+        ]
+      },
+      {
+        label: 'Tier 2 - Lite / Every Other Day Full',
+        ids: [
+          'pico', 'mad-river-glen', 'burke', 'cannon', 'wildcat', 'waterville', 'brettonwoods',
+          'belleayre', 'jiminy-peak', 'wachusett', 'saddleback', 'mont-sainte-anne',
+          'le-massif', 'mont-sutton'
+        ]
+      },
+      {
+        label: 'Tier 3 - Exceptions / Weekend Focus',
+        ids: [
+          'jack-frost', 'big-boulder', 'shawnee', 'bear-creek', 'elk', 'montage', 'mohawk'
+        ]
+      }
+    ];
+    const overrides = JSON.parse(JSON.stringify(window.MANUAL_RESORT_OVERRIDES || {}));
+    const resortsById = new Map(resorts.map(r => [r.id, r]));
+
+    function getTierRankMap() {
+      const tierRank = {};
+      tierGroups.forEach((group, idx) => {
+        group.ids.forEach((id) => {
+          tierRank[id] = idx;
+        });
+      });
+      return tierRank;
+    }
+
+    const tierRankById = getTierRankMap();
+    const orderedResorts = resorts.slice().sort((a, b) => {
+      const aRank = tierRankById[a.id] ?? 999;
+      const bRank = tierRankById[b.id] ?? 999;
+      if (aRank !== bRank) return aRank - bRank;
+      return a.name.localeCompare(b.name);
+    });
+
+    const el = {
+      resortSelect: document.getElementById('resortSelect'),
+      regionView: document.getElementById('regionView'),
+      liftieView: document.getElementById('liftieView'),
+      conditions: document.getElementById('conditions'),
+      icecoastRating: document.getElementById('icecoastRating'),
+      apres: document.getElementById('apres'),
+      family: document.getElementById('family'),
+      vertical: document.getElementById('vertical'),
+      weekdayTicket: document.getElementById('weekdayTicket'),
+      weekendTicket: document.getElementById('weekendTicket'),
+      parking: document.getElementById('parking'),
+      dynamicPricing: document.getElementById('dynamicPricing'),
+      trailsOpen: document.getElementById('trailsOpen'),
+      trailsClosed: document.getElementById('trailsClosed'),
+      liftsOpen: document.getElementById('liftsOpen'),
+      liftsTotal: document.getElementById('liftsTotal'),
+      snow24: document.getElementById('snow24'),
+      snow48: document.getElementById('snow48'),
+      snow7d: document.getElementById('snow7d'),
+      saveResortBtn: document.getElementById('saveResortBtn'),
+      saveNextBtn: document.getElementById('saveNextBtn'),
+      clearResortBtn: document.getElementById('clearResortBtn'),
+      resortMeta: document.getElementById('resortMeta'),
+      editStatus: document.getElementById('editStatus'),
+      exportText: document.getElementById('exportText'),
+      downloadBtn: document.getElementById('downloadBtn'),
+      copyBtn: document.getElementById('copyBtn'),
+      refreshBtn: document.getElementById('refreshBtn'),
+      exportStatus: document.getElementById('exportStatus')
+    };
+
+    function setStatus(node, text, cls) {
+      node.textContent = text || '';
+      node.className = `status ${cls || ''}`.trim();
+    }
+
+    function numberOrNull(value) {
+      if (value === '' || value === null || typeof value === 'undefined') return null;
+      const n = Number(value);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function cleanString(value) {
+      if (typeof value !== 'string') return '';
+      return value.trim();
+    }
+
+    function setConditionSelectValue(value) {
+      const normalized = cleanString(value);
+      Array.from(el.conditions.options)
+        .filter((opt) => opt.dataset.custom === 'true')
+        .forEach((opt) => opt.remove());
+      if (!normalized) {
+        el.conditions.value = '';
+        return;
+      }
+
+      const hasMatch = Array.from(el.conditions.options).some(opt => opt.value === normalized);
+      if (!hasMatch) {
+        const custom = document.createElement('option');
+        custom.value = normalized;
+        custom.textContent = `${normalized} (custom)`;
+        custom.dataset.custom = 'true';
+        el.conditions.appendChild(custom);
+      }
+      el.conditions.value = normalized;
+    }
+
+    function hasLiftieCoverage(resort) {
+      return !!(resort && typeof resort.liftie === 'string' && resort.liftie !== 'null');
+    }
+
+    function getCurrentResort() {
+      const id = el.resortSelect.value;
+      return resorts.find(r => r.id === id) || null;
+    }
+
+    function getResortOptionMarkup(resort) {
+      return `<option value="${resort.id}">${resort.name}${hasLiftieCoverage(resort) ? '' : ' (manual lifts)'}</option>`;
+    }
+
+    function populateResortSelect() {
+      const groupMarkup = tierGroups.map((group) => {
+        const options = group.ids
+          .map((id) => resortsById.get(id))
+          .filter(Boolean)
+          .map((resort) => getResortOptionMarkup(resort))
+          .join('');
+        if (!options) return '';
+        return `<optgroup label="${group.label}">${options}</optgroup>`;
+      }).join('');
+
+      const unassigned = orderedResorts
+        .filter((resort) => typeof tierRankById[resort.id] === 'undefined')
+        .map((resort) => getResortOptionMarkup(resort))
+        .join('');
+
+      el.resortSelect.innerHTML = unassigned
+        ? `${groupMarkup}<optgroup label="Unassigned">${unassigned}</optgroup>`
+        : groupMarkup;
+    }
+
+    function loadFormForResort(resortId) {
+      const resort = resorts.find(r => r.id === resortId);
+      if (!resort) return;
+      const patch = overrides[resortId] || {};
+      const liftieEnabled = hasLiftieCoverage(resort);
+
+      el.regionView.value = resort.region || '';
+      el.liftieView.value = liftieEnabled ? `Yes (${resort.liftie})` : 'No (manual lift input recommended)';
+      setConditionSelectValue(patch.conditions ?? '');
+      el.icecoastRating.value = patch.icecoastRating ?? '';
+      el.apres.value = patch.apres ?? '';
+      el.family.value = patch.family ?? '';
+      el.vertical.value = patch.vertical ?? '';
+      el.weekdayTicket.value = patch.liftTicket?.weekday ?? '';
+      el.weekendTicket.value = patch.liftTicket?.weekend ?? '';
+      el.parking.value = patch.parking ?? '';
+      el.dynamicPricing.value = patch.dynamicPricing ? 'true' : 'false';
+      el.trailsOpen.value = patch.trails?.open ?? '';
+      el.trailsClosed.value = patch.trails?.closed ?? '';
+      el.liftsOpen.value = patch.lifts?.open ?? '';
+      el.liftsTotal.value = patch.lifts?.total ?? resort.liftsTotal ?? '';
+      el.snow24.value = patch.snowfall24h ?? '';
+      el.snow48.value = patch.snowfall48h ?? '';
+      el.snow7d.value = patch.snowfall7d ?? '';
+
+      const isEdited = !!overrides[resortId];
+      el.resortMeta.innerHTML = isEdited
+        ? `Editing <strong>${resort.name}</strong> <span class="pill">Override saved</span> ${liftieEnabled ? '' : '<span class="pill">Manual lifts</span>'}`
+        : `Editing <strong>${resort.name}</strong>${liftieEnabled ? '' : ' <span class="pill">Manual lifts</span>'}`;
+    }
+
+    function buildPatchFromForm() {
+      const patch = {};
+      const conditions = cleanString(el.conditions.value);
+      if (conditions) patch.conditions = conditions;
+
+      const rating = numberOrNull(el.icecoastRating.value);
+      if (rating !== null) patch.icecoastRating = Math.max(1, Math.min(5, Math.round(rating)));
+
+      const apres = numberOrNull(el.apres.value);
+      if (apres !== null) patch.apres = Math.max(0, Math.min(5, Math.round(apres)));
+
+      const family = numberOrNull(el.family.value);
+      if (family !== null) patch.family = Math.max(0, Math.min(5, Math.round(family)));
+
+      const vertical = numberOrNull(el.vertical.value);
+      if (vertical !== null) patch.vertical = Math.max(0, Math.round(vertical));
+
+      const weekday = cleanString(el.weekdayTicket.value);
+      const weekend = cleanString(el.weekendTicket.value);
+      if (weekday || weekend) {
+        patch.liftTicket = {
+          weekday: weekday || weekend,
+          weekend: weekend || weekday
+        };
+      }
+
+      const parking = cleanString(el.parking.value);
+      if (parking) patch.parking = parking;
+
+      patch.dynamicPricing = el.dynamicPricing.value === 'true';
+
+      const trailsOpen = numberOrNull(el.trailsOpen.value);
+      const trailsClosed = numberOrNull(el.trailsClosed.value);
+      if (trailsOpen !== null || trailsClosed !== null) {
+        patch.trails = {};
+        if (trailsOpen !== null) patch.trails.open = Math.max(0, Math.round(trailsOpen));
+        if (trailsClosed !== null) patch.trails.closed = Math.max(0, Math.round(trailsClosed));
+      }
+
+      const liftsOpen = numberOrNull(el.liftsOpen.value);
+      const liftsTotal = numberOrNull(el.liftsTotal.value);
+      if (liftsOpen !== null || liftsTotal !== null) {
+        patch.lifts = {};
+        if (liftsOpen !== null) patch.lifts.open = Math.max(0, Math.round(liftsOpen));
+        if (liftsTotal !== null) patch.lifts.total = Math.max(0, Math.round(liftsTotal));
+      }
+
+      const snow24 = numberOrNull(el.snow24.value);
+      if (snow24 !== null) patch.snowfall24h = Math.max(0, Math.round(snow24));
+      const snow48 = numberOrNull(el.snow48.value);
+      if (snow48 !== null) patch.snowfall48h = Math.max(0, Math.round(snow48));
+      const snow7d = numberOrNull(el.snow7d.value);
+      if (snow7d !== null) patch.snowfall7d = Math.max(0, Math.round(snow7d));
+
+      return patch;
+    }
+
+    function isPatchEmpty(patch) {
+      return !patch || Object.keys(patch).length === 0;
+    }
+
+    function saveCurrentResort() {
+      const resort = getCurrentResort();
+      if (!resort) return;
+      const patch = buildPatchFromForm();
+      if (isPatchEmpty(patch)) {
+        delete overrides[resort.id];
+      } else {
+        overrides[resort.id] = patch;
+      }
+      loadFormForResort(resort.id);
+      renderExportText();
+      setStatus(el.editStatus, `Saved ${resort.name}.`, 'ok');
+    }
+
+    function goToNextResort() {
+      const idx = el.resortSelect.selectedIndex;
+      const total = el.resortSelect.options.length;
+      if (!total) return;
+      const next = (idx + 1) % total;
+      el.resortSelect.selectedIndex = next;
+      loadFormForResort(el.resortSelect.value);
+    }
+
+    function renderExportText() {
+      const sorted = {};
+      orderedResorts.forEach(r => {
+        if (overrides[r.id]) sorted[r.id] = overrides[r.id];
+      });
+      const out = [
+        '/*',
+        ' * ICECOAST manual resort overrides',
+        ' * Generated from admin.html',
+        ' */',
+        `window.MANUAL_RESORT_OVERRIDES = ${JSON.stringify(sorted, null, 2)};`,
+        ''
+      ].join('\n');
+      el.exportText.value = out;
+      setStatus(el.exportStatus, `${Object.keys(sorted).length} resorts with manual overrides.`, 'warn');
+    }
+
+    function downloadExport() {
+      const text = el.exportText.value;
+      const blob = new Blob([text], { type: 'application/javascript;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'manual-data.js';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      setStatus(el.exportStatus, 'Downloaded manual-data.js', 'ok');
+    }
+
+    async function copyExport() {
+      try {
+        await navigator.clipboard.writeText(el.exportText.value);
+        setStatus(el.exportStatus, 'Copied JS to clipboard.', 'ok');
+      } catch (e) {
+        setStatus(el.exportStatus, 'Clipboard copy failed. Use download instead.', 'warn');
+      }
+    }
+
+    el.resortSelect.addEventListener('change', () => {
+      loadFormForResort(el.resortSelect.value);
+      setStatus(el.editStatus, '', '');
+    });
+    el.saveResortBtn.addEventListener('click', saveCurrentResort);
+    el.saveNextBtn.addEventListener('click', () => {
+      saveCurrentResort();
+      goToNextResort();
+    });
+    el.clearResortBtn.addEventListener('click', () => {
+      const resort = getCurrentResort();
+      if (!resort) return;
+      delete overrides[resort.id];
+      loadFormForResort(resort.id);
+      renderExportText();
+      setStatus(el.editStatus, `Cleared override for ${resort.name}.`, 'warn');
+    });
+    el.downloadBtn.addEventListener('click', downloadExport);
+    el.copyBtn.addEventListener('click', copyExport);
+    el.refreshBtn.addEventListener('click', renderExportText);
+
+    populateResortSelect();
+    if (el.resortSelect.options.length > 0) {
+      loadFormForResort(el.resortSelect.value);
+    }
+    renderExportText();
+  </script>
+</body>
+</html>
