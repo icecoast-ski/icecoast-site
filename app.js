@@ -1187,64 +1187,88 @@
                 : '';
 
             // Unique resort art is now one file per resort id in /v2/resort-art.
-            const backgroundImageFile = `${resort.id}.jpg`;
+const backgroundImageByResort = {
+    'camelback': 'camelback-alt.jpg'
+};
+const backgroundImageFile = backgroundImageByResort[resort.id] || `${resort.id}.jpg`;
 
             // Fine-tuned focal points so peaks/bases are framed better per resort.
-            const backgroundPositionByResort = {
-                'camelback': 'center 38%',
-                'blue-mountain': 'center 46%',
-                'jack-frost': 'center 52%',
-                'shawnee': 'center 50%',
-                'bear-creek': 'center 54%',
-                'elk': 'center 44%',
-                'big-boulder': 'center 55%',
-                'montage': 'center 48%',
-                'hunter': 'center 34%',
-                'windham': 'center 40%',
-                'belleayre': 'center 42%',
-                'whiteface': 'center 26%',
-                'gore-mountain': 'center 30%',
-                'jiminy-peak': 'center 45%',
-                'wachusett': 'center 52%',
-                'mohawk': 'center 52%',
-                'stratton': 'center 43%',
-                'mount-snow': 'center 41%',
-                'killington': 'center 38%',
-                'okemo': 'center 44%',
-                'pico': 'center 40%',
-                'sugarbush': 'center 33%',
-                'mad-river-glen': 'center 34%',
-                'stowe': 'center 30%',
-                'smugglers-notch': 'center 31%',
-                'jay-peak': 'center 28%',
-                'burke': 'center 32%',
-                'loon': 'center 42%',
-                'brettonwoods': 'center 40%',
-                'waterville': 'center 44%',
-                'cannon': 'center 36%',
-                'wildcat': 'center 27%',
-                'sunday-river': 'center 40%',
-                'sugarloaf': 'center 34%',
-                'saddleback': 'center 35%',
-                'tremblant': 'center 34%',
-                'mont-sainte-anne': 'center 39%',
-                'le-massif': 'center 30%',
-                'mont-sutton': 'center 38%'
+const backgroundPositionByResort = {
+    'camelback': 'center 34%',
+    'blue-mountain': 'center 42%',
+    'jack-frost': 'center 47%',
+    'shawnee': 'center 46%',
+    'bear-creek': 'center 50%',
+    'elk': 'center 40%',
+    'big-boulder': 'center 53%',
+    'montage': 'center 46%',
+    'hunter': 'center 33%',
+    'windham': 'center 35%',
+    'belleayre': 'center 40%',
+    'whiteface': 'center 24%',
+    'gore-mountain': 'center 29%',
+    'jiminy-peak': 'center 43%',
+    'wachusett': 'center 47%',
+    'mohawk': 'center 49%',
+    'stratton': 'center 39%',
+    'mount-snow': 'center 39%',
+    'killington': 'center 37%',
+    'okemo': 'center 40%',
+    'pico': 'center 36%',
+    'sugarbush': 'center 31%',
+    'mad-river-glen': 'center 33%',
+    'stowe': 'center 28%',
+    'smugglers-notch': 'center 29%',
+    'jay-peak': 'center 27%',
+    'burke': 'center 30%',
+    'loon': 'center 40%',
+    'brettonwoods': 'center 36%',
+    'waterville': 'center 40%',
+    'cannon': 'center 34%',
+    'wildcat': 'center 24%',
+    'sunday-river': 'center 38%',
+    'sugarloaf': 'center 30%',
+    'saddleback': 'center 31%',
+    'tremblant': 'center 33%',
+    'mont-sainte-anne': 'center 37%',
+    'le-massif': 'center 29%',
+    'mont-sutton': 'center 36%'
+};
+
             };
 
             // Keep a slight zoom to hide white borders in source art without heavy pixelation.
-            const backgroundSizeByResort = {
-                'whiteface': '104%',
-                'gore-mountain': '104%',
-                'stowe': '104%',
-                'wildcat': '103%',
-                'jay-peak': '104%',
-                'sugarbush': '103%',
-                'sugarloaf': '103%',
-                'le-massif': '104%',
-                'mad-river-glen': '103%',
-                'killington': '103%',
-                'tremblant': '103%'
+const backgroundSizeByResort = {
+    'camelback': '100%',
+    'blue-mountain': '100%',
+    'jack-frost': '101%',
+    'shawnee': '100%',
+    'bear-creek': '100%',
+    'elk': '100%',
+    'mohawk': '100%',
+    'wachusett': '100%',
+    'windham': '101%',
+    'stratton': '101%',
+    'okemo': '100%',
+    'pico': '100%',
+    'sugarbush': '102%',
+    'burke': '101%',
+    'brettonwoods': '101%',
+    'waterville': '101%',
+    'cannon': '101%',
+    'wildcat': '102%',
+    'sugarloaf': '102%',
+    'saddleback': '101%',
+    'whiteface': '103%',
+    'gore-mountain': '103%',
+    'stowe': '103%',
+    'jay-peak': '103%',
+    'killington': '102%',
+    'le-massif': '103%',
+    'mad-river-glen': '102%',
+    'tremblant': '102%'
+};
+
             };
 
             const backgroundPos = backgroundPositionByResort[resort.id] || 'center 42%';

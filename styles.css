@@ -2959,3 +2959,11 @@
         }
 
         END OF REMOVED RESORT-SPECIFIC RULES */
+
+/* Force app.js-provided resort backgrounds (prevents legacy overrides from blank/wrong images). */
+.resort-card .resort-header {
+    background-image: var(--bg) !important;
+    background-size: var(--bg-size, 101%) !important;
+    background-position: var(--bg-pos, center 42%) !important;
+    background-repeat: no-repeat !important;
+}
