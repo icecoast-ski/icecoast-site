@@ -49,7 +49,7 @@
 
         .header-left {
             display: flex;
-            align-items: center;
+            align-items: flex-end;
             gap: 0.75rem;
         }
 
@@ -79,6 +79,7 @@
             color: #5A5A5A;
             font-weight: 600;
             margin: 0;
+            padding-bottom: 0.08rem;
         }
 
         .patreon-chip {
@@ -3214,14 +3215,14 @@
     pointer-events: none;
     background: linear-gradient(
         to bottom,
-        rgba(8, 14, 28, 0.54) 0%,
-        rgba(8, 14, 28, 0.28) 42%,
-        rgba(8, 14, 28, 0.08) 100%
+        rgba(8, 14, 28, 0.34) 0%,
+        rgba(8, 14, 28, 0.18) 42%,
+        rgba(8, 14, 28, 0.04) 100%
     );
     z-index: 1;
 }
 
-.resort-card[data-resort="wildcat"] .resort-header > * {
+.resort-card[data-resort="wildcat"] .resort-header > :not(.family-badge) {
     position: relative;
     z-index: 2;
 }
@@ -3234,14 +3235,14 @@
     pointer-events: none;
     background: linear-gradient(
         to bottom,
-        rgba(10, 16, 30, 0.52) 0%,
-        rgba(10, 16, 30, 0.24) 44%,
-        rgba(10, 16, 30, 0.06) 100%
+        rgba(10, 16, 30, 0.34) 0%,
+        rgba(10, 16, 30, 0.18) 44%,
+        rgba(10, 16, 30, 0.04) 100%
     );
     z-index: 1;
 }
 
-.resort-card[data-resort="sugarloaf"] .resort-header > * {
+.resort-card[data-resort="sugarloaf"] .resort-header > :not(.family-badge) {
     position: relative;
     z-index: 2;
 }
@@ -3254,14 +3255,36 @@
     pointer-events: none;
     background: linear-gradient(
         to bottom,
-        rgba(8, 12, 24, 0.56) 0%,
-        rgba(8, 12, 24, 0.28) 42%,
-        rgba(8, 12, 24, 0.08) 100%
+        rgba(8, 12, 24, 0.34) 0%,
+        rgba(8, 12, 24, 0.18) 42%,
+        rgba(8, 12, 24, 0.04) 100%
     );
     z-index: 1;
 }
 
-.resort-card[data-resort="montage"] .resort-header > * {
+.resort-card[data-resort="montage"] .resort-header > :not(.family-badge) {
     position: relative;
     z-index: 2;
+}
+
+.resort-card[data-resort="montage"] .family-badge {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    z-index: 3;
+}
+
+/* Dark-image headers: use light text with dark shadow for true contrast. */
+.resort-card[data-resort="wildcat"] .resort-name,
+.resort-card[data-resort="sugarloaf"] .resort-name,
+.resort-card[data-resort="montage"] .resort-name {
+    color: #f7fbff;
+    text-shadow: 0 2px 10px rgba(6, 10, 20, 0.88), 0 1px 4px rgba(6, 10, 20, 0.8);
+}
+
+.resort-card[data-resort="wildcat"] .resort-location,
+.resort-card[data-resort="sugarloaf"] .resort-location,
+.resort-card[data-resort="montage"] .resort-location {
+    color: #eef5ff;
+    text-shadow: 0 1px 8px rgba(6, 10, 20, 0.85), 0 1px 3px rgba(6, 10, 20, 0.8);
 }
