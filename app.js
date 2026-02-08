@@ -1442,14 +1442,14 @@
                     "No resorts match your filters. Go sharpen your edges."
                 ];
                 const avoidMessages = [
-                    "Avoid mode says low tide, but a few firm laps still count as skiing.",
-                    "Avoid mode found chatter city. Tune the edges and farm the side hits.",
-                    "Avoid mode says boilerplate vibes. Keep it technical and stack clean turns.",
-                    "Avoid mode picked spicy snow. Ski smart, stay loose, and grab the best pockets.",
-                    "Avoid mode says survival-carve weather, not no-ski weather.",
-                    "Avoid mode found crunchy cord. Bring sharp steel and make it a skills day.",
-                    "Avoid mode says sketchy in spots. Locals still get quality laps with good line choice.",
-                    "Avoid mode called it firm and fast. Time to polish technique and send controlled."
+                    "avoid grom says low tide, but a few firm laps still count as skiing.",
+                    "avoid grom found chatter city. Tune the edges and farm the side hits.",
+                    "avoid grom says boilerplate vibes. Keep it technical and stack clean turns.",
+                    "avoid grom picked spicy snow. Ski smart, stay loose, and grab the best pockets.",
+                    "avoid grom says survival-carve weather, not no-ski weather.",
+                    "avoid grom found crunchy cord. Bring sharp steel and make it a skills day.",
+                    "avoid grom says sketchy in spots. Locals still get quality laps with good line choice.",
+                    "avoid grom called it firm and fast. Time to polish technique and send controlled."
                 ];
                 const messages = filterState.vibe === 'avoid' ? avoidMessages : snarkMessages;
                 const randomMessage = messages[Math.floor(Math.random() * messages.length)];
