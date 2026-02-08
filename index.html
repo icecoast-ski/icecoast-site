@@ -2516,7 +2516,7 @@
                                                   'FRESH POW';
                                     return `
                                         <div class="snow-alert-badge">
-                                            ❄️ ${resort.snowfall ? resort.snowfall['24h'] : '0'}" ${label}
+                                            ❄️ ${resort.snowfall ? resort.snowfall['24h'] : '0'} ${label}
                                         </div>
                                     `;
                                 }
@@ -2546,7 +2546,7 @@
                                 ${resort.dynamicPricing ? '<span class="dynamic-badge">Dynamic</span>' : ''}
                             </span>
                             <div style="display: flex; align-items: center; gap: 0.5rem">
-                                <span class="info-value">$${resort.liftTicket.weekday}${resort.dynamicPricing ? '+' : ''} / $${resort.liftTicket.weekend}${resort.dynamicPricing ? '+' : ''}</span>
+                                <span class="info-value">${resort.liftTicket ? `$${resort.liftTicket.weekday}${resort.dynamicPricing ? '+' : ''} / $${resort.liftTicket.weekend}${resort.dynamicPricing ? '+' : ''}` : 'N/A'}</span>
                                 ${resort.passes ? resort.passes.map(pass =>
                                     `<span class="pass-badge pass-${pass}">${pass === 'ikon' ? 'Ikon' : 'Epic'}</span>`
                                 ).join('') : ''}
@@ -2573,8 +2573,8 @@
                                     Trails
                                 </span>
                                 <div class="trail-status">
-                                    <span class="trail-badge open">${resort.trails.open} Open</span>
-                                    <span class="trail-badge closed">${resort.trails.closed} Closed</span>
+                                    <span class="trail-badge open">${resort.trails ? resort.trails.open : 0} Open</span>
+                                    <span class="trail-badge closed">${resort.trails ? resort.trails.closed : 0} Closed</span>
                                 </div>
                             </div>
                             <div class="info-item">
@@ -2583,8 +2583,8 @@
                                     Lifts
                                 </span>
                                 <div class="trail-status">
-                                    <span class="trail-badge open">${resort.lifts.open} Open</span>
-                                    <span class="trail-badge closed">${resort.lifts.closed} Closed</span>
+                                    <span class="trail-badge open">${resort.lifts ? resort.lifts.open : 0} Open</span>
+                                    <span class="trail-badge closed">${resort.lifts ? resort.lifts.closed : 0} Closed</span>
                                 </div>
                             </div>
                             ${resort.park > 0 ? `
@@ -2606,7 +2606,7 @@
                                 </span>
                                 <span style="display: flex; align-items: center; gap: 0.5rem;">
                                     <span class="lift-toggle-counts">
-                                        <span class="trail-badge open" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">${resort.lifts.open}/${resort.lifts.total}</span>
+                                        <span class="trail-badge open" style="font-size: 0.7rem; padding: 0.2rem 0.5rem;">${resort.lifts ? `${resort.lifts.open}/${resort.lifts.total}` : '0/0'}</span>
                                     </span>
                                     <svg class="lift-toggle-chevron" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
                                 </span>
@@ -2631,22 +2631,22 @@
 
                         <div class="weather-section">
                             <div class="weather-current">
-                                <span class="weather-icon">${resort.weather.icon}</span>
+                                <span class="weather-icon">${resort.weather ? resort.weather.icon : '🌡️'}</span>
                                 <div>
-                                    <div class="weather-temp">${resort.weather.temp}°F</div>
-                                    <div class="weather-desc">${resort.weather.condition}</div>
+                                    <div class="weather-temp">${resort.weather ? resort.weather.temp : '--'}°F</div>
+                                    <div class="weather-desc">${resort.weather ? resort.weather.condition : 'N/A'}</div>
                                 </div>
                             </div>
                             <div class="weather-details">
                                 <div class="weather-detail-item">
                                     <span class="info-icon">${icons.thermometer}</span>
                                     <span class="weather-detail-label">Feels like</span>
-                                    <span class="weather-detail-value">${resort.weather.feelsLike}°F</span>
+                                    <span class="weather-detail-value">${resort.weather ? resort.weather.feelsLike : '--'}°F</span>
                                 </div>
                                 <div class="weather-detail-item">
                                     <span class="info-icon">${icons.wind}</span>
                                     <span class="weather-detail-label">Wind</span>
-                                    <span class="weather-detail-value">${resort.weather.wind}</span>
+                                    <span class="weather-detail-value">${resort.weather ? resort.weather.wind : 'N/A'}</span>
                                 </div>
                             </div>
 
@@ -2656,29 +2656,29 @@
                                     3-Day Forecast
                                 </summary>
                                 <div class="forecast-grid">
-                                    ${resort.forecast.map(day => `
+                                    ${resort.forecast ? resort.forecast.map(day => `
                                         <div class="forecast-day">
                                             <div class="forecast-day-name">${day.day}</div>
                                             <div class="forecast-icon">${day.icon}</div>
                                             <div class="forecast-temp">${day.temp}°F</div>
                                             <div class="forecast-snow">${day.snow}</div>
                                         </div>
-                                    `).join('')}
+                                    `).join('') : '<div style="padding: 0.5rem; text-align: center; color: var(--text-secondary);">Forecast unavailable</div>'}
                                 </div>
                             </details>
 
                             <div class="snow-report">
                                 <div class="snow-stat">
                                     <div class="snow-label">24h</div>
-                                    <div class="snow-value">${resort.snowfall ? resort.snowfall['24h'] : '0"'}</div>
+                                    <div class="snow-value">${resort.snowfall && resort.snowfall['24h'] ? resort.snowfall['24h'] : '0"'}</div>
                                 </div>
                                 <div class="snow-stat">
                                     <div class="snow-label">48h</div>
-                                    <div class="snow-value">${resort.snowfall ? resort.snowfall['48h'] : '0"'}</div>
+                                    <div class="snow-value">${resort.snowfall && resort.snowfall['48h'] ? resort.snowfall['48h'] : '0"'}</div>
                                 </div>
                                 <div class="snow-stat">
                                     <div class="snow-label">7d</div>
-                                    <div class="snow-value">${resort.snowfall ? resort.snowfall['7d'] : '0"'}</div>
+                                    <div class="snow-value">${resort.snowfall && resort.snowfall['7d'] ? resort.snowfall['7d'] : '0"'}</div>
                                 </div>
                             </div>
                         </div>
@@ -2771,10 +2771,18 @@
                     });
                     break;
                 case 'price-low':
-                    filtered.sort((a, b) => a.liftTicket.weekend - b.liftTicket.weekend);
+                    filtered.sort((a, b) => {
+                        const aPrice = a.liftTicket ? a.liftTicket.weekend : 999;
+                        const bPrice = b.liftTicket ? b.liftTicket.weekend : 999;
+                        return aPrice - bPrice;
+                    });
                     break;
                 case 'price-high':
-                    filtered.sort((a, b) => b.liftTicket.weekend - a.liftTicket.weekend);
+                    filtered.sort((a, b) => {
+                        const aPrice = a.liftTicket ? a.liftTicket.weekend : 0;
+                        const bPrice = b.liftTicket ? b.liftTicket.weekend : 0;
+                        return bPrice - aPrice;
+                    });
                     break;
                 case 'name':
                     filtered.sort((a, b) => a.name.localeCompare(b.name));
