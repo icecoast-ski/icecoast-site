@@ -912,6 +912,43 @@
             }
         }
 
+        function showSendItToast(message) {
+            const existing = document.querySelector('.sendit-toast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.className = 'sendit-toast';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+
+            requestAnimationFrame(() => toast.classList.add('visible'));
+            setTimeout(() => {
+                toast.classList.remove('visible');
+                setTimeout(() => toast.remove(), 260);
+            }, 1500);
+        }
+
+        function celebrateSendItVote(resortId) {
+            const card = document.querySelector(`.resort-card[data-resort="${resortId}"]`);
+            if (!card) return;
+            const section = card.querySelector('.sendit-section');
+            const score = card.querySelector('.sendit-scoreboard');
+            const prompt = card.querySelector('.sendit-prompt');
+
+            if (section) section.classList.add('vote-locked');
+            if (score) score.classList.add('vote-pop');
+            if (prompt) {
+                prompt.textContent = 'Vote locked in ⚡';
+                prompt.classList.add('vote-payoff');
+            }
+
+            setTimeout(() => {
+                if (section) section.classList.remove('vote-locked');
+                if (score) score.classList.remove('vote-pop');
+                if (prompt) prompt.classList.remove('vote-payoff');
+            }, 1200);
+        }
+
         async function unlockSendItForResort(resortId, buttonEl) {
             const resortCoords = getResortCoords(resortId);
             if (!resortCoords) {
@@ -1011,8 +1048,16 @@
                 }
 
                 triggerHaptic([14, 26, 14]);
+                if (buttonEl) {
+                    buttonEl.classList.remove('is-submitting');
+                    buttonEl.classList.add('vote-success');
+                    buttonEl.textContent = 'Locked In ⚡';
+                }
+                await new Promise(resolve => setTimeout(resolve, 320));
 
                 renderResorts();
+                celebrateSendItVote(resortId);
+                showSendItToast('Local vote locked in');
             } catch (e) {
                 triggerHaptic([24, 34, 24]);
                 if (e?.code === 'SENDIT_COOLDOWN') {
@@ -1021,7 +1066,7 @@
                 }
                 alert(e.message || 'Unable to submit vote right now.');
             } finally {
-                if (buttonEl) {
+                if (buttonEl && buttonEl.isConnected) {
                     buttonEl.disabled = false;
                     buttonEl.classList.remove('is-submitting');
                     buttonEl.textContent = originalText;
@@ -1265,7 +1310,7 @@
                       <span class="sendit-gauge-pointer"></span>
                     </div>
                     <div class="sendit-scale-labels">
-                      <span class="sendit-scale-low">Measured</span>
+                      <span class="sendit-scale-low">Calculated</span>
                       <span class="sendit-scale-high">Full Send</span>
                     </div>
                     <span class="sendit-score-value">${sendItScoreMarkup}</span>
