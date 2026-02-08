@@ -893,6 +893,19 @@
             border: 1px solid var(--light-grey);
             border-radius: 12px;
             background: var(--snow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .sendit-section::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background:
+                radial-gradient(circle at 18% 20%, rgba(0, 102, 255, 0.07) 0%, transparent 45%),
+                radial-gradient(circle at 82% 78%, rgba(255, 90, 95, 0.06) 0%, transparent 42%);
+            pointer-events: none;
+            z-index: 0;
         }
 
         .sendit-header {
@@ -901,6 +914,8 @@
             justify-content: space-between;
             gap: 0.75rem;
             margin-bottom: 0.6rem;
+            position: relative;
+            z-index: 1;
         }
 
         .sendit-subtitle {
@@ -913,7 +928,7 @@
             min-width: 58px;
             height: 58px;
             border-radius: 50%;
-            border: 3px solid var(--light-grey);
+            border: 3px solid var(--charcoal);
             display: inline-flex;
             align-items: center;
             justify-content: center;
@@ -921,21 +936,27 @@
             font-weight: 800;
             color: var(--charcoal);
             background: var(--white);
+            box-shadow: 3px 3px 0 rgba(0, 0, 0, 0.18);
+            transform: rotate(-4deg);
+            transition: transform 0.2s ease;
         }
 
         .sendit-score.hot {
-            border-color: var(--forest);
-            color: var(--forest);
+            border-color: #0f7f77;
+            color: #0f7f77;
+            background: linear-gradient(135deg, #e8fffb 0%, #ffffff 100%);
         }
 
         .sendit-score.mid {
-            border-color: var(--primary-blue);
-            color: var(--primary-blue);
+            border-color: #2256b4;
+            color: #2256b4;
+            background: linear-gradient(135deg, #eef4ff 0%, #ffffff 100%);
         }
 
         .sendit-score.cold {
-            border-color: var(--coral);
-            color: var(--coral);
+            border-color: #c2444a;
+            color: #c2444a;
+            background: linear-gradient(135deg, #fff0f1 0%, #ffffff 100%);
         }
 
         .sendit-locked-note {
@@ -943,6 +964,8 @@
             color: var(--medium-grey);
             margin-top: 0.45rem;
             font-weight: 600;
+            position: relative;
+            z-index: 1;
         }
 
         .sendit-unlock-btn,
@@ -955,6 +978,8 @@
             font-weight: 700;
             cursor: pointer;
             transition: all 0.18s ease;
+            position: relative;
+            z-index: 1;
         }
 
         .sendit-unlock-btn {
@@ -969,12 +994,38 @@
 
         .sendit-vote-btn {
             padding: 0.35rem 0.55rem;
+            border: 2px solid var(--charcoal);
+            box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.15);
+            text-transform: uppercase;
+            letter-spacing: 0.02em;
         }
 
         .sendit-vote-btn:hover,
         .sendit-unlock-btn:hover {
             border-color: var(--primary-blue);
             color: var(--primary-blue);
+        }
+
+        .sendit-vote-btn[data-score="20"] {
+            background: #fff1f2;
+            border-color: #d96a70;
+            color: #9d2e35;
+        }
+
+        .sendit-vote-btn[data-score="60"] {
+            background: #eef4ff;
+            border-color: #5f88d8;
+            color: #244787;
+        }
+
+        .sendit-vote-btn[data-score="100"] {
+            background: #e9fffb;
+            border-color: #32a99e;
+            color: #0f6f68;
+        }
+
+        .sendit-vote-btn[data-score="100"]:hover {
+            transform: translateY(-1px) rotate(-1.2deg);
         }
 
         .resort-icon {
@@ -2775,9 +2826,9 @@
                 ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>`
                 : canVote
                     ? `<div class="sendit-vote-row">
-                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="20">Not Today</button>
-                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="60">Maybe</button>
-                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="100">Send It</button>
+                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="20">Yard Sale</button>
+                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="60">Could Be Worse</button>
+                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="100">Full Send</button>
                       </div>
                       <div class="sendit-locked-note">Location verified. Your vote is local-only (${formatMiles(requiredMiles)} mi geofence).</div>`
                     : `<button class="sendit-unlock-btn" data-sendit-action="unlock" data-resort-id="${resort.id}">Unlock Nearby Voting</button>
@@ -2949,7 +3000,7 @@
                 <div class="sendit-section">
                   <div class="sendit-header">
                     <div>
-                      <div class="rating-label">Send It Meter</div>
+                      <div class="rating-label">Locals Send It Meter</div>
                       <div class="sendit-subtitle">${sendItSubtitle}</div>
                     </div>
                     <div class="sendit-score ${sendItScoreClass}">${sendItScore}</div>
