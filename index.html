@@ -2429,7 +2429,7 @@
             let score = 0;
 
             // 1. SNOW (40% weight) - Most important factor
-            const snow24h = parseInt(snowfall['24h']) || 0;
+            const snow24h = (snowfall && snowfall['24h']) ? parseInt(snowfall['24h']) : 0;
             let snowScore = 0;
             if (snow24h >= 6) snowScore = 5;
             else if (snow24h >= 4) snowScore = 4;
@@ -2437,7 +2437,7 @@
             else if (snow24h >= 1) snowScore = 2;
             else {
                 // Check 48h if no 24h snow
-                const snow48h = parseInt(snowfall['48h']) || 0;
+                const snow48h = (snowfall && snowfall['48h']) ? parseInt(snowfall['48h']) : 0;
                 snowScore = snow48h > 0 ? 2 : 1;
             }
             score += snowScore * 0.4;
@@ -2508,7 +2508,7 @@
                                 // Show fresh pow badge based on conditions OR snow totals
                                 const isPowder = resort.conditions === 'Powder';
                                 const isPackedPowder = resort.conditions === 'Packed Powder';
-                                const hasSignificantSnow = parseInt(resort.snowfall['24h']) >= 6;
+                                const hasSignificantSnow = resort.snowfall && resort.snowfall['24h'] && parseInt(resort.snowfall['24h']) >= 6;
 
                                 if (isPowder || isPackedPowder || hasSignificantSnow) {
                                     const label = isPowder ? 'POWDER DAY' :
@@ -2516,7 +2516,7 @@
                                                   'FRESH POW';
                                     return `
                                         <div class="snow-alert-badge">
-                                            ❄️ ${resort.snowfall['24h']} ${label}
+                                            ❄️ ${resort.snowfall ? resort.snowfall['24h'] : '0'}" ${label}
                                         </div>
                                     `;
                                 }
@@ -2530,7 +2530,7 @@
                                 <div class="rating-label">Icecoast Rating</div>
                                 <div class="rating-stars">${stars}</div>
                             </div>
-                            <div class="rating-text">${getRatingText(resort.rating, resort.snowfall['24h'], resort)}</div>
+                            <div class="rating-text">${getRatingText(resort.rating, resort.snowfall ? resort.snowfall['24h'] : '0', resort)}</div>
                         </div>
 
                         <div class="conditions-highlight">
@@ -2670,15 +2670,15 @@
                             <div class="snow-report">
                                 <div class="snow-stat">
                                     <div class="snow-label">24h</div>
-                                    <div class="snow-value">${resort.snowfall['24h']}</div>
+                                    <div class="snow-value">${resort.snowfall ? resort.snowfall['24h'] : '0"'}</div>
                                 </div>
                                 <div class="snow-stat">
                                     <div class="snow-label">48h</div>
-                                    <div class="snow-value">${resort.snowfall['48h']}</div>
+                                    <div class="snow-value">${resort.snowfall ? resort.snowfall['48h'] : '0"'}</div>
                                 </div>
                                 <div class="snow-stat">
                                     <div class="snow-label">7d</div>
-                                    <div class="snow-value">${resort.snowfall['7d']}</div>
+                                    <div class="snow-value">${resort.snowfall ? resort.snowfall['7d'] : '0"'}</div>
                                 </div>
                             </div>
                         </div>
@@ -2758,15 +2758,15 @@
                     break;
                 case 'snow-24h':
                     filtered.sort((a, b) => {
-                        const aSnow = parseInt(a.snowfall['24h']) || 0;
-                        const bSnow = parseInt(b.snowfall['24h']) || 0;
+                        const aSnow = (a.snowfall && a.snowfall['24h']) ? parseInt(a.snowfall['24h']) : 0;
+                        const bSnow = (b.snowfall && b.snowfall['24h']) ? parseInt(b.snowfall['24h']) : 0;
                         return bSnow - aSnow;
                     });
                     break;
                 case 'snow-7d':
                     filtered.sort((a, b) => {
-                        const aSnow = parseInt(a.snowfall['7d']) || 0;
-                        const bSnow = parseInt(b.snowfall['7d']) || 0;
+                        const aSnow = (a.snowfall && a.snowfall['7d']) ? parseInt(a.snowfall['7d']) : 0;
+                        const bSnow = (b.snowfall && b.snowfall['7d']) ? parseInt(b.snowfall['7d']) : 0;
                         return bSnow - aSnow;
                     });
                     break;
@@ -3552,7 +3552,7 @@
                             <h3>Governing Law & Contact</h3>
                             <p>These terms are governed by the laws of the State of New Jersey, USA, without regard to conflict of law principles. Any disputes shall be resolved in courts located in New Jersey.</p>
 
-                            <p>For questions, permissions, or legal concerns, contact: <strong>sendit@icecoast.ski</strong></p>
+                            <p>For questions, permissions, or legal concerns, contact: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="681b0d060c011c28010b0d0b07091b1c461b0301">[email&#160;protected]</a></strong></p>
                         </div>
                     </div>
                     <!-- End Accordion -->
@@ -3569,7 +3569,7 @@
                 </div>
             </div>
             </footer>
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         // Send It Meter - Fills on scroll
         const sendItMessages = [
             "Verdict: Send it.",
@@ -3615,15 +3615,4 @@
             }
 
             if (percentageText) {
-                percentageText.textContent = `${Math.min(100, Math.round(scrollPercentage))}%`;
-            }
-        }
-
-        // Listen for scroll events
-        window.addEventListener('scroll', updateSendItProgress);
-
-        // Initialize on page load
-        updateSendItProgress();
-    </script>
-</body>
-</html>
+                percentageText.textContent = `${Math.min(100, Math.round(scrollPercentage)
