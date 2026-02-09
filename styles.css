@@ -1702,6 +1702,7 @@
     position: fixed;
     left: 50%;
     top: 50%;
+    rotate: 180deg;
     transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(0deg) scale(0.88);
     opacity: 0;
     z-index: 10060;
@@ -4698,10 +4699,10 @@
 }
 
 .sendit-subtitle {
-    font-size: 1.52rem !important;
+    font-size: 1.44rem !important;
     line-height: 1.05 !important;
     color: #144089 !important;
-    font-weight: 700 !important;
-    letter-spacing: 0 !important;
+    font-weight: 800 !important;
+    letter-spacing: -0.02em !important;
     text-transform: none !important;
 }

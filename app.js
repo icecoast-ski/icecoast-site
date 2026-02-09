@@ -1211,10 +1211,14 @@
 
             const sourceRect = sourceButton.getBoundingClientRect();
             const targetRect = targetButton.getBoundingClientRect();
-            const gondolaStartX = Math.max(18, Math.round(window.innerWidth * 0.06));
-            const gondolaStartY = Math.min(window.innerHeight - 36, Math.round(sourceRect.top + 210));
-            const gondolaEndX = Math.max(26, Math.round(sourceRect.left - 18));
-            const gondolaEndY = Math.max(24, Math.round(sourceRect.top - 72));
+            const gondolaEndX = Math.max(42, Math.round(sourceRect.left - 16));
+            const gondolaEndY = Math.max(26, Math.round(sourceRect.top - 72));
+            const gondolaStartX = -74;
+            const diagonalRun = gondolaEndX - gondolaStartX;
+            const gondolaStartY = Math.min(
+                window.innerHeight - 28,
+                Math.max(gondolaEndY + 90, Math.round(gondolaEndY + diagonalRun))
+            );
             const startX = gondolaEndX + 18;
             const startY = gondolaEndY + 12;
             const railStartX = (targetRect.left + 10) - startX;
@@ -1735,7 +1739,6 @@ const backgroundSizeByResort = {
                   ${sendItPrompt}
                   ${sendItControls}
                   ${canVote ? `<div class="sendit-locked-note">Set crowd + wind then send your slope signal</div>` : ''}
-                  ${canVote ? `<div class="sendit-result">${signalSummaryLine}</div>` : ''}
                 </div>
 
                 <div class="rating-section">
