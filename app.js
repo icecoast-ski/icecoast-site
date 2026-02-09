@@ -1373,9 +1373,15 @@
                 }
                 await new Promise(resolve => setTimeout(resolve, 320));
 
-                renderResorts();
                 celebrateSendItVote(resortId, score, buttonEl);
                 showSendItToast('Local vote locked in');
+
+                // After payoff animation, require re-verification for the next vote.
+                const lockDelayMs = Number(score) >= 100 ? 2350 : 2050;
+                await new Promise(resolve => setTimeout(resolve, lockDelayMs));
+                sendItUnlockedResorts.delete(resortId);
+                persistSendItUnlockState();
+                renderResorts();
             } catch (e) {
                 triggerHaptic([24, 34, 24]);
                 if (e?.code === 'SENDIT_COOLDOWN') {
@@ -1678,6 +1684,16 @@ const backgroundSizeByResort = {
 
                 <div class="resort-section-divider" aria-hidden="true"></div>
 
+                <div class="rating-section">
+                  <div>
+                    <div class="rating-label icecoast-title">Icecoast Rating</div>
+                    <div class="rating-stars">${stars}</div>
+                  </div>
+                  <div class="rating-text">
+                    ${getRatingText(resort.rating, resort.snowfall24h, resort)}
+                  </div>
+                </div>
+
                 <div class="sendit-section">
                   <div class="sendit-header">
                     <div class="sendit-title-pill">
@@ -1692,16 +1708,6 @@ const backgroundSizeByResort = {
                   ${sendItPrompt}
                   ${sendItControls}
                   ${canVote ? `<div class="sendit-locked-note">Set crowd + wind then send your slope signal</div>` : ''}
-                </div>
-
-                <div class="rating-section">
-                  <div>
-                    <div class="rating-label icecoast-title">Icecoast Rating</div>
-                    <div class="rating-stars">${stars}</div>
-                  </div>
-                  <div class="rating-text">
-                    ${getRatingText(resort.rating, resort.snowfall24h, resort)}
-                  </div>
                 </div>
 
                 <div class="mountain-ops-section">
