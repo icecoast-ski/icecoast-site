@@ -798,6 +798,45 @@
         ];
         const SENDIT_DEFAULT_SIGNALS = { crowd: 'normal', wind: 'breezy' };
         const SENDIT_HISTORY_MIN_VOTES = 2;
+        const SENDIT_PAYOFF_PHRASES = {
+            nodata: [
+                'First Chair',
+                'Be The First To Call It',
+                'Fresh Slate',
+                'No Local Calls Yet',
+                'Waiting On The First Drop'
+            ],
+            low: [
+                'Sharpen Those Edges',
+                'Survival Turns',
+                'Refreeze Roulette',
+                'Edge Work Day',
+                'Boilerplate Ballet',
+                'Fast Base, Soft Knees',
+                'Technical Turns Only',
+                'Firm But Skiable'
+            ],
+            mid: [
+                'Good Turns Ahead',
+                'Good Laps',
+                'Hot Laps',
+                'Prime Time',
+                'Carve Mode',
+                'Chairlift Smiles',
+                'Plenty To Work With',
+                'Send-Ish Conditions'
+            ],
+            high: [
+                'Full Send',
+                'Full Tilt',
+                'Warp Speed',
+                'Deep Day Energy',
+                'Face Shot Potential',
+                'Storm Day Stoke',
+                'Unreal Laps',
+                'Hammer Time'
+            ]
+        };
         const sendItSignalSelectionByResort = {};
         const SENDIT_COOLDOWN_OPTIONS = [
             'Easy, legend. icecoast patrol says wait {minutes}m before your next call.',
@@ -1088,8 +1127,36 @@
             return '';
         }
 
-        function getSlopeSignalPayoffPhrase(resortId, crowdMode, windMode, slopeState) {
-            return 'Good Turns Ahead';
+        function pickStableSlopeSignalPhrase(pool, seedText) {
+            if (!Array.isArray(pool) || !pool.length) return 'First Chair';
+            const seed = `${seedText || 'icecoast-signal'}`;
+            let hash = 0;
+            for (let i = 0; i < seed.length; i++) {
+                hash = ((hash << 5) - hash + seed.charCodeAt(i)) | 0;
+            }
+            const idx = Math.abs(hash) % pool.length;
+            return pool[idx];
+        }
+
+        function getSlopeSignalPayoffPhrase(resortId, scoreValue, votesTotal, crowdMode, windMode) {
+            const votes = Number.isFinite(Number(votesTotal)) ? Number(votesTotal) : 0;
+            const crowd = isValidSendItCrowd(crowdMode) ? crowdMode : SENDIT_DEFAULT_SIGNALS.crowd;
+            const wind = isValidSendItWind(windMode) ? windMode : SENDIT_DEFAULT_SIGNALS.wind;
+
+            if (!Number.isFinite(Number(scoreValue)) || votes < SENDIT_HISTORY_MIN_VOTES) {
+                return pickStableSlopeSignalPhrase(
+                    SENDIT_PAYOFF_PHRASES.nodata,
+                    `${resortId}|nodata|${crowd}|${wind}|${votes}`
+                );
+            }
+
+            const numericScore = Number(scoreValue);
+            const bucket = numericScore >= 70 ? 'high' : (numericScore >= 45 ? 'mid' : 'low');
+            const quantizedScore = Math.round(numericScore / 5);
+            return pickStableSlopeSignalPhrase(
+                SENDIT_PAYOFF_PHRASES[bucket],
+                `${resortId}|${bucket}|${crowd}|${wind}|${quantizedScore}|${votes}`
+            );
         }
 
         function haversineMiles(lat1, lon1, lat2, lon2) {
@@ -1463,7 +1530,13 @@
                 ? getSendItState(sendItScore48h, resort.id).label
                 : 'First Chair';
             const signalSummaryLine = `Crowd: ${getSendItCrowdLabel(liveCrowdMode || SENDIT_DEFAULT_SIGNALS.crowd)} • Wind: ${getSendItWindLabel(liveWindMode || SENDIT_DEFAULT_SIGNALS.wind)} • Slope: ${liveSlopeLabel}`;
-            const sendItSubtitlePrimary = getSlopeSignalPayoffPhrase(resort.id, liveCrowdMode, liveWindMode, liveSlopeLabel);
+            const sendItSubtitlePrimary = getSlopeSignalPayoffPhrase(
+                resort.id,
+                sendItScoreValue,
+                sendItVotes,
+                liveCrowdMode,
+                liveWindMode
+            );
             const sendItSubtitleSecondary = '';
             const sendItPrompt = '';
             const sendItControls = !hasCoords ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>` : canVote
