@@ -1364,10 +1364,14 @@
             if (hasFreshPatrol) confidenceSources.push('Patrol');
             if (hasLiveWeather) confidenceSources.push('Weather');
             if (hasLiveLifts) confidenceSources.push('Lifts');
-            if (sendItVotes > 0) confidenceSources.push('Locals');
+
+            // De-weight Slope Signal until there is meaningful local participation.
+            const localsSignalStrong = sendItVotes >= 8;
             const confidenceLevel = confidenceSources.length >= 3 ? 'High' : (confidenceSources.length === 2 ? 'Medium' : 'Basic');
             const confidenceClass = confidenceLevel === 'High' ? 'confidence-high' : (confidenceLevel === 'Medium' ? 'confidence-mid' : 'confidence-low');
-            const confidenceSourceText = confidenceSources.length ? confidenceSources.join(' + ') : 'Manual patrol-only';
+            const confidenceSourceText = confidenceSources.length
+                ? `${confidenceSources.join(' + ')}${localsSignalStrong ? ' + Locals' : ''}`
+                : 'Manual patrol-only';
             const metrics24h = parseInt(resort.snowfall24h || 0, 10);
             const metrics48h = parseInt(resort.snowfall48h || 0, 10);
             const metricsTemp = weather.tempF ?? (typeof weather.temp === 'number' ? `${weather.temp}°` : '—');
