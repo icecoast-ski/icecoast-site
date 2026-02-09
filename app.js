@@ -1396,7 +1396,9 @@
                 ? weather.feelsLike
                 : (typeof weather.feelsLikeF === 'string' ? parseFloat(weather.feelsLikeF) : null);
             const metricsFeelsLikeBase = weather.feelsLikeF ?? (typeof weather.feelsLike === 'number' ? `${weather.feelsLike}°` : '—');
-            const feelsLikeWarning = Number.isFinite(feelsLikeValue) && feelsLikeValue <= -10 ? ' ⚠︎' : '';
+            const feelsLikeWarning = Number.isFinite(feelsLikeValue) && feelsLikeValue <= -10
+                ? ' <span class="cold-warning-icon" aria-hidden="true">⚠︎</span>'
+                : '';
             const metricsFeelsLike = `${metricsFeelsLikeBase}${feelsLikeWarning}`;
             const metricsWind = weather.wind ?? '—';
             const signalLead = sendItSubtitlePrimary;
