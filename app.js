@@ -797,6 +797,7 @@
             { key: 'nuking', label: 'Nuking' }
         ];
         const SENDIT_DEFAULT_SIGNALS = { crowd: 'normal', wind: 'breezy' };
+        const SENDIT_HISTORY_MIN_VOTES = 2;
         const sendItSignalSelectionByResort = {};
         const SENDIT_COOLDOWN_OPTIONS = [
             'Easy, legend. icecoast patrol says wait {minutes}m before your next call.',
@@ -1435,9 +1436,6 @@
             const requiredMiles = getSendItRadiusMilesForResort(resort.id);
             const sendItVotes = Number.isFinite(sendIt.votes) ? sendIt.votes : 0;
             const sendItVotesLastHour = Number.isFinite(sendIt.votesLastHour) ? sendIt.votesLastHour : 0;
-            const sendItVotes24h = Number.isFinite(sendIt.votes24h) ? sendIt.votes24h : sendItVotes;
-            const sendItVotes48h = Number.isFinite(sendIt.votes48h) ? sendIt.votes48h : sendItVotes24h;
-            const sendItVotes3d = Number.isFinite(sendIt.votes3d) ? sendIt.votes3d : sendItVotes48h;
             const sendItScoreValue = Number.isFinite(sendIt.score) ? sendIt.score : null;
             const sendItScoreClass = sendItScoreValue === null
                 ? ''
@@ -1450,6 +1448,20 @@
             const liveCrowdMode = isValidSendItCrowd(sendIt.crowdMode) ? sendIt.crowdMode : null;
             const liveWindMode = isValidSendItWind(sendIt.windMode) ? sendIt.windMode : null;
             const liveSlopeLabel = sendItState.label;
+            const sendItVotes24h = Number.isFinite(sendIt.votes24h) ? Number(sendIt.votes24h) : 0;
+            const sendItVotes48h = Number.isFinite(sendIt.votes48h) ? Number(sendIt.votes48h) : 0;
+            const sendItScore24h = Number.isFinite(sendIt.score24h)
+                ? sendIt.score24h
+                : (Number.isFinite(sendIt.score) && sendItVotes24h > 0 ? Number(sendIt.score) : null);
+            const sendItScore48h = Number.isFinite(sendIt.score48h)
+                ? sendIt.score48h
+                : (Number.isFinite(sendIt.score) && sendItVotes48h > 0 ? Number(sendIt.score) : null);
+            const sendItPhrase24h = Number.isFinite(sendItScore24h) && sendItVotes24h >= SENDIT_HISTORY_MIN_VOTES
+                ? getSendItState(sendItScore24h, resort.id).label
+                : 'First Chair';
+            const sendItPhrase48h = Number.isFinite(sendItScore48h) && sendItVotes48h >= SENDIT_HISTORY_MIN_VOTES
+                ? getSendItState(sendItScore48h, resort.id).label
+                : 'First Chair';
             const signalSummaryLine = `Crowd: ${getSendItCrowdLabel(liveCrowdMode || SENDIT_DEFAULT_SIGNALS.crowd)} • Wind: ${getSendItWindLabel(liveWindMode || SENDIT_DEFAULT_SIGNALS.wind)} • Slope: ${liveSlopeLabel}`;
             const sendItSubtitlePrimary = getSlopeSignalPayoffPhrase(resort.id, liveCrowdMode, liveWindMode, liveSlopeLabel);
             const sendItSubtitleSecondary = '';
@@ -1687,8 +1699,6 @@ const backgroundSizeByResort = {
                   </details>
                 </div>
 
-                <div class="resort-section-divider" aria-hidden="true"></div>
-
                 <div class="rating-section">
                   <div>
                     <div class="rating-label icecoast-title">Icecoast Rating</div>
@@ -1712,13 +1722,12 @@ const backgroundSizeByResort = {
                   </div>
                   ${sendItPrompt}
                   ${sendItControls}
-                  ${canVote ? `<div class="sendit-locked-note">Set crowd + wind then send your slope signal</div>` : ''}
+                  ${canVote ? `<div class="sendit-locked-note">Set crowd + wind then send your slope signal</div>
                   <div class="sendit-history-divider" aria-hidden="true"></div>
                   <div class="sendit-history-row" aria-label="Slope Signal history">
-                    <span class="sendit-history-item"><strong>24h</strong> ${sendItVotes24h}</span>
-                    <span class="sendit-history-item"><strong>48h</strong> ${sendItVotes48h}</span>
-                    <span class="sendit-history-item"><strong>3d</strong> ${sendItVotes3d}</span>
-                  </div>
+                    <span class="sendit-history-item"><strong>24h</strong> <em>${sendItPhrase24h}</em></span>
+                    <span class="sendit-history-item"><strong>48h</strong> <em>${sendItPhrase48h}</em></span>
+                  </div>` : ''}
                 </div>
 
                 <div class="mountain-ops-section">

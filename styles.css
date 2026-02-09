@@ -3215,6 +3215,16 @@
                 padding: 0.56rem 0.78rem;
             }
 
+            .sendit-history-row {
+                gap: 0.3rem;
+            }
+
+            .sendit-history-item {
+                font-size: 0.64rem;
+                min-height: 1.16rem;
+                padding: 0.1rem 0.24rem;
+            }
+
             .sendit-pulse {
                 gap: 0.35rem;
                 padding: 0.12rem 0.42rem;
@@ -3966,6 +3976,55 @@
 .sendit-subtitle-flavor {
     font-size: 0.62rem;
     color: #5e6d83;
+}
+
+.sendit-history-divider {
+    height: 1px;
+    width: 100%;
+    margin: 0.48rem 0 0.42rem;
+    background: rgba(18, 38, 70, 0.12);
+}
+
+.sendit-history-row {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.38rem;
+    align-items: center;
+}
+
+.sendit-history-item {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 0.22rem;
+    min-height: 1.24rem;
+    padding: 0.18rem 0.4rem;
+    border-radius: 7px;
+    background: #f2f6ff;
+    color: #324763;
+    font-size: 0.68rem;
+    font-weight: 620;
+    line-height: 1;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.sendit-history-item strong {
+    color: #1f3560;
+    font-size: 0.64rem;
+    font-weight: 760;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+}
+
+.sendit-history-item em {
+    font-style: normal;
+    font-size: 0.67rem;
+    font-weight: 680;
+    color: #243f72;
+    letter-spacing: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .sendit-result {
