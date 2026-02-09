@@ -3478,6 +3478,47 @@
     margin-bottom: 0.42rem;
 }
 
+.conditions-weather {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.42rem;
+    padding: 0.3rem 0.5rem;
+    border-radius: 10px;
+    border: 1px solid rgba(30, 64, 175, 0.18);
+    background: linear-gradient(180deg, #ffffff 0%, #eef4ff 100%);
+    min-width: 142px;
+    justify-content: flex-end;
+}
+
+.conditions-weather-icon {
+    font-size: 1.08rem;
+    line-height: 1;
+    color: #1e40af;
+}
+
+.conditions-weather-copy {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.05rem;
+}
+
+.conditions-weather-temp {
+    font-size: 1rem;
+    font-weight: 850;
+    color: #16233b;
+    line-height: 1;
+}
+
+.conditions-weather-desc {
+    font-size: 0.62rem;
+    color: #44556f;
+    font-weight: 650;
+    max-width: 110px;
+    text-align: right;
+    line-height: 1.15;
+}
+
 .conditions-label {
     color: #263246;
     opacity: 1;
@@ -3567,10 +3608,17 @@
     font-weight: 700;
 }
 
+.extra-label .info-icon {
+    width: 16px;
+    height: 16px;
+    margin-right: 0.22rem !important;
+}
+
 .extra-value {
     color: #1e40af;
     font-size: 0.86rem;
     font-weight: 800;
+    letter-spacing: 0.015em;
 }
 
 .sendit-section {
@@ -3839,4 +3887,16 @@
 
 .distance-item {
     font-size: 0.78rem;
+}
+
+@media (max-width: 768px) {
+    .conditions-weather {
+        width: 100%;
+        justify-content: space-between;
+        margin-top: 0.15rem;
+    }
+
+    .conditions-weather-copy {
+        align-items: flex-end;
+    }
 }

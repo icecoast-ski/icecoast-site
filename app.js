@@ -405,6 +405,18 @@
             return fallback;
         }
 
+        function normalizeWeatherIcon(icon) {
+            if (!icon) return '☁';
+            const cleaned = String(icon).trim();
+            if (cleaned.includes('❄')) return '❄';
+            if (cleaned.includes('☀')) return '☀';
+            if (cleaned.includes('⛅')) return '⛅';
+            if (cleaned.includes('🌤')) return '⛅';
+            if (cleaned.includes('🌫') || cleaned.includes('〰')) return '〰';
+            if (cleaned.includes('🌧') || cleaned.includes('☂') || cleaned.includes('⛈')) return '☂';
+            return '☁';
+        }
+
         function normalizeSnowfall(resort) {
             if (!resort || typeof resort !== 'object') return;
             const snow24 = resort.snowfall24h ?? resort.snowfall?.['24h'] ?? 0;
@@ -1332,9 +1344,8 @@
             const sendItSocialLine = getSendItSocialLine(sendItVotesLastHour, sendItVotes);
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
-            const verifySubtitle = getSendItVerifySubtitleParts(resort.id);
-            const sendItSubtitlePrimary = canVote ? 'Drop your local call.' : verifySubtitle.primary;
-            const sendItSubtitleSecondary = canVote ? 'Tap a lane below.' : verifySubtitle.secondary;
+            const sendItSubtitlePrimary = 'On-mountain locals call how sendy it is right now.';
+            const sendItSubtitleSecondary = canVote ? 'Tap a lane below.' : 'Local votes only when you are nearby.';
             const sendItPrompt = canVote ? `<div class="sendit-prompt">Tap your call</div>` : '';
             const sendItControls = !hasCoords ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>` : canVote
                 ? `<div class="sendit-vote-row">
@@ -1377,7 +1388,9 @@
             const metricsTemp = weather.tempF ?? (typeof weather.temp === 'number' ? `${weather.temp}°` : '—');
             const metricsFeelsLike = weather.feelsLikeF ?? (typeof weather.feelsLike === 'number' ? `${weather.feelsLike}°` : '—');
             const metricsWind = weather.wind ?? '—';
-            const signalLead = canVote ? 'Locals on-mountain are calling it.' : 'Verify once to unlock local voting.';
+            const weatherIconDisplay = normalizeWeatherIcon(weather.icon);
+            const weatherConditionDisplay = weather.condition || 'Weather pending';
+            const signalLead = sendItSubtitlePrimary;
             const sendItGaugeBlock = canVote
                 ? `<div class="sendit-result ${sendItState.className || sendItScoreClass}">${sendItState.label}</div>
                    <div class="sendit-scoreboard ${sendItState.className || sendItScoreClass}" style="--sendit-score:${sendItScoreValue === null ? 0 : Math.max(0, Math.min(100, Math.round(sendItScoreValue)))}" aria-label="Slope Signal score">
@@ -1507,14 +1520,22 @@ const backgroundSizeByResort = {
               <div class="resort-body">
                 <div class="conditions-highlight">
                   <div class="conditions-top">
-                    <div class="conditions-label">Current Conditions</div>
-                    <div class="conditions-confidence ${confidenceClass}">${confidenceLevel} confidence</div>
+                    <div>
+                      <div class="conditions-label">Current Conditions</div>
+                      <div class="conditions-confidence ${confidenceClass}">${confidenceLevel} confidence</div>
+                    </div>
+                    <div class="conditions-weather" aria-label="Current weather">
+                      <span class="conditions-weather-icon">${weatherIconDisplay}</span>
+                      <div class="conditions-weather-copy">
+                        <div class="conditions-weather-temp">${metricsTemp}</div>
+                        <div class="conditions-weather-desc">${weatherConditionDisplay}</div>
+                      </div>
+                    </div>
                   </div>
                   <div class="conditions-value">${resort.conditions || 'Unknown'}</div>
                   <div class="conditions-metrics">
                     <span>24h Snow <strong>${metrics24h}"</strong></span>
                     <span>48h Snow <strong>${metrics48h}"</strong></span>
-                    <span>Temp <strong>${metricsTemp}</strong></span>
                     <span>Feels Like <strong>${metricsFeelsLike}</strong></span>
                     <span>Wind <strong>${metricsWind}</strong></span>
                   </div>
@@ -1597,17 +1618,6 @@ const backgroundSizeByResort = {
                     </div>
                   </div>
 
-                  <div class="info-item">
-                    <span class="info-label">
-                      <span class="info-icon">${icons.lift}</span>
-                      Lifts
-                    </span>
-                    <div class="trail-status">
-                      <span class="trail-badge open">${liftsOpen} Open</span>
-                      <span class="trail-badge closed">${liftsClosed} Closed</span>
-                    </div>
-                  </div>
-
                   ${park > 0 ? `
                   <div class="info-item">
                     <span class="info-label">
@@ -1625,7 +1635,7 @@ const backgroundSizeByResort = {
                   <summary class="lift-toggle">
                     <span class="lift-toggle-left">
                       <span class="info-icon" style="display:inline-flex;vertical-align:middle;">${icons.lift}</span>
-                      Lift Status${showLiftMoon ? ' 🌙' : ''}
+                      Lifts Status${showLiftMoon ? ' 🌙' : ''}
                     </span>
                     <span style="display:flex;align-items:center;gap:0.5rem;">
                       <span class="trail-badge open" style="font-size:0.7rem;padding:0.2rem 0.5rem;">
@@ -1661,26 +1671,6 @@ const backgroundSizeByResort = {
                 </details>
 
                 <div class="weather-section">
-                  <div class="weather-current">
-                    <span class="weather-icon">${weather.icon || '☁️'}</span>
-                    <div>
-                      <div class="weather-temp">${weather.tempF ?? (typeof weather.temp === 'number' ? `${weather.temp}°` : '—')}</div>
-                      <div class="weather-desc">${weather.condition || 'Unknown'}</div>
-                    </div>
-                  </div>
-                  <div class="weather-details">
-                    <div class="weather-detail-item">
-                      <span class="info-icon">${icons.thermometer}</span>
-                      <span class="weather-detail-label">Feels like</span>
-                      <span class="weather-detail-value">${weather.feelsLikeF ?? (typeof weather.feelsLike === 'number' ? `${weather.feelsLike}°` : '—')}</span>
-                    </div>
-                    <div class="weather-detail-item">
-                      <span class="info-icon">${icons.wind}</span>
-                      <span class="weather-detail-label">Wind</span>
-                      <span class="weather-detail-value">${weather.wind ?? '—'}</span>
-                    </div>
-                  </div>
-
                   <details class="forecast-details" style="margin-top:0.75rem;">
                     <summary class="forecast-toggle">
                       <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.5rem;">
