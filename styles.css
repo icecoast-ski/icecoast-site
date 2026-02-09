@@ -3538,6 +3538,41 @@
     font-weight: 600;
 }
 
+.extra-ratings {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem;
+    margin-top: 0.95rem;
+    padding-top: 0.95rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.extra-rating-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.6rem 0.7rem;
+    border: 1px solid rgba(15, 23, 42, 0.1);
+    border-radius: 12px;
+    background: linear-gradient(180deg, #ffffff 0%, #f4f8ff 100%);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.extra-label {
+    display: inline-flex;
+    align-items: center;
+    color: #2a3b55;
+    font-size: 0.74rem;
+    font-weight: 700;
+}
+
+.extra-value {
+    color: #1e40af;
+    font-size: 0.86rem;
+    font-weight: 800;
+}
+
 .sendit-section {
     margin-bottom: 0.95rem;
     border-radius: 16px;
@@ -3663,5 +3698,13 @@
 
     .conditions-value {
         font-size: 1.44rem;
+    }
+
+    .extra-ratings {
+        gap: 0.5rem;
+    }
+
+    .extra-rating-item {
+        padding: 0.52rem 0.6rem;
     }
 }

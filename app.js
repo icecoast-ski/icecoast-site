@@ -1311,9 +1311,9 @@
             const hasLiveWeather = !!resort.hasLiveWeather;
             const hasLiveLifts = !!resort.hasLiveLifts;
             const patrolUpdatedLabel = hasFreshPatrol
-                ? formatUpdateLabel(resort.patrolUpdatedAt, 'Patrol Updated')
+                ? formatUpdateLabel(resort.patrolUpdatedAt, 'Updated')
                 : '';
-            const heroUpdatedText = hasFreshPatrol ? patrolUpdatedLabel : 'Patrol update pending';
+            const heroUpdatedText = hasFreshPatrol ? patrolUpdatedLabel : 'Updated...';
             const sendItButtonCopy = getSendItButtonCopy(resort.id);
             const requiredMiles = getSendItRadiusMilesForResort(resort.id);
             const sendItVotes = Number.isFinite(sendIt.votes) ? sendIt.votes : 0;
@@ -1369,8 +1369,9 @@
             const confidenceClass = confidenceLevel === 'High' ? 'confidence-high' : (confidenceLevel === 'Medium' ? 'confidence-mid' : 'confidence-low');
             const confidenceSourceText = confidenceSources.length ? confidenceSources.join(' + ') : 'Manual patrol-only';
             const metrics24h = parseInt(resort.snowfall24h || 0, 10);
-            const metricsBase = parseInt(resort.snowfall7d || 0, 10);
+            const metrics48h = parseInt(resort.snowfall48h || 0, 10);
             const metricsTemp = weather.tempF ?? (typeof weather.temp === 'number' ? `${weather.temp}°` : '—');
+            const metricsFeelsLike = weather.feelsLikeF ?? (typeof weather.feelsLike === 'number' ? `${weather.feelsLike}°` : '—');
             const metricsWind = weather.wind ?? '—';
             const signalLead = canVote ? 'Locals on-mountain are calling it.' : 'Verify once to unlock local voting.';
             const sendItGaugeBlock = canVote
@@ -1508,8 +1509,9 @@ const backgroundSizeByResort = {
                   <div class="conditions-value">${resort.conditions || 'Unknown'}</div>
                   <div class="conditions-metrics">
                     <span>24h Snow <strong>${metrics24h}"</strong></span>
-                    <span>7d Snow <strong>${metricsBase}"</strong></span>
+                    <span>48h Snow <strong>${metrics48h}"</strong></span>
                     <span>Temp <strong>${metricsTemp}</strong></span>
+                    <span>Feels Like <strong>${metricsFeelsLike}</strong></span>
                     <span>Wind <strong>${metricsWind}</strong></span>
                   </div>
                   <div class="conditions-source">${confidenceSourceText}</div>
@@ -1693,21 +1695,6 @@ const backgroundSizeByResort = {
                       `).join('')}
                     </div>
                   </details>
-                </div>
-
-                <div class="snow-report">
-                  <div class="snow-stat">
-                    <div class="snow-label">24h</div>
-                    <div class="snow-value">${resort.snowfall24h ?? '—'}</div>
-                  </div>
-                  <div class="snow-stat">
-                    <div class="snow-label">48h</div>
-                    <div class="snow-value">${resort.snowfall48h ?? '—'}</div>
-                  </div>
-                  <div class="snow-stat">
-                    <div class="snow-label">7d</div>
-                    <div class="snow-value">${resort.snowfall7d ?? '—'}</div>
-                  </div>
                 </div>
 
                 <div class="extra-ratings">
