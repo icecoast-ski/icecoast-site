@@ -1712,6 +1712,41 @@
     will-change: transform, opacity;
 }
 
+.sendit-gondola-run {
+    position: fixed;
+    left: 0;
+    top: 0;
+    transform: translate3d(var(--g-start-x), var(--g-start-y), 0) rotate(-45deg) scale(0.88);
+    transform-origin: center;
+    opacity: 0;
+    z-index: 10058;
+    pointer-events: none;
+    font-size: 30px;
+    line-height: 1;
+    filter: drop-shadow(0 4px 11px rgba(8, 24, 40, 0.46));
+    will-change: transform, opacity;
+}
+
+.sendit-gondola-run::before {
+    content: '';
+    position: absolute;
+    left: -82px;
+    top: 50%;
+    width: 84px;
+    height: 2px;
+    transform: translateY(-50%);
+    background: linear-gradient(90deg, rgba(185, 198, 214, 0.08) 0%, rgba(185, 198, 214, 0.8) 70%, rgba(185, 198, 214, 0.02) 100%);
+}
+
+.sendit-gondola-run.active {
+    animation: senditGondolaApproach 0.98s cubic-bezier(0.2, 0.82, 0.28, 1) forwards;
+}
+
+.sendit-gondola-run.fullsend {
+    font-size: 34px;
+    filter: drop-shadow(0 5px 14px rgba(8, 30, 48, 0.52));
+}
+
 .sendit-skier-launch.active.normal {
     animation: senditSkierRailRide 2s cubic-bezier(0.2, 0.8, 0.24, 1) forwards;
 }
@@ -1791,6 +1826,28 @@
     100% {
         opacity: 0;
         transform: translate(-50%, -50%) translate3d(var(--down-x), var(--down-y), 0) rotate(14deg) scale(0.92);
+    }
+}
+
+@keyframes senditGondolaApproach {
+    0% {
+        opacity: 0;
+        transform: translate3d(var(--g-start-x), var(--g-start-y), 0) rotate(-45deg) scale(0.88);
+    }
+    12% {
+        opacity: 1;
+    }
+    72% {
+        opacity: 1;
+        transform: translate3d(var(--g-end-x), var(--g-end-y), 0) rotate(-45deg) scale(1);
+    }
+    84% {
+        opacity: 1;
+        transform: translate3d(var(--g-end-x), calc(var(--g-end-y) - 6px), 0) rotate(-45deg) scale(1.02);
+    }
+    100% {
+        opacity: 0;
+        transform: translate3d(var(--g-end-x), calc(var(--g-end-y) - 4px), 0) rotate(-45deg) scale(1.01);
     }
 }
 
@@ -4576,6 +4633,7 @@
 
 .status-chip {
     flex: 0 0 auto !important;
+    border-radius: 999px !important;
 }
 
 .status-chips-bottom {

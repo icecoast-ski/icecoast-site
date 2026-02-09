@@ -1211,8 +1211,12 @@
 
             const sourceRect = sourceButton.getBoundingClientRect();
             const targetRect = targetButton.getBoundingClientRect();
-            const startX = sourceRect.left + (sourceRect.width * 0.5);
-            const startY = sourceRect.top + (sourceRect.height * 0.3);
+            const gondolaStartX = Math.max(18, Math.round(window.innerWidth * 0.06));
+            const gondolaStartY = Math.min(window.innerHeight - 36, Math.round(sourceRect.top + 210));
+            const gondolaEndX = Math.max(26, Math.round(sourceRect.left - 18));
+            const gondolaEndY = Math.max(24, Math.round(sourceRect.top - 72));
+            const startX = gondolaEndX + 18;
+            const startY = gondolaEndY + 12;
             const railStartX = (targetRect.left + 10) - startX;
             const railStartY = (targetRect.top - 8) - startY;
             const railEndX = (targetRect.right - 12) - startX;
@@ -1220,6 +1224,18 @@
             const maxDrop = Math.max(240, window.innerHeight - startY + 80);
             const downX = railEndX + (isFullSend ? 14 : 8);
             const downY = Math.min(maxDrop, isFullSend ? 880 : 760);
+            const gondolaDurationMs = 980;
+            const skierDropDelayMs = 540;
+
+            const gondola = document.createElement('span');
+            gondola.className = `sendit-gondola-run ${isFullSend ? 'fullsend' : 'normal'}`;
+            gondola.textContent = '\ud83d\udea1';
+            gondola.style.setProperty('--g-start-x', `${gondolaStartX}px`);
+            gondola.style.setProperty('--g-start-y', `${gondolaStartY}px`);
+            gondola.style.setProperty('--g-end-x', `${gondolaEndX}px`);
+            gondola.style.setProperty('--g-end-y', `${gondolaEndY}px`);
+            document.body.appendChild(gondola);
+            requestAnimationFrame(() => gondola.classList.add('active'));
 
             const skier = document.createElement('span');
             skier.className = `sendit-skier-launch ${isFullSend ? 'fullsend' : 'normal'}`;
@@ -1234,13 +1250,20 @@
             skier.style.setProperty('--down-y', `${Math.round(downY)}px`);
             document.body.appendChild(skier);
 
-            targetButton.classList.add(isFullSend ? 'sendit-grind-epic' : 'sendit-grind-target');
-            requestAnimationFrame(() => skier.classList.add('active'));
+            setTimeout(() => {
+                targetButton.classList.add(isFullSend ? 'sendit-grind-epic' : 'sendit-grind-target');
+                requestAnimationFrame(() => skier.classList.add('active'));
+            }, skierDropDelayMs);
 
             setTimeout(() => {
                 targetButton.classList.remove('sendit-grind-target', 'sendit-grind-epic');
                 skier.remove();
+                gondola.remove();
             }, isFullSend ? 2300 : 2000);
+
+            setTimeout(() => {
+                gondola.remove();
+            }, gondolaDurationMs + 140);
         }
 
         function celebrateSendItVote(resortId, scoreValue, buttonEl) {
