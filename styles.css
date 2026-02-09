@@ -4434,3 +4434,68 @@
         padding: 0.64rem 0.72rem !important;
     }
 }
+
+/* Slope Signal: Crowd + Wind lanes */
+.sendit-signal-group {
+    display: grid;
+    gap: 0.45rem;
+    margin: 0.5rem 0 0.6rem;
+}
+
+.sendit-signal-row {
+    display: grid;
+    grid-template-columns: 54px minmax(0, 1fr);
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.sendit-signal-label {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    color: #3a4b62;
+    text-transform: uppercase;
+}
+
+.sendit-segmented {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.32rem;
+}
+
+.sendit-choice-btn {
+    border: 1px solid rgba(24, 46, 82, 0.18);
+    border-radius: 8px;
+    background: #f4f7fc;
+    color: #2f4567;
+    font-size: 0.7rem;
+    font-weight: 700;
+    line-height: 1;
+    padding: 0.42rem 0.35rem;
+    cursor: pointer;
+    transition: all 0.16s ease;
+}
+
+.sendit-choice-btn:hover {
+    border-color: rgba(24, 46, 82, 0.34);
+    background: #edf3ff;
+}
+
+.sendit-choice-btn.active {
+    border-color: #1f5ec8;
+    background: #1f5ec8;
+    color: #ffffff;
+    box-shadow: 0 4px 10px rgba(31, 94, 200, 0.24);
+}
+
+@media (max-width: 768px) {
+    .sendit-signal-row {
+        grid-template-columns: 48px minmax(0, 1fr);
+        gap: 0.38rem;
+    }
+
+    .sendit-choice-btn {
+        font-size: 0.66rem;
+        padding: 0.38rem 0.26rem;
+    }
+}

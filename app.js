@@ -785,6 +785,18 @@
         const SENDIT_LOW_OPTIONS = ['Sharpen Edges'];
         const SENDIT_MID_OPTIONS = ['Good Laps'];
         const SENDIT_HIGH_OPTIONS = ['Full Send'];
+        const SENDIT_CROWD_OPTIONS = [
+            { key: 'quiet', label: 'Quiet' },
+            { key: 'normal', label: 'Normal' },
+            { key: 'swarm', label: 'Jerry Swarm' }
+        ];
+        const SENDIT_WIND_OPTIONS = [
+            { key: 'calm', label: 'Calm' },
+            { key: 'breezy', label: 'Breezy' },
+            { key: 'nuking', label: 'Nuking' }
+        ];
+        const SENDIT_DEFAULT_SIGNALS = { crowd: 'normal', wind: 'breezy' };
+        const sendItSignalSelectionByResort = {};
         const SENDIT_COOLDOWN_OPTIONS = [
             'Easy, legend. icecoast patrol says wait {minutes}m before your next call.',
             'You already dropped your vote. Take a hot-lap and check back in {minutes}m.',
@@ -837,6 +849,43 @@
             const minutes = Math.max(1, Math.round(Number(retryAfterMinutes) || 1));
             const template = pickRandomLabel(SENDIT_COOLDOWN_OPTIONS);
             return template.replace('{minutes}', `${minutes}`);
+        }
+
+        function isValidSendItCrowd(value) {
+            return SENDIT_CROWD_OPTIONS.some((opt) => opt.key === value);
+        }
+
+        function isValidSendItWind(value) {
+            return SENDIT_WIND_OPTIONS.some((opt) => opt.key === value);
+        }
+
+        function getSendItCrowdLabel(value) {
+            const match = SENDIT_CROWD_OPTIONS.find((opt) => opt.key === value);
+            return match ? match.label : 'Normal';
+        }
+
+        function getSendItWindLabel(value) {
+            const match = SENDIT_WIND_OPTIONS.find((opt) => opt.key === value);
+            return match ? match.label : 'Breezy';
+        }
+
+        function getSendItSignalSelection(resortId) {
+            const existing = sendItSignalSelectionByResort[resortId];
+            if (existing) return existing;
+            const fromSummary = sendItSummaryByResort?.[resortId] || {};
+            const seeded = {
+                crowd: isValidSendItCrowd(fromSummary.crowdMode) ? fromSummary.crowdMode : SENDIT_DEFAULT_SIGNALS.crowd,
+                wind: isValidSendItWind(fromSummary.windMode) ? fromSummary.windMode : SENDIT_DEFAULT_SIGNALS.wind
+            };
+            sendItSignalSelectionByResort[resortId] = seeded;
+            return seeded;
+        }
+
+        function setSendItSignalSelection(resortId, key, value) {
+            if (key === 'crowd' && !isValidSendItCrowd(value)) return;
+            if (key === 'wind' && !isValidSendItWind(value)) return;
+            const next = { ...getSendItSignalSelection(resortId), [key]: value };
+            sendItSignalSelectionByResort[resortId] = next;
         }
 
         function getSendItOutOfRangeMessage(distanceMiles, requiredMiles) {
@@ -1150,6 +1199,13 @@
                 return;
             }
 
+            if (isUnlimitedSendItTestResort(resortId)) {
+                sendItUnlockedResorts.add(resortId);
+                persistSendItUnlockState();
+                renderResorts();
+                return;
+            }
+
             const originalText = buttonEl ? buttonEl.textContent : '';
             if (buttonEl) {
                 buttonEl.disabled = true;
@@ -1186,7 +1242,7 @@
             }
         }
 
-        async function submitSendItVote(resortId, score, buttonEl) {
+        async function submitSendItVote(resortId, score, signalSelection, buttonEl) {
             const resortCoords = getResortCoords(resortId);
             if (!resortCoords) {
                 alert('This resort is missing coordinates, so Send It voting is unavailable.');
@@ -1207,9 +1263,25 @@
             triggerHaptic(10);
 
             try {
-                const pos = await getBrowserLocation();
-                const baseDeviceId = getSendItDeviceId();
-                const deviceId = baseDeviceId;
+                const isUnlimitedTest = isUnlimitedSendItTestResort(resortId);
+                let voteLat;
+                let voteLon;
+                let voteAccuracy;
+                let deviceId = getSendItDeviceId();
+
+                if (isUnlimitedTest) {
+                    voteLat = resortCoords.lat;
+                    voteLon = resortCoords.lon;
+                    voteAccuracy = 10;
+                    // Fresh synthetic token to bypass cooldown while testing this resort UI.
+                    deviceId = `test-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+                } else {
+                    const pos = await getBrowserLocation();
+                    voteLat = pos.coords.latitude;
+                    voteLon = pos.coords.longitude;
+                    voteAccuracy = pos.coords.accuracy;
+                }
+
                 const voteUrl = new URL('sendit/vote', WORKER_URL).toString();
                 const resp = await fetch(voteUrl, {
                     method: 'POST',
@@ -1217,9 +1289,11 @@
                     body: JSON.stringify({
                         resortId,
                         score,
-                        lat: pos.coords.latitude,
-                        lon: pos.coords.longitude,
-                        accuracy: pos.coords.accuracy,
+                        crowd: signalSelection?.crowd,
+                        wind: signalSelection?.wind,
+                        lat: voteLat,
+                        lon: voteLon,
+                        accuracy: voteAccuracy,
                         deviceId
                     })
                 });
@@ -1312,11 +1386,43 @@
             const sendItSocialLine = getSendItSocialLine(sendItVotesLastHour, sendItVotes);
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
+            const selectedSignals = getSendItSignalSelection(resort.id);
+            const liveCrowdMode = isValidSendItCrowd(sendIt.crowdMode) ? sendIt.crowdMode : null;
+            const liveWindMode = isValidSendItWind(sendIt.windMode) ? sendIt.windMode : null;
+            const signalSummaryLine = (liveCrowdMode || liveWindMode)
+                ? `Live signal: Crowd ${getSendItCrowdLabel(liveCrowdMode || SENDIT_DEFAULT_SIGNALS.crowd)} • Wind ${getSendItWindLabel(liveWindMode || SENDIT_DEFAULT_SIGNALS.wind)}`
+                : 'Live signal: Be first to set Crowd + Wind.';
             const sendItSubtitlePrimary = 'On-mountain locals call how sendy it is right now.';
             const sendItSubtitleSecondary = canVote ? 'Tap a lane below.' : '';
             const sendItPrompt = canVote ? `<div class="sendit-prompt">Tap your call</div>` : '';
             const sendItControls = !hasCoords ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>` : canVote
-                ? `<div class="sendit-vote-row">
+                ? `<div class="sendit-signal-group">
+                        <div class="sendit-signal-row">
+                          <span class="sendit-signal-label">Crowd</span>
+                          <div class="sendit-segmented">
+                            ${SENDIT_CROWD_OPTIONS.map((opt) => `
+                              <button
+                                class="sendit-choice-btn ${selectedSignals.crowd === opt.key ? 'active' : ''}"
+                                data-sendit-action="select-crowd"
+                                data-resort-id="${resort.id}"
+                                data-value="${opt.key}"
+                                type="button">${opt.label}</button>`).join('')}
+                          </div>
+                        </div>
+                        <div class="sendit-signal-row">
+                          <span class="sendit-signal-label">Wind</span>
+                          <div class="sendit-segmented">
+                            ${SENDIT_WIND_OPTIONS.map((opt) => `
+                              <button
+                                class="sendit-choice-btn ${selectedSignals.wind === opt.key ? 'active' : ''}"
+                                data-sendit-action="select-wind"
+                                data-resort-id="${resort.id}"
+                                data-value="${opt.key}"
+                                type="button">${opt.label}</button>`).join('')}
+                          </div>
+                        </div>
+                      </div>
+                      <div class="sendit-vote-row">
                         <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="20">${sendItButtonCopy.low}</button>
                         <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="60">${sendItButtonCopy.mid}</button>
                         <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="100">${sendItButtonCopy.high}</button>
@@ -1535,6 +1641,7 @@ const backgroundSizeByResort = {
                   ${sendItPrompt}
                   ${sendItControls}
                   ${canVote ? `<div class="sendit-locked-note">Verified nearby. Local-only voting (${formatMiles(requiredMiles)} mi geofence).</div>` : ''}
+                  <div class="sendit-result">${signalSummaryLine}</div>
                 </div>
 
                 <div class="rating-section">
@@ -1909,9 +2016,24 @@ const backgroundSizeByResort = {
                 return;
             }
 
+            if (action === 'select-crowd') {
+                const crowd = target.dataset.value;
+                setSendItSignalSelection(resortId, 'crowd', crowd);
+                renderResorts();
+                return;
+            }
+
+            if (action === 'select-wind') {
+                const wind = target.dataset.value;
+                setSendItSignalSelection(resortId, 'wind', wind);
+                renderResorts();
+                return;
+            }
+
             if (action === 'vote') {
                 const score = Number(target.dataset.score);
-                await submitSendItVote(resortId, score, target);
+                const signalSelection = getSendItSignalSelection(resortId);
+                await submitSendItVote(resortId, score, signalSelection, target);
             }
         });
 
