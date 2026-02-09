@@ -1543,13 +1543,11 @@
             padding: 0.36rem 0.38rem;
             position: relative;
             overflow: hidden;
-            border: 1px solid rgba(19, 36, 64, 0.24);
-            border-radius: 8px;
+            border: 2px solid var(--charcoal);
             box-shadow: 2px 2px 0 rgba(0, 0, 0, 0.15);
             text-transform: uppercase;
-            letter-spacing: 0.01em;
-            font-size: 0.7rem;
-            font-weight: 650;
+            letter-spacing: 0.015em;
+            font-size: 0.72rem;
             line-height: 1.12;
             white-space: normal;
             text-align: center;
@@ -1677,6 +1675,7 @@
             transform: translateX(-50%) translateY(0);
         }
 
+        .sendit-vote-btn:hover,
         .sendit-unlock-btn:hover:not(.sendit-unlock-cta) {
             border-color: var(--primary-blue);
             color: var(--primary-blue);
@@ -1684,19 +1683,19 @@
 
         .sendit-vote-btn[data-score="20"] {
             background: #fff1f2;
-            border-color: #d48b91;
+            border-color: #d96a70;
             color: #9d2e35;
         }
 
         .sendit-vote-btn[data-score="60"] {
             background: #eef4ff;
-            border-color: #86a6dc;
+            border-color: #5f88d8;
             color: #244787;
         }
 
         .sendit-vote-btn[data-score="100"] {
             background: #e9fffb;
-            border-color: #74b8a8;
+            border-color: #32a99e;
             color: #0f6f68;
         }
 
@@ -4646,7 +4645,7 @@
     position: absolute !important;
     left: 1.05rem !important;
     right: 1.05rem !important;
-    bottom: 1.05rem !important;
+    bottom: 0.34rem !important;
     margin: 0 !important;
     display: flex !important;
     flex-wrap: nowrap !important;
@@ -4664,7 +4663,7 @@
     position: absolute !important;
     left: 1.05rem !important;
     right: 1.05rem !important;
-    bottom: 1.05rem !important;
+    bottom: 0.34rem !important;
     margin: 0 !important;
     display: flex !important;
     flex-wrap: nowrap !important;
@@ -4682,7 +4681,7 @@
 
 @media (max-width: 768px) {
     .resort-header {
-        padding-bottom: 3.2rem !important;
+        padding-bottom: 2.75rem !important;
     }
 
     .resort-location {
@@ -4694,14 +4693,14 @@
     .status-chips {
         left: 0.9rem !important;
         right: 0.9rem !important;
-        bottom: 0.9rem !important;
+        bottom: 0.32rem !important;
         gap: 0.28rem !important;
     }
 
     .status-chips-bottom {
         left: 0.9rem !important;
         right: 0.9rem !important;
-        bottom: 0.9rem !important;
+        bottom: 0.32rem !important;
         gap: 0.28rem !important;
     }
 }
