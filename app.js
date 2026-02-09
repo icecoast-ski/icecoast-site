@@ -1376,11 +1376,20 @@
                 .map((chip) => `<span class="status-chip ${chip.cls}">${chip.label}</span>`)
                 .join('');
 
-            const confidenceSources = [];
-            if (hasFreshPatrol) confidenceSources.push('Patrol');
-            if (hasLiveWeather) confidenceSources.push('Weather');
-            if (hasLiveLifts) confidenceSources.push('Lifts');
-            const confidenceLevel = confidenceSources.length >= 3 ? 'High' : (confidenceSources.length === 2 ? 'Medium' : 'Basic');
+            let confidenceLevel = 'Basic';
+            if (hasFreshPatrol) {
+                const updatedTs = Date.parse(resort.patrolUpdatedAt);
+                if (Number.isFinite(updatedTs)) {
+                    const hoursOld = (Date.now() - updatedTs) / (60 * 60 * 1000);
+                    if (hoursOld <= 24) {
+                        confidenceLevel = 'High';
+                    } else if (hoursOld <= 48) {
+                        confidenceLevel = 'Medium';
+                    } else {
+                        confidenceLevel = 'Basic';
+                    }
+                }
+            }
             const confidenceClass = confidenceLevel === 'High' ? 'confidence-high' : (confidenceLevel === 'Medium' ? 'confidence-mid' : 'confidence-low');
             const metrics24h = parseInt(resort.snowfall24h || 0, 10);
             const metrics48h = parseInt(resort.snowfall48h || 0, 10);
@@ -1532,10 +1541,17 @@ const backgroundSizeByResort = {
                   </div>
                   <details class="forecast-inline">
                     <summary class="forecast-inline-toggle">
-                      <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.4rem;">
-                        ${icons.calendar}
+                      <span class="forecast-inline-left">
+                        <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.4rem;">
+                          ${icons.calendar}
+                        </span>
+                        3-Day Forecast
                       </span>
-                      3-Day Forecast
+                      <span class="forecast-inline-chevron" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                      </span>
                     </summary>
                     <div class="forecast-grid">
                       ${forecast.map(day => `

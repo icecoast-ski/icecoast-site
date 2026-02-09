@@ -3641,7 +3641,7 @@
 }
 
 .forecast-inline-toggle {
-    padding: 0.2rem 0;
+    padding: 0.24rem 0;
     background: transparent;
     cursor: pointer;
     font-weight: 700;
@@ -3649,10 +3649,36 @@
     color: #334155;
     list-style: none;
     user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.6rem;
 }
 
 .forecast-inline-toggle::-webkit-details-marker {
     display: none;
+}
+
+.forecast-inline-left {
+    display: inline-flex;
+    align-items: center;
+}
+
+.forecast-inline-chevron {
+    width: 16px;
+    height: 16px;
+    color: #64748b;
+    transition: transform 0.22s ease;
+    flex-shrink: 0;
+}
+
+.forecast-inline-chevron svg {
+    width: 100%;
+    height: 100%;
+}
+
+.forecast-inline[open] .forecast-inline-chevron {
+    transform: rotate(180deg);
 }
 
 .resort-section-divider {
@@ -3668,6 +3694,28 @@
     border: 1px solid rgba(15, 23, 42, 0.08);
     box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
     padding: 0.85rem;
+}
+
+.mountain-ops-section .info-grid {
+    gap: 0;
+    margin-bottom: 0.65rem;
+}
+
+.mountain-ops-section .info-item {
+    padding: 0.52rem 0;
+    border: 0;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+}
+
+.mountain-ops-section .info-item:last-child {
+    border-bottom: 0;
+}
+
+.mountain-ops-section .lift-details {
+    margin-top: 0.15rem;
 }
 
 .conditions-source {
