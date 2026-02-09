@@ -4541,13 +4541,14 @@
 /* Final hard lock: header location/chips + live badge color */
 .resort-header {
     position: relative !important;
+    padding-bottom: 2.95rem !important;
 }
 
 .resort-location {
     display: inline-flex !important;
     align-items: center !important;
     margin-top: 0 !important;
-    margin-bottom: 0 !important;
+    margin-bottom: 1.15rem !important;
     padding: 0.16rem 0.5rem !important;
     border-radius: 8px !important;
     background: rgba(8, 16, 30, 0.46) !important;
@@ -4564,7 +4565,7 @@
     position: absolute !important;
     left: 1.05rem !important;
     right: 1.05rem !important;
-    bottom: 0.5rem !important;
+    bottom: 0.34rem !important;
     margin: 0 !important;
     display: flex !important;
     flex-wrap: nowrap !important;
@@ -4585,15 +4586,20 @@
 }
 
 @media (max-width: 768px) {
+    .resort-header {
+        padding-bottom: 2.75rem !important;
+    }
+
     .resort-location {
         font-size: 0.8rem !important;
         padding: 0.15rem 0.44rem !important;
+        margin-bottom: 1.02rem !important;
     }
 
     .status-chips {
         left: 0.9rem !important;
         right: 0.9rem !important;
-        bottom: 0.44rem !important;
+        bottom: 0.32rem !important;
         gap: 0.28rem !important;
     }
 }

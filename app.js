@@ -764,6 +764,7 @@
         const SENDIT_TEST_UNLOCKED_RESORTS = new Set(['mont-sutton']);
         const sendItButtonCopyByResort = {};
         const sendItVerifyFlavorByResort = {};
+        const sendItStateLabelByResort = {};
         const SENDIT_TEST_UNLIMITED_RESORTS = new Set(['mont-sutton']);
         const DEFAULT_LIFT_CLOSE_HOUR = 16;
         const NIGHT_SKI_CLOSE_HOURS = {
@@ -782,9 +783,9 @@
             'jiminy-peak': { weekday: 21, weekend: 22 }
         };
 
-        const SENDIT_LOW_OPTIONS = ['Sharpen Edges'];
-        const SENDIT_MID_OPTIONS = ['Good Laps'];
-        const SENDIT_HIGH_OPTIONS = ['Full Send'];
+        const SENDIT_LOW_OPTIONS = ['Sharpen Edges', 'Edge Tune', 'Low Tide'];
+        const SENDIT_MID_OPTIONS = ['Good Laps', 'Hot Laps', 'Prime Time'];
+        const SENDIT_HIGH_OPTIONS = ['Full Send', 'Warp Speed', 'Full Tilt'];
         const SENDIT_CROWD_OPTIONS = [
             { key: 'quiet', label: 'Quiet' },
             { key: 'normal', label: 'Normal' },
@@ -834,12 +835,29 @@
             return options[Math.floor(Math.random() * options.length)];
         }
 
+        function getSendItTierOptions(tier) {
+            if (tier === 'low') return SENDIT_LOW_OPTIONS;
+            if (tier === 'mid') return SENDIT_MID_OPTIONS;
+            return SENDIT_HIGH_OPTIONS;
+        }
+
+        function getSendItStateLabelForResort(resortId, tier) {
+            const key = resortId || 'global';
+            if (!sendItStateLabelByResort[key]) {
+                sendItStateLabelByResort[key] = {};
+            }
+            if (!sendItStateLabelByResort[key][tier]) {
+                sendItStateLabelByResort[key][tier] = pickRandomLabel(getSendItTierOptions(tier));
+            }
+            return sendItStateLabelByResort[key][tier];
+        }
+
         function getSendItButtonCopy(resortId) {
             if (!sendItButtonCopyByResort[resortId]) {
                 sendItButtonCopyByResort[resortId] = {
-                    low: pickRandomLabel(SENDIT_LOW_OPTIONS),
-                    mid: pickRandomLabel(SENDIT_MID_OPTIONS),
-                    high: pickRandomLabel(SENDIT_HIGH_OPTIONS)
+                    low: getSendItStateLabelForResort(resortId, 'low'),
+                    mid: getSendItStateLabelForResort(resortId, 'mid'),
+                    high: getSendItStateLabelForResort(resortId, 'high')
                 };
             }
             return sendItButtonCopyByResort[resortId];
@@ -1042,17 +1060,17 @@
             }
         }
 
-        function getSendItState(scoreValue) {
+        function getSendItState(scoreValue, resortId) {
             if (!Number.isFinite(scoreValue)) {
                 return { label: 'First Chair', className: '' };
             }
             if (scoreValue >= 70) {
-                return { label: 'Full Send', className: 'hot' };
+                return { label: getSendItStateLabelForResort(resortId, 'high'), className: 'hot' };
             }
             if (scoreValue >= 45) {
-                return { label: 'Good Laps', className: 'mid' };
+                return { label: getSendItStateLabelForResort(resortId, 'mid'), className: 'mid' };
             }
-            return { label: 'Sharpen Edges', className: 'cold' };
+            return { label: getSendItStateLabelForResort(resortId, 'low'), className: 'cold' };
         }
 
         function isUnlimitedSendItTestResort(resortId) {
@@ -1067,6 +1085,62 @@
                 return `No fresh votes in the last hour • ${votesTotal} total`;
             }
             return '';
+        }
+
+        function getSlopeSignalPayoffPhrase(resortId, crowdMode, windMode, slopeState) {
+            const safeResortId = resortId || 'global';
+            const hasLiveModes = isValidSendItCrowd(crowdMode) || isValidSendItWind(windMode);
+            if (!hasLiveModes) return 'First Chair';
+
+            const crowd = isValidSendItCrowd(crowdMode) ? crowdMode : SENDIT_DEFAULT_SIGNALS.crowd;
+            const wind = isValidSendItWind(windMode) ? windMode : SENDIT_DEFAULT_SIGNALS.wind;
+            const slope = (slopeState || '').toLowerCase();
+
+            let bucket = 'mid';
+            if (slope.includes('full') || slope.includes('warp') || slope.includes('tilt')) {
+                bucket = 'high';
+            } else if (slope.includes('sharpen') || slope.includes('edge') || slope.includes('tide')) {
+                bucket = 'low';
+            }
+
+            const phrasePool = {
+                high: [
+                    'All-Time Window',
+                    'Send Window Open',
+                    'Hammer Time',
+                    'Lifts Spinning, Legs Burning',
+                    'Fast Laps, Good Vibes'
+                ],
+                mid: [
+                    'Sweet Spot',
+                    'Prime Laps',
+                    'Green Light',
+                    'Good Turns Ahead',
+                    'Find Your Line'
+                ],
+                low: [
+                    'Technical Day',
+                    'Dial It In',
+                    'Sharp Edges, Clean Turns',
+                    'Work For Your Turns',
+                    'Steeze Through It'
+                ]
+            };
+
+            const modifiers = [];
+            if (crowd === 'swarm') modifiers.push('Crowded');
+            if (crowd === 'quiet') modifiers.push('Wide Open');
+            if (wind === 'nuking') modifiers.push('Windy');
+            if (wind === 'calm') modifiers.push('Calm Air');
+
+            const seedBase = `${safeResortId}:${crowd}:${wind}:${bucket}`;
+            let hash = 0;
+            for (let i = 0; i < seedBase.length; i++) {
+                hash = ((hash << 5) - hash) + seedBase.charCodeAt(i);
+                hash |= 0;
+            }
+            const basePhrase = phrasePool[bucket][Math.abs(hash) % phrasePool[bucket].length];
+            return modifiers.length ? `${basePhrase} • ${modifiers.join(' / ')}` : basePhrase;
         }
 
         function haversineMiles(lat1, lon1, lat2, lon2) {
@@ -1380,7 +1454,7 @@
             const sendItScoreClass = sendItScoreValue === null
                 ? ''
                 : (sendItScoreValue >= 70 ? 'hot' : (sendItScoreValue >= 45 ? 'mid' : 'cold'));
-            const sendItState = getSendItState(sendItScoreValue);
+            const sendItState = getSendItState(sendItScoreValue, resort.id);
             const sendItSocialLine = getSendItSocialLine(sendItVotesLastHour, sendItVotes);
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
@@ -1389,9 +1463,9 @@
             const liveWindMode = isValidSendItWind(sendIt.windMode) ? sendIt.windMode : null;
             const liveSlopeLabel = sendItState.label;
             const signalSummaryLine = `Crowd: ${getSendItCrowdLabel(liveCrowdMode || SENDIT_DEFAULT_SIGNALS.crowd)} • Wind: ${getSendItWindLabel(liveWindMode || SENDIT_DEFAULT_SIGNALS.wind)} • Slope: ${liveSlopeLabel}`;
-            const sendItSubtitlePrimary = `Live Signal: ${liveSlopeLabel}`;
-            const sendItSubtitleSecondary = canVote ? 'Set Crowd + Wind, then hit your Slope call.' : 'Verify once to unlock local voting.';
-            const sendItPrompt = canVote ? `<div class="sendit-prompt">Crowd • Wind • Slope</div>` : '';
+            const sendItSubtitlePrimary = getSlopeSignalPayoffPhrase(resort.id, liveCrowdMode, liveWindMode, liveSlopeLabel);
+            const sendItSubtitleSecondary = canVote ? '' : 'Verify once to unlock local voting.';
+            const sendItPrompt = '';
             const sendItControls = !hasCoords ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>` : canVote
                 ? `<div class="sendit-signal-group">
                         <div class="sendit-signal-row">
@@ -1635,10 +1709,10 @@ const backgroundSizeByResort = {
                       ${sendItSubtitleSecondary ? `<span class="sendit-subtitle-flavor">${sendItSubtitleSecondary}</span>` : ''}
                     </div>
                   </div>
-                  <div class="sendit-result">${signalSummaryLine}</div>
                   ${sendItPrompt}
                   ${sendItControls}
-                  ${canVote ? `<div class="sendit-locked-note">Verified nearby. Local-only voting unlocked.</div>` : ''}
+                  ${canVote ? `<div class="sendit-locked-note">Set crowd + wind then send your slope signal</div>` : ''}
+                  <div class="sendit-result">${signalSummaryLine}</div>
                 </div>
 
                 <div class="rating-section">
