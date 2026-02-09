@@ -774,46 +774,9 @@
             'jiminy-peak': { weekday: 21, weekend: 22 }
         };
 
-        const SENDIT_LOW_OPTIONS = [
-            'Yard Sale',
-            'Core Shot Day',
-            'Lap And Laugh',
-            'Edge Tune Energy',
-            'Sharpen Your Edges',
-            'Steel Edges Today',
-            'Boilerplate Ballet',
-            'Firm And Fast'
-        ];
-
-        const SENDIT_MID_OPTIONS = [
-            'Type 2 Fun',
-            'Soft Send',
-            'Send-ish',
-            'Firm But Fun',
-            'Edge It Out',
-            'Still Worth It',
-            'Mid Stoke',
-            'Ski It Anyway'
-        ];
-
-        const SENDIT_HIGH_OPTIONS = [
-            'Full Send',
-            'Drop In',
-            'All Gas',
-            'Top To Bottom',
-            'No Friends Day',
-            'Laps On Laps',
-            'Nuking Vibes',
-            'Ride Till Last Chair',
-            'Hammer Laps',
-            'Legends Only',
-            'Point Em Downhill',
-            'Send Train',
-            'Straight Filth',
-            'Air It Out',
-            'Maximum Stoke',
-            'Zero Hesitation'
-        ];
+        const SENDIT_LOW_OPTIONS = ['Sharpen Edges'];
+        const SENDIT_MID_OPTIONS = ['Good Laps'];
+        const SENDIT_HIGH_OPTIONS = ['Full Send'];
         const SENDIT_COOLDOWN_OPTIONS = [
             'Easy, legend. icecoast patrol says wait {minutes}m before your next call.',
             'You already dropped your vote. Take a hot-lap and check back in {minutes}m.',
@@ -1030,7 +993,7 @@
                 return { label: 'Full Send', className: 'hot' };
             }
             if (scoreValue >= 45) {
-                return { label: 'Could Be Worse', className: 'mid' };
+                return { label: 'Good Laps', className: 'mid' };
             }
             return { label: 'Sharpen Edges', className: 'cold' };
         }
@@ -1338,12 +1301,6 @@
                 ? ''
                 : (sendItScoreValue >= 70 ? 'hot' : (sendItScoreValue >= 45 ? 'mid' : 'cold'));
             const sendItState = getSendItState(sendItScoreValue);
-            const sendItScoreRounded = Number.isFinite(sendItScoreValue)
-                ? Math.round(sendItScoreValue)
-                : null;
-            const sendItScoreMarkup = sendItScoreRounded === null
-                ? '<span class="sendit-score-empty">—</span>'
-                : `<span class="sendit-score-number">${sendItScoreRounded}</span><span class="sendit-score-unit">%</span>`;
             const sendItSocialLine = getSendItSocialLine(sendItVotesLastHour, sendItVotes);
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
@@ -1402,19 +1359,8 @@
             const metricsFeelsLike = `${metricsFeelsLikeBase}${feelsLikeWarning}`;
             const metricsWind = weather.wind ?? '—';
             const signalLead = sendItSubtitlePrimary;
-            const sendItGaugeBlock = canVote
+            const sendItStatusBlock = canVote
                 ? `<div class="sendit-result ${sendItState.className || sendItScoreClass}">${sendItState.label}</div>
-                   <div class="sendit-scoreboard ${sendItState.className || sendItScoreClass}" style="--sendit-score:${sendItScoreValue === null ? 0 : Math.max(0, Math.min(100, Math.round(sendItScoreValue)))}" aria-label="Slope Signal score">
-                     <div class="sendit-gauge" aria-hidden="true">
-                       <span class="sendit-gauge-pointer"></span>
-                     </div>
-                     <div class="sendit-scale-labels">
-                       <span class="sendit-scale-low">Low Tide</span>
-                       <span class="sendit-scale-mid">Send-ish</span>
-                       <span class="sendit-scale-high">Full Send</span>
-                     </div>
-                     <span class="sendit-score-value">${sendItScoreMarkup}</span>
-                   </div>
                    ${sendItSocialLine ? `<div class="sendit-social-proof">${sendItSocialLine}</div>` : ''}`
                 : '';
 
@@ -1583,7 +1529,7 @@ const backgroundSizeByResort = {
                       ${sendItSubtitleSecondary ? `<span class="sendit-subtitle-flavor">${sendItSubtitleSecondary}</span>` : ''}
                     </div>
                   </div>
-                  ${sendItGaugeBlock}
+                  ${sendItStatusBlock}
                   ${sendItPrompt}
                   ${sendItControls}
                   ${canVote ? `<div class="sendit-locked-note">Verified nearby. Local-only voting (${formatMiles(requiredMiles)} mi geofence).</div>` : ''}
