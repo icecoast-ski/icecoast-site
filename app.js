@@ -1356,17 +1356,10 @@
             `;
 
             // POWDER / FRESH badges safely
-            const isPowder = resort.conditions === 'Powder';
-            const isPackedPowder = resort.conditions === 'Packed Powder';
             const hasSignificantSnow = parseInt(resort.snowfall24h || '0', 10) >= 6;
             let snowBadge = '';
-            if (isPowder || isPackedPowder || hasSignificantSnow) {
-                const label = isPowder
-                    ? 'POWDER DAY'
-                    : isPackedPowder
-                    ? 'PACKED POWDER'
-                    : 'FRESH POW';
-                snowBadge = `<div class="snow-alert-badge">${resort.snowfall24h || 0}″ ${label}</div>`;
+            if (hasSignificantSnow) {
+                snowBadge = `<div class="snow-alert-badge">${resort.snowfall24h || 0}″ FRESH POW</div>`;
             }
 
             // Unique resort art is now one file per resort id in /v2/resort-art.
