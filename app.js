@@ -1487,7 +1487,7 @@ const backgroundSizeByResort = {
                   <div class="sendit-header">
                     <div class="sendit-title-pill">
                       <span class="sendit-live-dot"></span>
-                      <div class="rating-label sendit-title">SLOPE SIGNAL</div>
+                      <div class="sendit-title">SLOPE SIGNAL</div>
                     </div>
                     <div class="sendit-subline">
                       <span class="sendit-subtitle">${sendItSubtitlePrimary}</span>

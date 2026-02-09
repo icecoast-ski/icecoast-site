@@ -1073,6 +1073,8 @@
                 inset 0 1px 0 rgba(255, 235, 208, 0.35),
                 inset 0 -1px 0 rgba(64, 38, 20, 0.45);
             position: relative;
+            width: fit-content;
+            max-width: 100%;
         }
 
         .sendit-title-pill::before,
@@ -1108,6 +1110,7 @@
             gap: 0.38rem;
             flex-wrap: wrap;
             margin: 0;
+            line-height: 1;
         }
 
         .icecoast-title {
