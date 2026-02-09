@@ -1987,6 +1987,10 @@
             letter-spacing: 0.55px;
             box-shadow: 0 2px 8px rgba(0, 166, 153, 0.3);
             animation: pulse 2s ease-in-out infinite;
+            position: absolute;
+            top: 0.65rem;
+            right: 0.65rem;
+            z-index: 4;
         }
 
         .live-data-badge {
@@ -2939,6 +2943,8 @@
             .snow-alert-badge {
                 font-size: 0.66rem;
                 padding: 0.275rem 0.495rem;
+                top: 0.5rem;
+                right: 0.5rem;
             }
 
             .live-data-badge {
