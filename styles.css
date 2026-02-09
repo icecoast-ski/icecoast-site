@@ -3634,6 +3634,42 @@
     flex-direction: row;
 }
 
+.forecast-inline {
+    margin-top: 0.62rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+    padding-top: 0.56rem;
+}
+
+.forecast-inline-toggle {
+    padding: 0.2rem 0;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.72rem;
+    color: #334155;
+    list-style: none;
+    user-select: none;
+}
+
+.forecast-inline-toggle::-webkit-details-marker {
+    display: none;
+}
+
+.resort-section-divider {
+    height: 1px;
+    background: rgba(15, 23, 42, 0.08);
+    margin: 0.76rem 0 0.72rem;
+}
+
+.mountain-ops-section {
+    margin-bottom: 0.9rem;
+    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
+    padding: 0.85rem;
+}
+
 .conditions-source {
     font-size: 0.74rem;
     color: #5a6a82;
