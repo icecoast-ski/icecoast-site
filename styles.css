@@ -2043,13 +2043,13 @@
             align-items: center;
             gap: 0.25rem;
             padding: 0.2rem 0.45rem;
-            background: rgba(16, 185, 129, 0.95);
+            background: #15803d;
             border-radius: 3px;
             font-size: 0.55rem;
             font-weight: 700;
-            color: white;
-            border: 1px solid rgba(16, 185, 129, 1);
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+            color: #f0fdf4;
+            border: 1px solid #166534;
+            box-shadow: 0 2px 8px rgba(21, 128, 61, 0.28);
             vertical-align: middle;
             margin-left: 0.5rem;
         }
@@ -4200,7 +4200,6 @@
 
 .sendit-title,
 .icecoast-title,
-.info-label,
 .distance-title,
 .forecast-inline-toggle,
 .mountain-ops-section .lift-toggle {
@@ -4241,6 +4240,33 @@
 
 .sendit-subtitle-flavor {
     opacity: 0.9;
+}
+
+/* Mountain Ops typography should mirror Current Conditions metrics */
+.mountain-ops-section .info-label,
+.mountain-ops-section .lift-toggle-left {
+    font-size: 0.76rem;
+    font-weight: 650;
+    color: #34435a;
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.mountain-ops-section .info-value,
+.mountain-ops-section .ticket-price,
+.mountain-ops-section .lift-toggle-counts {
+    font-size: 0.82rem;
+    font-weight: 800;
+    color: #162234;
+    letter-spacing: 0.01em;
+    text-transform: none;
+}
+
+.mountain-ops-section .trail-badge {
+    font-size: 0.82rem;
+    font-weight: 800;
+    letter-spacing: 0.01em;
+    text-transform: none;
 }
 
 .sendit-subtitle,
