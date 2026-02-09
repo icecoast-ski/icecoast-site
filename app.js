@@ -867,7 +867,7 @@
                 sendItVerifyFlavorByResort[resortId] = pickRandomLabel(SENDIT_VERIFY_TAGLINES);
             }
             return {
-                primary: 'Verify location to vote on real-time conditions',
+                primary: 'Verify once to unlock local voting.',
                 secondary: sendItVerifyFlavorByResort[resortId]
             };
         }
@@ -1313,6 +1313,7 @@
             const patrolUpdatedLabel = hasFreshPatrol
                 ? formatUpdateLabel(resort.patrolUpdatedAt, 'Patrol Updated')
                 : '';
+            const heroUpdatedText = hasFreshPatrol ? patrolUpdatedLabel : 'Patrol update pending';
             const sendItButtonCopy = getSendItButtonCopy(resort.id);
             const requiredMiles = getSendItRadiusMilesForResort(resort.id);
             const sendItVotes = Number.isFinite(sendIt.votes) ? sendIt.votes : 0;
@@ -1322,7 +1323,6 @@
                 ? ''
                 : (sendItScoreValue >= 70 ? 'hot' : (sendItScoreValue >= 45 ? 'mid' : 'cold'));
             const sendItState = getSendItState(sendItScoreValue);
-            const sendItVotesText = `${sendItVotes} vote${sendItVotes === 1 ? '' : 's'}`;
             const sendItScoreRounded = Number.isFinite(sendItScoreValue)
                 ? Math.round(sendItScoreValue)
                 : null;
@@ -1333,27 +1333,61 @@
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
             const verifySubtitle = getSendItVerifySubtitleParts(resort.id);
-            const sendItSubtitlePrimary = canVote ? 'Vote current conditions now' : verifySubtitle.primary;
-            const sendItSubtitleSecondary = canVote ? '' : verifySubtitle.secondary;
+            const sendItSubtitlePrimary = canVote ? 'Drop your local call.' : verifySubtitle.primary;
+            const sendItSubtitleSecondary = canVote ? 'Tap a lane below.' : verifySubtitle.secondary;
             const sendItPrompt = canVote ? `<div class="sendit-prompt">Tap your call</div>` : '';
-            const sendItControls = !hasCoords
-                ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>`
-                : canVote
-                    ? `<div class="sendit-vote-row">
+            const sendItControls = !hasCoords ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>` : canVote
+                ? `<div class="sendit-vote-row">
                         <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="20">${sendItButtonCopy.low}</button>
                         <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="60">${sendItButtonCopy.mid}</button>
                         <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="100">${sendItButtonCopy.high}</button>
-                      </div>
-                      <div class="sendit-locked-note">Verified nearby. Local-only voting (${formatMiles(requiredMiles)} mi geofence).</div>`
-                    : `<button class="sendit-unlock-btn sendit-unlock-cta" data-sendit-action="unlock" data-resort-id="${resort.id}">⚡ Verify You're On-Mountain</button>
-                       <div class="sendit-locked-note">One-time check to unlock local voting.</div>`;
-            const dataBadges = `
-                <div class="data-provenance-row">
-                  ${hasLiveWeather ? '<span class="data-provenance-badge live-weather">Live Weather</span>' : ''}
-                  ${hasLiveLifts ? '<span class="data-provenance-badge live-lifts">Live Lifts</span>' : ''}
-                  ${hasFreshPatrol ? `<span class="data-provenance-badge updated">${patrolUpdatedLabel}</span>` : ''}
-                </div>
-            `;
+                      </div>`
+                : `<button class="sendit-unlock-btn sendit-unlock-cta" data-sendit-action="unlock" data-resort-id="${resort.id}">⚡ Verify You're On-Mountain</button>
+                   <div class="sendit-locked-note">One-time check to unlock local voting.</div>`;
+
+            const heroChips = [];
+            if (hasLiveWeather) heroChips.push({ cls: 'chip-good', label: 'Live Weather' });
+            if (hasLiveLifts) heroChips.push({ cls: 'chip-neutral', label: 'Live Lifts' });
+            if (resort.glades > 0) {
+                heroChips.push({
+                    cls: 'chip-neutral',
+                    label: glades >= 3 ? '🌲🌲🌲 Elite Glades' : glades === 2 ? '🌲🌲 Excellent Glades' : '🌲 Some Glades'
+                });
+            } else if (resort.familyOwned) {
+                heroChips.push({ cls: 'chip-neutral', label: 'Family-Owned' });
+            }
+            const heroChipMarkup = heroChips.slice(0, 3)
+                .map((chip) => `<span class="status-chip ${chip.cls}">${chip.label}</span>`)
+                .join('');
+
+            const confidenceSources = [];
+            if (hasFreshPatrol) confidenceSources.push('Patrol');
+            if (hasLiveWeather) confidenceSources.push('Weather');
+            if (hasLiveLifts) confidenceSources.push('Lifts');
+            if (sendItVotes > 0) confidenceSources.push('Locals');
+            const confidenceLevel = confidenceSources.length >= 3 ? 'High' : (confidenceSources.length === 2 ? 'Medium' : 'Basic');
+            const confidenceClass = confidenceLevel === 'High' ? 'confidence-high' : (confidenceLevel === 'Medium' ? 'confidence-mid' : 'confidence-low');
+            const confidenceSourceText = confidenceSources.length ? confidenceSources.join(' + ') : 'Manual patrol-only';
+            const metrics24h = parseInt(resort.snowfall24h || 0, 10);
+            const metricsBase = parseInt(resort.snowfall7d || 0, 10);
+            const metricsTemp = weather.tempF ?? (typeof weather.temp === 'number' ? `${weather.temp}°` : '—');
+            const metricsWind = weather.wind ?? '—';
+            const signalLead = canVote ? 'Locals on-mountain are calling it.' : 'Verify once to unlock local voting.';
+            const sendItGaugeBlock = canVote
+                ? `<div class="sendit-result ${sendItState.className || sendItScoreClass}">${sendItState.label}</div>
+                   <div class="sendit-scoreboard ${sendItState.className || sendItScoreClass}" style="--sendit-score:${sendItScoreValue === null ? 0 : Math.max(0, Math.min(100, Math.round(sendItScoreValue)))}" aria-label="Slope Signal score">
+                     <div class="sendit-gauge" aria-hidden="true">
+                       <span class="sendit-gauge-pointer"></span>
+                     </div>
+                     <div class="sendit-scale-labels">
+                       <span class="sendit-scale-low">Low Tide</span>
+                       <span class="sendit-scale-mid">Send-ish</span>
+                       <span class="sendit-scale-high">Full Send</span>
+                     </div>
+                     <span class="sendit-score-value">${sendItScoreMarkup}</span>
+                   </div>
+                   ${sendItSocialLine ? `<div class="sendit-social-proof">${sendItSocialLine}</div>` : ''}`
+                : '';
 
             // POWDER / FRESH badges safely
             const hasSignificantSnow = parseInt(resort.snowfall24h || '0', 10) >= 6;
@@ -1452,35 +1486,33 @@ const backgroundSizeByResort = {
             return `
             <div class="resort-card" data-region="${resort.region}" data-resort="${resort.id}">
               <div class="resort-header" style="--bg: url('resort-art/${backgroundImageFile}'); --bg-pos: ${backgroundPos}; --bg-size: ${backgroundSize};">
-                ${resort.familyOwned ? `<div class="family-badge">Family-Owned</div>` : ''}
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;">
                   <div style="flex:1;">
                     <h2 class="resort-name">
                       <span class="resort-name-text">${resort.name}</span>
                     </h2>
                     <p class="resort-location">${resort.location}</p>
-                    ${dataBadges}
-                    ${resort.glades > 0 ? `
-                      <div class="glade-indicator">
-                        <span class="glade-trees">${'🌲'.repeat(Math.min(glades, 3))}</span>
-                        <span class="glade-label">
-                          ${glades >= 3 ? 'Elite Glades' : glades === 2 ? 'Excellent Glades' : 'Some Glades'}
-                        </span>
-                      </div>` : ''}
+                    <p class="resort-updated">${heroUpdatedText}</p>
+                    ${heroChipMarkup ? `<div class="status-chips">${heroChipMarkup}</div>` : ''}
                   </div>
                 </div>
                 ${snowBadge}
               </div>
 
               <div class="resort-body">
-                <div class="rating-section">
-                  <div>
-                    <div class="rating-label icecoast-title">Icecoast Rating</div>
-                    <div class="rating-stars">${stars}</div>
+                <div class="conditions-highlight">
+                  <div class="conditions-top">
+                    <div class="conditions-label">Current Conditions</div>
+                    <div class="conditions-confidence ${confidenceClass}">${confidenceLevel} confidence</div>
                   </div>
-                  <div class="rating-text">
-                    ${getRatingText(resort.rating, resort.snowfall24h, resort)}
+                  <div class="conditions-value">${resort.conditions || 'Unknown'}</div>
+                  <div class="conditions-metrics">
+                    <span>24h Snow <strong>${metrics24h}"</strong></span>
+                    <span>7d Snow <strong>${metricsBase}"</strong></span>
+                    <span>Temp <strong>${metricsTemp}</strong></span>
+                    <span>Wind <strong>${metricsWind}</strong></span>
                   </div>
+                  <div class="conditions-source">${confidenceSourceText}</div>
                 </div>
 
                 <div class="sendit-section">
@@ -1490,30 +1522,24 @@ const backgroundSizeByResort = {
                       <div class="sendit-title">SLOPE SIGNAL</div>
                     </div>
                     <div class="sendit-subline">
-                      <span class="sendit-subtitle">${sendItSubtitlePrimary}</span>
+                      <span class="sendit-subtitle">${signalLead}</span>
                       ${sendItSubtitleSecondary ? `<span class="sendit-subtitle-flavor">${sendItSubtitleSecondary}</span>` : ''}
                     </div>
-                    <div class="sendit-result ${sendItState.className || sendItScoreClass}">${sendItState.label}</div>
                   </div>
-                  <div class="sendit-scoreboard ${sendItState.className || sendItScoreClass}" style="--sendit-score:${sendItScoreValue === null ? 0 : Math.max(0, Math.min(100, Math.round(sendItScoreValue)))}" aria-label="Full Send score">
-                    <div class="sendit-gauge" aria-hidden="true">
-                      <span class="sendit-gauge-pointer"></span>
-                    </div>
-                    <div class="sendit-scale-labels">
-                      <span class="sendit-scale-low">Low Tide</span>
-                      <span class="sendit-scale-mid">Send-ish</span>
-                      <span class="sendit-scale-high">Full Send</span>
-                    </div>
-                    <span class="sendit-score-value">${sendItScoreMarkup}</span>
-                  </div>
-                  ${sendItSocialLine ? `<div class="sendit-social-proof">${sendItSocialLine}</div>` : ''}
+                  ${sendItGaugeBlock}
                   ${sendItPrompt}
                   ${sendItControls}
+                  ${canVote ? `<div class="sendit-locked-note">Verified nearby. Local-only voting (${formatMiles(requiredMiles)} mi geofence).</div>` : ''}
                 </div>
 
-                <div class="conditions-highlight">
-                  <div class="conditions-label">Current Conditions</div>
-                  <div class="conditions-value">${resort.conditions || 'Unknown'}</div>
+                <div class="rating-section">
+                  <div>
+                    <div class="rating-label icecoast-title">Icecoast Rating</div>
+                    <div class="rating-stars">${stars}</div>
+                  </div>
+                  <div class="rating-text">
+                    ${getRatingText(resort.rating, resort.snowfall24h, resort)}
+                  </div>
                 </div>
 
                 <div class="info-grid">
