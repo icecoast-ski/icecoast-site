@@ -959,6 +959,17 @@
             return `Last Updated ${time}`;
         }
 
+        function formatUpdateLabel(iso, prefix) {
+            if (!iso) return `${prefix} —`;
+            const dt = new Date(iso);
+            if (Number.isNaN(dt.getTime())) return `${prefix} —`;
+            const time = dt.toLocaleTimeString('en-US', {
+                hour: 'numeric',
+                minute: '2-digit'
+            });
+            return `${prefix} ${time}`;
+        }
+
         function isRecentIso(iso, maxHours = 24) {
             if (!iso) return false;
             const ts = Date.parse(iso);
@@ -1287,8 +1298,14 @@
             const sendIt = sendItSummaryByResort[resort.id] || {};
             const showLiftMoon = isAfterLiftClose(resort.id);
             const hasFreshPatrol = resort.hasPatrolUpdate && isRecentIso(resort.patrolUpdatedAt, 24);
-            const liveUpdatedLabel = resort.hasLiveUpdate ? formatSnapshotBadge(snapshotLastUpdatedIso) : '';
-            const patrolUpdatedLabel = hasFreshPatrol ? formatSnapshotBadge(resort.patrolUpdatedAt) : '';
+            const hasLiveWeather = !!resort.hasLiveWeather;
+            const hasLiveLifts = !!resort.hasLiveLifts;
+            const liveUpdatedLabel = (hasLiveWeather || hasLiveLifts)
+                ? formatUpdateLabel(snapshotLastUpdatedIso, 'Live Updated')
+                : '';
+            const patrolUpdatedLabel = hasFreshPatrol
+                ? formatUpdateLabel(resort.patrolUpdatedAt, 'Condition Updated')
+                : '';
             const sendItButtonCopy = getSendItButtonCopy(resort.id);
             const requiredMiles = getSendItRadiusMilesForResort(resort.id);
             const sendItVotes = Number.isFinite(sendIt.votes) ? sendIt.votes : 0;
@@ -1325,11 +1342,12 @@
                        <div class="sendit-locked-note">Only users within ${formatMiles(requiredMiles)} miles can vote.</div>`;
             const dataBadges = `
                 <div class="data-provenance-row">
-                  ${resort.hasLiveUpdate ? '<span class="data-provenance-badge live">Live</span>' : ''}
-                  ${hasFreshPatrol ? '<span class="data-provenance-badge patrol">Patrol Updated</span>' : ''}
+                  ${hasLiveWeather ? '<span class="data-provenance-badge live-weather">Live Weather</span>' : ''}
+                  ${hasLiveLifts ? '<span class="data-provenance-badge live-lifts">Live Lifts</span>' : ''}
+                  ${hasFreshPatrol ? '<span class="data-provenance-badge patrol">Condition Report</span>' : ''}
                   ${hasFreshPatrol
                       ? `<span class="data-provenance-badge updated">${patrolUpdatedLabel}</span>`
-                      : (resort.hasLiveUpdate ? `<span class="data-provenance-badge updated">${liveUpdatedLabel}</span>` : '')}
+                      : ((hasLiveWeather || hasLiveLifts) ? `<span class="data-provenance-badge updated">${liveUpdatedLabel}</span>` : '')}
                 </div>
             `;
 
@@ -1976,6 +1994,8 @@ const backgroundSizeByResort = {
                 let liftUpdatedCount = 0;
                 resorts.forEach((resort) => {
                     resort.hasLiveUpdate = false;
+                    resort.hasLiveWeather = false;
+                    resort.hasLiveLifts = false;
                 });
 
                 resorts.forEach(resort => {
@@ -1997,6 +2017,7 @@ const backgroundSizeByResort = {
                         };
                         weatherUpdatedCount++;
                         resort.hasLiveUpdate = true;
+                        resort.hasLiveWeather = true;
                     }
 
                     // ── Forecast (OpenWeather) ──
@@ -2024,6 +2045,7 @@ const backgroundSizeByResort = {
                         resort.hasLiftie = true;
                         liftUpdatedCount++;
                         resort.hasLiveUpdate = true;
+                        resort.hasLiveLifts = true;
 
                         // Store individual lift details for the dropdown
                         if (live.lifts.details) {
