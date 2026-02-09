@@ -3,7 +3,7 @@
  * Generated from admin.html
  */
 window.MANUAL_RESORT_OVERRIDES_META = {
-  "updatedAt": "2026-02-09T01:41:32.768Z"
+  "updatedAt": "2026-02-09T04:49:09.194Z"
 };
 window.MANUAL_RESORT_OVERRIDES = {
   "blue-mountain": {
@@ -331,5 +331,269 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 11
     }
+  },
+  "belleayre": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 3,
+    "liftTicket": {
+      "weekday": "$65+",
+      "weekend": "$107+"
+    },
+    "parking": "Free",
+    "dynamicPricing": true,
+    "trails": {
+      "open": 62
+    },
+    "lifts": {
+      "total": 8
+    },
+    "snowfall7d": 2,
+    "_patrolUpdatedAt": "2026-02-09T04:31:43.436Z"
+  },
+  "brettonwoods": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 4,
+    "liftTicket": {
+      "weekday": "$99+",
+      "weekend": "$149"
+    },
+    "dynamicPricing": true,
+    "trails": {
+      "open": 63
+    },
+    "lifts": {
+      "total": 10
+    },
+    "snowfall24h": 0,
+    "_patrolUpdatedAt": "2026-02-09T04:28:39.593Z"
+  },
+  "burke": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 4,
+    "liftTicket": {
+      "weekday": "$25+",
+      "weekend": "$89+"
+    },
+    "parking": "Free",
+    "dynamicPricing": true,
+    "trails": {
+      "open": 54
+    },
+    "lifts": {
+      "total": 5
+    },
+    "snowfall24h": 3,
+    "snowfall48h": 4,
+    "snowfall7d": 8,
+    "_patrolUpdatedAt": "2026-02-09T04:18:36.013Z"
+  },
+  "cannon": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 4,
+    "liftTicket": {
+      "weekday": "$99",
+      "weekend": "$114"
+    },
+    "parking": "Free",
+    "dynamicPricing": false,
+    "trails": {
+      "open": 97
+    },
+    "lifts": {
+      "total": 10
+    },
+    "snowfall48h": 6,
+    "_patrolUpdatedAt": "2026-02-09T04:21:48.189Z"
+  },
+  "jiminy-peak": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 4,
+    "liftTicket": {
+      "weekday": "$114",
+      "weekend": "$124"
+    },
+    "dynamicPricing": false,
+    "trails": {
+      "open": 39
+    },
+    "lifts": {
+      "total": 9
+    },
+    "snowfall24h": 3,
+    "_patrolUpdatedAt": "2026-02-09T04:33:37.524Z"
+  },
+  "le-massif": {
+    "conditions": "Packed Powder",
+    "icecoastRating": 4,
+    "liftTicket": {
+      "weekday": "$110",
+      "weekend": "$110"
+    },
+    "parking": "Free",
+    "dynamicPricing": false,
+    "trails": {
+      "open": 53
+    },
+    "lifts": {
+      "total": 7
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 0,
+    "snowfall7d": 2,
+    "_patrolUpdatedAt": "2026-02-09T04:46:17.651Z"
+  },
+  "mad-river-glen": {
+    "conditions": "Packed Powder",
+    "icecoastRating": 4,
+    "liftTicket": {
+      "weekday": "$94+",
+      "weekend": "$111"
+    },
+    "parking": "Free",
+    "dynamicPricing": true,
+    "trails": {
+      "open": 60
+    },
+    "lifts": {
+      "total": 5
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-09T04:14:58.357Z"
+  },
+  "mont-sutton": {
+    "conditions": "Powder",
+    "icecoastRating": 5,
+    "liftTicket": {
+      "weekday": "$51+",
+      "weekend": "$51+"
+    },
+    "parking": "Free",
+    "dynamicPricing": true,
+    "trails": {
+      "open": 60
+    },
+    "lifts": {
+      "total": 9
+    },
+    "snowfall24h": 5,
+    "snowfall48h": 6,
+    "snowfall7d": 10,
+    "_patrolUpdatedAt": "2026-02-09T04:49:09.194Z"
+  },
+  "mont-sainte-anne": {
+    "conditions": "Packed Powder",
+    "liftTicket": {
+      "weekday": "$145",
+      "weekend": "$155"
+    },
+    "parking": "Free",
+    "dynamicPricing": false,
+    "trails": {
+      "open": 61
+    },
+    "lifts": {
+      "total": 11
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 0,
+    "snowfall7d": 0,
+    "_patrolUpdatedAt": "2026-02-09T04:42:01.202Z"
+  },
+  "pico": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 4,
+    "liftTicket": {
+      "weekday": "$64+",
+      "weekend": "$103+"
+    },
+    "parking": "Free",
+    "dynamicPricing": true,
+    "trails": {
+      "open": 60
+    },
+    "lifts": {
+      "total": 7
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 6,
+    "snowfall7d": 9,
+    "_patrolUpdatedAt": "2026-02-09T04:10:22.188Z"
+  },
+  "saddleback": {
+    "conditions": "Packed Powder",
+    "icecoastRating": 4,
+    "liftTicket": {
+      "weekday": "$75+",
+      "weekend": "$110+"
+    },
+    "parking": "Free",
+    "dynamicPricing": true,
+    "trails": {
+      "open": 68
+    },
+    "lifts": {
+      "total": 6
+    },
+    "snowfall24h": 1,
+    "snowfall48h": 3,
+    "_patrolUpdatedAt": "2026-02-09T04:38:54.697Z"
+  },
+  "wachusett": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 4,
+    "liftTicket": {
+      "weekday": "$102",
+      "weekend": "$112"
+    },
+    "parking": "Free",
+    "dynamicPricing": false,
+    "trails": {
+      "open": 21
+    },
+    "lifts": {
+      "total": 8
+    },
+    "snowfall24h": 2,
+    "_patrolUpdatedAt": "2026-02-09T04:36:38.132Z"
+  },
+  "waterville": {
+    "conditions": "Packed Powder",
+    "icecoastRating": 4,
+    "liftTicket": {
+      "weekday": "$25+",
+      "weekend": "$116"
+    },
+    "parking": "Free",
+    "dynamicPricing": true,
+    "trails": {
+      "open": 62
+    },
+    "lifts": {
+      "total": 11
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 4,
+    "_patrolUpdatedAt": "2026-02-09T04:26:21.213Z"
+  },
+  "wildcat": {
+    "conditions": "Packed Powder",
+    "icecoastRating": 4,
+    "liftTicket": {
+      "weekday": "$62+",
+      "weekend": "$139"
+    },
+    "parking": "Free",
+    "dynamicPricing": true,
+    "trails": {
+      "open": 43
+    },
+    "lifts": {
+      "total": 5
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 1,
+    "snowfall7d": 1,
+    "_patrolUpdatedAt": "2026-02-09T04:24:12.766Z"
   }
 };
