@@ -459,7 +459,7 @@
                 if (typeof patch._patrolUpdatedAt === 'string' && patch._patrolUpdatedAt.trim()) {
                     resort.patrolUpdatedAt = patch._patrolUpdatedAt;
                 }
-                resort.hasPatrolUpdate = isRecentIso(resort.patrolUpdatedAt, 24);
+                resort.hasPatrolUpdate = true;
 
                 if (Number.isFinite(Number(patch.icecoastRating))) {
                     resort.manualRating = Math.max(1, Math.min(5, Number(patch.icecoastRating)));
@@ -1307,11 +1307,13 @@
 
             const sendIt = sendItSummaryByResort[resort.id] || {};
             const showLiftMoon = isAfterLiftClose(resort.id);
-            const hasFreshPatrol = resort.hasPatrolUpdate && isRecentIso(resort.patrolUpdatedAt, 24);
+            const hasFreshPatrol = !!resort.hasPatrolUpdate;
             const hasLiveWeather = !!resort.hasLiveWeather;
             const hasLiveLifts = !!resort.hasLiveLifts;
             const patrolUpdatedLabel = hasFreshPatrol
-                ? formatUpdateLabel(resort.patrolUpdatedAt, 'Patrol Updated')
+                ? (resort.patrolUpdatedAt
+                    ? formatUpdateLabel(resort.patrolUpdatedAt, 'Patrol Updated')
+                    : 'Patrol Updated')
                 : '';
             const sendItButtonCopy = getSendItButtonCopy(resort.id);
             const requiredMiles = getSendItRadiusMilesForResort(resort.id);
