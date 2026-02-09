@@ -4499,3 +4499,41 @@
         padding: 0.38rem 0.26rem;
     }
 }
+
+/* Final typography normalization for Current Conditions + Mountain Ops */
+.conditions-secondary-metrics .metric-temp strong {
+    font-size: inherit !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    color: #162234 !important;
+}
+
+.mountain-ops-section .info-label,
+.mountain-ops-section .lift-toggle,
+.mountain-ops-section .lift-toggle-left {
+    font-size: 0.76rem !important;
+    font-weight: 650 !important;
+    color: #34435a !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+.mountain-ops-section .info-value,
+.mountain-ops-section .ticket-price,
+.mountain-ops-section .lift-toggle-counts,
+.mountain-ops-section .trail-badge {
+    font-size: 0.78rem !important;
+    font-weight: 700 !important;
+    color: #162234 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+.mountain-ops-section .trail-badge {
+    height: auto !important;
+    padding: 0 !important;
+    border: 0 !important;
+    background: transparent !important;
+    border-radius: 0 !important;
+    display: inline !important;
+}

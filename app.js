@@ -1640,7 +1640,7 @@ const backgroundSizeByResort = {
                   </div>
                   ${sendItPrompt}
                   ${sendItControls}
-                  ${canVote ? `<div class="sendit-locked-note">Verified nearby. Local-only voting (${formatMiles(requiredMiles)} mi geofence).</div>` : ''}
+                  ${canVote ? `<div class="sendit-locked-note">Verified nearby. Local-only voting unlocked.</div>` : ''}
                   <div class="sendit-result">${signalSummaryLine}</div>
                 </div>
 
