@@ -1301,7 +1301,7 @@
             const hasLiveWeather = !!resort.hasLiveWeather;
             const hasLiveLifts = !!resort.hasLiveLifts;
             const liveUpdatedLabel = (hasLiveWeather || hasLiveLifts)
-                ? formatUpdateLabel(snapshotLastUpdatedIso, 'Live Updated')
+                ? formatUpdateLabel(snapshotLastUpdatedIso, 'Patrol Updated')
                 : '';
             const patrolUpdatedLabel = hasFreshPatrol
                 ? formatUpdateLabel(resort.patrolUpdatedAt, 'Condition Updated')
@@ -1342,8 +1342,8 @@
                        <div class="sendit-locked-note">Only users within ${formatMiles(requiredMiles)} miles can vote.</div>`;
             const dataBadges = `
                 <div class="data-provenance-row">
-                  ${hasLiveWeather ? '<span class="data-provenance-badge live-weather">Live Weather</span>' : ''}
-                  ${hasLiveLifts ? '<span class="data-provenance-badge live-lifts">Live Lifts</span>' : ''}
+                  ${hasLiveWeather ? '<span class="data-provenance-badge live-weather">Patrol Updated Weather</span>' : ''}
+                  ${hasLiveLifts ? '<span class="data-provenance-badge live-lifts">Patrol Updated Lifts</span>' : ''}
                   ${hasFreshPatrol ? '<span class="data-provenance-badge patrol">Condition Report</span>' : ''}
                   ${hasFreshPatrol
                       ? `<span class="data-provenance-badge updated">${patrolUpdatedLabel}</span>`
