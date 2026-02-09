@@ -1647,9 +1647,9 @@ const backgroundSizeByResort = {
                       <span class="resort-name-text">${resort.name}</span>
                     </h2>
                     <p class="resort-location">${resort.location}</p>
-                    ${heroChipMarkup ? `<div class="status-chips">${heroChipMarkup}</div>` : ''}
                   </div>
                 </div>
+                ${heroChipMarkup ? `<div class="status-chips status-chips-bottom">${heroChipMarkup}</div>` : ''}
                 ${snowBadge}
               </div>
 

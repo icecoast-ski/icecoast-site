@@ -4578,6 +4578,19 @@
     flex: 0 0 auto !important;
 }
 
+.status-chips-bottom {
+    position: absolute !important;
+    left: 1.05rem !important;
+    right: 1.05rem !important;
+    bottom: 0.34rem !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 0.34rem !important;
+    overflow: hidden !important;
+    z-index: 3 !important;
+}
+
 .live-data-badge {
     background: #22c55e !important;
     border-color: #16a34a !important;
@@ -4597,6 +4610,13 @@
     }
 
     .status-chips {
+        left: 0.9rem !important;
+        right: 0.9rem !important;
+        bottom: 0.32rem !important;
+        gap: 0.28rem !important;
+    }
+
+    .status-chips-bottom {
         left: 0.9rem !important;
         right: 0.9rem !important;
         bottom: 0.32rem !important;
