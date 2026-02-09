@@ -3,9 +3,66 @@
  * Generated from admin.html
  */
 window.MANUAL_RESORT_OVERRIDES_META = {
-  "updatedAt": "2026-02-09T00:29:34.601Z"
+  "updatedAt": "2026-02-09T01:41:32.768Z"
 };
 window.MANUAL_RESORT_OVERRIDES = {
+  "blue-mountain": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 3,
+    "liftTicket": {
+      "weekday": "$55+",
+      "weekend": "$89+"
+    },
+    "parking": "Free",
+    "dynamicPricing": true,
+    "trails": {
+      "open": 38
+    },
+    "lifts": {
+      "total": 7
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-09T01:41:32.768Z"
+  },
+  "camelback": {
+    "conditions": "Packed Powder",
+    "icecoastRating": 3,
+    "liftTicket": {
+      "weekday": "$55+",
+      "weekend": "$65+"
+    },
+    "parking": "Free",
+    "dynamicPricing": true,
+    "trails": {
+      "open": 39
+    },
+    "lifts": {
+      "total": 16
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-09T01:37:04.536Z"
+  },
+  "gore-mountain": {
+    "conditions": "Loose Granular",
+    "icecoastRating": 3,
+    "liftTicket": {
+      "weekday": "$74+",
+      "weekend": "$99+"
+    },
+    "parking": "Free",
+    "dynamicPricing": true,
+    "trails": {
+      "open": 76
+    },
+    "lifts": {
+      "total": 14
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 2,
+    "_patrolUpdatedAt": "2026-02-09T01:25:53.939Z"
+  },
   "hunter": {
     "conditions": "Machine Groomed",
     "icecoastRating": 4,
@@ -74,6 +131,23 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 1,
     "snowfall7d": 4
+  },
+  "tremblant": {
+    "conditions": "Arctic Blast ⚠️",
+    "icecoastRating": 4,
+    "liftTicket": {
+      "weekday": "$115+",
+      "weekend": "$125+"
+    },
+    "parking": "Free",
+    "dynamicPricing": true,
+    "lifts": {
+      "open": 102,
+      "total": 14
+    },
+    "snowfall48h": 5,
+    "snowfall7d": 7,
+    "_patrolUpdatedAt": "2026-02-09T01:33:43.281Z"
   },
   "mount-snow": {
     "conditions": "Machine Groomed",
