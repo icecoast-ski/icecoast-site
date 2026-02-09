@@ -3468,6 +3468,7 @@
     box-shadow: 0 4px 14px rgba(15, 23, 42, 0.08);
     padding: 1rem;
     margin-bottom: 0.9rem;
+    position: relative;
 }
 
 .conditions-top {
@@ -3476,6 +3477,8 @@
     justify-content: space-between;
     gap: 0.5rem;
     margin-bottom: 0.42rem;
+    padding-right: 4.6rem;
+    min-height: 3.9rem;
 }
 
 .conditions-weather {
@@ -3491,6 +3494,9 @@
     border: 1px solid rgba(30, 64, 175, 0.18);
     background: linear-gradient(180deg, #ffffff 0%, #eef4ff 100%);
     flex-shrink: 0;
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
 }
 
 .conditions-weather-icon {
@@ -3920,10 +3926,16 @@
 }
 
 @media (max-width: 768px) {
+    .conditions-top {
+        padding-right: 4.1rem;
+        min-height: 3.55rem;
+    }
+
     .conditions-weather {
         width: 3.55rem;
         height: 3.55rem;
-        margin-top: 0;
+        top: 0.9rem;
+        right: 0.9rem;
     }
 
     .conditions-weather-copy {
