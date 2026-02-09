@@ -3468,6 +3468,21 @@
     background: #5f7448;
 }
 
+.status-chip.chip-weather {
+    background: #1e4f9c;
+    color: #f3f8ff;
+}
+
+.status-chip.chip-lifts {
+    background: #1f7a4f;
+    color: #ecfff5;
+}
+
+.status-chip.chip-family {
+    background: #7b5a3e;
+    color: #fff6ec;
+}
+
 .resort-body {
     padding: 0 1rem 1rem;
 }
@@ -3715,7 +3730,27 @@
 }
 
 .mountain-ops-section .lift-details {
-    margin-top: 0.15rem;
+    margin-top: 0.2rem;
+    border: 0;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+    overflow: visible;
+}
+
+.mountain-ops-section .lift-toggle {
+    padding: 0.32rem 0;
+    background: transparent;
+}
+
+.mountain-ops-section .lift-toggle:hover {
+    background: transparent;
+}
+
+.mountain-ops-section .lift-list {
+    padding: 0.35rem 0 0.2rem;
+    background: transparent;
 }
 
 .conditions-source {
@@ -3737,12 +3772,13 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
+    flex-wrap: wrap;
     gap: 0.5rem;
-    padding: 0.6rem 0.7rem;
+    padding: 0.5rem 0.6rem;
     border: 1px solid rgba(15, 23, 42, 0.1);
-    border-radius: 12px;
-    background: linear-gradient(180deg, #ffffff 0%, #f4f8ff 100%);
-    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+    border-radius: 10px;
+    background: #ffffff;
+    box-shadow: none;
 }
 
 .extra-label {
@@ -3764,6 +3800,39 @@
     font-size: 0.86rem;
     font-weight: 800;
     letter-spacing: 0.015em;
+}
+
+.extra-rating-track {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.08rem;
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.extra-rating-icon {
+    font-size: 0.72rem;
+    line-height: 1;
+}
+
+.extra-rating-icon.filled {
+    opacity: 1;
+    filter: saturate(1);
+}
+
+.extra-rating-icon.empty {
+    opacity: 0.28;
+    filter: grayscale(1) saturate(0);
+}
+
+.extra-score {
+    color: #1e3a8a;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.02em;
+    min-width: 2.2rem;
+    text-align: right;
+    white-space: nowrap;
 }
 
 .sendit-section {
@@ -3907,6 +3976,14 @@
     .extra-rating-item {
         padding: 0.52rem 0.6rem;
     }
+
+    .extra-rating-icon {
+        font-size: 0.68rem;
+    }
+
+    .extra-score {
+        font-size: 0.64rem;
+    }
 }
 
 /* ---------- Lower Data System Alignment ---------- */
@@ -3986,6 +4063,10 @@
     line-height: 1;
 }
 
+.pass-badge {
+    border-radius: 6px;
+}
+
 .trail-badge {
     border: 1px solid transparent;
 }
@@ -4003,15 +4084,15 @@
 }
 
 .pass-badge.pass-ikon {
-    background: #fff1e4;
-    color: #9a3412;
-    border: 1px solid #fed7aa;
+    background: #f58220;
+    color: #ffffff;
+    border: 1px solid #dc6f16;
 }
 
 .pass-badge.pass-epic {
-    background: #e8f1ff;
-    color: #1e40af;
-    border: 1px solid #bfdbfe;
+    background: #153d8a;
+    color: #ffffff;
+    border: 1px solid #0f2f6d;
 }
 
 .dynamic-badge {
@@ -4096,4 +4177,68 @@
         margin-left: 0.28rem;
         gap: 0.18rem;
     }
+}
+
+/* ---------- Typography Continuity Pass ---------- */
+:root {
+    --ui-title-size: 0.72rem;
+    --ui-title-weight: 720;
+    --ui-title-color: #263246;
+    --ui-title-track: 0.075em;
+    --ui-body-size: 0.76rem;
+    --ui-body-weight: 650;
+    --ui-body-color: #34435a;
+    --ui-value-size: 0.82rem;
+    --ui-value-weight: 760;
+    --ui-value-color: #162234;
+}
+
+.conditions-label,
+.sendit-title,
+.icecoast-title,
+.info-label,
+.distance-title,
+.forecast-inline-toggle,
+.mountain-ops-section .lift-toggle {
+    font-size: var(--ui-title-size);
+    font-weight: var(--ui-title-weight);
+    color: var(--ui-title-color);
+    letter-spacing: var(--ui-title-track);
+    text-transform: uppercase;
+}
+
+.conditions-metrics,
+.conditions-secondary-metrics,
+.sendit-subtitle,
+.sendit-subtitle-flavor,
+.rating-text,
+.info-value,
+.distance-item,
+.lift-item,
+.sendit-locked-note,
+.sendit-result,
+.sendit-social-proof {
+    font-size: var(--ui-body-size);
+    font-weight: var(--ui-body-weight);
+    color: var(--ui-body-color);
+    letter-spacing: 0;
+    text-transform: none;
+}
+
+.conditions-metrics strong,
+.conditions-secondary-metrics strong,
+.rating-stars .star,
+.ticket-price,
+.distance-item strong,
+.lift-toggle-counts,
+.sendit-score-number,
+.sendit-score-value,
+.info-value strong {
+    font-size: var(--ui-value-size);
+    font-weight: var(--ui-value-weight);
+    color: var(--ui-value-color);
+}
+
+.sendit-subtitle-flavor {
+    opacity: 0.9;
 }

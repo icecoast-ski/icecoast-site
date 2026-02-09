@@ -1310,6 +1310,8 @@
             const glades = resort.glades ?? 0;
             const apres = resort.apres ?? 0;
             const family = resort.family ?? 0;
+            const apresScore = Math.max(0, Math.min(5, Math.round(Number(apres) || 0)));
+            const familyScore = Math.max(0, Math.min(5, Math.round(Number(family) || 0)));
 
             const passes = resort.passes || [];
             const distance = resort.distance || {};
@@ -1362,15 +1364,15 @@
                    <div class="sendit-locked-note"><span class="sendit-lock-icon" aria-hidden="true">🔒</span> One-time check to unlock local voting.</div>`;
 
             const heroChips = [];
-            if (hasLiveWeather) heroChips.push({ cls: 'chip-good', label: 'Live Weather' });
-            if (hasLiveLifts) heroChips.push({ cls: 'chip-neutral', label: 'Live Lifts' });
+            if (hasLiveWeather) heroChips.push({ cls: 'chip-weather', label: 'Live Weather' });
+            if (hasLiveLifts) heroChips.push({ cls: 'chip-lifts', label: 'Live Lifts' });
             if (resort.glades > 0) {
                 heroChips.push({
                     cls: 'chip-glades',
                     label: glades >= 3 ? '🌲🌲🌲 Elite Glades' : glades === 2 ? '🌲🌲 Excellent Glades' : '🌲 Some Glades'
                 });
             } else if (resort.familyOwned) {
-                heroChips.push({ cls: 'chip-neutral', label: 'Family-Owned' });
+                heroChips.push({ cls: 'chip-family', label: 'Family-Owned' });
             }
             const heroChipMarkup = heroChips.slice(0, 3)
                 .map((chip) => `<span class="status-chip ${chip.cls}">${chip.label}</span>`)
@@ -1394,7 +1396,12 @@
             const metrics24h = parseInt(resort.snowfall24h || 0, 10);
             const metrics48h = parseInt(resort.snowfall48h || 0, 10);
             const metricsTemp = weather.tempF ?? (typeof weather.temp === 'number' ? `${weather.temp}°` : '—');
-            const metricsFeelsLike = weather.feelsLikeF ?? (typeof weather.feelsLike === 'number' ? `${weather.feelsLike}°` : '—');
+            const feelsLikeValue = typeof weather.feelsLike === 'number'
+                ? weather.feelsLike
+                : (typeof weather.feelsLikeF === 'string' ? parseFloat(weather.feelsLikeF) : null);
+            const metricsFeelsLikeBase = weather.feelsLikeF ?? (typeof weather.feelsLike === 'number' ? `${weather.feelsLike}°` : '—');
+            const feelsLikeWarning = Number.isFinite(feelsLikeValue) && feelsLikeValue <= -10 ? ' ⚠︎' : '';
+            const metricsFeelsLike = `${metricsFeelsLikeBase}${feelsLikeWarning}`;
             const metricsWind = weather.wind ?? '—';
             const signalLead = sendItSubtitlePrimary;
             const sendItGaugeBlock = canVote
@@ -1705,7 +1712,10 @@ const backgroundSizeByResort = {
                       </span>
                       Après
                     </span>
-                    <span class="extra-value">${'⭐'.repeat(Math.min(apres, 3))}</span>
+                    <span class="extra-rating-track" aria-hidden="true">
+                      ${Array.from({ length: 5 }, (_, i) => `<span class="extra-rating-icon ${i < apresScore ? 'filled' : 'empty'}">🍺</span>`).join('')}
+                    </span>
+                    <span class="extra-score">${apresScore}/5</span>
                   </div>
                   <div class="extra-rating-item">
                     <span class="extra-label">
@@ -1714,7 +1724,10 @@ const backgroundSizeByResort = {
                       </span>
                       Family
                     </span>
-                    <span class="extra-value">${'⭐'.repeat(Math.min(family, 3))}</span>
+                    <span class="extra-rating-track" aria-hidden="true">
+                      ${Array.from({ length: 5 }, (_, i) => `<span class="extra-rating-icon ${i < familyScore ? 'filled' : 'empty'}">👶</span>`).join('')}
+                    </span>
+                    <span class="extra-score">${familyScore}/5</span>
                   </div>
                 </div>
 
