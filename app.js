@@ -1433,9 +1433,6 @@
             const requiredMiles = getSendItRadiusMilesForResort(resort.id);
             const sendItVotes = Number.isFinite(sendIt.votes) ? sendIt.votes : 0;
             const sendItVotesLastHour = Number.isFinite(sendIt.votesLastHour) ? sendIt.votesLastHour : 0;
-            const sendItVotes24h = Number.isFinite(sendIt.votes24h) ? sendIt.votes24h : sendItVotes;
-            const sendItVotes48h = Number.isFinite(sendIt.votes48h) ? sendIt.votes48h : sendItVotes24h;
-            const sendItVotes3d = Number.isFinite(sendIt.votes3d) ? sendIt.votes3d : sendItVotes48h;
             const sendItScoreValue = Number.isFinite(sendIt.score) ? sendIt.score : null;
             const sendItScoreClass = sendItScoreValue === null
                 ? ''
@@ -1711,12 +1708,6 @@ const backgroundSizeByResort = {
                   ${sendItPrompt}
                   ${sendItControls}
                   ${canVote ? `<div class="sendit-locked-note">Set crowd + wind then send your slope signal</div>` : ''}
-                  <div class="sendit-history-divider" aria-hidden="true"></div>
-                  <div class="sendit-history-row" aria-label="Slope Signal history">
-                    <span class="sendit-history-item"><strong>24h</strong> ${sendItVotes24h}</span>
-                    <span class="sendit-history-item"><strong>48h</strong> ${sendItVotes48h}</span>
-                    <span class="sendit-history-item"><strong>3d</strong> ${sendItVotes3d}</span>
-                  </div>
                 </div>
 
                 <div class="mountain-ops-section">
