@@ -1528,6 +1528,7 @@ const backgroundSizeByResort = {
                       <span class="conditions-weather-icon">${weatherIconDisplay}</span>
                       <div class="conditions-weather-copy">
                         <div class="conditions-weather-temp">${metricsTemp}</div>
+                        <div class="conditions-weather-desc">${weatherConditionDisplay}</div>
                       </div>
                     </div>
                   </div>
@@ -1573,6 +1574,11 @@ const backgroundSizeByResort = {
                     <span class="info-label">
                       <span class="info-icon">${icons.ticket}</span>
                       Lift Ticket
+                      ${passes.length
+                          ? `<span class="ticket-label-badges">${passes.map(pass =>
+                              `<span class="pass-badge pass-${pass}">${pass === 'ikon' ? 'Ikon' : 'Epic'}</span>`
+                            ).join('')}</span>`
+                          : ''}
                     </span>
                     <div class="ticket-info-stack">
                       <div class="ticket-price-line">
@@ -1581,11 +1587,6 @@ const backgroundSizeByResort = {
                         </span>
                         ${resort.dynamicPricing ? '<span class="ticket-dynamic-note">Varies</span>' : ''}
                       </div>
-                      ${passes.length
-                          ? `<div class="ticket-pass-line">${passes.map(pass =>
-                              `<span class="pass-badge pass-${pass}">${pass === 'ikon' ? 'Ikon' : 'Epic'}</span>`
-                            ).join('')}</div>`
-                          : ''}
                     </div>
                   </div>
 
