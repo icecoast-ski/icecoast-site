@@ -1464,7 +1464,7 @@
             const liveSlopeLabel = sendItState.label;
             const signalSummaryLine = `Crowd: ${getSendItCrowdLabel(liveCrowdMode || SENDIT_DEFAULT_SIGNALS.crowd)} • Wind: ${getSendItWindLabel(liveWindMode || SENDIT_DEFAULT_SIGNALS.wind)} • Slope: ${liveSlopeLabel}`;
             const sendItSubtitlePrimary = getSlopeSignalPayoffPhrase(resort.id, liveCrowdMode, liveWindMode, liveSlopeLabel);
-            const sendItSubtitleSecondary = canVote ? '' : 'Verify once to unlock local voting.';
+            const sendItSubtitleSecondary = '';
             const sendItPrompt = '';
             const sendItControls = !hasCoords ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>` : canVote
                 ? `<div class="sendit-signal-group">
@@ -1498,7 +1498,7 @@
                         <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="60">${sendItButtonCopy.mid}</button>
                         <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="100">${sendItButtonCopy.high}</button>
                       </div>`
-                : `<button class="sendit-unlock-btn sendit-unlock-cta" data-sendit-action="unlock" data-resort-id="${resort.id}">⚡ I'm on the mountain!</button>
+                : `<button class="sendit-unlock-btn sendit-unlock-cta" data-sendit-action="unlock" data-resort-id="${resort.id}">⚡ I'M ON THE MOUNTAIN!</button>
                    <div class="sendit-locked-note"><span class="sendit-lock-icon" aria-hidden="true">🔒</span> One-time check to unlock local voting.</div>`;
 
             const heroChips = [];
@@ -1712,7 +1712,7 @@ const backgroundSizeByResort = {
                   ${sendItPrompt}
                   ${sendItControls}
                   ${canVote ? `<div class="sendit-locked-note">Set crowd + wind then send your slope signal</div>` : ''}
-                  <div class="sendit-result">${signalSummaryLine}</div>
+                  ${canVote ? `<div class="sendit-result">${signalSummaryLine}</div>` : ''}
                 </div>
 
                 <div class="rating-section">

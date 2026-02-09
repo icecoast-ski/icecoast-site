@@ -4623,3 +4623,27 @@
         gap: 0.28rem !important;
     }
 }
+
+/* Slope Signal alignment + result hierarchy */
+.sendit-header {
+    text-align: left !important;
+    align-items: flex-start !important;
+}
+
+.sendit-title-pill {
+    justify-content: flex-start !important;
+}
+
+.sendit-subline {
+    align-items: flex-start !important;
+    text-align: left !important;
+}
+
+.sendit-subtitle {
+    font-size: 1.52rem !important;
+    line-height: 1.05 !important;
+    color: #144089 !important;
+    font-weight: 700 !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
