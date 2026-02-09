@@ -1345,7 +1345,7 @@
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
             const sendItSubtitlePrimary = 'On-mountain locals call how sendy it is right now.';
-            const sendItSubtitleSecondary = canVote ? 'Tap a lane below.' : 'Local votes only when you are nearby.';
+            const sendItSubtitleSecondary = canVote ? 'Tap a lane below.' : '';
             const sendItPrompt = canVote ? `<div class="sendit-prompt">Tap your call</div>` : '';
             const sendItControls = !hasCoords ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>` : canVote
                 ? `<div class="sendit-vote-row">
