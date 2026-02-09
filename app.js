@@ -1157,10 +1157,11 @@
             const targetButton = card.querySelector(`.sendit-vote-btn[data-score="${targetScore}"]`) || sourceButton;
             if (!sourceButton || !targetButton) return;
 
-            const sourceRect = sourceButton.getBoundingClientRect();
             const targetRect = targetButton.getBoundingClientRect();
-            const gondolaEndX = Math.max(42, Math.round(sourceRect.left - 16));
-            const gondolaEndY = Math.max(26, Math.round(sourceRect.top - 72));
+            // Anchor gondola drop to the actual grind target so all three vote paths
+            // land on-rail consistently (left/mid/right buttons).
+            const gondolaEndX = Math.max(42, Math.round(targetRect.left - 24));
+            const gondolaEndY = Math.max(26, Math.round(targetRect.top - 72));
             const gondolaStartX = -74;
             const diagonalRun = gondolaEndX - gondolaStartX;
             const gondolaStartY = Math.min(
@@ -1169,10 +1170,11 @@
             );
             const startX = gondolaEndX + 18;
             const startY = gondolaEndY + 12;
-            const railStartX = (targetRect.left + 10) - startX;
-            const railStartY = (targetRect.top - 8) - startY;
-            const railEndX = (targetRect.right - 12) - startX;
-            const railEndY = (targetRect.top - 10) - startY;
+            const railY = (targetRect.top - 9) - startY;
+            const railStartX = (targetRect.left + 8) - startX;
+            const railStartY = railY;
+            const railEndX = (targetRect.right - 8) - startX;
+            const railEndY = railY;
             // Force a rightward drift so red/blue votes do not eject left,
             // and push the skier clearly off-screen after the rail.
             const rightDrift = Math.max(56, Math.round(window.innerWidth * 0.08));
@@ -1433,6 +1435,9 @@
             const requiredMiles = getSendItRadiusMilesForResort(resort.id);
             const sendItVotes = Number.isFinite(sendIt.votes) ? sendIt.votes : 0;
             const sendItVotesLastHour = Number.isFinite(sendIt.votesLastHour) ? sendIt.votesLastHour : 0;
+            const sendItVotes24h = Number.isFinite(sendIt.votes24h) ? sendIt.votes24h : sendItVotes;
+            const sendItVotes48h = Number.isFinite(sendIt.votes48h) ? sendIt.votes48h : sendItVotes24h;
+            const sendItVotes3d = Number.isFinite(sendIt.votes3d) ? sendIt.votes3d : sendItVotes48h;
             const sendItScoreValue = Number.isFinite(sendIt.score) ? sendIt.score : null;
             const sendItScoreClass = sendItScoreValue === null
                 ? ''
@@ -1708,6 +1713,12 @@ const backgroundSizeByResort = {
                   ${sendItPrompt}
                   ${sendItControls}
                   ${canVote ? `<div class="sendit-locked-note">Set crowd + wind then send your slope signal</div>` : ''}
+                  <div class="sendit-history-divider" aria-hidden="true"></div>
+                  <div class="sendit-history-row" aria-label="Slope Signal history">
+                    <span class="sendit-history-item"><strong>24h</strong> ${sendItVotes24h}</span>
+                    <span class="sendit-history-item"><strong>48h</strong> ${sendItVotes48h}</span>
+                    <span class="sendit-history-item"><strong>3d</strong> ${sendItVotes3d}</span>
+                  </div>
                 </div>
 
                 <div class="mountain-ops-section">
