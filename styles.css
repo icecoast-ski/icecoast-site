@@ -3480,43 +3480,36 @@
 
 .conditions-weather {
     display: inline-flex;
+    flex-direction: column;
     align-items: center;
-    gap: 0.42rem;
-    padding: 0.3rem 0.5rem;
-    border-radius: 10px;
+    justify-content: center;
+    gap: 0.18rem;
+    width: 3.9rem;
+    height: 3.9rem;
+    padding: 0.35rem;
+    border-radius: 12px;
     border: 1px solid rgba(30, 64, 175, 0.18);
     background: linear-gradient(180deg, #ffffff 0%, #eef4ff 100%);
-    min-width: 142px;
-    justify-content: flex-end;
+    flex-shrink: 0;
 }
 
 .conditions-weather-icon {
-    font-size: 1.08rem;
+    font-size: 1.2rem;
     line-height: 1;
     color: #1e40af;
 }
 
 .conditions-weather-copy {
     display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 0.05rem;
+    align-items: center;
+    justify-content: center;
 }
 
 .conditions-weather-temp {
-    font-size: 1rem;
+    font-size: 0.9rem;
     font-weight: 850;
     color: #16233b;
     line-height: 1;
-}
-
-.conditions-weather-desc {
-    font-size: 0.62rem;
-    color: #44556f;
-    font-weight: 650;
-    max-width: 110px;
-    text-align: right;
-    line-height: 1.15;
 }
 
 .conditions-label {
@@ -3555,7 +3548,7 @@
 
 .conditions-value {
     color: #144089;
-    font-size: 1.7rem;
+    font-size: 1.52rem;
     line-height: 1.05;
     margin-bottom: 0.52rem;
 }
@@ -3783,6 +3776,43 @@
     color: #1f2e46;
 }
 
+.ticket-info-stack {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.26rem;
+    min-width: 0;
+}
+
+.ticket-price-line {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.38rem;
+    min-width: 0;
+}
+
+.ticket-price {
+    white-space: nowrap;
+}
+
+.ticket-dynamic-note {
+    font-size: 0.58rem;
+    font-weight: 760;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: #be123c;
+    opacity: 0.95;
+    white-space: nowrap;
+}
+
+.ticket-pass-line {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 0.25rem;
+    max-width: 170px;
+}
+
 .trail-badge,
 .pass-badge,
 .dynamic-badge {
@@ -3891,12 +3921,12 @@
 
 @media (max-width: 768px) {
     .conditions-weather {
-        width: 100%;
-        justify-content: space-between;
-        margin-top: 0.15rem;
+        width: 3.55rem;
+        height: 3.55rem;
+        margin-top: 0;
     }
 
     .conditions-weather-copy {
-        align-items: flex-end;
+        align-items: center;
     }
 }

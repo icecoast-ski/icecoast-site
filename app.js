@@ -1528,7 +1528,6 @@ const backgroundSizeByResort = {
                       <span class="conditions-weather-icon">${weatherIconDisplay}</span>
                       <div class="conditions-weather-copy">
                         <div class="conditions-weather-temp">${metricsTemp}</div>
-                        <div class="conditions-weather-desc">${weatherConditionDisplay}</div>
                       </div>
                     </div>
                   </div>
@@ -1573,20 +1572,19 @@ const backgroundSizeByResort = {
                   <div class="info-item">
                     <span class="info-label">
                       <span class="info-icon">${icons.ticket}</span>
-                      Lift Ticket ${resort.dynamicPricing ? '<span class="dynamic-badge">Dynamic</span>' : ''}
+                      Lift Ticket
                     </span>
-                    <div style="display:flex;align-items:center;gap:0.5rem;">
-                      <span class="info-value">
-                        ${resort.liftTicket?.weekday ?? '—'}
-                        ${resort.dynamicPricing ? ' / ' : ''}
-                      </span>
-                      ${resort.dynamicPricing && resort.liftTicket?.weekend
-                          ? `<span class="info-value">${resort.liftTicket.weekend}</span>`
-                          : ''}
+                    <div class="ticket-info-stack">
+                      <div class="ticket-price-line">
+                        <span class="info-value ticket-price">
+                          ${resort.liftTicket?.weekday ?? '—'}${resort.dynamicPricing && resort.liftTicket?.weekend ? ` / ${resort.liftTicket.weekend}` : ''}
+                        </span>
+                        ${resort.dynamicPricing ? '<span class="ticket-dynamic-note">Varies</span>' : ''}
+                      </div>
                       ${passes.length
-                          ? passes.map(pass =>
+                          ? `<div class="ticket-pass-line">${passes.map(pass =>
                               `<span class="pass-badge pass-${pass}">${pass === 'ikon' ? 'Ikon' : 'Epic'}</span>`
-                            ).join('')
+                            ).join('')}</div>`
                           : ''}
                     </div>
                   </div>
