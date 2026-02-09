@@ -1444,6 +1444,13 @@
             text-align: center;
         }
 
+        .sendit-lock-icon {
+            margin-right: 0.22rem;
+            color: #1d4ed8;
+            display: inline-block;
+            filter: saturate(0.15) hue-rotate(165deg) brightness(0.72);
+        }
+
         .sendit-unlock-btn,
         .sendit-vote-btn {
             border: 1px solid var(--light-grey);
@@ -1473,7 +1480,7 @@
             font-size: 0.86rem;
             font-weight: 800;
             letter-spacing: 0.03em;
-            text-transform: uppercase;
+            text-transform: none;
             box-shadow: 0 4px 10px rgba(224, 43, 62, 0.35);
             position: relative;
         }

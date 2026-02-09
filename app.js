@@ -753,6 +753,7 @@
         let sendItMaxAccuracyMeters = 200;
         const SENDIT_DEVICE_ID_KEY = 'icecoast_sendit_device_id';
         const sendItUnlockedResorts = new Set();
+        const SENDIT_TEST_UNLOCKED_RESORTS = new Set(['mont-sutton']);
         const sendItButtonCopyByResort = {};
         const sendItVerifyFlavorByResort = {};
         const SENDIT_TEST_UNLIMITED_RESORTS = new Set();
@@ -910,6 +911,10 @@
             } catch (e) {
                 console.warn('Could not persist Send It unlock state:', e);
             }
+        }
+
+        function applySendItTestUnlocks() {
+            SENDIT_TEST_UNLOCKED_RESORTS.forEach((id) => sendItUnlockedResorts.add(id));
         }
 
         function getResortCoords(resortId) {
@@ -1353,8 +1358,8 @@
                         <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="60">${sendItButtonCopy.mid}</button>
                         <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="100">${sendItButtonCopy.high}</button>
                       </div>`
-                : `<button class="sendit-unlock-btn sendit-unlock-cta" data-sendit-action="unlock" data-resort-id="${resort.id}">⚡ Verify You're On-Mountain</button>
-                   <div class="sendit-locked-note">One-time check to unlock local voting.</div>`;
+                : `<button class="sendit-unlock-btn sendit-unlock-cta" data-sendit-action="unlock" data-resort-id="${resort.id}">⚡ I'm on the mountain!</button>
+                   <div class="sendit-locked-note"><span class="sendit-lock-icon" aria-hidden="true">🔒</span> One-time check to unlock local voting.</div>`;
 
             const heroChips = [];
             if (hasLiveWeather) heroChips.push({ cls: 'chip-good', label: 'Live Weather' });
@@ -1916,6 +1921,7 @@ const backgroundSizeByResort = {
         applyResortDriveTimes();
 
         loadSendItUnlockState();
+        applySendItTestUnlocks();
         renderResorts();
 
         document.addEventListener('click', async (event) => {
