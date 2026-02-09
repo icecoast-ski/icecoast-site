@@ -537,12 +537,17 @@
 
         const RESORT_PASS_MEMBERSHIP = {
             // Epic
+            'jack-frost': ['epic'],
+            'big-boulder': ['epic'],
             'hunter': ['epic'],
             'mount-snow': ['epic'],
             'okemo': ['epic'],
             'stowe': ['epic'],
+            'wildcat': ['epic'],
 
             // Ikon
+            'camelback': ['ikon'],
+            'blue-mountain': ['ikon'],
             'stratton': ['ikon'],
             'killington': ['ikon'],
             'pico': ['ikon'],
@@ -551,6 +556,9 @@
             'sunday-river': ['ikon'],
             'sugarloaf': ['ikon'],
             'tremblant': ['ikon'],
+            'le-massif': ['ikon'],
+            // Jiminy is Ikon "bonus mountain" (limited access days), still surfaced as Ikon badge.
+            'jiminy-peak': ['ikon'],
 
             // Windham is no longer Ikon
             'windham': []

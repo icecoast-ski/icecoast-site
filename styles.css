@@ -4323,8 +4323,13 @@
 }
 
 .resort-location {
+    display: block !important;
+    color: #eef5ff !important;
+    font-size: 0.86rem !important;
+    font-weight: 650 !important;
+    text-shadow: 0 2px 8px rgba(8, 12, 22, 0.72), 0 1px 3px rgba(8, 12, 22, 0.66) !important;
     margin-top: 0 !important;
-    margin-bottom: 0.1rem !important;
+    margin-bottom: 0.42rem !important;
     line-height: 1.08 !important;
 }
 
@@ -4332,7 +4337,7 @@
     position: absolute !important;
     left: 0 !important;
     right: auto !important;
-    bottom: 0 !important;
+    bottom: 0.14rem !important;
     margin-top: 0 !important;
     display: inline-flex !important;
     flex-wrap: nowrap !important;
@@ -4345,10 +4350,10 @@
     flex: 0 0 auto !important;
     min-width: 0 !important;
     max-width: none !important;
-    height: 1.2rem !important;
-    padding: 0 0.42rem !important;
+    height: 1.26rem !important;
+    padding: 0 0.48rem !important;
     border-radius: 6px !important;
-    font-size: 0.56rem !important;
+    font-size: 0.58rem !important;
     line-height: 1 !important;
     white-space: nowrap !important;
     overflow: hidden !important;
@@ -4361,9 +4366,9 @@
     }
 
     .status-chip {
-        height: 1.16rem !important;
-        padding: 0 0.38rem !important;
-        font-size: 0.54rem !important;
+        height: 1.2rem !important;
+        padding: 0 0.42rem !important;
+        font-size: 0.56rem !important;
     }
 }
 
