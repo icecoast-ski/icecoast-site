@@ -1704,9 +1704,6 @@ const backgroundSizeByResort = {
                 <div class="extra-ratings">
                   <div class="extra-rating-item">
                     <span class="extra-label">
-                      <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.25rem;">
-                        ${icons.apres}
-                      </span>
                       Après
                     </span>
                     <span class="extra-rating-track" aria-hidden="true">
@@ -1715,9 +1712,6 @@ const backgroundSizeByResort = {
                   </div>
                   <div class="extra-rating-item">
                     <span class="extra-label">
-                      <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.25rem;">
-                        ${icons.family}
-                      </span>
                       Family
                     </span>
                     <span class="extra-rating-track" aria-hidden="true">
