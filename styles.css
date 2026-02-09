@@ -4836,3 +4836,48 @@
     font-weight: 700 !important;
     color: #162234 !important;
 }
+
+/* Final header baseline lock: keep tagline bottom-aligned with logo */
+.header-top {
+    align-items: flex-end !important;
+}
+
+.header-left {
+    align-items: baseline !important;
+}
+
+.logo {
+    line-height: 1 !important;
+}
+
+.main-tagline {
+    align-self: flex-end !important;
+    line-height: 1 !important;
+    padding-bottom: 0 !important;
+    margin-bottom: 0.1rem !important;
+}
+
+/* Slope Signal secondary line should read as compact context */
+.sendit-subtitle-flavor {
+    font-size: 0.62rem !important;
+    font-weight: 620 !important;
+    color: #5e6f86 !important;
+    line-height: 1.15 !important;
+    margin-top: 0.16rem !important;
+    letter-spacing: 0.005em !important;
+}
+
+@media (max-width: 768px) {
+    .header-left {
+        align-items: baseline !important;
+    }
+
+    .main-tagline {
+        margin-bottom: 0.06rem !important;
+        font-size: 0.68rem !important;
+    }
+
+    .sendit-subtitle-flavor {
+        font-size: 0.58rem !important;
+    }
+}

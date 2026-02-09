@@ -806,34 +806,28 @@
                 'Waiting On The First Drop'
             ],
             low: [
-                'Sharpen Those Edges',
-                'Survival Turns',
-                'Refreeze Roulette',
-                'Edge Work Day',
-                'Boilerplate Ballet',
-                'Fast Base, Soft Knees',
-                'Technical Turns Only',
-                'Firm But Skiable'
+                'Red Light: Sharpen Those Edges',
+                'Red Light: Survival Turns',
+                'Red Light: Refreeze Roulette',
+                'Red Light: Edge Work Day',
+                'Red Light: Boilerplate Ballet',
+                'Red Light: Firm But Skiable'
             ],
             mid: [
-                'Good Turns Ahead',
-                'Good Laps',
-                'Hot Laps',
-                'Prime Time',
-                'Carve Mode',
-                'Chairlift Smiles',
-                'Plenty To Work With',
-                'Send-Ish Conditions'
+                'Blue Light: Good Turns Ahead',
+                'Blue Light: Good Laps',
+                'Blue Light: Hot Laps',
+                'Blue Light: Prime Time',
+                'Blue Light: Carve Mode',
+                'Blue Light: Send-Ish Conditions'
             ],
             high: [
-                'Full Send',
-                'Full Tilt',
-                'Warp Speed',
-                'Deep Day Energy',
-                'Face Shot Potential',
-                'Storm Day Stoke',
-                'Unreal Laps',
-                'Hammer Time'
+                'Green Light: Full Send',
+                'Green Light: Full Tilt',
+                'Green Light: Warp Speed',
+                'Green Light: Storm Day Stoke',
+                'Green Light: Unreal Laps',
+                'Green Light: Hammer Time'
             ]
         };
         const sendItSignalSelectionByResort = {};
@@ -1156,6 +1150,20 @@
                 SENDIT_PAYOFF_PHRASES[bucket],
                 `${resortId}|${bucket}|${crowd}|${wind}|${quantizedScore}|${votes}`
             );
+        }
+
+        function getSlopeSignalContextLine(crowdMode, windMode) {
+            const crowd = isValidSendItCrowd(crowdMode) ? crowdMode : SENDIT_DEFAULT_SIGNALS.crowd;
+            const wind = isValidSendItWind(windMode) ? windMode : SENDIT_DEFAULT_SIGNALS.wind;
+
+            const windText = wind === 'nuking'
+                ? 'High wind'
+                : (wind === 'breezy' ? 'Breezy wind' : 'Calm wind');
+            const crowdText = crowd === 'swarm'
+                ? 'Jerry swarm'
+                : (crowd === 'normal' ? 'Normal crowd' : 'Quiet crowd');
+
+            return `${windText}. ${crowdText}.`;
         }
 
         function haversineMiles(lat1, lon1, lat2, lon2) {
@@ -1499,22 +1507,13 @@
             const hasLiveWeather = !!resort.hasLiveWeather;
             const hasLiveLifts = !!resort.hasLiveLifts;
             const sendItButtonCopy = getSendItButtonCopy(resort.id);
-            const requiredMiles = getSendItRadiusMilesForResort(resort.id);
             const sendItVotes = Number.isFinite(sendIt.votes) ? sendIt.votes : 0;
-            const sendItVotesLastHour = Number.isFinite(sendIt.votesLastHour) ? sendIt.votesLastHour : 0;
             const sendItScoreValue = Number.isFinite(sendIt.score) ? sendIt.score : null;
-            const sendItScoreClass = sendItScoreValue === null
-                ? ''
-                : (sendItScoreValue >= 70 ? 'hot' : (sendItScoreValue >= 45 ? 'mid' : 'cold'));
-            const sendItState = getSendItState(sendItScoreValue, resort.id);
-            const hasSlopeSignalData = Number.isFinite(sendItScoreValue) && sendItVotes >= SENDIT_HISTORY_MIN_VOTES;
-            const sendItSocialLine = getSendItSocialLine(sendItVotesLastHour, sendItVotes);
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
             const selectedSignals = getSendItSignalSelection(resort.id);
             const liveCrowdMode = isValidSendItCrowd(sendIt.crowdMode) ? sendIt.crowdMode : null;
             const liveWindMode = isValidSendItWind(sendIt.windMode) ? sendIt.windMode : null;
-            const liveSlopeLabel = sendItState.label;
             const sendItVotes24h = Number.isFinite(sendIt.votes24h) ? Number(sendIt.votes24h) : 0;
             const sendItVotes48h = Number.isFinite(sendIt.votes48h) ? Number(sendIt.votes48h) : 0;
             const sendItScore24h = Number.isFinite(sendIt.score24h)
@@ -1529,7 +1528,6 @@
             const sendItPhrase48h = Number.isFinite(sendItScore48h) && sendItVotes48h >= SENDIT_HISTORY_MIN_VOTES
                 ? getSendItState(sendItScore48h, resort.id).label
                 : 'First Chair';
-            const signalSummaryLine = `Crowd: ${getSendItCrowdLabel(liveCrowdMode || SENDIT_DEFAULT_SIGNALS.crowd)} • Wind: ${getSendItWindLabel(liveWindMode || SENDIT_DEFAULT_SIGNALS.wind)} • Slope: ${liveSlopeLabel}`;
             const sendItSubtitlePrimary = getSlopeSignalPayoffPhrase(
                 resort.id,
                 sendItScoreValue,
@@ -1537,7 +1535,7 @@
                 liveCrowdMode,
                 liveWindMode
             );
-            const sendItSubtitleSecondary = hasSlopeSignalData ? '' : 'No local calls yet.';
+            const sendItSubtitleSecondary = getSlopeSignalContextLine(liveCrowdMode, liveWindMode);
             const sendItPrompt = '';
             const sendItControls = !hasCoords ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>` : canVote
                 ? `<div class="sendit-signal-group">
