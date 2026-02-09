@@ -4537,3 +4537,63 @@
     border-radius: 0 !important;
     display: inline !important;
 }
+
+/* Final hard lock: header location/chips + live badge color */
+.resort-header {
+    position: relative !important;
+}
+
+.resort-location {
+    display: inline-flex !important;
+    align-items: center !important;
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+    padding: 0.16rem 0.5rem !important;
+    border-radius: 8px !important;
+    background: rgba(8, 16, 30, 0.46) !important;
+    color: #f5f9ff !important;
+    font-size: 0.84rem !important;
+    font-weight: 650 !important;
+    line-height: 1.1 !important;
+    text-shadow: none !important;
+    position: relative !important;
+    z-index: 3 !important;
+}
+
+.status-chips {
+    position: absolute !important;
+    left: 1.05rem !important;
+    right: 1.05rem !important;
+    bottom: 0.5rem !important;
+    margin: 0 !important;
+    display: flex !important;
+    flex-wrap: nowrap !important;
+    gap: 0.34rem !important;
+    overflow: hidden !important;
+    z-index: 3 !important;
+}
+
+.status-chip {
+    flex: 0 0 auto !important;
+}
+
+.live-data-badge {
+    background: #22c55e !important;
+    border-color: #16a34a !important;
+    color: #f0fdf4 !important;
+    box-shadow: 0 2px 8px rgba(34, 197, 94, 0.34) !important;
+}
+
+@media (max-width: 768px) {
+    .resort-location {
+        font-size: 0.8rem !important;
+        padding: 0.15rem 0.44rem !important;
+    }
+
+    .status-chips {
+        left: 0.9rem !important;
+        right: 0.9rem !important;
+        bottom: 0.44rem !important;
+        gap: 0.28rem !important;
+    }
+}
