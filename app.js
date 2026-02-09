@@ -756,7 +756,7 @@
         const SENDIT_TEST_UNLOCKED_RESORTS = new Set(['mont-sutton']);
         const sendItButtonCopyByResort = {};
         const sendItVerifyFlavorByResort = {};
-        const SENDIT_TEST_UNLIMITED_RESORTS = new Set();
+        const SENDIT_TEST_UNLIMITED_RESORTS = new Set(['mont-sutton']);
         const DEFAULT_LIFT_CLOSE_HOUR = 16;
         const NIGHT_SKI_CLOSE_HOURS = {
             camelback: { weekday: 21, weekend: 21 },
@@ -1359,11 +1359,6 @@
             const metricsFeelsLike = `${metricsFeelsLikeBase}${feelsLikeWarning}`;
             const metricsWind = weather.wind ?? '—';
             const signalLead = sendItSubtitlePrimary;
-            const sendItStatusBlock = canVote
-                ? `<div class="sendit-result ${sendItState.className || sendItScoreClass}">${sendItState.label}</div>
-                   ${sendItSocialLine ? `<div class="sendit-social-proof">${sendItSocialLine}</div>` : ''}`
-                : '';
-
             // POWDER / FRESH badges safely
             const hasSignificantSnow = parseInt(resort.snowfall24h || '0', 10) >= 6;
             let snowBadge = '';
@@ -1529,7 +1524,6 @@ const backgroundSizeByResort = {
                       ${sendItSubtitleSecondary ? `<span class="sendit-subtitle-flavor">${sendItSubtitleSecondary}</span>` : ''}
                     </div>
                   </div>
-                  ${sendItStatusBlock}
                   ${sendItPrompt}
                   ${sendItControls}
                   ${canVote ? `<div class="sendit-locked-note">Verified nearby. Local-only voting (${formatMiles(requiredMiles)} mi geofence).</div>` : ''}
