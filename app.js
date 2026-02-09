@@ -1361,7 +1361,7 @@
             if (hasLiveLifts) heroChips.push({ cls: 'chip-neutral', label: 'Live Lifts' });
             if (resort.glades > 0) {
                 heroChips.push({
-                    cls: 'chip-neutral',
+                    cls: 'chip-glades',
                     label: glades >= 3 ? '🌲🌲🌲 Elite Glades' : glades === 2 ? '🌲🌲 Excellent Glades' : '🌲 Some Glades'
                 });
             } else if (resort.familyOwned) {
@@ -1382,7 +1382,6 @@
             const metricsTemp = weather.tempF ?? (typeof weather.temp === 'number' ? `${weather.temp}°` : '—');
             const metricsFeelsLike = weather.feelsLikeF ?? (typeof weather.feelsLike === 'number' ? `${weather.feelsLike}°` : '—');
             const metricsWind = weather.wind ?? '—';
-            const weatherIconDisplay = normalizeWeatherIcon(weather.icon, weather.condition);
             const weatherConditionDisplay = weather.condition || 'Weather pending';
             const signalLead = sendItSubtitlePrimary;
             const sendItGaugeBlock = canVote
@@ -1514,10 +1513,8 @@ const backgroundSizeByResort = {
               <div class="resort-body">
                 <div class="conditions-highlight">
                   <div class="conditions-top">
-                    <div>
-                      <div class="conditions-label">Current Conditions</div>
-                      <div class="conditions-confidence ${confidenceClass}">${confidenceLevel} confidence</div>
-                    </div>
+                    <div class="conditions-label">Current Conditions</div>
+                    <div class="conditions-confidence ${confidenceClass}">Confidence: ${confidenceLevel}</div>
                   </div>
                   <div class="conditions-value">${resort.conditions || 'Unknown'}</div>
                   <div class="conditions-metrics">
@@ -1525,7 +1522,7 @@ const backgroundSizeByResort = {
                     <span>48h Snow <strong>${metrics48h}"</strong></span>
                   </div>
                   <div class="conditions-secondary-metrics">
-                    <span class="metric-weather"><strong>${weatherIconDisplay} ${metricsTemp}</strong><small>${weatherConditionDisplay}</small></span>
+                    <span class="metric-temp">Temp <strong>${metricsTemp}</strong><small>${weatherConditionDisplay}</small></span>
                     <span>Feels Like <strong>${metricsFeelsLike}</strong></span>
                     <span>Wind <strong>${metricsWind}</strong></span>
                   </div>

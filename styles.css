@@ -3437,26 +3437,31 @@
 .status-chip {
     display: inline-flex;
     align-items: center;
-    height: 1.55rem;
-    padding: 0 0.62rem;
+    height: 1.32rem;
+    padding: 0 0.52rem;
     border-radius: 999px;
-    border: 1px solid rgba(255, 255, 255, 0.28);
-    background: rgba(16, 25, 40, 0.6);
+    border: 1px solid #314564;
+    background: #1f2b3f;
     color: #f4f8ff;
-    font-size: 0.66rem;
+    font-size: 0.58rem;
     font-weight: 760;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
     text-transform: uppercase;
 }
 
 .status-chip.chip-good {
-    background: rgba(20, 148, 103, 0.78);
-    border-color: rgba(167, 243, 208, 0.6);
+    background: #167d5c;
+    border-color: #1d9b73;
 }
 
 .status-chip.chip-neutral {
-    background: rgba(30, 41, 59, 0.72);
-    border-color: rgba(191, 219, 254, 0.38);
+    background: #2f3f56;
+    border-color: #40597e;
+}
+
+.status-chip.chip-glades {
+    background: #5f7448;
+    border-color: #778f5c;
 }
 
 .resort-body {
@@ -3532,27 +3537,37 @@
 }
 
 .conditions-confidence {
-    display: inline-block;
-    margin-top: 0.18rem;
-    font-size: 0.64rem;
-    font-weight: 650;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 1.34rem;
+    padding: 0.12rem 0.56rem;
+    border-radius: 8px;
+    border: 1px solid transparent;
+    font-size: 0.58rem;
+    font-weight: 760;
     letter-spacing: 0.02em;
     text-transform: none;
-    background: transparent;
-    border: none;
-    padding: 0;
+    line-height: 1;
+    white-space: nowrap;
 }
 
 .conditions-confidence.confidence-high {
-    color: #0f766e;
+    background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
+    border-color: rgba(13, 148, 136, 0.5);
+    color: #f0fdfa;
 }
 
 .conditions-confidence.confidence-mid {
-    color: #1d4ed8;
+    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
+    border-color: rgba(37, 99, 235, 0.45);
+    color: #eff6ff;
 }
 
 .conditions-confidence.confidence-low {
-    color: #b45309;
+    background: linear-gradient(135deg, #b45309 0%, #d97706 100%);
+    border-color: rgba(217, 119, 6, 0.45);
+    color: #fffbeb;
 }
 
 .conditions-value {
@@ -3585,7 +3600,8 @@
 }
 
 .conditions-metrics .metric-weather,
-.conditions-secondary-metrics .metric-weather {
+.conditions-secondary-metrics .metric-weather,
+.conditions-secondary-metrics .metric-temp {
     display: inline-flex;
     flex-direction: column;
     align-items: flex-start;
@@ -3594,19 +3610,25 @@
 }
 
 .conditions-metrics .metric-weather strong,
-.conditions-secondary-metrics .metric-weather strong {
+.conditions-secondary-metrics .metric-weather strong,
+.conditions-secondary-metrics .metric-temp strong {
     font-size: 0.82rem;
     font-weight: 800;
     letter-spacing: 0.01em;
-    color: #1d4ed8;
+    color: #162234;
 }
 
 .conditions-metrics .metric-weather small,
-.conditions-secondary-metrics .metric-weather small {
+.conditions-secondary-metrics .metric-weather small,
+.conditions-secondary-metrics .metric-temp small {
     font-size: 0.58rem;
     color: #5d6b81;
     text-transform: lowercase;
     line-height: 1.1;
+}
+
+.conditions-secondary-metrics .metric-temp {
+    color: #34435a;
 }
 
 .conditions-source {
@@ -3778,14 +3800,13 @@
     }
 
     .status-chip {
-        font-size: 0.61rem;
-        height: 1.45rem;
+        font-size: 0.55rem;
+        height: 1.22rem;
     }
 
     .conditions-top {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 0.32rem;
+        align-items: center;
+        gap: 0.45rem;
     }
 
     .conditions-value {
@@ -3866,15 +3887,15 @@
 .trail-badge,
 .pass-badge,
 .dynamic-badge {
-    height: 1.45rem;
+    height: 1.26rem;
     display: inline-flex;
     align-items: center;
     border-radius: 999px;
-    font-size: 0.62rem;
+    font-size: 0.56rem;
     font-weight: 760;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.03em;
     text-transform: uppercase;
-    padding: 0 0.58rem;
+    padding: 0 0.5rem;
     line-height: 1;
 }
 
@@ -3883,31 +3904,31 @@
 }
 
 .trail-badge.open {
-    background: #e6fff6;
+    background: #dff9f0;
     color: #0f766e;
     border-color: #99f6e4;
 }
 
 .trail-badge.closed {
-    background: #fef2f2;
+    background: #ffeaea;
     color: #b91c1c;
     border-color: #fecaca;
 }
 
 .pass-badge.pass-ikon {
-    background: #fff5ec;
+    background: #fff1e4;
     color: #9a3412;
     border: 1px solid #fed7aa;
 }
 
 .pass-badge.pass-epic {
-    background: #eff6ff;
+    background: #e8f1ff;
     color: #1e40af;
     border: 1px solid #bfdbfe;
 }
 
 .dynamic-badge {
-    background: #fff1f2;
+    background: #ffe7ec;
     color: #be123c;
     border: 1px solid #fecdd3;
     box-shadow: none;
