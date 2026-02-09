@@ -2,6 +2,9 @@
  * ICECOAST manual resort overrides
  * Generated from admin.html
  */
+window.MANUAL_RESORT_OVERRIDES_META = {
+  "updatedAt": "2026-02-09T00:26:34Z"
+};
 window.MANUAL_RESORT_OVERRIDES = {
   "hunter": {
     "conditions": "Machine Groomed",

@@ -446,6 +446,13 @@
             const overrides =
                 (typeof window !== 'undefined' && (window.MANUAL_RESORT_OVERRIDES || window.ICECOAST_MANUAL_OVERRIDES))
                 || {};
+            const manualMeta =
+                (typeof window !== 'undefined' && window.MANUAL_RESORT_OVERRIDES_META)
+                || {};
+            const manualFileUpdatedAt =
+                (typeof manualMeta.updatedAt === 'string' && manualMeta.updatedAt.trim())
+                    ? manualMeta.updatedAt
+                    : null;
             if (!overrides || typeof overrides !== 'object') return;
 
             resorts.forEach((resort) => {
@@ -458,6 +465,8 @@
                 if (!patch || typeof patch !== 'object') return;
                 if (typeof patch._patrolUpdatedAt === 'string' && patch._patrolUpdatedAt.trim()) {
                     resort.patrolUpdatedAt = patch._patrolUpdatedAt;
+                } else if (manualFileUpdatedAt) {
+                    resort.patrolUpdatedAt = manualFileUpdatedAt;
                 }
                 resort.hasPatrolUpdate = true;
 
