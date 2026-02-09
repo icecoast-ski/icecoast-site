@@ -1088,59 +1088,7 @@
         }
 
         function getSlopeSignalPayoffPhrase(resortId, crowdMode, windMode, slopeState) {
-            const safeResortId = resortId || 'global';
-            const hasLiveModes = isValidSendItCrowd(crowdMode) || isValidSendItWind(windMode);
-            if (!hasLiveModes) return 'First Chair';
-
-            const crowd = isValidSendItCrowd(crowdMode) ? crowdMode : SENDIT_DEFAULT_SIGNALS.crowd;
-            const wind = isValidSendItWind(windMode) ? windMode : SENDIT_DEFAULT_SIGNALS.wind;
-            const slope = (slopeState || '').toLowerCase();
-
-            let bucket = 'mid';
-            if (slope.includes('full') || slope.includes('warp') || slope.includes('tilt')) {
-                bucket = 'high';
-            } else if (slope.includes('sharpen') || slope.includes('edge') || slope.includes('tide')) {
-                bucket = 'low';
-            }
-
-            const phrasePool = {
-                high: [
-                    'All-Time Window',
-                    'Send Window Open',
-                    'Hammer Time',
-                    'Lifts Spinning, Legs Burning',
-                    'Fast Laps, Good Vibes'
-                ],
-                mid: [
-                    'Sweet Spot',
-                    'Prime Laps',
-                    'Green Light',
-                    'Good Turns Ahead',
-                    'Find Your Line'
-                ],
-                low: [
-                    'Technical Day',
-                    'Dial It In',
-                    'Sharp Edges, Clean Turns',
-                    'Work For Your Turns',
-                    'Steeze Through It'
-                ]
-            };
-
-            const modifiers = [];
-            if (crowd === 'swarm') modifiers.push('Crowded');
-            if (crowd === 'quiet') modifiers.push('Wide Open');
-            if (wind === 'nuking') modifiers.push('Windy');
-            if (wind === 'calm') modifiers.push('Calm Air');
-
-            const seedBase = `${safeResortId}:${crowd}:${wind}:${bucket}`;
-            let hash = 0;
-            for (let i = 0; i < seedBase.length; i++) {
-                hash = ((hash << 5) - hash) + seedBase.charCodeAt(i);
-                hash |= 0;
-            }
-            const basePhrase = phrasePool[bucket][Math.abs(hash) % phrasePool[bucket].length];
-            return modifiers.length ? `${basePhrase} • ${modifiers.join(' / ')}` : basePhrase;
+            return 'Good Turns Ahead';
         }
 
         function haversineMiles(lat1, lon1, lat2, lon2) {
@@ -1520,10 +1468,13 @@
                           </div>
                         </div>
                       </div>
-                      <div class="sendit-vote-row">
-                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="20">${sendItButtonCopy.low}</button>
-                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="60">${sendItButtonCopy.mid}</button>
-                        <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="100">${sendItButtonCopy.high}</button>
+                      <div class="sendit-signal-row sendit-slope-row">
+                        <span class="sendit-signal-label">Slope</span>
+                        <div class="sendit-vote-row">
+                          <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="20">${sendItButtonCopy.low}</button>
+                          <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="60">${sendItButtonCopy.mid}</button>
+                          <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="100">${sendItButtonCopy.high}</button>
+                        </div>
                       </div>`
                 : `<button class="sendit-unlock-btn sendit-unlock-cta" data-sendit-action="unlock" data-resort-id="${resort.id}">⚡ I'M ON THE MOUNTAIN!</button>
                    <div class="sendit-locked-note"><span class="sendit-lock-icon" aria-hidden="true">🔒</span> One-time check to unlock local voting.</div>`;

@@ -1526,12 +1526,13 @@
             animation: railSlam 0.6s cubic-bezier(0.36, 0, 0.66, -0.56);
         }
 
-        .sendit-vote-row {
-            display: grid;
-            grid-template-columns: repeat(3, minmax(0, 1fr));
-            gap: 0.45rem;
-            align-items: stretch;
-        }
+.sendit-vote-row {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.45rem;
+    align-items: stretch;
+    width: 100%;
+}
 
         .sendit-vote-btn {
             width: 100%;
@@ -1702,7 +1703,7 @@
     position: fixed;
     left: 50%;
     top: 50%;
-    rotate: 180deg;
+    scale: -1 1;
     transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(0deg) scale(0.88);
     opacity: 0;
     z-index: 10060;
@@ -4546,6 +4547,10 @@
     box-shadow: 0 4px 10px rgba(31, 94, 200, 0.24);
 }
 
+.sendit-slope-row .sendit-vote-row {
+    width: 100%;
+}
+
 @media (max-width: 768px) {
     .sendit-signal-row {
         grid-template-columns: 48px minmax(0, 1fr);
@@ -4705,4 +4710,41 @@
     font-weight: 800 !important;
     letter-spacing: -0.02em !important;
     text-transform: none !important;
+}
+
+.sendit-header {
+    margin-bottom: 0 !important;
+}
+
+.sendit-subline {
+    margin-top: 0.42rem !important;
+    gap: 0 !important;
+}
+
+/* Match Mountain Ops typography to 24h/48h Snow metric style */
+.mountain-ops-section .info-label,
+.mountain-ops-section .lift-toggle,
+.mountain-ops-section .lift-toggle-left,
+.mountain-ops-section .info-value,
+.mountain-ops-section .ticket-price,
+.mountain-ops-section .lift-toggle-counts,
+.mountain-ops-section .trail-badge {
+    font-size: 0.76rem !important;
+    letter-spacing: 0 !important;
+    text-transform: none !important;
+}
+
+.mountain-ops-section .info-label,
+.mountain-ops-section .lift-toggle,
+.mountain-ops-section .lift-toggle-left {
+    font-weight: 500 !important;
+    color: #34435a !important;
+}
+
+.mountain-ops-section .info-value,
+.mountain-ops-section .ticket-price,
+.mountain-ops-section .lift-toggle-counts,
+.mountain-ops-section .trail-badge {
+    font-weight: 700 !important;
+    color: #162234 !important;
 }
