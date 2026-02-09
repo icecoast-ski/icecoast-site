@@ -3529,31 +3529,27 @@
 }
 
 .conditions-confidence {
-    font-size: 0.68rem;
-    font-weight: 760;
-    border-radius: 999px;
-    padding: 0.19rem 0.54rem;
-    border: 1px solid transparent;
-    text-transform: uppercase;
-    letter-spacing: 0.04em;
+    display: inline-block;
+    margin-top: 0.18rem;
+    font-size: 0.64rem;
+    font-weight: 650;
+    letter-spacing: 0.02em;
+    text-transform: none;
+    background: transparent;
+    border: none;
+    padding: 0;
 }
 
 .conditions-confidence.confidence-high {
     color: #0f766e;
-    background: #e6fffb;
-    border-color: #99f6e4;
 }
 
 .conditions-confidence.confidence-mid {
     color: #1d4ed8;
-    background: #eff6ff;
-    border-color: #bfdbfe;
 }
 
 .conditions-confidence.confidence-low {
     color: #b45309;
-    background: #fffbeb;
-    border-color: #fde68a;
 }
 
 .conditions-value {
@@ -3569,14 +3565,24 @@
     gap: 0.45rem 0.9rem;
     font-size: 0.76rem;
     color: #34435a;
-    margin-bottom: 0.25rem;
+    margin-bottom: 0.42rem;
 }
 
 .conditions-metrics strong {
     color: #162234;
 }
 
-.conditions-metrics .metric-weather {
+.conditions-secondary-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 0.5rem 0.95rem;
+    font-size: 0.75rem;
+    color: #34435a;
+}
+
+.conditions-metrics .metric-weather,
+.conditions-secondary-metrics .metric-weather {
     display: inline-flex;
     flex-direction: column;
     align-items: flex-start;
@@ -3584,13 +3590,16 @@
     min-width: 96px;
 }
 
-.conditions-metrics .metric-weather strong {
-    font-size: 0.8rem;
+.conditions-metrics .metric-weather strong,
+.conditions-secondary-metrics .metric-weather strong {
+    font-size: 0.82rem;
     font-weight: 800;
     letter-spacing: 0.01em;
+    color: #1d4ed8;
 }
 
-.conditions-metrics .metric-weather small {
+.conditions-metrics .metric-weather small,
+.conditions-secondary-metrics .metric-weather small {
     font-size: 0.58rem;
     color: #5d6b81;
     text-transform: lowercase;
@@ -3727,8 +3736,11 @@
 }
 
 .icecoast-title {
-    font-size: 0.84rem;
-    color: #1f2f49;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    color: #263246;
 }
 
 .rating-text {
@@ -3913,8 +3925,8 @@
 }
 
 .weather-section {
-    margin-top: 0.9rem;
-    padding-top: 0.9rem;
+    margin-top: 0.38rem;
+    padding-top: 0.12rem;
 }
 
 .weather-current {

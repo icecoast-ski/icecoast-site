@@ -405,6 +405,18 @@
             return fallback;
         }
 
+        function normalizeWeatherIcon(icon, condition) {
+            const source = `${icon || ''} ${condition || ''}`.toLowerCase();
+            if (source.includes('thunder') || source.includes('lightning') || source.includes('⛈')) return '⚡';
+            if (source.includes('snow') || source.includes('sleet') || source.includes('flurr')) return '❄';
+            if (source.includes('rain') || source.includes('drizzle') || source.includes('🌧')) return '☂';
+            if (source.includes('mist') || source.includes('fog') || source.includes('haze') || source.includes('🌫')) return '☁';
+            if (source.includes('clear') || source.includes('sun') || source.includes('☀')) return '☀';
+            if (source.includes('partly') || source.includes('broken') || source.includes('scattered') || source.includes('⛅')) return '⛅';
+            if (source.includes('cloud') || source.includes('☁')) return '☁';
+            return '☁';
+        }
+
         function normalizeSnowfall(resort) {
             if (!resort || typeof resort !== 'object') return;
             const snow24 = resort.snowfall24h ?? resort.snowfall?.['24h'] ?? 0;
@@ -1369,7 +1381,8 @@
             const metrics48h = parseInt(resort.snowfall48h || 0, 10);
             const metricsTemp = weather.tempF ?? (typeof weather.temp === 'number' ? `${weather.temp}°` : '—');
             const metricsFeelsLike = weather.feelsLikeF ?? (typeof weather.feelsLike === 'number' ? `${weather.feelsLike}°` : '—');
-            const weatherIconDisplay = weather.icon || '☁️';
+            const metricsWind = weather.wind ?? '—';
+            const weatherIconDisplay = normalizeWeatherIcon(weather.icon, weather.condition);
             const weatherConditionDisplay = weather.condition || 'Weather pending';
             const signalLead = sendItSubtitlePrimary;
             const sendItGaugeBlock = canVote
@@ -1510,9 +1523,33 @@ const backgroundSizeByResort = {
                   <div class="conditions-metrics">
                     <span>24h Snow <strong>${metrics24h}"</strong></span>
                     <span>48h Snow <strong>${metrics48h}"</strong></span>
+                  </div>
+                  <div class="conditions-secondary-metrics">
                     <span class="metric-weather"><strong>${weatherIconDisplay} ${metricsTemp}</strong><small>${weatherConditionDisplay}</small></span>
                     <span>Feels Like <strong>${metricsFeelsLike}</strong></span>
+                    <span>Wind <strong>${metricsWind}</strong></span>
                   </div>
+                </div>
+
+                <div class="weather-section">
+                  <details class="forecast-details" style="margin-top:0.75rem;">
+                    <summary class="forecast-toggle">
+                      <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.5rem;">
+                        ${icons.calendar}
+                      </span>
+                      3-Day Forecast
+                    </summary>
+                    <div class="forecast-grid">
+                      ${forecast.map(day => `
+                        <div class="forecast-day">
+                          <div class="forecast-day-name">${day.day}</div>
+                          <div class="forecast-icon">${day.icon}</div>
+                          <div class="forecast-temp">${day.tempF ?? (typeof day.temp === 'number' ? `${day.temp}°` : '—')}</div>
+                          <div class="forecast-snow">${typeof day.snow === 'number' ? `${day.snow}"` : (day.snow ?? '—')}</div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </details>
                 </div>
 
                 <div class="sendit-section">
@@ -1641,27 +1678,6 @@ const backgroundSizeByResort = {
                     }
                   </div>
                 </details>
-
-                <div class="weather-section">
-                  <details class="forecast-details" style="margin-top:0.75rem;">
-                    <summary class="forecast-toggle">
-                      <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.5rem;">
-                        ${icons.calendar}
-                      </span>
-                      3-Day Forecast
-                    </summary>
-                    <div class="forecast-grid">
-                      ${forecast.map(day => `
-                        <div class="forecast-day">
-                          <div class="forecast-day-name">${day.day}</div>
-                          <div class="forecast-icon">${day.icon}</div>
-                          <div class="forecast-temp">${day.tempF ?? (typeof day.temp === 'number' ? `${day.temp}°` : '—')}</div>
-                          <div class="forecast-snow">${typeof day.snow === 'number' ? `${day.snow}"` : (day.snow ?? '—')}</div>
-                        </div>
-                      `).join('')}
-                    </div>
-                  </details>
-                </div>
 
                 <div class="extra-ratings">
                   <div class="extra-rating-item">
