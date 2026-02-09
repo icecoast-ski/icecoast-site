@@ -963,11 +963,21 @@
             if (!iso) return `${prefix} —`;
             const dt = new Date(iso);
             if (Number.isNaN(dt.getTime())) return `${prefix} —`;
+            const now = new Date();
+            const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+            const startOfTarget = new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+            const dayDiff = Math.round((startOfToday - startOfTarget) / (24 * 60 * 60 * 1000));
             const time = dt.toLocaleTimeString('en-US', {
                 hour: 'numeric',
                 minute: '2-digit'
             });
-            return `${prefix} ${time}`;
+            if (dayDiff <= 0) return `${prefix} ${time}`;
+            if (dayDiff === 1) return `${prefix} yesterday ${time}`;
+            const dateLabel = dt.toLocaleDateString('en-US', {
+                month: 'short',
+                day: 'numeric'
+            });
+            return `${prefix} ${dateLabel}, ${time}`;
         }
 
         function isRecentIso(iso, maxHours = 24) {
@@ -1300,11 +1310,8 @@
             const hasFreshPatrol = resort.hasPatrolUpdate && isRecentIso(resort.patrolUpdatedAt, 24);
             const hasLiveWeather = !!resort.hasLiveWeather;
             const hasLiveLifts = !!resort.hasLiveLifts;
-            const liveUpdatedLabel = (hasLiveWeather || hasLiveLifts)
-                ? formatUpdateLabel(snapshotLastUpdatedIso, 'Patrol Updated')
-                : '';
             const patrolUpdatedLabel = hasFreshPatrol
-                ? formatUpdateLabel(resort.patrolUpdatedAt, 'Condition Updated')
+                ? formatUpdateLabel(resort.patrolUpdatedAt, 'Patrol Updated')
                 : '';
             const sendItButtonCopy = getSendItButtonCopy(resort.id);
             const requiredMiles = getSendItRadiusMilesForResort(resort.id);
@@ -1342,12 +1349,9 @@
                        <div class="sendit-locked-note">Only users within ${formatMiles(requiredMiles)} miles can vote.</div>`;
             const dataBadges = `
                 <div class="data-provenance-row">
-                  ${hasLiveWeather ? '<span class="data-provenance-badge live-weather">Patrol Updated Weather</span>' : ''}
-                  ${hasLiveLifts ? '<span class="data-provenance-badge live-lifts">Patrol Updated Lifts</span>' : ''}
-                  ${hasFreshPatrol ? '<span class="data-provenance-badge patrol">Condition Report</span>' : ''}
-                  ${hasFreshPatrol
-                      ? `<span class="data-provenance-badge updated">${patrolUpdatedLabel}</span>`
-                      : ((hasLiveWeather || hasLiveLifts) ? `<span class="data-provenance-badge updated">${liveUpdatedLabel}</span>` : '')}
+                  ${hasLiveWeather ? '<span class="data-provenance-badge live-weather">Live Weather</span>' : ''}
+                  ${hasLiveLifts ? '<span class="data-provenance-badge live-lifts">Live Lifts</span>' : ''}
+                  ${hasFreshPatrol ? `<span class="data-provenance-badge updated">${patrolUpdatedLabel}</span>` : ''}
                 </div>
             `;
 
