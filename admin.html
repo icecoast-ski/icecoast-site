@@ -200,16 +200,31 @@
             <input id="icecoastRating" type="number" min="1" max="5" step="1" />
           </div>
           <div>
-            <label for="apres">Apres (0-5)</label>
-            <input id="apres" type="number" min="0" max="5" step="1" />
+            <label for="trailsOpen">Trails Open</label>
+            <input id="trailsOpen" type="number" min="0" step="1" />
           </div>
           <div>
-            <label for="family">Family (0-5)</label>
-            <input id="family" type="number" min="0" max="5" step="1" />
+            <label for="liftsOpen">Lifts Open</label>
+            <input id="liftsOpen" type="number" min="0" step="1" />
           </div>
           <div>
-            <label for="vertical">Vertical Drop (ft)</label>
-            <input id="vertical" type="number" min="0" step="1" />
+            <label for="liftsTotal">Lifts Total</label>
+            <input id="liftsTotal" type="number" min="0" step="1" />
+          </div>
+        </div>
+
+        <div class="row-3">
+          <div>
+            <label for="snow24">24h Snow (inches)</label>
+            <input id="snow24" type="number" min="0" step="1" />
+          </div>
+          <div>
+            <label for="snow48">48h Snow (inches)</label>
+            <input id="snow48" type="number" min="0" step="1" />
+          </div>
+          <div>
+            <label for="snow7d">7d Snow (inches)</label>
+            <input id="snow7d" type="number" min="0" step="1" />
           </div>
         </div>
 
@@ -240,38 +255,23 @@
 
         <div class="row">
           <div>
-            <label for="trailsOpen">Trails Open</label>
-            <input id="trailsOpen" type="number" min="0" step="1" />
-          </div>
-          <div>
             <label for="trailsClosed">Trails Closed</label>
             <input id="trailsClosed" type="number" min="0" step="1" />
+          </div>
+          <div>
+            <label for="vertical">Vertical Drop (ft)</label>
+            <input id="vertical" type="number" min="0" step="1" />
           </div>
         </div>
 
         <div class="row">
           <div>
-            <label for="liftsOpen">Lifts Open</label>
-            <input id="liftsOpen" type="number" min="0" step="1" />
+            <label for="apres">Apres (0-5)</label>
+            <input id="apres" type="number" min="0" max="5" step="1" />
           </div>
           <div>
-            <label for="liftsTotal">Lifts Total</label>
-            <input id="liftsTotal" type="number" min="0" step="1" />
-          </div>
-        </div>
-
-        <div class="row-3">
-          <div>
-            <label for="snow24">24h Snow (inches)</label>
-            <input id="snow24" type="number" min="0" step="1" />
-          </div>
-          <div>
-            <label for="snow48">48h Snow (inches)</label>
-            <input id="snow48" type="number" min="0" step="1" />
-          </div>
-          <div>
-            <label for="snow7d">7d Snow (inches)</label>
-            <input id="snow7d" type="number" min="0" step="1" />
+            <label for="family">Family (0-5)</label>
+            <input id="family" type="number" min="0" max="5" step="1" />
           </div>
         </div>
 
@@ -549,6 +549,17 @@
       return !patch || Object.keys(patch).length === 0;
     }
 
+    function stripPatchMeta(patch) {
+      if (!patch || typeof patch !== 'object') return {};
+      const copy = JSON.parse(JSON.stringify(patch));
+      delete copy._patrolUpdatedAt;
+      return copy;
+    }
+
+    function patchesEqual(a, b) {
+      return JSON.stringify(stripPatchMeta(a)) === JSON.stringify(stripPatchMeta(b));
+    }
+
     function saveCurrentResort() {
       const resort = getCurrentResort();
       if (!resort) return;
@@ -556,6 +567,12 @@
       if (isPatchEmpty(patch)) {
         delete overrides[resort.id];
       } else {
+        const existing = overrides[resort.id] || {};
+        if (!patchesEqual(existing, patch)) {
+          patch._patrolUpdatedAt = new Date().toISOString();
+        } else if (typeof existing._patrolUpdatedAt === 'string' && existing._patrolUpdatedAt) {
+          patch._patrolUpdatedAt = existing._patrolUpdatedAt;
+        }
         overrides[resort.id] = patch;
       }
       loadFormForResort(resort.id);

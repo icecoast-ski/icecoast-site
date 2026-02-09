@@ -449,9 +449,17 @@
             if (!overrides || typeof overrides !== 'object') return;
 
             resorts.forEach((resort) => {
+                resort.hasPatrolUpdate = false;
+                resort.patrolUpdatedAt = null;
+            });
+
+            resorts.forEach((resort) => {
                 const patch = overrides[resort.id];
                 if (!patch || typeof patch !== 'object') return;
-                resort.hasPatrolUpdate = true;
+                if (typeof patch._patrolUpdatedAt === 'string' && patch._patrolUpdatedAt.trim()) {
+                    resort.patrolUpdatedAt = patch._patrolUpdatedAt;
+                }
+                resort.hasPatrolUpdate = isRecentIso(resort.patrolUpdatedAt, 24);
 
                 if (Number.isFinite(Number(patch.icecoastRating))) {
                     resort.manualRating = Math.max(1, Math.min(5, Number(patch.icecoastRating)));
@@ -951,6 +959,13 @@
             return `Last Updated ${time}`;
         }
 
+        function isRecentIso(iso, maxHours = 24) {
+            if (!iso) return false;
+            const ts = Date.parse(iso);
+            if (!Number.isFinite(ts)) return false;
+            return (Date.now() - ts) <= (maxHours * 60 * 60 * 1000);
+        }
+
         function getSendItDeviceId() {
             try {
                 let id = localStorage.getItem(SENDIT_DEVICE_ID_KEY);
@@ -1271,7 +1286,9 @@
 
             const sendIt = sendItSummaryByResort[resort.id] || {};
             const showLiftMoon = isAfterLiftClose(resort.id);
-            const lastUpdatedBadge = formatSnapshotBadge(snapshotLastUpdatedIso);
+            const hasFreshPatrol = resort.hasPatrolUpdate && isRecentIso(resort.patrolUpdatedAt, 24);
+            const liveUpdatedLabel = resort.hasLiveUpdate ? formatSnapshotBadge(snapshotLastUpdatedIso) : '';
+            const patrolUpdatedLabel = hasFreshPatrol ? formatSnapshotBadge(resort.patrolUpdatedAt) : '';
             const sendItButtonCopy = getSendItButtonCopy(resort.id);
             const requiredMiles = getSendItRadiusMilesForResort(resort.id);
             const sendItVotes = Number.isFinite(sendIt.votes) ? sendIt.votes : 0;
@@ -1309,8 +1326,10 @@
             const dataBadges = `
                 <div class="data-provenance-row">
                   ${resort.hasLiveUpdate ? '<span class="data-provenance-badge live">Live</span>' : ''}
-                  ${resort.hasPatrolUpdate ? '<span class="data-provenance-badge patrol">Patrol Updated</span>' : ''}
-                  <span class="data-provenance-badge updated">${lastUpdatedBadge}</span>
+                  ${hasFreshPatrol ? '<span class="data-provenance-badge patrol">Patrol Updated</span>' : ''}
+                  ${hasFreshPatrol
+                      ? `<span class="data-provenance-badge updated">${patrolUpdatedLabel}</span>`
+                      : (resort.hasLiveUpdate ? `<span class="data-provenance-badge updated">${liveUpdatedLabel}</span>` : '')}
                 </div>
             `;
 
