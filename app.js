@@ -1175,12 +1175,10 @@
             const section = card.querySelector('.sendit-section');
             const score = card.querySelector('.sendit-scoreboard');
             const prompt = card.querySelector('.sendit-prompt');
-            const isFullSend = Number(scoreValue) >= 100;
 
             if (section) section.classList.add('vote-locked');
             if (score) score.classList.add('vote-pop');
             if (prompt) {
-                prompt.textContent = isFullSend ? 'Full send locked ⚡' : 'Vote locked in ⚡';
                 prompt.classList.add('vote-payoff');
             }
             launchSendItSkier(resortId, scoreValue);
@@ -1389,12 +1387,11 @@
             const selectedSignals = getSendItSignalSelection(resort.id);
             const liveCrowdMode = isValidSendItCrowd(sendIt.crowdMode) ? sendIt.crowdMode : null;
             const liveWindMode = isValidSendItWind(sendIt.windMode) ? sendIt.windMode : null;
-            const signalSummaryLine = (liveCrowdMode || liveWindMode)
-                ? `Live signal: Crowd ${getSendItCrowdLabel(liveCrowdMode || SENDIT_DEFAULT_SIGNALS.crowd)} • Wind ${getSendItWindLabel(liveWindMode || SENDIT_DEFAULT_SIGNALS.wind)}`
-                : 'Live signal: Be first to set Crowd + Wind.';
-            const sendItSubtitlePrimary = 'On-mountain locals call how sendy it is right now.';
-            const sendItSubtitleSecondary = canVote ? 'Tap a lane below.' : '';
-            const sendItPrompt = canVote ? `<div class="sendit-prompt">Tap your call</div>` : '';
+            const liveSlopeLabel = sendItState.label;
+            const signalSummaryLine = `Crowd: ${getSendItCrowdLabel(liveCrowdMode || SENDIT_DEFAULT_SIGNALS.crowd)} • Wind: ${getSendItWindLabel(liveWindMode || SENDIT_DEFAULT_SIGNALS.wind)} • Slope: ${liveSlopeLabel}`;
+            const sendItSubtitlePrimary = `Live Signal: ${liveSlopeLabel}`;
+            const sendItSubtitleSecondary = canVote ? 'Set Crowd + Wind, then hit your Slope call.' : 'Verify once to unlock local voting.';
+            const sendItPrompt = canVote ? `<div class="sendit-prompt">Crowd • Wind • Slope</div>` : '';
             const sendItControls = !hasCoords ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>` : canVote
                 ? `<div class="sendit-signal-group">
                         <div class="sendit-signal-row">
@@ -1638,10 +1635,10 @@ const backgroundSizeByResort = {
                       ${sendItSubtitleSecondary ? `<span class="sendit-subtitle-flavor">${sendItSubtitleSecondary}</span>` : ''}
                     </div>
                   </div>
+                  <div class="sendit-result">${signalSummaryLine}</div>
                   ${sendItPrompt}
                   ${sendItControls}
                   ${canVote ? `<div class="sendit-locked-note">Verified nearby. Local-only voting unlocked.</div>` : ''}
-                  <div class="sendit-result">${signalSummaryLine}</div>
                 </div>
 
                 <div class="rating-section">
