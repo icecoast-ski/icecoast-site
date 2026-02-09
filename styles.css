@@ -3649,6 +3649,14 @@
     flex-direction: row;
 }
 
+.cold-warning-icon {
+    display: inline-block;
+    font-size: 1.18em;
+    line-height: 1;
+    margin-left: 0.12rem;
+    vertical-align: -0.04em;
+}
+
 .forecast-inline {
     margin-top: 0.62rem;
     border-top: 1px solid rgba(15, 23, 42, 0.08);
