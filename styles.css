@@ -4242,3 +4242,13 @@
 .sendit-subtitle-flavor {
     opacity: 0.9;
 }
+
+/* Header image should render clean with no tint/overlay layer */
+.resort-header::before,
+.resort-header::after,
+.resort-card[data-resort="wildcat"] .resort-header::before,
+.resort-card[data-resort="sugarloaf"] .resort-header::before,
+.resort-card[data-resort="montage"] .resort-header::before {
+    content: none !important;
+    background: none !important;
+}

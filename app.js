@@ -1329,10 +1329,6 @@
             const hasFreshPatrol = !!resort.hasPatrolUpdate && !!resort.patrolUpdatedAt;
             const hasLiveWeather = !!resort.hasLiveWeather;
             const hasLiveLifts = !!resort.hasLiveLifts;
-            const patrolUpdatedLabel = hasFreshPatrol
-                ? formatUpdateLabel(resort.patrolUpdatedAt, 'Updated')
-                : '';
-            const heroUpdatedText = hasFreshPatrol ? patrolUpdatedLabel : 'Updated...';
             const sendItButtonCopy = getSendItButtonCopy(resort.id);
             const requiredMiles = getSendItRadiusMilesForResort(resort.id);
             const sendItVotes = Number.isFinite(sendIt.votes) ? sendIt.votes : 0;
@@ -1523,7 +1519,6 @@ const backgroundSizeByResort = {
                       <span class="resort-name-text">${resort.name}</span>
                     </h2>
                     <p class="resort-location">${resort.location}</p>
-                    <p class="resort-updated">${heroUpdatedText}</p>
                     ${heroChipMarkup ? `<div class="status-chips">${heroChipMarkup}</div>` : ''}
                   </div>
                 </div>
