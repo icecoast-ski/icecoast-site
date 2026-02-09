@@ -1382,7 +1382,6 @@
             const metricsTemp = weather.tempF ?? (typeof weather.temp === 'number' ? `${weather.temp}°` : '—');
             const metricsFeelsLike = weather.feelsLikeF ?? (typeof weather.feelsLike === 'number' ? `${weather.feelsLike}°` : '—');
             const metricsWind = weather.wind ?? '—';
-            const weatherConditionDisplay = weather.condition || 'Weather pending';
             const signalLead = sendItSubtitlePrimary;
             const sendItGaugeBlock = canVote
                 ? `<div class="sendit-result ${sendItState.className || sendItScoreClass}">${sendItState.label}</div>
@@ -1522,7 +1521,7 @@ const backgroundSizeByResort = {
                     <span>48h Snow <strong>${metrics48h}"</strong></span>
                   </div>
                   <div class="conditions-secondary-metrics">
-                    <span class="metric-temp">Temp <strong>${metricsTemp}</strong><small>${weatherConditionDisplay}</small></span>
+                    <span class="metric-temp">Temp <strong>${metricsTemp}</strong></span>
                     <span>Feels Like <strong>${metricsFeelsLike}</strong></span>
                     <span>Wind <strong>${metricsWind}</strong></span>
                   </div>

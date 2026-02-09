@@ -3439,8 +3439,8 @@
     align-items: center;
     height: 1.32rem;
     padding: 0 0.52rem;
-    border-radius: 999px;
-    border: 1px solid #314564;
+    border-radius: 7px;
+    border: none;
     background: #1f2b3f;
     color: #f4f8ff;
     font-size: 0.58rem;
@@ -3451,17 +3451,14 @@
 
 .status-chip.chip-good {
     background: #167d5c;
-    border-color: #1d9b73;
 }
 
 .status-chip.chip-neutral {
     background: #2f3f56;
-    border-color: #40597e;
 }
 
 .status-chip.chip-glades {
     background: #5f7448;
-    border-color: #778f5c;
 }
 
 .resort-body {
@@ -3542,32 +3539,31 @@
     justify-content: center;
     min-height: 1.34rem;
     padding: 0.12rem 0.56rem;
-    border-radius: 8px;
-    border: 1px solid transparent;
+    border-radius: 6px;
+    border: none;
     font-size: 0.58rem;
     font-weight: 760;
     letter-spacing: 0.02em;
     text-transform: none;
     line-height: 1;
     white-space: nowrap;
+    background: #e8f1ff;
+    color: #1f3b68;
 }
 
 .conditions-confidence.confidence-high {
-    background: linear-gradient(135deg, #0f766e 0%, #0d9488 100%);
-    border-color: rgba(13, 148, 136, 0.5);
-    color: #f0fdfa;
+    background: #e8f1ff;
+    color: #1f3b68;
 }
 
 .conditions-confidence.confidence-mid {
-    background: linear-gradient(135deg, #1d4ed8 0%, #2563eb 100%);
-    border-color: rgba(37, 99, 235, 0.45);
-    color: #eff6ff;
+    background: #e8f1ff;
+    color: #1f3b68;
 }
 
 .conditions-confidence.confidence-low {
-    background: linear-gradient(135deg, #b45309 0%, #d97706 100%);
-    border-color: rgba(217, 119, 6, 0.45);
-    color: #fffbeb;
+    background: #e8f1ff;
+    color: #1f3b68;
 }
 
 .conditions-value {
@@ -3603,10 +3599,9 @@
 .conditions-secondary-metrics .metric-weather,
 .conditions-secondary-metrics .metric-temp {
     display: inline-flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 0.06rem;
-    min-width: 96px;
+    align-items: baseline;
+    gap: 0.3rem;
+    min-width: 0;
 }
 
 .conditions-metrics .metric-weather strong,
@@ -3629,6 +3624,7 @@
 
 .conditions-secondary-metrics .metric-temp {
     color: #34435a;
+    flex-direction: row;
 }
 
 .conditions-source {
