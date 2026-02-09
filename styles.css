@@ -1655,21 +1655,23 @@
         .sendit-toast {
             position: fixed;
             left: 50%;
-            bottom: 84px;
+            bottom: 136px;
             transform: translateX(-50%) translateY(12px);
             opacity: 0;
             z-index: 10040;
-            background: linear-gradient(135deg, #1f6ad8 0%, #14a06a 100%);
-            color: #fff;
-            border-radius: 999px;
-            padding: 0.56rem 0.9rem;
-            font-size: 0.74rem;
-            font-weight: 800;
-            letter-spacing: 0.04em;
-            text-transform: uppercase;
-            box-shadow: 0 8px 20px rgba(21, 37, 56, 0.24);
+            background: #ffffff;
+            color: #1e4ea4;
+            border: 1px solid rgba(30, 78, 164, 0.22);
+            border-radius: 12px;
+            padding: 0.48rem 0.78rem;
+            font-size: 0.72rem;
+            font-weight: 720;
+            letter-spacing: 0.01em;
+            text-transform: none;
+            box-shadow: 0 8px 20px rgba(16, 34, 62, 0.16);
             transition: opacity 0.2s ease, transform 0.2s ease;
             pointer-events: none;
+            white-space: nowrap;
         }
 
         .sendit-toast.visible {
@@ -3974,8 +3976,11 @@
 }
 
 .sendit-subtitle-flavor {
-    font-size: 0.62rem;
-    color: #5e6d83;
+    font-size: 0.54rem;
+    color: #667892;
+    font-weight: 560;
+    letter-spacing: 0.01em;
+    margin-top: 0.08rem;
 }
 
 .sendit-history-divider {
@@ -4762,6 +4767,12 @@
         right: 0.9rem !important;
         bottom: 0.9rem !important;
         gap: 0.28rem !important;
+    }
+
+    .sendit-toast {
+        bottom: 118px;
+        font-size: 0.7rem;
+        padding: 0.44rem 0.72rem;
     }
 }
 

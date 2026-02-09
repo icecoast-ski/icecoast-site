@@ -803,7 +803,6 @@
                 'First Chair',
                 'Be The First To Call It',
                 'Fresh Slate',
-                'No Local Calls Yet',
                 'Waiting On The First Drop'
             ],
             low: [
@@ -1444,7 +1443,7 @@
                 await new Promise(resolve => setTimeout(resolve, 320));
 
                 celebrateSendItVote(resortId, score, buttonEl);
-                showSendItToast('Local vote locked in');
+                showSendItToast('Slope Signal SENT');
 
                 // After payoff animation, require re-verification for the next vote.
                 const lockDelayMs = Number(score) >= 100 ? 2350 : 2050;
@@ -1508,6 +1507,7 @@
                 ? ''
                 : (sendItScoreValue >= 70 ? 'hot' : (sendItScoreValue >= 45 ? 'mid' : 'cold'));
             const sendItState = getSendItState(sendItScoreValue, resort.id);
+            const hasSlopeSignalData = Number.isFinite(sendItScoreValue) && sendItVotes >= SENDIT_HISTORY_MIN_VOTES;
             const sendItSocialLine = getSendItSocialLine(sendItVotesLastHour, sendItVotes);
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
@@ -1537,7 +1537,7 @@
                 liveCrowdMode,
                 liveWindMode
             );
-            const sendItSubtitleSecondary = '';
+            const sendItSubtitleSecondary = hasSlopeSignalData ? '' : 'No local calls yet.';
             const sendItPrompt = '';
             const sendItControls = !hasCoords ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>` : canVote
                 ? `<div class="sendit-signal-group">
