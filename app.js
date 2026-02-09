@@ -1345,8 +1345,8 @@
                         <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="100">${sendItButtonCopy.high}</button>
                       </div>
                       <div class="sendit-locked-note">Verified nearby. Local-only voting (${formatMiles(requiredMiles)} mi geofence).</div>`
-                    : `<button class="sendit-unlock-btn sendit-unlock-cta" data-sendit-action="unlock" data-resort-id="${resort.id}">⚡ Unlock Nearby Voting</button>
-                       <div class="sendit-locked-note">Only users within ${formatMiles(requiredMiles)} miles can vote.</div>`;
+                    : `<button class="sendit-unlock-btn sendit-unlock-cta" data-sendit-action="unlock" data-resort-id="${resort.id}">⚡ Verify You're On-Mountain</button>
+                       <div class="sendit-locked-note">One-time check to unlock local voting.</div>`;
             const dataBadges = `
                 <div class="data-provenance-row">
                   ${hasLiveWeather ? '<span class="data-provenance-badge live-weather">Live Weather</span>' : ''}
