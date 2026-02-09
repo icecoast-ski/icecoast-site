@@ -3826,6 +3826,7 @@
 }
 
 .extra-score {
+    display: none;
     color: #1e3a8a;
     font-size: 0.68rem;
     font-weight: 800;
@@ -3913,7 +3914,11 @@
 
 .rating-section {
     margin-bottom: 0.95rem;
-    padding-bottom: 0.95rem;
+    padding: 0.9rem;
+    border-radius: 16px;
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
 }
 
 .icecoast-title {
@@ -4193,7 +4198,6 @@
     --ui-value-color: #162234;
 }
 
-.conditions-label,
 .sendit-title,
 .icecoast-title,
 .info-label,
@@ -4207,8 +4211,6 @@
     text-transform: uppercase;
 }
 
-.conditions-metrics,
-.conditions-secondary-metrics,
 .sendit-subtitle,
 .sendit-subtitle-flavor,
 .rating-text,
@@ -4225,8 +4227,6 @@
     text-transform: none;
 }
 
-.conditions-metrics strong,
-.conditions-secondary-metrics strong,
 .rating-stars .star,
 .ticket-price,
 .distance-item strong,
@@ -4241,6 +4241,30 @@
 
 .sendit-subtitle-flavor {
     opacity: 0.9;
+}
+
+.sendit-subtitle,
+.rating-text,
+.info-value,
+.distance-item,
+.lift-item,
+.sendit-locked-note,
+.sendit-result,
+.sendit-social-proof {
+    font-size: 0.75rem;
+    font-weight: 650;
+    color: #34435a;
+}
+
+.ticket-price,
+.distance-item strong,
+.lift-toggle-counts,
+.sendit-score-number,
+.sendit-score-value,
+.info-value strong {
+    font-size: 0.82rem;
+    font-weight: 760;
+    color: #162234;
 }
 
 /* Header image should render clean with no tint/overlay layer */

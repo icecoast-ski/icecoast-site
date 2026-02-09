@@ -1710,7 +1710,6 @@ const backgroundSizeByResort = {
                     <span class="extra-rating-track" aria-hidden="true">
                       ${Array.from({ length: 5 }, (_, i) => `<span class="extra-rating-icon ${i < apresScore ? 'filled' : 'empty'}">🍺</span>`).join('')}
                     </span>
-                    <span class="extra-score">${apresScore}/5</span>
                   </div>
                   <div class="extra-rating-item">
                     <span class="extra-label">
@@ -1722,7 +1721,6 @@ const backgroundSizeByResort = {
                     <span class="extra-rating-track" aria-hidden="true">
                       ${Array.from({ length: 5 }, (_, i) => `<span class="extra-rating-icon ${i < familyScore ? 'filled' : 'empty'}">👶</span>`).join('')}
                     </span>
-                    <span class="extra-score">${familyScore}/5</span>
                   </div>
                 </div>
 
