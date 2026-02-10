@@ -765,7 +765,7 @@
         const sendItButtonCopyByResort = {};
         const sendItVerifyFlavorByResort = {};
         const sendItStateLabelByResort = {};
-        const SENDIT_TEST_UNLIMITED_RESORTS = new Set(['mont-sutton']);
+        const SENDIT_TEST_UNLIMITED_RESORTS = new Set([]);
         const DEFAULT_LIFT_CLOSE_HOUR = 16;
         const NIGHT_SKI_CLOSE_HOURS = {
             camelback: { weekday: 21, weekend: 21 },
