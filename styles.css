@@ -4804,15 +4804,6 @@
     text-align: left !important;
 }
 
-.sendit-read-label {
-    font-size: 0.62rem !important;
-    font-weight: 650 !important;
-    color: #5b6d86 !important;
-    letter-spacing: 0.015em !important;
-    text-transform: none !important;
-    margin-bottom: 0.08rem !important;
-}
-
 .sendit-main-read {
     display: inline-flex !important;
     align-items: center !important;
@@ -4861,8 +4852,9 @@
 .mountain-ops-section .ticket-price,
 .mountain-ops-section .lift-toggle-counts,
 .mountain-ops-section .trail-badge {
-    font-weight: 700 !important;
-    color: #162234 !important;
+    font-size: 0.75rem !important;
+    font-weight: 650 !important;
+    color: #34435a !important;
 }
 
 /* Final header baseline lock: keep tagline bottom-aligned with logo */

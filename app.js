@@ -579,25 +579,25 @@
         const RESORT_APRES_FAMILY_SCORE = {
             // Poconos / PA
             'camelback': { apres: 3, family: 5 },
-            'blue-mountain': { apres: 3, family: 4 },
+            'blue-mountain': { apres: 3, family: 3 },
             'jack-frost': { apres: 2, family: 3 },
             'shawnee': { apres: 2, family: 4 },
-            'bear-creek': { apres: 2, family: 4 },
+            'bear-creek': { apres: 3, family: 4 },
             'elk': { apres: 2, family: 3 },
-            'big-boulder': { apres: 3, family: 3 },
-            'montage': { apres: 3, family: 3 },
+            'big-boulder': { apres: 3, family: 2 },
+            'montage': { apres: 2, family: 3 },
 
             // NY
-            'hunter': { apres: 4, family: 3 },
-            'windham': { apres: 4, family: 4 },
-            'belleayre': { apres: 2, family: 4 },
-            'whiteface': { apres: 3, family: 3 },
+            'hunter': { apres: 3, family: 3 },
+            'windham': { apres: 3, family: 4 },
+            'belleayre': { apres: 2, family: 5 },
+            'whiteface': { apres: 4, family: 4 },
             'gore-mountain': { apres: 2, family: 4 },
 
             // MA / CT
             'jiminy-peak': { apres: 3, family: 5 },
-            'wachusett': { apres: 2, family: 5 },
-            'mohawk': { apres: 2, family: 4 },
+            'wachusett': { apres: 2, family: 4 },
+            'mohawk': { apres: 1, family: 4 },
 
             // Vermont
             'stratton': { apres: 4, family: 4 },
@@ -606,26 +606,26 @@
             'okemo': { apres: 3, family: 5 },
             'pico': { apres: 2, family: 4 },
             'sugarbush': { apres: 4, family: 4 },
-            'mad-river-glen': { apres: 2, family: 3 },
-            'stowe': { apres: 4, family: 4 },
+            'mad-river-glen': { apres: 2, family: 2 },
+            'stowe': { apres: 5, family: 4 },
             'smugglers-notch': { apres: 2, family: 5 },
-            'jay-peak': { apres: 3, family: 3 },
+            'jay-peak': { apres: 3, family: 4 },
             'burke': { apres: 2, family: 3 },
 
             // NH / ME
-            'loon': { apres: 4, family: 4 },
+            'loon': { apres: 3, family: 4 },
             'brettonwoods': { apres: 3, family: 5 },
             'waterville': { apres: 3, family: 4 },
-            'cannon': { apres: 2, family: 3 },
-            'wildcat': { apres: 2, family: 3 },
-            'sunday-river': { apres: 4, family: 4 },
+            'cannon': { apres: 1, family: 3 },
+            'wildcat': { apres: 1, family: 2 },
+            'sunday-river': { apres: 4, family: 5 },
             'sugarloaf': { apres: 4, family: 4 },
-            'saddleback': { apres: 3, family: 4 },
+            'saddleback': { apres: 2, family: 3 },
 
             // Canada
-            'tremblant': { apres: 5, family: 4 },
+            'tremblant': { apres: 5, family: 5 },
             'mont-sainte-anne': { apres: 3, family: 4 },
-            'le-massif': { apres: 3, family: 3 },
+            'le-massif': { apres: 2, family: 3 },
             'mont-sutton': { apres: 3, family: 4 }
         };
 
@@ -657,10 +657,10 @@
 
             // NY
             'hunter': 2,
-            'windham': 2,
+            'windham': 1,
             'belleayre': 2,
             'whiteface': 3,
-            'gore-mountain': 2,
+            'gore-mountain': 3,
 
             // MA / CT
             'jiminy-peak': 1,
@@ -1789,7 +1789,6 @@ const backgroundSizeByResort = {
                       <div class="sendit-title">SLOPE SIGNAL</div>
                     </div>
                     <div class="sendit-subline">
-                      <span class="sendit-read-label">Local Read:</span>
                       <span class="sendit-main-read">
                         <span class="sendit-live-dot signal-${sendItTone}" aria-hidden="true"></span>
                         <span class="sendit-subtitle">${signalLead}</span>
