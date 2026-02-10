@@ -1554,12 +1554,8 @@
 
                 celebrateSendItVote(resortId, score, buttonEl);
                 showSendItToast('Slope Signal SENT');
-
-                // After payoff animation, require re-verification for the next vote.
-                const lockDelayMs = Number(score) >= 100 ? 2350 : 2050;
-                await new Promise(resolve => setTimeout(resolve, lockDelayMs));
-                sendItUnlockedResorts.delete(resortId);
-                persistSendItUnlockState();
+                const settleDelayMs = Number(score) >= 100 ? 2350 : 2050;
+                await new Promise(resolve => setTimeout(resolve, settleDelayMs));
                 renderResorts();
             } catch (e) {
                 triggerHaptic([24, 34, 24]);
