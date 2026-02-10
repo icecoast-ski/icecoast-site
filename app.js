@@ -830,6 +830,84 @@
                 'Hammer Time'
             ]
         };
+        const SENDIT_24H_SUMMARY_BY_REGION = {
+            default: {
+                high: [
+                    'Locals called a heater window. Legs might not survive.',
+                    'Chair-to-lap momentum all day. Keep snacks in the pocket.',
+                    'Home mountain energy is peaking. No wasted turns.'
+                ],
+                mid: [
+                    'Solid local read: pick your lines and stack clean laps.',
+                    'Locals are finding good turns if you stay a little patient.',
+                    'Not a hero day, but very skiable with smart choices.'
+                ],
+                low: [
+                    'Local read says tune day: edge control and short-turn style.',
+                    'Survival snow with character. Keep it playful and low ego.',
+                    'Firm vibes reported. Technical laps, good stories later.'
+                ],
+                fallback: [
+                    'No local reads yet. First Chair energy is still on the table.',
+                    'Fresh slate from locals today. Drop the first signal.',
+                    'No crowd signal yet. Be the one who sets the tone.'
+                ]
+            },
+            poconos: {
+                high: ['Poconos locals say go now. Fast laps, no excuses.'],
+                mid: ['Poconos read is decent: pick the right pod and keep moving.'],
+                low: ['Poconos locals called it spicy. Sharpen edges, then send small.'],
+                fallback: ['No local read yet in the Poconos. First Chair is up for grabs.']
+            },
+            catskills: {
+                high: ['Catskills locals are on it. Quick chairs, quicker turns.'],
+                mid: ['Catskills report says good-enough stoke if you stay nimble.'],
+                low: ['Catskills locals called a technical day. Clean carves win.'],
+                fallback: ['No Catskills local read yet. Someone call first tracks.']
+            },
+            adirondacks: {
+                high: ['Adirondack locals called a proper send window.'],
+                mid: ['ADK local read: steady laps with smart terrain picks.'],
+                low: ['ADK locals say bring edge discipline and patience.'],
+                fallback: ['No Adirondack read yet. First Chair still open.']
+            },
+            'vermont-south': {
+                high: ['Southern VT locals are firing. Classic Green Mountain day.'],
+                mid: ['Southern VT read says solid turns if you hunt the goods.'],
+                low: ['Southern VT locals called it firm. Technique over chaos.'],
+                fallback: ['No Southern VT local read yet. Be first to call it.']
+            },
+            'vermont-central': {
+                high: ['Central VT locals report all-gas laps. Bring your legs.'],
+                mid: ['Central VT read: good turns around if you stay selective.'],
+                low: ['Central VT locals called an edge day. Keep it precise.'],
+                fallback: ['No Central VT local read yet. First Chair is yours.']
+            },
+            'vermont-north': {
+                high: ['Northern VT locals called a big day. Full mountain mood.'],
+                mid: ['Northern VT read says steady stoke with careful line choice.'],
+                low: ['Northern VT locals say tough surface, still worth laps.'],
+                fallback: ['No Northern VT local read yet. Set the first signal.']
+            },
+            'white-mountains': {
+                high: ['White Mountains locals are green-lighting lap season today.'],
+                mid: ['White Mountains read is workable: hunt good snow, skip junk.'],
+                low: ['White Mountains locals called a grip-and-rip day.'],
+                fallback: ['No White Mountains local read yet. First Chair available.']
+            },
+            maine: {
+                high: ['Maine locals called a beauty window. Keep the chair turning.'],
+                mid: ['Maine read says good laps if you stay adaptable.'],
+                low: ['Maine locals reported firm spice. Ski smart, still ski.'],
+                fallback: ['No Maine local read yet. Someone drop the first call.']
+            },
+            canada: {
+                high: ['Quebec locals called a full-send day, eh.'],
+                mid: ['Quebec read says good turns with a little patience.'],
+                low: ['Quebec locals say edge game first, then après.'],
+                fallback: ['No Quebec local read yet. First Chair is wide open.']
+            }
+        };
         const sendItSignalSelectionByResort = {};
         const SENDIT_COOLDOWN_OPTIONS = [
             'Easy, legend. icecoast patrol says wait {minutes}m before your next call.',
@@ -1164,6 +1242,30 @@
                 : (crowd === 'normal' ? 'Normal crowd' : 'Quiet crowd');
 
             return `${windText}. ${crowdText}.`;
+        }
+
+        function getSlopeSignal24hSummary(resort, score24h, votes24h, crowdMode, windMode) {
+            const regionKey = resort?.region || 'default';
+            const phraseBank = SENDIT_24H_SUMMARY_BY_REGION[regionKey] || SENDIT_24H_SUMMARY_BY_REGION.default;
+            const votes = Number.isFinite(Number(votes24h)) ? Number(votes24h) : 0;
+
+            if (!Number.isFinite(Number(score24h)) || votes < SENDIT_HISTORY_MIN_VOTES) {
+                return pickStableSlopeSignalPhrase(
+                    phraseBank.fallback || SENDIT_24H_SUMMARY_BY_REGION.default.fallback,
+                    `${resort?.id || 'resort'}|24h|fallback|${votes}`
+                );
+            }
+
+            const crowd = isValidSendItCrowd(crowdMode) ? crowdMode : SENDIT_DEFAULT_SIGNALS.crowd;
+            const wind = isValidSendItWind(windMode) ? windMode : SENDIT_DEFAULT_SIGNALS.wind;
+            const numericScore = Number(score24h);
+            const tier = numericScore >= 70 ? 'high' : (numericScore >= 45 ? 'mid' : 'low');
+            const pool = phraseBank[tier] || SENDIT_24H_SUMMARY_BY_REGION.default[tier];
+
+            return pickStableSlopeSignalPhrase(
+                pool,
+                `${resort?.id || 'resort'}|24h|${tier}|${crowd}|${wind}|${Math.round(numericScore / 5)}|${votes}`
+            );
         }
 
         function haversineMiles(lat1, lon1, lat2, lon2) {
@@ -1518,19 +1620,16 @@
             const liveCrowdMode = isValidSendItCrowd(sendIt.crowdMode) ? sendIt.crowdMode : null;
             const liveWindMode = isValidSendItWind(sendIt.windMode) ? sendIt.windMode : null;
             const sendItVotes24h = Number.isFinite(sendIt.votes24h) ? Number(sendIt.votes24h) : 0;
-            const sendItVotes48h = Number.isFinite(sendIt.votes48h) ? Number(sendIt.votes48h) : 0;
             const sendItScore24h = Number.isFinite(sendIt.score24h)
                 ? sendIt.score24h
                 : (Number.isFinite(sendIt.score) && sendItVotes24h > 0 ? Number(sendIt.score) : null);
-            const sendItScore48h = Number.isFinite(sendIt.score48h)
-                ? sendIt.score48h
-                : (Number.isFinite(sendIt.score) && sendItVotes48h > 0 ? Number(sendIt.score) : null);
-            const sendItPhrase24h = Number.isFinite(sendItScore24h) && sendItVotes24h >= SENDIT_HISTORY_MIN_VOTES
-                ? getSendItState(sendItScore24h, resort.id).label
-                : 'First Chair';
-            const sendItPhrase48h = Number.isFinite(sendItScore48h) && sendItVotes48h >= SENDIT_HISTORY_MIN_VOTES
-                ? getSendItState(sendItScore48h, resort.id).label
-                : 'First Chair';
+            const sendItSummary24h = getSlopeSignal24hSummary(
+                resort,
+                sendItScore24h,
+                sendItVotes24h,
+                liveCrowdMode,
+                liveWindMode
+            );
             const sendItSubtitlePrimary = getSlopeSignalPayoffPhrase(
                 resort.id,
                 sendItScoreValue,
@@ -1801,8 +1900,7 @@ const backgroundSizeByResort = {
                   ${canVote ? `<div class="sendit-locked-note">Set crowd + wind then send your slope signal</div>
                   <div class="sendit-history-divider" aria-hidden="true"></div>
                   <div class="sendit-history-row" aria-label="Slope Signal history">
-                    <span class="sendit-history-item"><strong>24h</strong> <em>${sendItPhrase24h}</em></span>
-                    <span class="sendit-history-item"><strong>48h</strong> <em>${sendItPhrase48h}</em></span>
+                    <span class="sendit-history-item"><strong>24h</strong> <em>${sendItSummary24h}</em></span>
                   </div>` : ''}
                 </div>
 
