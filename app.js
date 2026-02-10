@@ -766,6 +766,7 @@
         const sendItVerifyFlavorByResort = {};
         const sendItStateLabelByResort = {};
         const SENDIT_TEST_UNLIMITED_RESORTS = new Set([]);
+        const SENDIT_TEST_ON_MOUNTAIN_RESORTS = new Set(['mont-sutton']);
         const DEFAULT_LIFT_CLOSE_HOUR = 16;
         const NIGHT_SKI_CLOSE_HOURS = {
             camelback: { weekday: 21, weekend: 21 },
@@ -1188,6 +1189,10 @@
             return SENDIT_TEST_UNLIMITED_RESORTS.has(resortId);
         }
 
+        function isOnMountainSendItTestResort(resortId) {
+            return SENDIT_TEST_ON_MOUNTAIN_RESORTS.has(resortId);
+        }
+
         function getSendItSocialLine(votesLastHour, votesTotal) {
             if (votesLastHour > 0) {
                 return `${votesLastHour} local${votesLastHour === 1 ? '' : 's'} voted in the last hour`;
@@ -1494,17 +1499,20 @@
 
             try {
                 const isUnlimitedTest = isUnlimitedSendItTestResort(resortId);
+                const isOnMountainTest = isOnMountainSendItTestResort(resortId);
                 let voteLat;
                 let voteLon;
                 let voteAccuracy;
                 let deviceId = getSendItDeviceId();
 
-                if (isUnlimitedTest) {
+                if (isUnlimitedTest || isOnMountainTest) {
                     voteLat = resortCoords.lat;
                     voteLon = resortCoords.lon;
                     voteAccuracy = 10;
-                    // Fresh synthetic token to bypass cooldown while testing this resort UI.
-                    deviceId = `test-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+                    if (isUnlimitedTest) {
+                        // Fresh synthetic token to bypass cooldown while testing this resort UI.
+                        deviceId = `test-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+                    }
                 } else {
                     const pos = await getBrowserLocation();
                     voteLat = pos.coords.latitude;
