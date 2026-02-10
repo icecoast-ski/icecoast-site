@@ -4884,6 +4884,7 @@
     color: #5e6f86 !important;
     line-height: 1.15 !important;
     margin-top: 0.16rem !important;
+    margin-left: 1.1rem !important;
     letter-spacing: 0.005em !important;
 }
 
@@ -4899,5 +4900,6 @@
 
     .sendit-subtitle-flavor {
         font-size: 0.58rem !important;
+        margin-left: 1.02rem !important;
     }
 }
