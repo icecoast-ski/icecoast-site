@@ -765,7 +765,7 @@
         const sendItButtonCopyByResort = {};
         const sendItVerifyFlavorByResort = {};
         const sendItStateLabelByResort = {};
-        const SENDIT_TEST_UNLIMITED_RESORTS = new Set([]);
+        const SENDIT_TEST_UNLIMITED_RESORTS = new Set(['mont-sutton']);
         const SENDIT_TEST_ON_MOUNTAIN_RESORTS = new Set(['mont-sutton']);
         const DEFAULT_LIFT_CLOSE_HOUR = 16;
         const NIGHT_SKI_CLOSE_HOURS = {
@@ -1310,13 +1310,19 @@
             }
         }
 
-        function showSendItToast(message) {
+        function showSendItToast(message, subline = 'Local read updated') {
             const existing = document.querySelector('.sendit-toast');
             if (existing) existing.remove();
 
             const toast = document.createElement('div');
             toast.className = 'sendit-toast';
-            toast.textContent = message;
+            toast.innerHTML = `
+                <span class="sendit-toast-icon" aria-hidden="true">⚡</span>
+                <span class="sendit-toast-copy">
+                    <span class="sendit-toast-title">${message}</span>
+                    <span class="sendit-toast-subline">${subline}</span>
+                </span>
+            `;
             document.body.appendChild(toast);
 
             requestAnimationFrame(() => toast.classList.add('visible'));

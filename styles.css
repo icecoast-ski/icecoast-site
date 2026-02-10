@@ -1668,28 +1668,81 @@
         .sendit-toast {
             position: fixed;
             left: 50%;
-            bottom: 136px;
-            transform: translateX(-50%) translateY(12px);
+            bottom: 122px;
+            transform: translateX(-50%) translateY(14px) scale(0.96);
             opacity: 0;
             z-index: 10040;
-            background: #ffffff;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.46rem;
+            background: linear-gradient(135deg, #ffffff 0%, #f4f8ff 100%);
             color: #1e4ea4;
-            border: 1px solid rgba(30, 78, 164, 0.22);
-            border-radius: 12px;
-            padding: 0.48rem 0.78rem;
-            font-size: 0.72rem;
-            font-weight: 720;
-            letter-spacing: 0.01em;
-            text-transform: none;
-            box-shadow: 0 8px 20px rgba(16, 34, 62, 0.16);
-            transition: opacity 0.2s ease, transform 0.2s ease;
+            border: 1px solid rgba(30, 78, 164, 0.28);
+            border-radius: 10px;
+            padding: 0.46rem 0.7rem 0.44rem;
+            min-width: 208px;
+            box-shadow:
+                0 9px 22px rgba(16, 34, 62, 0.2),
+                0 0 0 1px rgba(255, 255, 255, 0.65) inset;
+            transition: opacity 0.2s ease, transform 0.24s ease;
             pointer-events: none;
-            white-space: nowrap;
+            white-space: normal;
         }
 
         .sendit-toast.visible {
             opacity: 1;
-            transform: translateX(-50%) translateY(0);
+            transform: translateX(-50%) translateY(0) scale(1);
+            animation: senditToastPulse 0.45s cubic-bezier(0.2, 0.9, 0.28, 1);
+        }
+
+        .sendit-toast-icon {
+            width: 1.34rem;
+            height: 1.34rem;
+            border-radius: 7px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1f6ef0 0%, #1556d6 100%);
+            color: #f4f9ff;
+            font-size: 0.82rem;
+            box-shadow: 0 4px 10px rgba(21, 86, 214, 0.28);
+            flex: 0 0 auto;
+        }
+
+        .sendit-toast-copy {
+            display: inline-flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+
+        .sendit-toast-title {
+            font-size: 0.74rem;
+            line-height: 1.05;
+            font-weight: 780;
+            letter-spacing: 0.015em;
+            color: #143a7a;
+        }
+
+        .sendit-toast-subline {
+            margin-top: 0.14rem;
+            font-size: 0.58rem;
+            font-weight: 620;
+            line-height: 1.05;
+            color: #5e7393;
+            letter-spacing: 0.012em;
+            text-transform: none;
+        }
+
+        @keyframes senditToastPulse {
+            0% {
+                transform: translateX(-50%) translateY(4px) scale(0.93);
+            }
+            56% {
+                transform: translateX(-50%) translateY(-1px) scale(1.03);
+            }
+            100% {
+                transform: translateX(-50%) translateY(0) scale(1);
+            }
         }
 
         .sendit-unlock-btn:hover:not(.sendit-unlock-cta) {
