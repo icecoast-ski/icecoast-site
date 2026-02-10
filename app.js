@@ -1352,11 +1352,13 @@
             const railStartY = railY;
             const railEndX = (targetRect.right - 8) - startX;
             const railEndY = railY;
-            // Force a rightward drift so red/blue votes do not eject left,
-            // and push the skier clearly off-screen after the rail.
-            const rightDrift = Math.max(56, Math.round(window.innerWidth * 0.08));
-            const downX = railEndX + rightDrift;
-            const downY = Math.max(window.innerHeight - startY + 160, isFullSend ? 920 : 820);
+            // Final exit: send it down the hill at ~45deg to the right.
+            const downhillRun = Math.max(
+                Math.round(window.innerHeight * (isFullSend ? 0.82 : 0.72)),
+                isFullSend ? 900 : 760
+            );
+            const downX = railEndX + downhillRun;
+            const downY = railEndY + downhillRun;
             const gondolaDurationMs = 980;
             const skierDropDelayMs = 540;
 

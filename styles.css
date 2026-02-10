@@ -1848,7 +1848,7 @@
     }
     100% {
         opacity: 0;
-        transform: translate(-50%, -50%) translate3d(var(--down-x), var(--down-y), 0) rotate(14deg) scale(0.92) scaleX(var(--skier-dir));
+        transform: translate(-50%, -50%) translate3d(var(--down-x), var(--down-y), 0) rotate(40deg) scale(0.92) scaleX(var(--skier-dir));
     }
 }
 
@@ -1896,7 +1896,7 @@
     }
     100% {
         opacity: 0;
-        transform: translate(-50%, -50%) translate3d(var(--down-x), var(--down-y), 0) rotate(18deg) scale(0.94) scaleX(var(--skier-dir));
+        transform: translate(-50%, -50%) translate3d(var(--down-x), var(--down-y), 0) rotate(44deg) scale(0.94) scaleX(var(--skier-dir));
     }
 }
 
