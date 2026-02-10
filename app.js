@@ -794,7 +794,7 @@
         const SENDIT_WIND_OPTIONS = [
             { key: 'calm', label: 'Calm' },
             { key: 'breezy', label: 'Breezy' },
-            { key: 'nuking', label: 'Nuking' }
+            { key: 'nuking', label: 'Blasting' }
         ];
         const SENDIT_DEFAULT_SIGNALS = { crowd: 'normal', wind: 'breezy' };
         const SENDIT_HISTORY_MIN_VOTES = 2;
@@ -806,28 +806,28 @@
                 'Waiting On The First Drop'
             ],
             low: [
-                'Red Light: Sharpen Those Edges',
-                'Red Light: Survival Turns',
-                'Red Light: Refreeze Roulette',
-                'Red Light: Edge Work Day',
-                'Red Light: Boilerplate Ballet',
-                'Red Light: Firm But Skiable'
+                'Sharpen Those Edges',
+                'Survival Turns',
+                'Refreeze Roulette',
+                'Edge Work Day',
+                'Boilerplate Ballet',
+                'Firm But Skiable'
             ],
             mid: [
-                'Blue Light: Good Turns Ahead',
-                'Blue Light: Good Laps',
-                'Blue Light: Hot Laps',
-                'Blue Light: Prime Time',
-                'Blue Light: Carve Mode',
-                'Blue Light: Send-Ish Conditions'
+                'Good Turns Ahead',
+                'Good Laps',
+                'Hot Laps',
+                'Prime Time',
+                'Carve Mode',
+                'Send-Ish Conditions'
             ],
             high: [
-                'Green Light: Full Send',
-                'Green Light: Full Tilt',
-                'Green Light: Warp Speed',
-                'Green Light: Storm Day Stoke',
-                'Green Light: Unreal Laps',
-                'Green Light: Hammer Time'
+                'Full Send',
+                'Full Tilt',
+                'Warp Speed',
+                'Storm Day Stoke',
+                'Unreal Laps',
+                'Hammer Time'
             ]
         };
         const sendItSignalSelectionByResort = {};
@@ -1509,6 +1509,9 @@
             const sendItButtonCopy = getSendItButtonCopy(resort.id);
             const sendItVotes = Number.isFinite(sendIt.votes) ? sendIt.votes : 0;
             const sendItScoreValue = Number.isFinite(sendIt.score) ? sendIt.score : null;
+            const sendItTone = (!Number.isFinite(sendItScoreValue) || sendItVotes < SENDIT_HISTORY_MIN_VOTES)
+                ? 'mid'
+                : (sendItScoreValue >= 70 ? 'high' : (sendItScoreValue >= 45 ? 'mid' : 'low'));
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
             const selectedSignals = getSendItSignalSelection(resort.id);
@@ -1783,11 +1786,14 @@ const backgroundSizeByResort = {
                 <div class="sendit-section">
                   <div class="sendit-header">
                     <div class="sendit-title-pill">
-                      <span class="sendit-live-dot"></span>
                       <div class="sendit-title">SLOPE SIGNAL</div>
                     </div>
                     <div class="sendit-subline">
-                      <span class="sendit-subtitle">${signalLead}</span>
+                      <span class="sendit-read-label">Local Read:</span>
+                      <span class="sendit-main-read">
+                        <span class="sendit-live-dot signal-${sendItTone}" aria-hidden="true"></span>
+                        <span class="sendit-subtitle">${signalLead}</span>
+                      </span>
                       ${sendItSubtitleSecondary ? `<span class="sendit-subtitle-flavor">${sendItSubtitleSecondary}</span>` : ''}
                     </div>
                   </div>

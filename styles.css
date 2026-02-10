@@ -1153,17 +1153,30 @@
             text-align: center;
         }
 
-        .sendit-live-dot {
-            width: 0.52rem;
-            height: 0.52rem;
-            border-radius: 50%;
-            background: #2ff07f;
-            box-shadow:
-                0 0 0 2px rgba(47, 240, 127, 0.22),
-                0 0 10px rgba(47, 240, 127, 0.5);
-            animation: senditPulseDot 1.6s ease-in-out infinite;
-            flex-shrink: 0;
-        }
+.sendit-live-dot {
+    --dot-rgb: 47, 240, 127;
+    width: 0.52rem;
+    height: 0.52rem;
+    border-radius: 50%;
+    background: rgb(var(--dot-rgb));
+    box-shadow:
+        0 0 0 2px rgba(var(--dot-rgb), 0.22),
+        0 0 10px rgba(var(--dot-rgb), 0.5);
+    animation: senditPulseDot 1.6s ease-in-out infinite;
+    flex-shrink: 0;
+}
+
+.sendit-live-dot.signal-low {
+    --dot-rgb: 210, 73, 78;
+}
+
+.sendit-live-dot.signal-mid {
+    --dot-rgb: 31, 94, 200;
+}
+
+.sendit-live-dot.signal-high {
+    --dot-rgb: 47, 196, 104;
+}
 
         .sendit-result {
             margin-top: 0.22rem;
@@ -1925,32 +1938,32 @@
         .sendit-vote-btn[data-score="60"] { order: 2; }
         .sendit-vote-btn[data-score="100"] { order: 3; }
 
-        @keyframes senditPulseDot {
-            0% {
-                transform: scale(0.96);
-                box-shadow:
-                    0 0 0 0 rgba(33, 196, 104, 0.5),
-                    0 0 0 2px rgba(33, 196, 104, 0.2);
-            }
-            40% {
-                transform: scale(1.04);
-                box-shadow:
-                    0 0 0 8px rgba(33, 196, 104, 0.16),
-                    0 0 0 2px rgba(33, 196, 104, 0.12);
-            }
-            75% {
-                transform: scale(1);
-                box-shadow:
-                    0 0 0 14px rgba(33, 196, 104, 0),
-                    0 0 0 2px rgba(33, 196, 104, 0.06);
-            }
-            100% {
-                transform: scale(0.96);
-                box-shadow:
-                    0 0 0 0 rgba(33, 196, 104, 0),
-                    0 0 0 2px rgba(33, 196, 104, 0.2);
-            }
-        }
+@keyframes senditPulseDot {
+    0% {
+        transform: scale(0.96);
+        box-shadow:
+            0 0 0 0 rgba(var(--dot-rgb), 0.5),
+            0 0 0 2px rgba(var(--dot-rgb), 0.2);
+    }
+    40% {
+        transform: scale(1.04);
+        box-shadow:
+            0 0 0 8px rgba(var(--dot-rgb), 0.16),
+            0 0 0 2px rgba(var(--dot-rgb), 0.12);
+    }
+    75% {
+        transform: scale(1);
+        box-shadow:
+            0 0 0 14px rgba(var(--dot-rgb), 0),
+            0 0 0 2px rgba(var(--dot-rgb), 0.06);
+    }
+    100% {
+        transform: scale(0.96);
+        box-shadow:
+            0 0 0 0 rgba(var(--dot-rgb), 0),
+            0 0 0 2px rgba(var(--dot-rgb), 0.2);
+    }
+}
 
         .resort-icon {
             width: 64px;
@@ -4789,6 +4802,21 @@
 .sendit-subline {
     align-items: flex-start !important;
     text-align: left !important;
+}
+
+.sendit-read-label {
+    font-size: 0.62rem !important;
+    font-weight: 650 !important;
+    color: #5b6d86 !important;
+    letter-spacing: 0.015em !important;
+    text-transform: none !important;
+    margin-bottom: 0.08rem !important;
+}
+
+.sendit-main-read {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.42rem !important;
 }
 
 .sendit-subtitle {
