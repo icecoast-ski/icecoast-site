@@ -1721,10 +1721,11 @@
 
 
 .sendit-skier-launch {
+    --skier-dir: -1;
     position: fixed;
     left: 50%;
     top: 50%;
-    transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(0deg) scale(0.88);
+    transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(0deg) scale(0.88) scaleX(var(--skier-dir));
     opacity: 0;
     z-index: 10060;
     pointer-events: none;
@@ -1828,26 +1829,26 @@
 @keyframes senditSkierRailRide {
     0% {
         opacity: 0;
-        transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(-5deg) scale(0.88);
+        transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(-5deg) scale(0.88) scaleX(var(--skier-dir));
     }
     8% {
         opacity: 1;
     }
     24% {
         opacity: 1;
-        transform: translate(-50%, -50%) translate3d(var(--land-x), var(--land-y), 0) rotate(-12deg) scale(1.01);
+        transform: translate(-50%, -50%) translate3d(var(--land-x), var(--land-y), 0) rotate(-12deg) scale(1.01) scaleX(var(--skier-dir));
     }
     68% {
         opacity: 1;
-        transform: translate(-50%, -50%) translate3d(var(--rail-end-x), var(--rail-end-y), 0) rotate(3deg) scale(1.03);
+        transform: translate(-50%, -50%) translate3d(var(--rail-end-x), var(--rail-end-y), 0) rotate(3deg) scale(1.03) scaleX(var(--skier-dir));
     }
     84% {
         opacity: 1;
-        transform: translate(-50%, -50%) translate3d(calc(var(--rail-end-x) + 6px), calc(var(--rail-end-y) + 2px), 0) rotate(6deg) scale(1);
+        transform: translate(-50%, -50%) translate3d(calc(var(--rail-end-x) + 6px), calc(var(--rail-end-y) + 2px), 0) rotate(6deg) scale(1) scaleX(var(--skier-dir));
     }
     100% {
         opacity: 0;
-        transform: translate(-50%, -50%) translate3d(var(--down-x), var(--down-y), 0) rotate(14deg) scale(0.92);
+        transform: translate(-50%, -50%) translate3d(var(--down-x), var(--down-y), 0) rotate(14deg) scale(0.92) scaleX(var(--skier-dir));
     }
 }
 
@@ -1876,26 +1877,26 @@
 @keyframes senditSkierRailRideEpic {
     0% {
         opacity: 0;
-        transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(-8deg) scale(0.9);
+        transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(-8deg) scale(0.9) scaleX(var(--skier-dir));
     }
     8% {
         opacity: 1;
     }
     22% {
         opacity: 1;
-        transform: translate(-50%, -50%) translate3d(var(--land-x), var(--land-y), 0) rotate(-13deg) scale(1.08);
+        transform: translate(-50%, -50%) translate3d(var(--land-x), var(--land-y), 0) rotate(-13deg) scale(1.08) scaleX(var(--skier-dir));
     }
     66% {
         opacity: 1;
-        transform: translate(-50%, -50%) translate3d(var(--rail-end-x), var(--rail-end-y), 0) rotate(5deg) scale(1.12);
+        transform: translate(-50%, -50%) translate3d(var(--rail-end-x), var(--rail-end-y), 0) rotate(5deg) scale(1.12) scaleX(var(--skier-dir));
     }
     82% {
         opacity: 1;
-        transform: translate(-50%, -50%) translate3d(calc(var(--rail-end-x) + 8px), calc(var(--rail-end-y) - 2px), 0) rotate(9deg) scale(1.08);
+        transform: translate(-50%, -50%) translate3d(calc(var(--rail-end-x) + 8px), calc(var(--rail-end-y) - 2px), 0) rotate(9deg) scale(1.08) scaleX(var(--skier-dir));
     }
     100% {
         opacity: 0;
-        transform: translate(-50%, -50%) translate3d(var(--down-x), var(--down-y), 0) rotate(18deg) scale(0.94);
+        transform: translate(-50%, -50%) translate3d(var(--down-x), var(--down-y), 0) rotate(18deg) scale(0.94) scaleX(var(--skier-dir));
     }
 }
 
