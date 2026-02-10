@@ -1569,9 +1569,10 @@
                 await new Promise(resolve => setTimeout(resolve, 320));
 
                 celebrateSendItVote(resortId, score, buttonEl);
-                showSendItToast('Slope Signal SENT');
                 const settleDelayMs = Number(score) >= 100 ? 2350 : 2050;
                 await new Promise(resolve => setTimeout(resolve, settleDelayMs));
+                showSendItToast('Slope Signal SENT');
+                triggerHaptic([18, 26, 18]);
                 renderResorts();
             } catch (e) {
                 triggerHaptic([24, 34, 24]);
