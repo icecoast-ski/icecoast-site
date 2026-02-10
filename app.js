@@ -761,12 +761,12 @@
         let sendItMaxAccuracyMeters = 200;
         const SENDIT_DEVICE_ID_KEY = 'icecoast_sendit_device_id';
         const sendItUnlockedResorts = new Set();
-        const SENDIT_TEST_UNLOCKED_RESORTS = new Set(['mont-sutton']);
+        const SENDIT_TEST_UNLOCKED_RESORTS = new Set([]);
         const sendItButtonCopyByResort = {};
         const sendItVerifyFlavorByResort = {};
         const sendItStateLabelByResort = {};
-        const SENDIT_TEST_UNLIMITED_RESORTS = new Set(['mont-sutton']);
-        const SENDIT_TEST_ON_MOUNTAIN_RESORTS = new Set(['mont-sutton']);
+        const SENDIT_TEST_UNLIMITED_RESORTS = new Set([]);
+        const SENDIT_TEST_ON_MOUNTAIN_RESORTS = new Set([]);
         const DEFAULT_LIFT_CLOSE_HOUR = 16;
         const NIGHT_SKI_CLOSE_HOURS = {
             camelback: { weekday: 21, weekend: 21 },
@@ -1041,7 +1041,7 @@
                 if (!raw) return;
                 const ids = JSON.parse(raw);
                 if (Array.isArray(ids)) {
-                    const migratedIds = ids.filter(id => id !== 'blue-mountain');
+                    const migratedIds = ids.filter(id => id !== 'blue-mountain' && id !== 'mont-sutton');
                     migratedIds.forEach(id => sendItUnlockedResorts.add(id));
                     if (migratedIds.length !== ids.length) {
                         localStorage.setItem('icecoast_sendit_unlocked', JSON.stringify(migratedIds));
