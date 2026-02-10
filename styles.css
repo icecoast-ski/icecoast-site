@@ -1724,7 +1724,6 @@
     position: fixed;
     left: 50%;
     top: 50%;
-    scale: -1 1;
     transform: translate(-50%, -50%) translate3d(0, 0, 0) rotate(0deg) scale(0.88);
     opacity: 0;
     z-index: 10060;
