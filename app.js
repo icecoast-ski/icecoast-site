@@ -1141,7 +1141,7 @@
             ].join(' ');
         }
 
-        function buildSendItWheelMarkup(resortId, selectedSignals, activeGroup) {
+        function buildSendItWheelMarkup(resortId, selectedSignals, activeGroup, canVote) {
             const difficultyCfg = [
                 { key: 'green', glyph: '●', center: -150 },
                 { key: 'blue', glyph: '■', center: -108 },
@@ -1193,7 +1193,7 @@
                 <div class="sendit-radial-rings">
                     <div class="ring ring-c"></div>
                 </div>
-                <svg class="sendit-hud-wheel" viewBox="0 0 600 600" aria-label="Slope Signal radial">
+                <svg class="sendit-hud-wheel ${canVote ? '' : 'locked'}" viewBox="0 0 600 600" aria-label="Slope Signal radial">
                     <g>${diffSectors}</g>
                     <g>${optionSectors}</g>
                 </svg>
@@ -1420,9 +1420,10 @@
             );
         }
 
-        function getSlopeSignalContextLine(crowdMode, windMode) {
+        function getSlopeSignalContextLine(crowdMode, windMode, hazardMode) {
             const crowd = isValidSendItCrowd(crowdMode) ? crowdMode : SENDIT_DEFAULT_SIGNALS.crowd;
             const wind = isValidSendItWind(windMode) ? windMode : SENDIT_DEFAULT_SIGNALS.wind;
+            const hazard = isValidSendItHazard(hazardMode) ? hazardMode : SENDIT_DEFAULT_SIGNALS.hazard;
 
             const windText = wind === 'nuking'
                 ? 'High wind'
@@ -1430,8 +1431,11 @@
             const crowdText = crowd === 'swarm'
                 ? 'Crowded'
                 : (crowd === 'normal' ? 'Normal crowd' : 'Quiet crowd');
+            const jerryText = hazard === 'clear'
+                ? 'No jerrys in sight'
+                : (hazard === 'swarm' ? 'Jerry swarm in the wild' : 'A few jerrys keeping it spicy');
 
-            return `${windText}. ${crowdText}.`;
+            return `${windText}. ${crowdText}. ${jerryText}.`;
         }
 
         function normalizeDifficultyKey(raw) {
@@ -1723,6 +1727,17 @@
                 await new Promise(resolve => setTimeout(resolve, 280));
                 showSendItToast('Slope Signal SENT');
                 triggerHaptic([18, 28, 16, 36, 22]);
+                // Reset this resort's radial state after a successful send so CTA
+                // returns to unlocked flow instead of staying in ready "SEND IT!" state.
+                sendItSignalSelectionByResort[resortId] = {
+                    crowd: null,
+                    wind: null,
+                    slope: null,
+                    hazard: null,
+                    difficulty: '',
+                    activeGroup: SENDIT_GROUP_ORDER[0]
+                };
+                sendItReadySlamByResort[resortId] = false;
                 renderResorts();
             } catch (e) {
                 triggerHaptic([24, 34, 24]);
@@ -1782,6 +1797,7 @@
             const selectedSignals = getSendItSignalSelection(resort.id);
             const liveCrowdMode = isValidSendItCrowd(sendIt.crowdMode) ? sendIt.crowdMode : null;
             const liveWindMode = isValidSendItWind(sendIt.windMode) ? sendIt.windMode : null;
+            const liveHazardMode = isValidSendItHazard(sendIt.hazardMode) ? sendIt.hazardMode : null;
             const sendItVotes24h = Number.isFinite(sendIt.votes24h) ? Number(sendIt.votes24h) : 0;
             const sendItScore24h = Number.isFinite(sendIt.score24h)
                 ? sendIt.score24h
@@ -1800,7 +1816,7 @@
                 liveCrowdMode,
                 liveWindMode
             );
-            const sendItSubtitleSecondary = getSlopeSignalContextLine(liveCrowdMode, liveWindMode);
+            const sendItSubtitleSecondary = getSlopeSignalContextLine(liveCrowdMode, liveWindMode, liveHazardMode);
             const sendItPrompt = '';
             const difficultyMix = getSlopeSignalDifficultyMix(sendIt);
             const hasDifficultyMix = difficultyMix.total >= SENDIT_HISTORY_MIN_VOTES;
@@ -1845,7 +1861,7 @@
             const centerLabel = canVote
                 ? getSendItStepLabel(selectedSignals, activeGroup)
                 : '<span class="line-stack">I\'M HERE!</span>';
-            const radialWheelMarkup = buildSendItWheelMarkup(resort.id, selectedSignals, activeGroup);
+            const radialWheelMarkup = buildSendItWheelMarkup(resort.id, selectedSignals, activeGroup, canVote);
             const radialEnterClass = sendItUnlockTransitionByResort[resort.id] ? 'unlock-enter' : '';
             if (sendItUnlockTransitionByResort[resort.id]) {
                 sendItUnlockTransitionByResort[resort.id] = false;
@@ -2466,6 +2482,18 @@ const backgroundSizeByResort = {
                 }
                 setTimeout(() => target.classList.remove('rail-slam'), 600);
                 await unlockSendItForResort(resortId, target);
+                return;
+            }
+
+            const requiresVerifiedLocation = action === 'select-difficulty'
+                || action === 'select-group'
+                || action === 'select-option'
+                || action === 'select-crowd'
+                || action === 'select-wind'
+                || action === 'vote'
+                || action === 'vote-radial';
+            if (requiresVerifiedLocation && !sendItUnlockedResorts.has(resortId)) {
+                showSendItToast('Verify first', 'Tap I\'M HERE! to unlock local voting.');
                 return;
             }
 
