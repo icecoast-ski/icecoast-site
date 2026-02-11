@@ -5365,13 +5365,21 @@
 }
 
 .sendit-explainer {
-    margin-top: 0.26rem !important;
-    margin-left: 0.02rem !important;
+    margin-top: 0 !important;
+    margin-left: 0 !important;
     font-size: 0.56rem !important;
     font-weight: 620 !important;
     color: #576a86 !important;
     line-height: 1.3 !important;
     letter-spacing: 0.005em !important;
+    white-space: nowrap !important;
+}
+
+.sendit-title-row {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.46rem !important;
+    flex-wrap: nowrap !important;
 }
 
 .sendit-legend {
@@ -5456,6 +5464,10 @@
 
     .sendit-explainer {
         font-size: 0.52rem !important;
+    }
+
+    .sendit-title-row {
+        gap: 0.36rem !important;
     }
 
     .sendit-legend {
