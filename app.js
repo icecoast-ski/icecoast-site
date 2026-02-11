@@ -1115,9 +1115,8 @@
             persistSendItCooldownState();
         }
 
-        function getSendItDirectionText(canVote, radialReady, selection, activeGroup, cooldownRemainingMinutes) {
+        function getSendItDirectionText(canVote, radialReady, selection, activeGroup) {
             if (!canVote) return 'Tap center to verify on-mountain.';
-            if (cooldownRemainingMinutes > 0) return `Signal sent. Next call in ${cooldownRemainingMinutes}m.`;
             if (radialReady) return 'Dialed in. SEND IT!';
             if (!selection || !selection.difficulty) return 'Choose your trail.';
             if (activeGroup === 'wind') return 'Is it windy?';
@@ -1697,6 +1696,12 @@
                 return;
             }
 
+            const localCooldownRemaining = getSendItCooldownRemainingMinutes(resortId);
+            if (localCooldownRemaining > 0) {
+                alert(getSendItCooldownMessage(localCooldownRemaining));
+                return;
+            }
+
             if (!Number.isFinite(score) || score < 0 || score > 100) {
                 alert('Invalid Send It score.');
                 return;
@@ -1908,9 +1913,9 @@
                 ? `<img class="send-core-icon send-core-icon-stage ${activeGroup === 'hazard' ? 'icon-hazard' : ''}" src="${SENDIT_GROUP_ICON_PATHS[activeGroup]}" alt="${activeGroup} icon">`
                 : '';
             const centerLabel = canVote
-                ? (isCooldownActive ? '<span class="line-stack">SENT ⚡</span>' : getSendItStepLabel(selectedSignals, activeGroup))
+                ? (isCooldownActive ? '<span class="line-stack">SEND NEW SIGNAL</span>' : getSendItStepLabel(selectedSignals, activeGroup))
                 : '<span class="line-stack">I\'M HERE!</span>';
-            const radialWheelMarkup = buildSendItWheelMarkup(resort.id, selectedSignals, activeGroup, canVote && !isCooldownActive);
+            const radialWheelMarkup = buildSendItWheelMarkup(resort.id, selectedSignals, activeGroup, canVote);
             const radialEnterClass = sendItUnlockTransitionByResort[resort.id] ? 'unlock-enter' : '';
             if (sendItUnlockTransitionByResort[resort.id]) {
                 sendItUnlockTransitionByResort[resort.id] = false;
@@ -1919,8 +1924,7 @@
                 canVote,
                 radialReady,
                 selectedSignals,
-                activeGroup,
-                cooldownRemainingMinutes
+                activeGroup
             );
             const radialPulseClass = !canVote || isCooldownActive
                 ? ''
@@ -1932,9 +1936,9 @@
                         ${radialWheelMarkup}
                         <button
                           class="sendit-core-btn ${radialReady && !isCooldownActive ? 'ready' : ''} ${isCooldownActive ? 'cooldown' : ''}"
-                          data-sendit-action="${canVote ? (isCooldownActive ? 'cooldown' : 'vote-radial') : 'unlock'}"
+                          data-sendit-action="${canVote ? 'vote-radial' : 'unlock'}"
                           data-resort-id="${resort.id}"
-                          ${(canVote && (!radialReady || isCooldownActive)) ? 'disabled' : ''}
+                          ${(canVote && !radialReady) ? 'disabled' : ''}
                           type="button">${centerIcon}<span class="send-core-label">${centerLabel}</span></button>
                         <div class="selection-lockline ${canVote ? locklineVisible : ''} ${canVote ? locklineModeClass : ''}">${canVote ? locklineMarkup : ''}</div>
                         <div class="sendit-radial-direction">${radialDirectionText}</div>
@@ -2545,19 +2549,6 @@ const backgroundSizeByResort = {
                 || action === 'vote-radial';
             if (requiresVerifiedLocation && !sendItUnlockedResorts.has(resortId)) {
                 showSendItToast('Verify first', 'Tap I\'M HERE! to unlock local voting.');
-                return;
-            }
-
-            const cooldownRemaining = getSendItCooldownRemainingMinutes(resortId);
-            const isCooldownBlockedAction = action === 'select-difficulty'
-                || action === 'select-group'
-                || action === 'select-option'
-                || action === 'select-crowd'
-                || action === 'select-wind'
-                || action === 'vote'
-                || action === 'vote-radial';
-            if (isCooldownBlockedAction && cooldownRemaining > 0) {
-                showSendItToast('Slope Signal SENT', `Next call opens in ${cooldownRemaining}m`);
                 return;
             }
 
