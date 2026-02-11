@@ -2323,7 +2323,8 @@ const backgroundSizeByResort = {
             region: 'all',
             pass: 'all',
             vibe: 'all',
-            sort: 'rating-high' // Start with best conditions
+            sort: 'rating-high', // Start with best conditions
+            search: ''
         };
 
         function getSlopeSignalSortScore(resort) {
@@ -2344,6 +2345,16 @@ const backgroundSizeByResort = {
 
         function applyFilters() {
             let filtered = Array.isArray(resorts) ? resorts.filter(Boolean) : [];
+            const searchTerm = (filterState.search || '').trim().toLowerCase();
+
+            if (searchTerm) {
+                filtered = filtered.filter((r) => {
+                    const name = String(r?.name || '').toLowerCase();
+                    const location = String(r?.location || '').toLowerCase();
+                    const region = String(r?.region || '').toLowerCase();
+                    return name.includes(searchTerm) || location.includes(searchTerm) || region.includes(searchTerm);
+                });
+            }
 
             if (filterState.region !== 'all') {
                 filtered = filtered.filter(r => r.region === filterState.region);
@@ -2358,7 +2369,7 @@ const backgroundSizeByResort = {
             }
 
             if (filterState.vibe === 'sendit') {
-                const ranked = (filtered.length > 0 ? [...filtered] : [...(Array.isArray(resorts) ? resorts.filter(Boolean) : [])]);
+                const ranked = [...filtered];
                 ranked.sort((a, b) => {
                     const aSignal = getSlopeSignalSortScore(a);
                     const bSignal = getSlopeSignalSortScore(b);
@@ -2482,6 +2493,14 @@ const backgroundSizeByResort = {
             filterState.sort = e.target.value;
             renderResorts();
         });
+
+        const resortSearchInput = document.getElementById('resortSearch');
+        if (resortSearchInput) {
+            resortSearchInput.addEventListener('input', (e) => {
+                filterState.search = e.target.value || '';
+                renderResorts();
+            });
+        }
 
 
         const WORKER_URL = 'https://cloudflare-worker.rickt123-0f8.workers.dev/';
