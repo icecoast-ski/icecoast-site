@@ -2199,11 +2199,11 @@ const backgroundSizeByResort = {
                   </div>
                   ${sendItPrompt}
                   ${sendItControls}
-                  ${canVote ? `
+                  ${`
                   <div class="sendit-history-divider" aria-hidden="true"></div>
                   <div class="sendit-history-row" aria-label="Slope Signal history">
                     <span class="sendit-history-item"><strong>24h</strong> <em>${sendItSummary24h}</em></span>
-                  </div>` : ''}
+                  </div>`}
                 </div>
 
                 <div class="mountain-ops-section">
