@@ -1100,8 +1100,24 @@
 
         function getSendItScoreFromSelection(selection) {
             if (!selection || !isValidSendItDifficulty(selection.difficulty)) return 60;
-            const match = SENDIT_DIFFICULTY_OPTIONS.find((opt) => opt.key === selection.difficulty);
-            return match ? match.score : 60;
+
+            // Sentiment-first scoring:
+            // left = bad (0), middle = neutral (1), right = good (2)
+            const rankMap = {
+                wind: { nuking: 0, breezy: 1, calm: 2 },
+                crowd: { swarm: 0, normal: 1, quiet: 2 },
+                hazard: { icy: 0, swarm: 1, clear: 2 },
+                slope: { edges: 0, good: 1, full: 2 }
+            };
+
+            const windRank = rankMap.wind[selection.wind] ?? 1;
+            const crowdRank = rankMap.crowd[selection.crowd] ?? 1;
+            const hazardRank = rankMap.hazard[selection.hazard] ?? 1;
+            const snowRank = rankMap.slope[selection.slope] ?? 1;
+            const avgRank = (windRank + crowdRank + hazardRank + snowRank) / 4;
+
+            // 0 -> 20, 1 -> 60, 2 -> 100
+            return Math.round(20 + avgRank * 40);
         }
 
         function polarPoint(cx, cy, r, aDeg) {
@@ -1155,19 +1171,19 @@
             const showSecondary = !!selectedSignals.difficulty && !!activeGroup && opts.length > 0;
             const optionSectors = showSecondary ? opts.map((opt, i) => {
                 const center = -90 + offsets[i];
-                const d = sectorPathData(300, 300, 210, 292, center - 21, center + 21);
+                const d = sectorPathData(300, 300, 210, 292, center - 29, center + 29);
                 const active = selectedSignals[activeGroup] === opt.key ? 'active' : '';
                 const guideId = `sendit-guide-${resortId}-${activeGroup}-${i}`;
                 const radius = (210 + 292) / 2;
-                const start = center - 17;
-                const end = center + 17;
+                const start = center - 26;
+                const end = center + 26;
                 const a = polarPoint(300, 300, radius, start);
                 const b = polarPoint(300, 300, radius, end);
                 return `
                     <path class="wheel-sector option-sector ${active}" d="${d}" data-opt-idx="${i + 1}" data-sendit-action="select-option" data-resort-id="${resortId}" data-group="${activeGroup}" data-value="${opt.key}"></path>
                     <path id="${guideId}" class="label-guide" d="M ${a.x} ${a.y} A ${radius} ${radius} 0 0 1 ${b.x} ${b.y}"></path>
                     <text class="wheel-label option-label ${active}" data-opt-idx="${i + 1}" data-sendit-action="select-option" data-resort-id="${resortId}" data-group="${activeGroup}" data-value="${opt.key}">
-                      <textPath href="#${guideId}" startOffset="50%" text-anchor="middle">${opt.label.toUpperCase()}</textPath>
+                      <textPath href="#${guideId}" startOffset="50%" text-anchor="middle">${opt.label}</textPath>
                     </text>
                 `;
             }).join('') : '';
@@ -2087,6 +2103,7 @@ const backgroundSizeByResort = {
                 </div>
 
                 <div class="mountain-ops-section">
+                  <div class="mountain-ops-title">Logistics</div>
                   <div class="info-grid">
                     <div class="info-item">
                       <span class="info-label">

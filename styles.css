@@ -4172,6 +4172,7 @@
 
 .sendit-title,
 .icecoast-title,
+.mountain-ops-title,
 .distance-title,
 .forecast-inline-toggle,
 .mountain-ops-section .lift-toggle {
@@ -4180,6 +4181,10 @@
     color: var(--ui-title-color);
     letter-spacing: var(--ui-title-track);
     text-transform: uppercase;
+}
+
+.mountain-ops-title {
+    margin-bottom: 0.5rem;
 }
 
 .sendit-subtitle,
@@ -4561,9 +4566,9 @@
 }
 
 .option-label {
-    font-size: 23.5px;
+    font-size: 21px;
     font-weight: 560;
-    letter-spacing: 0.018em;
+    letter-spacing: 0.008em;
     text-transform: uppercase;
     fill: #deebff;
     text-shadow: 0 1px 2px rgba(8, 22, 48, 0.52);
