@@ -1127,7 +1127,7 @@
             const rankMap = {
                 wind: { nuking: 0, breezy: 1, calm: 2 },
                 crowd: { swarm: 0, normal: 1, quiet: 2 },
-                hazard: { icy: 0, swarm: 1, clear: 2 },
+                hazard: { icy: 0, swarm: 0, clear: 2 },
                 slope: { edges: 0, good: 1, full: 2 }
             };
 
@@ -1478,7 +1478,7 @@
                 : (crowd === 'normal' ? 'Normal crowd' : 'Quiet crowd');
             const jerryText = hazard === 'clear'
                 ? 'No jerrys in sight'
-                : (hazard === 'swarm' ? 'Jerry swarm in the wild' : 'A few jerrys keeping it spicy');
+                : (hazard === 'swarm' ? 'JERRY SWARM' : 'Icy hazards');
 
             return `${windText}. ${crowdText}. ${jerryText}.`;
         }
