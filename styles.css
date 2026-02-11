@@ -411,14 +411,15 @@
 
         /* Skier icon inside button */
         .back-to-top::before {
-            content: '';
+            content: '⛷️';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 32px;
-            height: 32px;
-            background: center / contain no-repeat url('./slope-signal-lab-2d/assets/skier2.png');
+            width: auto;
+            height: auto;
+            font-size: 1.7rem;
+            line-height: 1;
             opacity: 1;
             transition: transform 0.3s ease;
             z-index: 3;
@@ -537,8 +538,7 @@
             }
 
             .back-to-top::before {
-                width: 26px;
-                height: 26px;
+                font-size: 1.45rem;
             }
 
             .back-to-top::after {
@@ -5423,7 +5423,7 @@
 .sendit-radial-direction {
     position: absolute !important;
     left: 50% !important;
-    top: calc(54% + 132px) !important;
+    top: calc(54% + 112px) !important;
     transform: translateX(-50%) !important;
     width: min(92%, 320px) !important;
     text-align: center !important;
@@ -5489,7 +5489,7 @@
     }
 
     .sendit-radial-direction {
-        top: calc(54% + 120px) !important;
+        top: calc(54% + 98px) !important;
         width: min(94%, 300px) !important;
         font-size: 1.48rem !important;
     }
@@ -5508,6 +5508,8 @@
     margin-top: 0.3rem !important;
     margin-left: 1.1rem !important;
     align-items: center !important;
+    justify-content: flex-start !important;
+    text-align: left !important;
 }
 
 .mix-pill {
@@ -5547,10 +5549,25 @@
     letter-spacing: 0.01em !important;
 }
 
+.sendit-line-mix-note {
+    margin-top: 0.18rem !important;
+    margin-left: 1.1rem !important;
+    font-size: 0.6rem !important;
+    font-weight: 620 !important;
+    color: #60728d !important;
+    letter-spacing: 0.01em !important;
+    text-align: left !important;
+}
+
 @media (max-width: 768px) {
     .sendit-line-mix {
         margin-left: 1.02rem !important;
         gap: 0.3rem !important;
+    }
+
+    .sendit-line-mix-note {
+        margin-left: 1.02rem !important;
+        font-size: 0.56rem !important;
     }
 
     .mix-pill {

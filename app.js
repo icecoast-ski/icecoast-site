@@ -788,7 +788,7 @@
         const SENDIT_MID_OPTIONS = ['Good Laps', 'Hot Laps', 'Prime Time'];
         const SENDIT_HIGH_OPTIONS = ['Full Send', 'Warp Speed', 'Full Tilt'];
         const SENDIT_CROWD_OPTIONS = [
-            { key: 'swarm', label: 'Jerry Swarm' },
+            { key: 'swarm', label: 'Crowded' },
             { key: 'normal', label: 'Normal' },
             { key: 'quiet', label: 'Quiet' }
         ];
@@ -824,7 +824,7 @@
             wind: './slope-signal-lab-2d/assets/wind.png',
             crowd: './slope-signal-lab-2d/assets/lift.png',
             hazard: './slope-signal-lab-2d/assets/caution.png',
-            slope: './slope-signal-lab-2d/assets/skier2.png'
+            slope: './slope-signal-lab-2d/assets/slope.png'
         };
         const SENDIT_DEFAULT_SIGNALS = { crowd: 'normal', wind: 'breezy', slope: 'good', hazard: 'clear', difficulty: '' };
         const SENDIT_HISTORY_MIN_VOTES = 2;
@@ -1408,7 +1408,7 @@
                 ? 'High wind'
                 : (wind === 'breezy' ? 'Breezy wind' : 'Calm wind');
             const crowdText = crowd === 'swarm'
-                ? 'Jerry swarm'
+                ? 'Crowded'
                 : (crowd === 'normal' ? 'Normal crowd' : 'Quiet crowd');
 
             return `${windText}. ${crowdText}.`;
@@ -1784,14 +1784,13 @@
             const sendItPrompt = '';
             const difficultyMix = getSlopeSignalDifficultyMix(sendIt);
             const hasDifficultyMix = difficultyMix.total >= SENDIT_HISTORY_MIN_VOTES;
-            const difficultyMixMarkup = hasDifficultyMix
-                ? `<div class="sendit-line-mix" aria-label="Slope Signal line mix">
+            const difficultyMixMarkup = `<div class="sendit-line-mix" aria-label="Slope Signal line mix">
                      <span class="mix-pill mix-green" title="Green Circle calls"><span class="mix-glyph">●</span><span class="mix-value">${Math.round(difficultyMix.green)} calls</span></span>
                      <span class="mix-pill mix-blue" title="Blue Square calls"><span class="mix-glyph">■</span><span class="mix-value">${Math.round(difficultyMix.blue)} calls</span></span>
                      <span class="mix-pill mix-black" title="Black Diamond calls"><span class="mix-glyph">◆</span><span class="mix-value">${Math.round(difficultyMix.black)} calls</span></span>
                      <span class="mix-pill mix-double" title="Double Black Diamond calls"><span class="mix-glyph">◆◆</span><span class="mix-value">${Math.round(difficultyMix.double)} calls</span></span>
-                   </div>`
-                : `<div class="sendit-line-mix sendit-line-mix-empty">Line mix building. First chair takes lead.</div>`;
+                   </div>
+                   ${hasDifficultyMix ? '' : '<div class="sendit-line-mix-note">First chair takes the lead.</div>'}`;
             const nextGroup = getNextSendItGroup(selectedSignals) || '';
             const selectionComplete = canSubmitSendItSelection(selectedSignals);
             const activeGroup = selectionComplete
