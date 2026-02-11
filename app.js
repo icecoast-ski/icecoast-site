@@ -940,6 +940,7 @@
         };
         const sendItSignalSelectionByResort = {};
         const sendItReadySlamByResort = {};
+        const sendItUnlockTransitionByResort = {};
         const SENDIT_COOLDOWN_OPTIONS = [
             'Easy, legend. icecoast patrol says wait {minutes}m before your next call.',
             'You already dropped your vote. Take a hot-lap and check back in {minutes}m.',
@@ -1639,8 +1640,13 @@
             }
 
             if (isUnlimitedSendItTestResort(resortId)) {
+                if (buttonEl) {
+                    buttonEl.classList.add('unlocking-out');
+                    await new Promise(resolve => setTimeout(resolve, 180));
+                }
                 sendItUnlockedResorts.add(resortId);
                 persistSendItUnlockState();
+                sendItUnlockTransitionByResort[resortId] = true;
                 renderResorts();
                 return;
             }
@@ -1670,6 +1676,11 @@
                 sendItUnlockedResorts.add(resortId);
                 persistSendItUnlockState();
                 triggerHaptic([12, 24, 12]);
+                if (buttonEl) {
+                    buttonEl.classList.add('unlocking-out');
+                    await new Promise(resolve => setTimeout(resolve, 180));
+                }
+                sendItUnlockTransitionByResort[resortId] = true;
                 renderResorts();
             } catch (e) {
                 alert('Could not verify your location. Please allow location access and try again.');
@@ -1731,8 +1742,11 @@
                     body: JSON.stringify({
                         resortId,
                         score,
+                        difficulty: signalSelection?.difficulty,
                         crowd: signalSelection?.crowd,
                         wind: signalSelection?.wind,
+                        slope: signalSelection?.slope,
+                        hazard: signalSelection?.hazard,
                         lat: voteLat,
                         lon: voteLon,
                         accuracy: voteAccuracy,
@@ -1854,10 +1868,10 @@
             const hasDifficultyMix = difficultyMix.total >= SENDIT_HISTORY_MIN_VOTES;
             const difficultyMixMarkup = hasDifficultyMix
                 ? `<div class="sendit-line-mix" aria-label="Slope Signal line mix">
-                     <span class="mix-pill mix-green" title="Green Circle calls"><span class="mix-glyph">●</span><span class="mix-value">${difficultyMix.green} calls</span></span>
-                     <span class="mix-pill mix-blue" title="Blue Square calls"><span class="mix-glyph">■</span><span class="mix-value">${difficultyMix.blue} calls</span></span>
-                     <span class="mix-pill mix-black" title="Black Diamond calls"><span class="mix-glyph">◆</span><span class="mix-value">${difficultyMix.black} calls</span></span>
-                     <span class="mix-pill mix-double" title="Double Black Diamond calls"><span class="mix-glyph">◆◆</span><span class="mix-value">${difficultyMix.double} calls</span></span>
+                     <span class="mix-pill mix-green" title="Green Circle calls"><span class="mix-glyph">●</span><span class="mix-value">${Math.round(difficultyMix.green)} calls</span></span>
+                     <span class="mix-pill mix-blue" title="Blue Square calls"><span class="mix-glyph">■</span><span class="mix-value">${Math.round(difficultyMix.blue)} calls</span></span>
+                     <span class="mix-pill mix-black" title="Black Diamond calls"><span class="mix-glyph">◆</span><span class="mix-value">${Math.round(difficultyMix.black)} calls</span></span>
+                     <span class="mix-pill mix-double" title="Double Black Diamond calls"><span class="mix-glyph">◆◆</span><span class="mix-value">${Math.round(difficultyMix.double)} calls</span></span>
                    </div>`
                 : `<div class="sendit-line-mix sendit-line-mix-empty">Line mix building. First chair takes lead.</div>`;
             const nextGroup = getNextSendItGroup(selectedSignals) || '';
@@ -1895,8 +1909,12 @@
                 ? 'SEND IT!'
                 : (!selectedSignals.difficulty ? '<span class="line-stack">CHOOSE<br>YOUR<br>LINE</span>' : '');
             const radialWheelMarkup = buildSendItWheelMarkup(resort.id, selectedSignals, activeGroup);
+            const radialEnterClass = sendItUnlockTransitionByResort[resort.id] ? 'unlock-enter' : '';
+            if (sendItUnlockTransitionByResort[resort.id]) {
+                sendItUnlockTransitionByResort[resort.id] = false;
+            }
             const sendItControls = !hasCoords ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>` : canVote
-                ? `<div class="sendit-radial" data-resort-id="${resort.id}">
+                ? `<div class="sendit-radial ${radialEnterClass}" data-resort-id="${resort.id}">
                       <div class="sendit-hud-radial unlocked">
                         ${radialWheelMarkup}
                         <button
