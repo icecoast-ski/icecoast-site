@@ -3,7 +3,7 @@
  * Generated from admin.html
  */
 window.MANUAL_RESORT_OVERRIDES_META = {
-  "updatedAt": "2026-02-09T04:49:09.194Z"
+  "updatedAt": "2026-02-11T18:58:06.462Z"
 };
 window.MANUAL_RESORT_OVERRIDES = {
   "blue-mountain": {
@@ -45,8 +45,8 @@ window.MANUAL_RESORT_OVERRIDES = {
     "_patrolUpdatedAt": "2026-02-09T01:37:04.536Z"
   },
   "gore-mountain": {
-    "conditions": "Loose Granular",
-    "icecoastRating": 3,
+    "conditions": "Packed Powder",
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$74+",
       "weekend": "$99+"
@@ -54,32 +54,32 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": true,
     "trails": {
-      "open": 76
+      "open": 86
     },
     "lifts": {
       "total": 14
     },
-    "snowfall24h": 0,
-    "snowfall48h": 2,
-    "_patrolUpdatedAt": "2026-02-09T01:25:53.939Z"
+    "snowfall24h": 4,
+    "snowfall48h": 4,
+    "_patrolUpdatedAt": "2026-02-11T18:38:07.143Z"
   },
   "hunter": {
     "conditions": "Machine Groomed",
     "icecoastRating": 4,
     "dynamicPricing": false,
     "trails": {
-      "open": 59
+      "open": 58
     },
     "lifts": {
       "total": 13
     },
-    "snowfall24h": 1,
-    "snowfall48h": 3,
-    "snowfall7d": 3
+    "snowfall24h": 0,
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-11T18:36:17.326Z"
   },
   "jay-peak": {
-    "conditions": "Arctic Blast ⚠️",
-    "icecoastRating": 3,
+    "conditions": "Machine Groomed",
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$99",
       "weekend": "$119"
@@ -92,12 +92,13 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 9
     },
-    "snowfall48h": 4,
-    "snowfall7d": 12
+    "snowfall24h": 4,
+    "snowfall48h": 6,
+    "_patrolUpdatedAt": "2026-02-11T18:31:14.120Z"
   },
   "killington": {
-    "conditions": "Machine Groomed",
-    "icecoastRating": 4,
+    "conditions": "Powder",
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$157+",
       "weekend": "$172+"
@@ -105,18 +106,18 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": true,
     "trails": {
-      "open": 96
+      "open": 97
     },
     "lifts": {
       "total": 21
     },
-    "snowfall24h": 0,
-    "snowfall48h": 6,
-    "snowfall7d": 9
+    "snowfall24h": 4,
+    "snowfall48h": 4,
+    "_patrolUpdatedAt": "2026-02-11T18:24:52.988Z"
   },
   "loon": {
     "conditions": "Machine Groomed",
-    "icecoastRating": 4,
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$82+",
       "weekend": "$127+"
@@ -129,12 +130,13 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 13
     },
-    "snowfall24h": 1,
-    "snowfall7d": 4
+    "snowfall24h": 4,
+    "snowfall48h": 4,
+    "_patrolUpdatedAt": "2026-02-11T18:33:59.619Z"
   },
   "tremblant": {
-    "conditions": "Arctic Blast ⚠️",
-    "icecoastRating": 4,
+    "conditions": "Powder",
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$115+",
       "weekend": "$125+"
@@ -145,13 +147,13 @@ window.MANUAL_RESORT_OVERRIDES = {
       "open": 102,
       "total": 14
     },
-    "snowfall48h": 5,
-    "snowfall7d": 7,
-    "_patrolUpdatedAt": "2026-02-09T01:33:43.281Z"
+    "snowfall24h": 7,
+    "snowfall48h": 7,
+    "_patrolUpdatedAt": "2026-02-11T18:39:43.686Z"
   },
   "mount-snow": {
     "conditions": "Machine Groomed",
-    "icecoastRating": 4,
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$99+",
       "weekend": "$115+"
@@ -159,18 +161,18 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": true,
     "trails": {
-      "open": 68
+      "open": 83
     },
     "lifts": {
       "total": 20
     },
-    "snowfall24h": 0,
-    "snowfall48h": 1,
-    "snowfall7d": 2
+    "snowfall24h": 4,
+    "snowfall48h": 5,
+    "_patrolUpdatedAt": "2026-02-11T18:29:55.178Z"
   },
   "okemo": {
-    "conditions": "Machine Groomed",
-    "icecoastRating": 4,
+    "conditions": "Powder",
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$99+",
       "weekend": "$125+"
@@ -178,18 +180,18 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": false,
     "trails": {
-      "open": 115
+      "open": 119
     },
     "lifts": {
       "total": 20
     },
-    "snowfall24h": 1,
-    "snowfall48h": 2,
-    "snowfall7d": 2
+    "snowfall24h": 4,
+    "snowfall48h": 4,
+    "_patrolUpdatedAt": "2026-02-11T18:30:43.249Z"
   },
   "smugglers-notch": {
     "conditions": "Packed Powder",
-    "icecoastRating": 4,
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$69",
       "weekend": "$99"
@@ -197,15 +199,18 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": false,
     "trails": {
-      "open": 74
+      "open": 77
     },
     "lifts": {
       "total": 8
     },
-    "snowfall24h": 1
+    "snowfall24h": 5,
+    "snowfall48h": 5,
+    "_patrolUpdatedAt": "2026-02-11T18:31:56.599Z"
   },
   "stowe": {
-    "conditions": "Variable",
+    "conditions": "Powder",
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$125+",
       "weekend": "$169+"
@@ -218,13 +223,13 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 12
     },
-    "snowfall24h": 2,
-    "snowfall48h": 7,
-    "snowfall7d": 13
+    "snowfall24h": 6,
+    "snowfall48h": 6,
+    "_patrolUpdatedAt": "2026-02-11T18:25:48.028Z"
   },
   "stratton": {
-    "conditions": "Machine Groomed",
-    "icecoastRating": 4,
+    "conditions": "Powder",
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$88+",
       "weekend": "$146+"
@@ -232,18 +237,19 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": true,
     "trails": {
-      "open": 98,
+      "open": 95,
       "closed": 1
     },
     "lifts": {
       "total": 14
     },
-    "snowfall24h": 0,
-    "snowfall48h": 3
+    "snowfall24h": 4,
+    "snowfall48h": 4,
+    "_patrolUpdatedAt": "2026-02-11T18:27:17.740Z"
   },
   "sugarbush": {
     "conditions": "Packed Powder",
-    "icecoastRating": 4,
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$129+",
       "weekend": "$179+"
@@ -251,18 +257,18 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": true,
     "trails": {
-      "open": 111
+      "open": 109
     },
     "lifts": {
       "total": 16
     },
-    "snowfall24h": 2,
+    "snowfall24h": 6,
     "snowfall48h": 6,
-    "snowfall7d": 7
+    "_patrolUpdatedAt": "2026-02-11T18:26:41.875Z"
   },
   "sugarloaf": {
-    "conditions": "Packed Powder",
-    "icecoastRating": 4,
+    "conditions": "Powder",
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$68+",
       "weekend": "$86+"
@@ -275,13 +281,13 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 13
     },
-    "snowfall24h": 1,
-    "snowfall48h": 2,
-    "snowfall7d": 2
+    "snowfall24h": 4,
+    "snowfall48h": 4,
+    "_patrolUpdatedAt": "2026-02-11T18:33:05.828Z"
   },
   "sunday-river": {
     "conditions": "Machine Groomed",
-    "icecoastRating": 4,
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$92+",
       "weekend": "$130+"
@@ -289,18 +295,18 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": true,
     "trails": {
-      "open": 129
+      "open": 130
     },
     "lifts": {
       "total": 15
     },
-    "snowfall24h": 1,
-    "snowfall48h": 1,
-    "snowfall7d": 1
+    "snowfall24h": 5,
+    "snowfall48h": 6,
+    "_patrolUpdatedAt": "2026-02-11T18:32:27.666Z"
   },
   "whiteface": {
-    "conditions": "Frozen Granular",
-    "icecoastRating": 3,
+    "conditions": "Powder",
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$80+",
       "weekend": "$107+"
@@ -308,17 +314,18 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": false,
     "trails": {
-      "open": 75
+      "open": 89
     },
     "lifts": {
       "total": 11
     },
-    "snowfall24h": 1,
-    "snowfall7d": 15
+    "snowfall24h": 6,
+    "snowfall48h": 6,
+    "_patrolUpdatedAt": "2026-02-11T18:35:16.963Z"
   },
   "windham": {
     "conditions": "Machine Groomed",
-    "icecoastRating": 3,
+    "icecoastRating": 4,
     "liftTicket": {
       "weekday": "$115+",
       "weekend": "$155+"
@@ -326,15 +333,18 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": true,
     "trails": {
-      "open": 52
+      "open": 51
     },
     "lifts": {
       "total": 11
-    }
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-11T18:37:27.167Z"
   },
   "belleayre": {
     "conditions": "Machine Groomed",
-    "icecoastRating": 3,
+    "icecoastRating": 4,
     "liftTicket": {
       "weekday": "$65+",
       "weekend": "$107+"
@@ -347,12 +357,11 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 8
     },
-    "snowfall7d": 2,
-    "_patrolUpdatedAt": "2026-02-09T04:31:43.436Z"
+    "_patrolUpdatedAt": "2026-02-11T18:45:52.461Z"
   },
   "brettonwoods": {
-    "conditions": "Machine Groomed",
-    "icecoastRating": 4,
+    "conditions": "Powder",
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$99+",
       "weekend": "$149"
@@ -364,12 +373,13 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 10
     },
-    "snowfall24h": 0,
-    "_patrolUpdatedAt": "2026-02-09T04:28:39.593Z"
+    "snowfall24h": 3,
+    "snowfall48h": 3,
+    "_patrolUpdatedAt": "2026-02-11T18:44:52.146Z"
   },
   "burke": {
-    "conditions": "Machine Groomed",
-    "icecoastRating": 4,
+    "conditions": "Powder",
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$25+",
       "weekend": "$89+"
@@ -382,14 +392,13 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 5
     },
-    "snowfall24h": 3,
-    "snowfall48h": 4,
-    "snowfall7d": 8,
-    "_patrolUpdatedAt": "2026-02-09T04:18:36.013Z"
+    "snowfall24h": 5,
+    "snowfall48h": 6,
+    "_patrolUpdatedAt": "2026-02-11T18:42:15.809Z"
   },
   "cannon": {
-    "conditions": "Machine Groomed",
-    "icecoastRating": 4,
+    "conditions": "Powder",
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$99",
       "weekend": "$114"
@@ -402,29 +411,31 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 10
     },
-    "snowfall48h": 6,
-    "_patrolUpdatedAt": "2026-02-09T04:21:48.189Z"
+    "snowfall24h": 6,
+    "snowfall48h": 8,
+    "_patrolUpdatedAt": "2026-02-11T18:43:10.856Z"
   },
   "jiminy-peak": {
-    "conditions": "Machine Groomed",
-    "icecoastRating": 4,
+    "conditions": "Packed Powder",
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$114",
       "weekend": "$124"
     },
     "dynamicPricing": false,
     "trails": {
-      "open": 39
+      "open": 45
     },
     "lifts": {
       "total": 9
     },
     "snowfall24h": 3,
-    "_patrolUpdatedAt": "2026-02-09T04:33:37.524Z"
+    "snowfall48h": 3,
+    "_patrolUpdatedAt": "2026-02-11T18:46:40.306Z"
   },
   "le-massif": {
     "conditions": "Packed Powder",
-    "icecoastRating": 4,
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$110",
       "weekend": "$110"
@@ -439,12 +450,11 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "snowfall7d": 2,
-    "_patrolUpdatedAt": "2026-02-09T04:46:17.651Z"
+    "_patrolUpdatedAt": "2026-02-11T18:49:52.607Z"
   },
   "mad-river-glen": {
-    "conditions": "Packed Powder",
-    "icecoastRating": 4,
+    "conditions": "Powder",
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$94+",
       "weekend": "$111"
@@ -452,14 +462,14 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": true,
     "trails": {
-      "open": 60
+      "open": 54
     },
     "lifts": {
       "total": 5
     },
-    "snowfall24h": 0,
-    "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-09T04:14:58.357Z"
+    "snowfall24h": 8,
+    "snowfall48h": 8,
+    "_patrolUpdatedAt": "2026-02-11T18:41:47.889Z"
   },
   "mont-sutton": {
     "conditions": "Powder",
@@ -476,13 +486,13 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 9
     },
-    "snowfall24h": 5,
-    "snowfall48h": 6,
-    "snowfall7d": 10,
-    "_patrolUpdatedAt": "2026-02-09T04:49:09.194Z"
+    "snowfall24h": 3,
+    "snowfall48h": 3,
+    "_patrolUpdatedAt": "2026-02-11T18:50:19.940Z"
   },
   "mont-sainte-anne": {
-    "conditions": "Packed Powder",
+    "conditions": "Powder",
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$145",
       "weekend": "$155"
@@ -490,19 +500,18 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": false,
     "trails": {
-      "open": 61
+      "open": 64
     },
     "lifts": {
       "total": 11
     },
-    "snowfall24h": 0,
-    "snowfall48h": 0,
-    "snowfall7d": 0,
-    "_patrolUpdatedAt": "2026-02-09T04:42:01.202Z"
+    "snowfall24h": 2,
+    "snowfall48h": 2,
+    "_patrolUpdatedAt": "2026-02-11T18:48:48.131Z"
   },
   "pico": {
-    "conditions": "Machine Groomed",
-    "icecoastRating": 4,
+    "conditions": "Powder",
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$64+",
       "weekend": "$103+"
@@ -515,14 +524,13 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 7
     },
-    "snowfall24h": 0,
-    "snowfall48h": 6,
-    "snowfall7d": 9,
-    "_patrolUpdatedAt": "2026-02-09T04:10:22.188Z"
+    "snowfall24h": 4,
+    "snowfall48h": 4,
+    "_patrolUpdatedAt": "2026-02-11T18:41:11.843Z"
   },
   "saddleback": {
     "conditions": "Packed Powder",
-    "icecoastRating": 4,
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$75+",
       "weekend": "$110+"
@@ -535,9 +543,9 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 6
     },
-    "snowfall24h": 1,
-    "snowfall48h": 3,
-    "_patrolUpdatedAt": "2026-02-09T04:38:54.697Z"
+    "snowfall24h": 4,
+    "snowfall48h": 4,
+    "_patrolUpdatedAt": "2026-02-11T18:47:46.576Z"
   },
   "wachusett": {
     "conditions": "Machine Groomed",
@@ -549,16 +557,16 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": false,
     "trails": {
-      "open": 21
+      "open": 27
     },
     "lifts": {
       "total": 8
     },
-    "snowfall24h": 2,
-    "_patrolUpdatedAt": "2026-02-09T04:36:38.132Z"
+    "snowfall24h": 3,
+    "_patrolUpdatedAt": "2026-02-11T18:47:21.804Z"
   },
   "waterville": {
-    "conditions": "Packed Powder",
+    "conditions": "Powder",
     "icecoastRating": 4,
     "liftTicket": {
       "weekday": "$25+",
@@ -572,13 +580,13 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 11
     },
-    "snowfall24h": 0,
-    "snowfall48h": 4,
-    "_patrolUpdatedAt": "2026-02-09T04:26:21.213Z"
+    "snowfall24h": 4,
+    "snowfall48h": 5,
+    "_patrolUpdatedAt": "2026-02-11T18:44:19.902Z"
   },
   "wildcat": {
-    "conditions": "Packed Powder",
-    "icecoastRating": 4,
+    "conditions": "Powder",
+    "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$62+",
       "weekend": "$139"
@@ -591,9 +599,114 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 5
     },
+    "snowfall24h": 4,
+    "snowfall48h": 4,
+    "_patrolUpdatedAt": "2026-02-11T18:43:43.909Z"
+  },
+  "bear-creek": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 2,
+    "dynamicPricing": false,
+    "trails": {
+      "open": 23
+    },
+    "lifts": {
+      "total": 7
+    },
     "snowfall24h": 0,
-    "snowfall48h": 1,
-    "snowfall7d": 1,
-    "_patrolUpdatedAt": "2026-02-09T04:24:12.766Z"
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-11T18:53:51.043Z"
+  },
+  "big-boulder": {
+    "conditions": "Packed Powder",
+    "icecoastRating": 3,
+    "dynamicPricing": false,
+    "trails": {
+      "open": 35
+    },
+    "lifts": {
+      "total": 8
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-11T18:52:26.108Z"
+  },
+  "elk": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 3,
+    "dynamicPricing": false,
+    "trails": {
+      "open": 27
+    },
+    "lifts": {
+      "open": 5,
+      "total": 7
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-11T18:54:27.641Z"
+  },
+  "jack-frost": {
+    "conditions": "Packed Powder",
+    "icecoastRating": 3,
+    "dynamicPricing": false,
+    "trails": {
+      "open": 35
+    },
+    "lifts": {
+      "total": 9
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-11T18:51:09.449Z"
+  },
+  "mohawk": {
+    "conditions": "Variable",
+    "icecoastRating": 2,
+    "liftTicket": {
+      "weekday": "$45",
+      "weekend": "$81"
+    },
+    "parking": "Free",
+    "dynamicPricing": false,
+    "trails": {
+      "open": 28
+    },
+    "lifts": {
+      "open": 6,
+      "total": 8
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-11T18:58:06.462Z"
+  },
+  "montage": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 2,
+    "dynamicPricing": false,
+    "trails": {
+      "open": 28
+    },
+    "lifts": {
+      "open": 6,
+      "total": 8
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-11T18:56:08.236Z"
+  },
+  "shawnee": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 3,
+    "dynamicPricing": false,
+    "trails": {
+      "open": 21
+    },
+    "lifts": {
+      "total": 11
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-11T18:53:06.550Z"
   }
 };
