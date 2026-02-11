@@ -761,12 +761,13 @@
         let sendItMaxAccuracyMeters = 200;
         const SENDIT_DEVICE_ID_KEY = 'icecoast_sendit_device_id';
         const sendItUnlockedResorts = new Set();
-        const SENDIT_TEST_UNLOCKED_RESORTS = new Set(['camelback']);
+        const SENDIT_TEST_UNLOCKED_RESORTS = new Set([]);
         const sendItButtonCopyByResort = {};
         const sendItVerifyFlavorByResort = {};
         const sendItStateLabelByResort = {};
-        const SENDIT_TEST_UNLIMITED_RESORTS = new Set(['camelback']);
-        const SENDIT_TEST_ON_MOUNTAIN_RESORTS = new Set([]);
+        const SENDIT_TEST_UNLIMITED_RESORTS = new Set([]);
+        const SENDIT_TEST_ON_MOUNTAIN_RESORTS = new Set(['camelback']);
+        const SENDIT_TEST_UNLOCK_ONLY_RESORTS = new Set(['camelback']);
         const DEFAULT_LIFT_CLOSE_HOUR = 16;
         const NIGHT_SKI_CLOSE_HOURS = {
             camelback: { weekday: 21, weekend: 21 },
@@ -966,12 +967,12 @@
             'Make the call.'
         ];
         const SENDIT_OUT_OF_RANGE_OPTIONS = [
-            'You are {distance} miles away. Slope Signal voting unlocks within {radius} miles. Time to shuffle over on skinny skis, nordic warrior.',
-            'You are {distance} miles away. Slope Signal voting unlocks within {radius} miles. You are currently in cross-country mode, not chairlift mode.',
-            'You are {distance} miles away. Slope Signal voting unlocks within {radius} miles. Grab the classic wax and start double-poling.',
-            'You are {distance} miles away. Slope Signal voting unlocks within {radius} miles. That is a little too far for a quick bootpack.',
-            'You are {distance} miles away. Slope Signal voting unlocks within {radius} miles. Respectfully: skate-ski closer and then drop your take.',
-            'You are {distance} miles away. Slope Signal voting unlocks within {radius} miles. icecoast patrol says this is a touring mission, not an on-mountain check-in.'
+            'You are {distance} miles away. Time to shuffle over on skinny skis, nordic warrior.',
+            'You are {distance} miles away. You are currently in cross-country mode, not chairlift mode.',
+            'You are {distance} miles away. Grab the classic wax and start double-poling.',
+            'You are {distance} miles away. That is a little too far for a quick bootpack.',
+            'You are {distance} miles away. Respectfully: skate-ski closer and then drop your take.',
+            'You are {distance} miles away. icecoast patrol says this is a touring mission, not an on-mountain check-in.'
         ];
 
         function pickRandomLabel(options) {
@@ -1167,16 +1168,16 @@
                 slope: SENDIT_SLOPE_OPTIONS
             };
             const opts = optionMap[activeGroup] || [];
-            const offsets = [-44, 0, 44];
+            const offsets = [-56, 0, 56];
             const showSecondary = !!selectedSignals.difficulty && !!activeGroup && opts.length > 0;
             const optionSectors = showSecondary ? opts.map((opt, i) => {
                 const center = -90 + offsets[i];
-                const d = sectorPathData(300, 300, 210, 292, center - 29, center + 29);
+                const d = sectorPathData(300, 300, 210, 292, center - 24, center + 24);
                 const active = selectedSignals[activeGroup] === opt.key ? 'active' : '';
                 const guideId = `sendit-guide-${resortId}-${activeGroup}-${i}`;
                 const radius = (210 + 292) / 2;
-                const start = center - 26;
-                const end = center + 26;
+                const start = center - 23;
+                const end = center + 23;
                 const a = polarPoint(300, 300, radius, start);
                 const b = polarPoint(300, 300, radius, end);
                 return `
@@ -1199,11 +1200,10 @@
             `;
         }
 
-        function getSendItOutOfRangeMessage(distanceMiles, requiredMiles) {
+        function getSendItOutOfRangeMessage(distanceMiles) {
             const template = pickRandomLabel(SENDIT_OUT_OF_RANGE_OPTIONS);
             return template
-                .replace('{distance}', distanceMiles.toFixed(1))
-                .replace('{radius}', formatMiles(requiredMiles));
+                .replace('{distance}', distanceMiles.toFixed(1));
         }
 
         function getSendItVerifySubtitleParts(resortId) {
@@ -1372,6 +1372,10 @@
 
         function isOnMountainSendItTestResort(resortId) {
             return SENDIT_TEST_ON_MOUNTAIN_RESORTS.has(resortId);
+        }
+
+        function isUnlockOnlySendItTestResort(resortId) {
+            return SENDIT_TEST_UNLOCK_ONLY_RESORTS.has(resortId);
         }
 
         function getSendItSocialLine(votesLastHour, votesTotal) {
@@ -1575,7 +1579,7 @@
                 return;
             }
 
-            if (isUnlimitedSendItTestResort(resortId)) {
+            if (isUnlimitedSendItTestResort(resortId) || isUnlockOnlySendItTestResort(resortId)) {
                 if (buttonEl) {
                     buttonEl.classList.add('unlocking-out');
                     await new Promise(resolve => setTimeout(resolve, 180));
@@ -1605,7 +1609,7 @@
                 );
 
                 if (distance > requiredMiles) {
-                    alert(getSendItOutOfRangeMessage(distance, requiredMiles));
+                    alert(getSendItOutOfRangeMessage(distance));
                     return;
                 }
 

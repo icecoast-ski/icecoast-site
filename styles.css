@@ -4566,9 +4566,9 @@
 }
 
 .option-label {
-    font-size: 21px;
+    font-size: 20px;
     font-weight: 560;
-    letter-spacing: 0.008em;
+    letter-spacing: 0.006em;
     text-transform: uppercase;
     fill: #deebff;
     text-shadow: 0 1px 2px rgba(8, 22, 48, 0.52);
@@ -4659,8 +4659,8 @@
 .sendit-hud-radial.pulse-secondary .option-label[data-opt-idx="3"] { animation-delay: 0.4s; }
 
 .option-sector {
-    fill: rgba(208, 229, 255, 0.16);
-    stroke: rgba(230, 241, 255, 0.34);
+    fill: rgba(208, 229, 255, 0.24);
+    stroke: rgba(230, 241, 255, 0.42);
     stroke-width: 0.95;
     filter: drop-shadow(0 5px 10px rgba(7, 24, 52, 0.16));
 }
@@ -4670,28 +4670,28 @@
 .option-sector[data-value="swarm"],
 .option-sector[data-value="edges"],
 .option-sector[data-value="icy"] {
-    fill: rgba(236, 83, 101, 0.16);
-    stroke: rgba(255, 196, 203, 0.34);
+    fill: rgba(236, 83, 101, 0.34);
+    stroke: rgba(255, 196, 203, 0.62);
 }
 
 .option-sector[data-value="breezy"],
 .option-sector[data-value="normal"],
 .option-sector[data-value="good"],
 .option-sector[data-value="clear"] {
-    fill: rgba(78, 144, 255, 0.16);
-    stroke: rgba(190, 221, 255, 0.34);
+    fill: rgba(78, 144, 255, 0.34);
+    stroke: rgba(190, 221, 255, 0.62);
 }
 
 .option-sector[data-value="calm"],
 .option-sector[data-value="quiet"],
 .option-sector[data-value="full"] {
-    fill: rgba(63, 190, 120, 0.16);
-    stroke: rgba(190, 245, 212, 0.34);
+    fill: rgba(63, 190, 120, 0.34);
+    stroke: rgba(190, 245, 212, 0.62);
 }
 
 .option-sector:hover {
-    fill: rgba(118, 165, 241, 0.32);
-    stroke: rgba(214, 232, 255, 0.52);
+    stroke: rgba(235, 244, 255, 0.82);
+    filter: drop-shadow(0 7px 14px rgba(10, 29, 63, 0.26)) brightness(1.06);
 }
 
 .option-sector.active {
