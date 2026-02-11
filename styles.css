@@ -1785,6 +1785,11 @@
             background: linear-gradient(135deg, #0066FF 0%, #0052CC 100%);
             color: white;
         }
+
+        .pass-badge.pass-indy {
+            background: linear-gradient(135deg, #0f7a3f 0%, #179a52 100%);
+            color: white;
+        }
         .dynamic-badge {
             padding: 0.25rem 0.6rem;
             border-radius: 12px;
@@ -3958,6 +3963,12 @@
     background: #153d8a;
     color: #ffffff;
     border: 1px solid #0f2f6d;
+}
+
+.pass-badge.pass-indy {
+    background: #118147;
+    color: #ffffff;
+    border: 1px solid #0b6738;
 }
 
 .dynamic-badge {

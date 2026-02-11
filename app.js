@@ -556,6 +556,15 @@
             'le-massif': ['ikon'],
             'jiminy-peak': ['ikon'],
 
+            'montage': ['indy'],
+            'mohawk': ['indy'],
+            'jay-peak': ['indy'],
+            'burke': ['indy'],
+            'cannon': ['indy'],
+            'waterville': ['indy'],
+            'saddleback': ['indy'],
+            'mont-sutton': ['indy'],
+
             'windham': []
         };
 
@@ -2185,7 +2194,9 @@ const backgroundSizeByResort = {
                         Lift Ticket
                         ${passes.length
                             ? `<span class="ticket-label-badges">${passes.map(pass =>
-                                `<span class="pass-badge pass-${pass}">${pass === 'ikon' ? 'Ikon' : 'Epic'}</span>`
+                                `<span class="pass-badge pass-${pass}">${
+                                    pass === 'ikon' ? 'Ikon' : (pass === 'epic' ? 'Epic' : (pass === 'indy' ? 'Indy' : pass))
+                                }</span>`
                               ).join('')}</span>`
                             : ''}
                       </span>
@@ -2364,6 +2375,8 @@ const backgroundSizeByResort = {
                 filtered = filtered.filter(r => r.passes && r.passes.includes('ikon'));
             } else if (filterState.pass === 'epic') {
                 filtered = filtered.filter(r => r.passes && r.passes.includes('epic'));
+            } else if (filterState.pass === 'indy') {
+                filtered = filtered.filter(r => r.passes && r.passes.includes('indy'));
             } else if (filterState.pass === 'none') {
                 filtered = filtered.filter(r => !r.passes || r.passes.length === 0);
             }
