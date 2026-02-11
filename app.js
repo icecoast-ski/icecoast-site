@@ -1547,107 +1547,6 @@
             }, 1500);
         }
 
-        function launchSendItSkier(resortId, scoreValue) {
-            const card = document.querySelector(`.resort-card[data-resort="${resortId}"]`);
-            if (!card) return;
-
-            const scoreNum = Number(scoreValue);
-            const sourceScore = scoreNum >= 100 ? 100 : (scoreNum >= 60 ? 60 : 20);
-            const targetScore = sourceScore >= 100 ? 100 : (sourceScore >= 60 ? 100 : 60);
-            const isFullSend = sourceScore >= 100;
-
-            const sourceButton = card.querySelector(`.sendit-vote-btn[data-score="${sourceScore}"]`);
-            const targetButton = card.querySelector(`.sendit-vote-btn[data-score="${targetScore}"]`) || sourceButton;
-            if (!sourceButton || !targetButton) return;
-
-            const targetRect = targetButton.getBoundingClientRect();
-            // Anchor gondola drop to the actual grind target so all three vote paths
-            // land on-rail consistently (left/mid/right buttons).
-            const gondolaEndX = Math.max(42, Math.round(targetRect.left - 24));
-            const gondolaEndY = Math.max(26, Math.round(targetRect.top - 72));
-            const gondolaStartX = -74;
-            const diagonalRun = gondolaEndX - gondolaStartX;
-            const gondolaStartY = Math.min(
-                window.innerHeight - 28,
-                Math.max(gondolaEndY + 90, Math.round(gondolaEndY + diagonalRun))
-            );
-            const startX = gondolaEndX + 18;
-            const startY = gondolaEndY + 12;
-            const railY = (targetRect.top - 9) - startY;
-            const railStartX = (targetRect.left + 8) - startX;
-            const railStartY = railY;
-            const railEndX = (targetRect.right - 8) - startX;
-            const railEndY = railY;
-            // Final exit: send it down the hill at ~45deg to the right.
-            const downhillRun = Math.max(
-                Math.round(window.innerHeight * (isFullSend ? 0.82 : 0.72)),
-                isFullSend ? 900 : 760
-            );
-            const downX = railEndX + downhillRun;
-            const downY = railEndY + downhillRun;
-            const gondolaDurationMs = 980;
-            const skierDropDelayMs = 540;
-
-            const gondola = document.createElement('span');
-            gondola.className = `sendit-gondola-run ${isFullSend ? 'fullsend' : 'normal'}`;
-            gondola.textContent = '\ud83d\udea1';
-            gondola.style.setProperty('--g-start-x', `${gondolaStartX}px`);
-            gondola.style.setProperty('--g-start-y', `${gondolaStartY}px`);
-            gondola.style.setProperty('--g-end-x', `${gondolaEndX}px`);
-            gondola.style.setProperty('--g-end-y', `${gondolaEndY}px`);
-            document.body.appendChild(gondola);
-            requestAnimationFrame(() => gondola.classList.add('active'));
-
-            const skier = document.createElement('span');
-            skier.className = `sendit-skier-launch ${isFullSend ? 'fullsend' : 'normal'}`;
-            skier.setAttribute('aria-hidden', 'true');
-            skier.style.left = `${Math.round(startX)}px`;
-            skier.style.top = `${Math.round(startY)}px`;
-            skier.style.setProperty('--land-x', `${Math.round(railStartX)}px`);
-            skier.style.setProperty('--land-y', `${Math.round(railStartY)}px`);
-            skier.style.setProperty('--rail-end-x', `${Math.round(railEndX)}px`);
-            skier.style.setProperty('--rail-end-y', `${Math.round(railEndY)}px`);
-            skier.style.setProperty('--down-x', `${Math.round(downX)}px`);
-            skier.style.setProperty('--down-y', `${Math.round(downY)}px`);
-            document.body.appendChild(skier);
-
-            setTimeout(() => {
-                targetButton.classList.add(isFullSend ? 'sendit-grind-epic' : 'sendit-grind-target');
-                requestAnimationFrame(() => skier.classList.add('active'));
-            }, skierDropDelayMs);
-
-            setTimeout(() => {
-                targetButton.classList.remove('sendit-grind-target', 'sendit-grind-epic');
-                skier.remove();
-                gondola.remove();
-            }, isFullSend ? 2300 : 2000);
-
-            setTimeout(() => {
-                gondola.remove();
-            }, gondolaDurationMs + 140);
-        }
-
-        function celebrateSendItVote(resortId, scoreValue, buttonEl) {
-            const card = document.querySelector(`.resort-card[data-resort="${resortId}"]`);
-            if (!card) return;
-            const section = card.querySelector('.sendit-section');
-            const score = card.querySelector('.sendit-scoreboard');
-            const prompt = card.querySelector('.sendit-prompt');
-
-            if (section) section.classList.add('vote-locked');
-            if (score) score.classList.add('vote-pop');
-            if (prompt) {
-                prompt.classList.add('vote-payoff');
-            }
-            launchSendItSkier(resortId, scoreValue);
-
-            setTimeout(() => {
-                if (section) section.classList.remove('vote-locked');
-                if (score) score.classList.remove('vote-pop');
-                if (prompt) prompt.classList.remove('vote-payoff');
-            }, 1200);
-        }
-
         async function unlockSendItForResort(resortId, buttonEl) {
             const resortCoords = getResortCoords(resortId);
             if (!resortCoords) {
@@ -1796,9 +1695,7 @@
                 }
                 await new Promise(resolve => setTimeout(resolve, 320));
 
-                celebrateSendItVote(resortId, score, buttonEl);
-                const settleDelayMs = Number(score) >= 100 ? 2350 : 2050;
-                await new Promise(resolve => setTimeout(resolve, settleDelayMs));
+                await new Promise(resolve => setTimeout(resolve, 280));
                 showSendItToast('Slope Signal SENT');
                 triggerHaptic([18, 28, 16, 36, 22]);
                 renderResorts();
