@@ -817,7 +817,7 @@
         const SENDIT_COOLDOWN_CTA_OPTIONS = [
             'SEND NEW SIGNAL',
             'DROP ANOTHER SIGNAL',
-            'CALL AGAIN',
+            'CAST SLOPE SIGNAL',
             'RELOAD SIGNAL'
         ];
         const SENDIT_DIFFICULTY_OPTIONS = [
