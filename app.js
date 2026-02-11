@@ -788,14 +788,14 @@
         const SENDIT_MID_OPTIONS = ['Good Laps', 'Hot Laps', 'Prime Time'];
         const SENDIT_HIGH_OPTIONS = ['Full Send', 'Warp Speed', 'Full Tilt'];
         const SENDIT_CROWD_OPTIONS = [
-            { key: 'quiet', label: 'Quiet' },
+            { key: 'swarm', label: 'Jerry Swarm' },
             { key: 'normal', label: 'Normal' },
-            { key: 'swarm', label: 'Jerry Swarm' }
+            { key: 'quiet', label: 'Quiet' }
         ];
         const SENDIT_WIND_OPTIONS = [
-            { key: 'calm', label: 'Calm' },
+            { key: 'nuking', label: 'Blasting' },
             { key: 'breezy', label: 'Breezy' },
-            { key: 'nuking', label: 'Blasting' }
+            { key: 'calm', label: 'Calm' }
         ];
         const SENDIT_SLOPE_OPTIONS = [
             { key: 'edges', label: 'Sharpen Edges' },
@@ -1130,7 +1130,7 @@
             };
             const opts = optionMap[activeGroup] || [];
             const offsets = [-44, 0, 44];
-            const showSecondary = !!selectedSignals.difficulty;
+            const showSecondary = !!selectedSignals.difficulty && !!activeGroup && opts.length > 0;
             const optionSectors = showSecondary ? opts.map((opt, i) => {
                 const center = -90 + offsets[i];
                 const d = sectorPathData(300, 300, 210, 292, center - 21, center + 21);
@@ -1860,9 +1860,13 @@
                      <span class="mix-pill mix-double" title="Double Black Diamond calls"><span class="mix-glyph">◆◆</span><span class="mix-value">${difficultyMix.double} calls</span></span>
                    </div>`
                 : `<div class="sendit-line-mix sendit-line-mix-empty">Line mix building. First chair takes lead.</div>`;
-            const activeGroup = SENDIT_GROUP_ORDER.includes(selectedSignals.activeGroup)
-                ? selectedSignals.activeGroup
-                : (getNextSendItGroup(selectedSignals) || SENDIT_GROUP_ORDER[0]);
+            const nextGroup = getNextSendItGroup(selectedSignals) || '';
+            const selectionComplete = canSubmitSendItSelection(selectedSignals);
+            const activeGroup = selectionComplete
+                ? ''
+                : (SENDIT_GROUP_ORDER.includes(selectedSignals.activeGroup)
+                    ? selectedSignals.activeGroup
+                    : nextGroup);
             const groupOptionsMap = {
                 wind: SENDIT_WIND_OPTIONS,
                 crowd: SENDIT_CROWD_OPTIONS,
