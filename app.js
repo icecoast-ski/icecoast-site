@@ -818,7 +818,7 @@
             wind: { icon: '🌬️', label: 'Wind' },
             crowd: { icon: '🚡', label: 'Crowd' },
             hazard: { icon: '⚠️', label: 'Hazard' },
-            slope: { icon: '⛷️', label: 'Slope' }
+            slope: { icon: '⛷️', label: 'Snow' }
         };
         const SENDIT_GROUP_ICON_PATHS = {
             wind: './slope-signal-lab-2d/assets/wind.png',
@@ -1088,7 +1088,7 @@
                 wind: 'STEP 2: PICK WIND',
                 crowd: 'STEP 3: PICK CROWD',
                 hazard: 'STEP 4: PICK HAZARD',
-                slope: 'STEP 5: PICK SLOPE'
+                slope: 'STEP 5: PICK SNOW'
             };
             return stepByGroup[activeGroup] || 'KEEP BUILDING';
         }
@@ -1933,7 +1933,7 @@
                 wind: 'Set wind at 12 o’clock.',
                 crowd: 'Set crowd at 12 o’clock.',
                 hazard: 'Set hazard at 12 o’clock.',
-                slope: 'Set slope at 12 o’clock.'
+                slope: 'Set snow at 12 o’clock.'
             };
             const radialDirectionText = !canVote
                 ? 'Tap center to verify on-mountain.'
@@ -2171,7 +2171,7 @@ const backgroundSizeByResort = {
                     <div class="sendit-title-pill">
                       <div class="sendit-title">SLOPE SIGNAL</div>
                     </div>
-                    <div class="sendit-explainer">Local mountain check: choose your line, then set wind, crowd, hazard, and slope.</div>
+                    <div class="sendit-explainer">Local mountain check: choose your line, then set wind, crowd, hazard, and snow.</div>
                     <div class="sendit-subline">
                       <span class="sendit-main-read">
                         <span class="sendit-live-dot signal-${sendItTone}" aria-hidden="true"></span>
@@ -2180,11 +2180,6 @@ const backgroundSizeByResort = {
                       ${sendItSubtitleSecondary ? `<span class="sendit-subtitle-flavor">${sendItSubtitleSecondary}</span>` : ''}
                     </div>
                     ${difficultyMixMarkup}
-                    <div class="sendit-legend" aria-label="Slope Signal color legend">
-                      <span class="legend-item legend-low"><i></i>Red rough</span>
-                      <span class="legend-item legend-mid"><i></i>Blue mixed</span>
-                      <span class="legend-item legend-high"><i></i>Green go</span>
-                    </div>
                   </div>
                   ${sendItPrompt}
                   ${sendItControls}
@@ -2622,7 +2617,7 @@ const backgroundSizeByResort = {
             if (action === 'vote-radial') {
                 const signalSelection = getSendItSignalSelection(resortId);
                 if (!canSubmitSendItSelection(signalSelection)) {
-                    showSendItToast('Finish your loadout', 'Pick difficulty + wind + crowd + hazard + slope');
+                    showSendItToast('Finish your loadout', 'Pick difficulty + wind + crowd + hazard + snow');
                     return;
                 }
                 target.classList.add('rail-slam');
