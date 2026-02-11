@@ -4813,6 +4813,11 @@
     filter: drop-shadow(0 2px 3px rgba(0, 0, 0, 0.24));
 }
 
+.send-core-icon-stage {
+    width: 96px !important;
+    height: 96px !important;
+}
+
 .send-core-icon.icon-hazard {
     transform: translate(-50%, -50%) translateY(-6px);
 }
@@ -5415,10 +5420,10 @@
     width: min(92%, 320px) !important;
     text-align: center !important;
     color: #f3f8ff !important;
-    font-size: 0.94rem !important;
+    font-size: 1.88rem !important;
     font-weight: 820 !important;
     letter-spacing: 0.01em !important;
-    line-height: 1.2 !important;
+    line-height: 1.12 !important;
     text-shadow: 0 2px 8px rgba(4, 12, 28, 0.55) !important;
     pointer-events: none !important;
     z-index: 4 !important;
@@ -5474,7 +5479,12 @@
     .sendit-radial-direction {
         top: calc(54% + 120px) !important;
         width: min(94%, 300px) !important;
-        font-size: 0.84rem !important;
+        font-size: 1.48rem !important;
+    }
+
+    .send-core-icon-stage {
+        width: 74px !important;
+        height: 74px !important;
     }
 }
 

@@ -1079,18 +1079,12 @@
 
         function getSendItStepLabel(selection, activeGroup) {
             if (!selection || !isValidSendItDifficulty(selection.difficulty)) {
-                return '<span class="line-stack">STEP 1<br>CHOOSE YOUR LINE</span>';
+                return 'TRAIL';
             }
             if (canSubmitSendItSelection(selection)) {
                 return 'SEND IT!';
             }
-            const stepByGroup = {
-                wind: 'STEP 2: PICK WIND',
-                crowd: 'STEP 3: PICK CROWD',
-                hazard: 'STEP 4: PICK HAZARD',
-                slope: 'STEP 5: PICK SNOW'
-            };
-            return stepByGroup[activeGroup] || 'KEEP BUILDING';
+            return '';
         }
 
         function getSendItScoreFromSelection(selection) {
@@ -1816,7 +1810,7 @@
                 ${idx < selectedGroups.length - 1 ? '<span class="lock-plus">+</span>' : ''}
             `).join('');
             const centerIcon = canVote && selectedSignals.difficulty && !radialReady && activeGroup
-                ? `<img class="send-core-icon ${activeGroup === 'hazard' ? 'icon-hazard' : ''}" src="${SENDIT_GROUP_ICON_PATHS[activeGroup]}" alt="${activeGroup} icon">`
+                ? `<img class="send-core-icon send-core-icon-stage ${activeGroup === 'hazard' ? 'icon-hazard' : ''}" src="${SENDIT_GROUP_ICON_PATHS[activeGroup]}" alt="${activeGroup} icon">`
                 : '';
             const centerLabel = canVote
                 ? getSendItStepLabel(selectedSignals, activeGroup)
@@ -1826,19 +1820,21 @@
             if (sendItUnlockTransitionByResort[resort.id]) {
                 sendItUnlockTransitionByResort[resort.id] = false;
             }
-            const groupPromptMap = {
-                wind: 'Set wind at 12 o’clock.',
-                crowd: 'Set crowd at 12 o’clock.',
-                hazard: 'Set hazard at 12 o’clock.',
-                slope: 'Set snow at 12 o’clock.'
-            };
             const radialDirectionText = !canVote
                 ? 'Tap center to verify on-mountain.'
                 : (radialReady
-                    ? 'All set. Press SEND IT!'
+                    ? 'Dialed in. SEND IT!'
                     : (!selectedSignals.difficulty
-                        ? 'Choose your trail difficulty.'
-                        : (groupPromptMap[activeGroup] || 'Complete your selections.')));
+                        ? 'Choose your trail.'
+                        : (activeGroup === 'wind'
+                            ? 'Is it windy?'
+                            : (activeGroup === 'crowd'
+                                ? 'Is it crowded?'
+                                : (activeGroup === 'hazard'
+                                    ? 'Any hazards?'
+                                    : (activeGroup === 'slope'
+                                        ? 'How’s the snow?'
+                                        : 'Complete your selections.')))));
             const radialPulseClass = !canVote
                 ? ''
                 : (!selectedSignals.difficulty
