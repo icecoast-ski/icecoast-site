@@ -5548,6 +5548,64 @@
     letter-spacing: 0.005em !important;
 }
 
+.sendit-explainer {
+    margin-top: 0.26rem !important;
+    margin-left: 0.02rem !important;
+    font-size: 0.62rem !important;
+    font-weight: 620 !important;
+    color: #576a86 !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0.005em !important;
+}
+
+.sendit-legend {
+    display: inline-flex !important;
+    flex-wrap: wrap !important;
+    gap: 0.36rem !important;
+    margin-top: 0.3rem !important;
+    margin-left: 1.1rem !important;
+    align-items: center !important;
+}
+
+.legend-item {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 0.22rem !important;
+    font-size: 0.58rem !important;
+    font-weight: 670 !important;
+    color: #4f637f !important;
+    line-height: 1 !important;
+}
+
+.legend-item i {
+    display: inline-block !important;
+    width: 0.42rem !important;
+    height: 0.42rem !important;
+    border-radius: 999px !important;
+}
+
+.legend-low i { background: #df5564 !important; }
+.legend-mid i { background: #2f7cff !important; }
+.legend-high i { background: #2cb06f !important; }
+
+.sendit-usage-hint {
+    margin-top: 0.34rem !important;
+    color: #4c607d !important;
+    font-size: 0.62rem !important;
+    font-weight: 640 !important;
+    letter-spacing: 0.005em !important;
+}
+
+.send-core-label {
+    letter-spacing: 0.03em !important;
+}
+
+.send-core-label .line-stack {
+    font-size: 0.98rem !important;
+    line-height: 1.3 !important;
+    letter-spacing: 0.08em !important;
+}
+
 @media (max-width: 768px) {
     .header-left {
         align-items: baseline !important;
@@ -5561,6 +5619,28 @@
     .sendit-subtitle-flavor {
         font-size: 0.58rem !important;
         margin-left: 1.02rem !important;
+    }
+
+    .sendit-explainer {
+        font-size: 0.58rem !important;
+    }
+
+    .sendit-legend {
+        margin-left: 1.02rem !important;
+        gap: 0.3rem !important;
+    }
+
+    .legend-item {
+        font-size: 0.54rem !important;
+    }
+
+    .legend-item i {
+        width: 0.38rem !important;
+        height: 0.38rem !important;
+    }
+
+    .sendit-usage-hint {
+        font-size: 0.58rem !important;
     }
 }
 

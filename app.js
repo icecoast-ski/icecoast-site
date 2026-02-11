@@ -1077,6 +1077,22 @@
             return SENDIT_GROUP_ORDER.every((key) => !!selection[key]);
         }
 
+        function getSendItStepLabel(selection, activeGroup) {
+            if (!selection || !isValidSendItDifficulty(selection.difficulty)) {
+                return '<span class="line-stack">STEP 1<br>CHOOSE YOUR LINE</span>';
+            }
+            if (canSubmitSendItSelection(selection)) {
+                return 'SEND IT!';
+            }
+            const stepByGroup = {
+                wind: 'STEP 2: PICK WIND',
+                crowd: 'STEP 3: PICK CROWD',
+                hazard: 'STEP 4: PICK HAZARD',
+                slope: 'STEP 5: PICK SLOPE'
+            };
+            return stepByGroup[activeGroup] || 'KEEP BUILDING';
+        }
+
         function getSendItScoreFromSelection(selection) {
             if (!selection || !isValidSendItDifficulty(selection.difficulty)) return 60;
             const match = SENDIT_DIFFICULTY_OPTIONS.find((opt) => opt.key === selection.difficulty);
@@ -1905,9 +1921,7 @@
             const centerIcon = selectedSignals.difficulty && !radialReady && activeGroup
                 ? `<img class="send-core-icon ${activeGroup === 'hazard' ? 'icon-hazard' : ''}" src="${SENDIT_GROUP_ICON_PATHS[activeGroup]}" alt="${activeGroup} icon">`
                 : '';
-            const centerLabel = radialReady
-                ? 'SEND IT!'
-                : (!selectedSignals.difficulty ? '<span class="line-stack">CHOOSE<br>YOUR<br>LINE</span>' : '');
+            const centerLabel = getSendItStepLabel(selectedSignals, activeGroup);
             const radialWheelMarkup = buildSendItWheelMarkup(resort.id, selectedSignals, activeGroup);
             const radialEnterClass = sendItUnlockTransitionByResort[resort.id] ? 'unlock-enter' : '';
             if (sendItUnlockTransitionByResort[resort.id]) {
@@ -2139,6 +2153,7 @@ const backgroundSizeByResort = {
                     <div class="sendit-title-pill">
                       <div class="sendit-title">SLOPE SIGNAL</div>
                     </div>
+                    <div class="sendit-explainer">Local mountain check: choose your line, then set wind, crowd, hazard, and slope.</div>
                     <div class="sendit-subline">
                       <span class="sendit-main-read">
                         <span class="sendit-live-dot signal-${sendItTone}" aria-hidden="true"></span>
@@ -2147,10 +2162,15 @@ const backgroundSizeByResort = {
                       ${sendItSubtitleSecondary ? `<span class="sendit-subtitle-flavor">${sendItSubtitleSecondary}</span>` : ''}
                     </div>
                     ${difficultyMixMarkup}
+                    <div class="sendit-legend" aria-label="Slope Signal color legend">
+                      <span class="legend-item legend-low"><i></i>Red rough</span>
+                      <span class="legend-item legend-mid"><i></i>Blue mixed</span>
+                      <span class="legend-item legend-high"><i></i>Green go</span>
+                    </div>
                   </div>
                   ${sendItPrompt}
                   ${sendItControls}
-                  ${canVote ? `<div class="sendit-locked-note">Set crowd + wind then send your slope signal</div>
+                  ${canVote ? `<div class="sendit-locked-note sendit-usage-hint">Tap the highlighted wedge at 12 o’clock.</div>
                   <div class="sendit-history-divider" aria-hidden="true"></div>
                   <div class="sendit-history-row" aria-label="Slope Signal history">
                     <span class="sendit-history-item"><strong>24h</strong> <em>${sendItSummary24h}</em></span>
