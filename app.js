@@ -2537,6 +2537,7 @@ const backgroundSizeByResort = {
         // Configuration - UPDATE THIS URL AFTER DEPLOYING YOUR WORKER
         const WORKER_URL = 'https://cloudflare-worker.rickt123-0f8.workers.dev/';
         const REFRESH_INTERVAL = 15 * 60 * 1000; // 15 min
+        const SENDIT_UI_REFRESH_INTERVAL = 12 * 1000; // keep CTA/cooldown state fresh without page reload
         let snapshotLastUpdatedIso = null;
 
         resorts.forEach(normalizeSnowfall);
@@ -2551,6 +2552,15 @@ const backgroundSizeByResort = {
         loadSendItCooldownState();
         applySendItTestUnlocks();
         renderResorts();
+
+        // Keep Slope Signal button/cooldown state current even if user doesn't interact.
+        setInterval(() => {
+            const hasCooldownState = Object.keys(sendItCooldownUntilByResort || {}).length > 0;
+            const hasPostVoteState = Object.values(sendItPostVoteAwaitByResort || {}).some(Boolean);
+            if (hasCooldownState || hasPostVoteState) {
+                renderResorts();
+            }
+        }, SENDIT_UI_REFRESH_INTERVAL);
 
         document.addEventListener('click', async (event) => {
             const target = event.target.closest('[data-sendit-action]');
