@@ -824,7 +824,7 @@
             wind: './slope-signal-lab-2d/assets/wind.png',
             crowd: './slope-signal-lab-2d/assets/lift.png',
             hazard: './slope-signal-lab-2d/assets/caution.png',
-            slope: './slope-signal-lab-2d/assets/slope.png'
+            slope: './slope-signal-lab-2d/assets/skier2.png'
         };
         const SENDIT_DEFAULT_SIGNALS = { crowd: 'normal', wind: 'breezy', slope: 'good', hazard: 'clear', difficulty: '' };
         const SENDIT_HISTORY_MIN_VOTES = 2;
@@ -1085,6 +1085,17 @@
                 return 'SEND IT!';
             }
             return '';
+        }
+
+        function getSendItDirectionText(canVote, radialReady, selection, activeGroup) {
+            if (!canVote) return 'Tap center to verify on-mountain.';
+            if (radialReady) return 'Dialed in. SEND IT!';
+            if (!selection || !selection.difficulty) return 'Choose your trail.';
+            if (activeGroup === 'wind') return 'Is it windy?';
+            if (activeGroup === 'crowd') return 'Is it crowded?';
+            if (activeGroup === 'hazard') return 'Any hazards?';
+            if (activeGroup === 'slope') return 'How’s the snow?';
+            return 'Complete your selections.';
         }
 
         function getSendItScoreFromSelection(selection) {
@@ -1820,21 +1831,12 @@
             if (sendItUnlockTransitionByResort[resort.id]) {
                 sendItUnlockTransitionByResort[resort.id] = false;
             }
-            const radialDirectionText = !canVote
-                ? 'Tap center to verify on-mountain.'
-                : (radialReady
-                    ? 'Dialed in. SEND IT!'
-                    : (!selectedSignals.difficulty
-                        ? 'Choose your trail.'
-                        : (activeGroup === 'wind'
-                            ? 'Is it windy?'
-                            : (activeGroup === 'crowd'
-                                ? 'Is it crowded?'
-                                : (activeGroup === 'hazard'
-                                    ? 'Any hazards?'
-                                    : (activeGroup === 'slope'
-                                        ? 'How’s the snow?'
-                                        : 'Complete your selections.')))));
+            const radialDirectionText = getSendItDirectionText(
+                canVote,
+                radialReady,
+                selectedSignals,
+                activeGroup
+            );
             const radialPulseClass = !canVote
                 ? ''
                 : (!selectedSignals.difficulty
