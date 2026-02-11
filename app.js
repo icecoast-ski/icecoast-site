@@ -1159,9 +1159,9 @@
                 const a = polarPoint(300, 300, radius, start);
                 const b = polarPoint(300, 300, radius, end);
                 return `
-                    <path class="wheel-sector option-sector ${active}" d="${d}" data-sendit-action="select-option" data-resort-id="${resortId}" data-group="${activeGroup}" data-value="${opt.key}"></path>
+                    <path class="wheel-sector option-sector ${active}" d="${d}" data-opt-idx="${i + 1}" data-sendit-action="select-option" data-resort-id="${resortId}" data-group="${activeGroup}" data-value="${opt.key}"></path>
                     <path id="${guideId}" class="label-guide" d="M ${a.x} ${a.y} A ${radius} ${radius} 0 0 1 ${b.x} ${b.y}"></path>
-                    <text class="wheel-label option-label ${active}" data-sendit-action="select-option" data-resort-id="${resortId}" data-group="${activeGroup}" data-value="${opt.key}">
+                    <text class="wheel-label option-label ${active}" data-opt-idx="${i + 1}" data-sendit-action="select-option" data-resort-id="${resortId}" data-group="${activeGroup}" data-value="${opt.key}">
                       <textPath href="#${guideId}" startOffset="50%" text-anchor="middle">${opt.label.toUpperCase()}</textPath>
                     </text>
                 `;
@@ -1929,11 +1929,26 @@
             if (sendItUnlockTransitionByResort[resort.id]) {
                 sendItUnlockTransitionByResort[resort.id] = false;
             }
-            const radialDirectionText = canVote
-                ? 'Tap the highlighted wedge at 12 o’clock.'
-                : 'Tap center to verify on-mountain.';
+            const groupPromptMap = {
+                wind: 'Set wind at 12 o’clock.',
+                crowd: 'Set crowd at 12 o’clock.',
+                hazard: 'Set hazard at 12 o’clock.',
+                slope: 'Set slope at 12 o’clock.'
+            };
+            const radialDirectionText = !canVote
+                ? 'Tap center to verify on-mountain.'
+                : (radialReady
+                    ? 'All set. Press SEND IT!'
+                    : (!selectedSignals.difficulty
+                        ? 'Choose your trail difficulty.'
+                        : (groupPromptMap[activeGroup] || 'Complete your selections.')));
+            const radialPulseClass = !canVote
+                ? ''
+                : (!selectedSignals.difficulty
+                    ? 'pulse-difficulty'
+                    : (!radialReady ? 'pulse-secondary' : ''));
             const sendItControls = !hasCoords ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>` : `<div class="sendit-radial ${radialEnterClass}" data-resort-id="${resort.id}">
-                      <div class="sendit-hud-radial unlocked">
+                      <div class="sendit-hud-radial unlocked ${radialPulseClass}">
                         ${radialWheelMarkup}
                         <button
                           class="sendit-core-btn ${radialReady ? 'ready' : ''}"
@@ -2173,7 +2188,7 @@ const backgroundSizeByResort = {
                   </div>
                   ${sendItPrompt}
                   ${sendItControls}
-                  ${canVote ? `<div class="sendit-locked-note sendit-usage-hint">Set crowd + wind then send your slope signal.</div>
+                  ${canVote ? `
                   <div class="sendit-history-divider" aria-hidden="true"></div>
                   <div class="sendit-history-row" aria-label="Slope Signal history">
                     <span class="sendit-history-item"><strong>24h</strong> <em>${sendItSummary24h}</em></span>

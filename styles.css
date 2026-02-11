@@ -4865,22 +4865,38 @@
 }
 
 /* Subtle invitation pulse on difficulty choices (in order) */
-.signal-sector:not(.active) {
+.sendit-hud-radial.pulse-difficulty .signal-sector:not(.active) {
     animation: signalInvitePulse 2.6s ease-in-out infinite;
 }
 
-.signal-label:not(.active) {
+.sendit-hud-radial.pulse-difficulty .signal-label:not(.active) {
     animation: signalInviteGlyphPulse 2.6s ease-in-out infinite;
 }
 
-.signal-sector[data-diff-idx="1"],
-.signal-label[data-diff-idx="1"] { animation-delay: 0s; }
-.signal-sector[data-diff-idx="2"],
-.signal-label[data-diff-idx="2"] { animation-delay: 0.22s; }
-.signal-sector[data-diff-idx="3"],
-.signal-label[data-diff-idx="3"] { animation-delay: 0.44s; }
-.signal-sector[data-diff-idx="4"],
-.signal-label[data-diff-idx="4"] { animation-delay: 0.66s; }
+.sendit-hud-radial.pulse-difficulty .signal-sector[data-diff-idx="1"],
+.sendit-hud-radial.pulse-difficulty .signal-label[data-diff-idx="1"] { animation-delay: 0s; }
+.sendit-hud-radial.pulse-difficulty .signal-sector[data-diff-idx="2"],
+.sendit-hud-radial.pulse-difficulty .signal-label[data-diff-idx="2"] { animation-delay: 0.22s; }
+.sendit-hud-radial.pulse-difficulty .signal-sector[data-diff-idx="3"],
+.sendit-hud-radial.pulse-difficulty .signal-label[data-diff-idx="3"] { animation-delay: 0.44s; }
+.sendit-hud-radial.pulse-difficulty .signal-sector[data-diff-idx="4"],
+.sendit-hud-radial.pulse-difficulty .signal-label[data-diff-idx="4"] { animation-delay: 0.66s; }
+
+/* Secondary menu pulse after difficulty is selected */
+.sendit-hud-radial.pulse-secondary .option-sector:not(.active) {
+    animation: signalInvitePulse 2.4s ease-in-out infinite;
+}
+
+.sendit-hud-radial.pulse-secondary .option-label:not(.active) {
+    animation: signalInviteGlyphPulse 2.4s ease-in-out infinite;
+}
+
+.sendit-hud-radial.pulse-secondary .option-sector[data-opt-idx="1"],
+.sendit-hud-radial.pulse-secondary .option-label[data-opt-idx="1"] { animation-delay: 0s; }
+.sendit-hud-radial.pulse-secondary .option-sector[data-opt-idx="2"],
+.sendit-hud-radial.pulse-secondary .option-label[data-opt-idx="2"] { animation-delay: 0.2s; }
+.sendit-hud-radial.pulse-secondary .option-sector[data-opt-idx="3"],
+.sendit-hud-radial.pulse-secondary .option-label[data-opt-idx="3"] { animation-delay: 0.4s; }
 
 .option-sector {
     fill: rgba(208, 229, 255, 0.16);
@@ -5644,8 +5660,8 @@
     width: min(92%, 320px) !important;
     text-align: center !important;
     color: #f3f8ff !important;
-    font-size: 0.82rem !important;
-    font-weight: 760 !important;
+    font-size: 0.94rem !important;
+    font-weight: 820 !important;
     letter-spacing: 0.01em !important;
     line-height: 1.2 !important;
     text-shadow: 0 2px 8px rgba(4, 12, 28, 0.55) !important;
@@ -5703,7 +5719,7 @@
     .sendit-radial-direction {
         top: calc(54% + 120px) !important;
         width: min(94%, 300px) !important;
-        font-size: 0.72rem !important;
+        font-size: 0.84rem !important;
     }
 }
 
