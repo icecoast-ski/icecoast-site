@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-label="Matte clay style snow mountain with four trails">
+  <defs>
+    <linearGradient id="skyGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#d9ecff"/>
+      <stop offset="100%" stop-color="#edf5ff"/>
+    </linearGradient>
+    <linearGradient id="hillBackGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#8bd9e8"/>
+      <stop offset="100%" stop-color="#62b7d2"/>
+    </linearGradient>
+    <linearGradient id="hillFrontGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#6fcce0"/>
+      <stop offset="100%" stop-color="#3f9ac6"/>
+    </linearGradient>
+    <linearGradient id="snowGrad" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#ebf2fb"/>
+    </linearGradient>
+  </defs>
+
+  <rect x="0" y="0" width="1200" height="760" fill="url(#skyGrad)"/>
+  <ellipse cx="600" cy="708" rx="510" ry="62" fill="#b7d8a0" opacity="0.22"/>
+
+  <path d="M84 626 C220 540, 380 502, 520 528 C650 548, 760 610, 932 612 C1030 612, 1100 618, 1145 632 L1145 760 L84 760 Z" fill="#7dd687"/>
+  <path d="M170 582 C280 456, 414 388, 520 404 C618 416, 690 486, 760 562 C694 550, 615 552, 541 571 C440 594, 304 614, 170 582 Z" fill="url(#hillBackGrad)"/>
+  <path d="M298 576 C370 418, 514 290, 628 304 C714 316, 794 394, 848 532 C782 528, 711 540, 640 563 C528 598, 404 615, 298 576 Z" fill="url(#hillFrontGrad)"/>
+  <path d="M430 534 C478 372, 560 246, 626 252 C676 258, 734 332, 778 496 C734 488, 682 496, 630 514 C564 536, 494 545, 430 534 Z" fill="#4d9ec9"/>
+
+  <path d="M528 306 C552 264, 584 242, 626 252 C661 260, 688 304, 704 346 C660 330, 595 332, 528 306 Z" fill="url(#snowGrad)"/>
+  <path d="M425 536 C459 449, 515 367, 568 341 C553 386, 531 439, 508 518 C484 527, 455 534, 425 536 Z" fill="url(#snowGrad)" opacity="0.97"/>
+  <path d="M584 520 C625 437, 674 375, 727 358 C704 414, 676 469, 654 534 C628 527, 606 521, 584 520 Z" fill="url(#snowGrad)" opacity="0.94"/>
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M444 520 C404 552, 436 574, 394 608 C352 641, 392 665, 358 700" stroke="#2aaa62" stroke-width="13"/>
+    <path d="M528 510 C500 538, 542 562, 510 596 C480 628, 520 651, 496 690" stroke="#2f6df1" stroke-width="11"/>
+    <path d="M618 512 C655 538, 621 560, 659 590 C699 622, 660 646, 704 680" stroke="#2d3442" stroke-width="10"/>
+    <path d="M702 500 C747 526, 712 551, 760 579 C812 611, 768 638, 830 676" stroke="#0f1218" stroke-width="12"/>
+  </g>
+
+  <g>
+    <g transform="translate(224 617) scale(1.15)">
+      <rect x="-3" y="8" width="6" height="10" fill="#6b4b32"/>
+      <path d="M0 -22 L-14 10 L14 10 Z" fill="#2faa4a"/>
+      <path d="M0 -21 L-6 -8 L6 -8 Z" fill="#eef6ff"/>
+    </g>
+    <g transform="translate(338 608) scale(0.95)">
+      <rect x="-3" y="8" width="6" height="10" fill="#6b4b32"/>
+      <path d="M0 -22 L-14 10 L14 10 Z" fill="#2faa4a"/>
+      <path d="M0 -21 L-6 -8 L6 -8 Z" fill="#eef6ff"/>
+    </g>
+    <g transform="translate(878 619) scale(1.12)">
+      <rect x="-3" y="8" width="6" height="10" fill="#6b4b32"/>
+      <path d="M0 -22 L-14 10 L14 10 Z" fill="#2faa4a"/>
+      <path d="M0 -21 L-6 -8 L6 -8 Z" fill="#eef6ff"/>
+    </g>
+    <g transform="translate(994 626) scale(1.0)">
+      <rect x="-3" y="8" width="6" height="10" fill="#6b4b32"/>
+      <path d="M0 -22 L-14 10 L14 10 Z" fill="#2faa4a"/>
+      <path d="M0 -21 L-6 -8 L6 -8 Z" fill="#eef6ff"/>
+    </g>
+  </g>
+</svg>
