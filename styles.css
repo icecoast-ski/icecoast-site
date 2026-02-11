@@ -4864,6 +4864,24 @@
     filter: drop-shadow(0 8px 14px rgba(22, 67, 145, 0.26));
 }
 
+/* Subtle invitation pulse on difficulty choices (in order) */
+.signal-sector:not(.active) {
+    animation: signalInvitePulse 2.6s ease-in-out infinite;
+}
+
+.signal-label:not(.active) {
+    animation: signalInviteGlyphPulse 2.6s ease-in-out infinite;
+}
+
+.signal-sector[data-diff-idx="1"],
+.signal-label[data-diff-idx="1"] { animation-delay: 0s; }
+.signal-sector[data-diff-idx="2"],
+.signal-label[data-diff-idx="2"] { animation-delay: 0.22s; }
+.signal-sector[data-diff-idx="3"],
+.signal-label[data-diff-idx="3"] { animation-delay: 0.44s; }
+.signal-sector[data-diff-idx="4"],
+.signal-label[data-diff-idx="4"] { animation-delay: 0.66s; }
+
 .option-sector {
     fill: rgba(208, 229, 255, 0.16);
     stroke: rgba(230, 241, 255, 0.34);
@@ -5197,6 +5215,28 @@
   100% {
     opacity: 1;
     transform: translateY(60px) scale(0.742);
+  }
+}
+
+@keyframes signalInvitePulse {
+  0%, 72%, 100% {
+    stroke-width: 1.9;
+    filter: drop-shadow(0 0 0 rgba(60, 124, 238, 0));
+  }
+  18% {
+    stroke-width: 2.35;
+    filter: drop-shadow(0 0 10px rgba(119, 176, 255, 0.2));
+  }
+}
+
+@keyframes signalInviteGlyphPulse {
+  0%, 72%, 100% {
+    opacity: 1;
+    text-shadow: 0 1px 2px rgba(5, 16, 34, 0.46);
+  }
+  18% {
+    opacity: 1;
+    text-shadow: 0 0 10px rgba(188, 217, 255, 0.55), 0 1px 2px rgba(5, 16, 34, 0.46);
   }
 }
 

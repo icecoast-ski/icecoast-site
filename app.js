@@ -1127,15 +1127,15 @@
                 { key: 'double', glyph: '◆◆', center: -24 }
             ];
 
-            const diffSectors = difficultyCfg.map((cfg) => {
+            const diffSectors = difficultyCfg.map((cfg, index) => {
                 const active = selectedSignals.difficulty === cfg.key ? 'active' : '';
                 const d = sectorPathData(300, 300, 106, 196, cfg.center - 20, cfg.center + 20);
                 const lp = polarPoint(300, 300, (106 + 196) / 2, cfg.center);
                 const rotation = cfg.center + 90;
                 const glyph = cfg.key === 'double' ? '◆ ◆' : cfg.glyph;
                 return `
-                    <path class="wheel-sector signal-sector ${active}" d="${d}" data-sendit-action="select-difficulty" data-resort-id="${resortId}" data-value="${cfg.key}"></path>
-                    <text class="wheel-label signal-label ${active}" data-sendit-action="select-difficulty" data-resort-id="${resortId}" data-value="${cfg.key}" x="${lp.x}" y="${lp.y}" transform="rotate(${rotation} ${lp.x} ${lp.y})">${glyph}</text>
+                    <path class="wheel-sector signal-sector ${active}" d="${d}" data-diff-idx="${index + 1}" data-sendit-action="select-difficulty" data-resort-id="${resortId}" data-value="${cfg.key}"></path>
+                    <text class="wheel-label signal-label ${active}" data-diff-idx="${index + 1}" data-sendit-action="select-difficulty" data-resort-id="${resortId}" data-value="${cfg.key}" x="${lp.x}" y="${lp.y}" transform="rotate(${rotation} ${lp.x} ${lp.y})">${glyph}</text>
                 `;
             }).join('');
 
@@ -1923,7 +1923,7 @@
                 : '';
             const centerLabel = canVote
                 ? getSendItStepLabel(selectedSignals, activeGroup)
-                : '<span class="line-stack">I\'M ON<br>THE MOUNTAIN</span>';
+                : '<span class="line-stack">I\'M HERE!</span>';
             const radialWheelMarkup = buildSendItWheelMarkup(resort.id, selectedSignals, activeGroup);
             const radialEnterClass = sendItUnlockTransitionByResort[resort.id] ? 'unlock-enter' : '';
             if (sendItUnlockTransitionByResort[resort.id]) {
