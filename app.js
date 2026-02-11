@@ -758,8 +758,12 @@
         let sendItSummaryByResort = {};
         let sendItRadiusMiles = DEFAULT_SEND_IT_RADIUS_MILES;
         let sendItRadiusOverrides = {};
+        let sendItCooldownMinutes = 20;
+        let sendItCooldownOverrides = {};
+        let sendItCooldownUntilByResort = {};
         let sendItMaxAccuracyMeters = 200;
         const SENDIT_DEVICE_ID_KEY = 'icecoast_sendit_device_id';
+        const SENDIT_COOLDOWN_STATE_KEY = 'icecoast_sendit_cooldown_until';
         const sendItUnlockedResorts = new Set();
         const SENDIT_TEST_UNLOCKED_RESORTS = new Set([]);
         const sendItButtonCopyByResort = {};
@@ -1088,8 +1092,32 @@
             return '';
         }
 
-        function getSendItDirectionText(canVote, radialReady, selection, activeGroup) {
+        function getSendItCooldownMinutesForResort(resortId) {
+            const override = sendItCooldownOverrides?.[resortId];
+            return Number.isFinite(Number(override)) ? Math.max(1, Number(override)) : sendItCooldownMinutes;
+        }
+
+        function getSendItCooldownRemainingMinutes(resortId) {
+            const until = Number(sendItCooldownUntilByResort?.[resortId] || 0);
+            if (!Number.isFinite(until) || until <= Date.now()) {
+                if (sendItCooldownUntilByResort[resortId]) {
+                    delete sendItCooldownUntilByResort[resortId];
+                    persistSendItCooldownState();
+                }
+                return 0;
+            }
+            return Math.max(1, Math.ceil((until - Date.now()) / 60000));
+        }
+
+        function setSendItLocalCooldown(resortId, minutes) {
+            const safeMinutes = Math.max(1, Math.round(Number(minutes) || getSendItCooldownMinutesForResort(resortId)));
+            sendItCooldownUntilByResort[resortId] = Date.now() + (safeMinutes * 60 * 1000);
+            persistSendItCooldownState();
+        }
+
+        function getSendItDirectionText(canVote, radialReady, selection, activeGroup, cooldownRemainingMinutes) {
             if (!canVote) return 'Tap center to verify on-mountain.';
+            if (cooldownRemainingMinutes > 0) return `Signal sent. Next call in ${cooldownRemainingMinutes}m.`;
             if (radialReady) return 'Dialed in. SEND IT!';
             if (!selection || !selection.difficulty) return 'Choose your trail.';
             if (activeGroup === 'wind') return 'Is it windy?';
@@ -1241,6 +1269,32 @@
                 );
             } catch (e) {
                 console.warn('Could not persist Send It unlock state:', e);
+            }
+        }
+
+        function loadSendItCooldownState() {
+            try {
+                const raw = localStorage.getItem(SENDIT_COOLDOWN_STATE_KEY);
+                if (!raw) return;
+                const parsed = JSON.parse(raw);
+                if (!parsed || typeof parsed !== 'object') return;
+                const now = Date.now();
+                const next = {};
+                Object.entries(parsed).forEach(([resortId, until]) => {
+                    const ts = Number(until);
+                    if (Number.isFinite(ts) && ts > now) next[resortId] = ts;
+                });
+                sendItCooldownUntilByResort = next;
+            } catch (e) {
+                console.warn('Could not load Send It cooldown state:', e);
+            }
+        }
+
+        function persistSendItCooldownState() {
+            try {
+                localStorage.setItem(SENDIT_COOLDOWN_STATE_KEY, JSON.stringify(sendItCooldownUntilByResort));
+            } catch (e) {
+                console.warn('Could not persist Send It cooldown state:', e);
             }
         }
 
@@ -1727,21 +1781,14 @@
                 await new Promise(resolve => setTimeout(resolve, 280));
                 showSendItToast('Slope Signal SENT');
                 triggerHaptic([18, 28, 16, 36, 22]);
-                // Reset this resort's radial state after a successful send so CTA
-                // returns to unlocked flow instead of staying in ready "SEND IT!" state.
-                sendItSignalSelectionByResort[resortId] = {
-                    crowd: null,
-                    wind: null,
-                    slope: null,
-                    hazard: null,
-                    difficulty: '',
-                    activeGroup: SENDIT_GROUP_ORDER[0]
-                };
+                setSendItLocalCooldown(resortId, payload?.cooldownMinutes);
                 sendItReadySlamByResort[resortId] = false;
                 renderResorts();
             } catch (e) {
                 triggerHaptic([24, 34, 24]);
                 if (e?.code === 'SENDIT_COOLDOWN') {
+                    setSendItLocalCooldown(resortId, e.retryAfterMinutes);
+                    renderResorts();
                     alert(getSendItCooldownMessage(e.retryAfterMinutes));
                     return;
                 }
@@ -1794,6 +1841,8 @@
                 : (sendItScoreValue >= 70 ? 'high' : (sendItScoreValue >= 45 ? 'mid' : 'low'));
             const hasCoords = typeof resort.lat === 'number' && typeof resort.lon === 'number';
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
+            const cooldownRemainingMinutes = getSendItCooldownRemainingMinutes(resort.id);
+            const isCooldownActive = canVote && cooldownRemainingMinutes > 0;
             const selectedSignals = getSendItSignalSelection(resort.id);
             const liveCrowdMode = isValidSendItCrowd(sendIt.crowdMode) ? sendIt.crowdMode : null;
             const liveWindMode = isValidSendItWind(sendIt.windMode) ? sendIt.windMode : null;
@@ -1855,13 +1904,13 @@
                 <span class="lock-item"><img src="${SENDIT_GROUP_ICON_PATHS[group]}" alt="${group} locked"></span>
                 ${idx < selectedGroups.length - 1 ? '<span class="lock-plus">+</span>' : ''}
             `).join('');
-            const centerIcon = canVote && selectedSignals.difficulty && !radialReady && activeGroup
+            const centerIcon = canVote && !isCooldownActive && selectedSignals.difficulty && !radialReady && activeGroup
                 ? `<img class="send-core-icon send-core-icon-stage ${activeGroup === 'hazard' ? 'icon-hazard' : ''}" src="${SENDIT_GROUP_ICON_PATHS[activeGroup]}" alt="${activeGroup} icon">`
                 : '';
             const centerLabel = canVote
-                ? getSendItStepLabel(selectedSignals, activeGroup)
+                ? (isCooldownActive ? '<span class="line-stack">SENT ⚡</span>' : getSendItStepLabel(selectedSignals, activeGroup))
                 : '<span class="line-stack">I\'M HERE!</span>';
-            const radialWheelMarkup = buildSendItWheelMarkup(resort.id, selectedSignals, activeGroup, canVote);
+            const radialWheelMarkup = buildSendItWheelMarkup(resort.id, selectedSignals, activeGroup, canVote && !isCooldownActive);
             const radialEnterClass = sendItUnlockTransitionByResort[resort.id] ? 'unlock-enter' : '';
             if (sendItUnlockTransitionByResort[resort.id]) {
                 sendItUnlockTransitionByResort[resort.id] = false;
@@ -1870,9 +1919,10 @@
                 canVote,
                 radialReady,
                 selectedSignals,
-                activeGroup
+                activeGroup,
+                cooldownRemainingMinutes
             );
-            const radialPulseClass = !canVote
+            const radialPulseClass = !canVote || isCooldownActive
                 ? ''
                 : (!selectedSignals.difficulty
                     ? 'pulse-difficulty'
@@ -1881,10 +1931,10 @@
                       <div class="sendit-hud-radial unlocked ${radialPulseClass}">
                         ${radialWheelMarkup}
                         <button
-                          class="sendit-core-btn ${radialReady ? 'ready' : ''}"
-                          data-sendit-action="${canVote ? 'vote-radial' : 'unlock'}"
+                          class="sendit-core-btn ${radialReady && !isCooldownActive ? 'ready' : ''} ${isCooldownActive ? 'cooldown' : ''}"
+                          data-sendit-action="${canVote ? (isCooldownActive ? 'cooldown' : 'vote-radial') : 'unlock'}"
                           data-resort-id="${resort.id}"
-                          ${(canVote && !radialReady) ? 'disabled' : ''}
+                          ${(canVote && (!radialReady || isCooldownActive)) ? 'disabled' : ''}
                           type="button">${centerIcon}<span class="send-core-label">${centerLabel}</span></button>
                         <div class="selection-lockline ${canVote ? locklineVisible : ''} ${canVote ? locklineModeClass : ''}">${canVote ? locklineMarkup : ''}</div>
                         <div class="sendit-radial-direction">${radialDirectionText}</div>
@@ -2464,6 +2514,7 @@ const backgroundSizeByResort = {
         applyResortDriveTimes();
 
         loadSendItUnlockState();
+        loadSendItCooldownState();
         applySendItTestUnlocks();
         renderResorts();
 
@@ -2494,6 +2545,19 @@ const backgroundSizeByResort = {
                 || action === 'vote-radial';
             if (requiresVerifiedLocation && !sendItUnlockedResorts.has(resortId)) {
                 showSendItToast('Verify first', 'Tap I\'M HERE! to unlock local voting.');
+                return;
+            }
+
+            const cooldownRemaining = getSendItCooldownRemainingMinutes(resortId);
+            const isCooldownBlockedAction = action === 'select-difficulty'
+                || action === 'select-group'
+                || action === 'select-option'
+                || action === 'select-crowd'
+                || action === 'select-wind'
+                || action === 'vote'
+                || action === 'vote-radial';
+            if (isCooldownBlockedAction && cooldownRemaining > 0) {
+                showSendItToast('Slope Signal SENT', `Next call opens in ${cooldownRemaining}m`);
                 return;
             }
 
@@ -2606,6 +2670,12 @@ const backgroundSizeByResort = {
                         }
                         if (typeof result.senditConfig.maxAccuracyMeters === 'number') {
                             sendItMaxAccuracyMeters = result.senditConfig.maxAccuracyMeters;
+                        }
+                        if (typeof result.senditConfig.cooldownMinutes === 'number') {
+                            sendItCooldownMinutes = Math.max(1, result.senditConfig.cooldownMinutes);
+                        }
+                        if (result.senditConfig.resortCooldownMinutes && typeof result.senditConfig.resortCooldownMinutes === 'object') {
+                            sendItCooldownOverrides = result.senditConfig.resortCooldownMinutes;
                         }
                     }
                 }

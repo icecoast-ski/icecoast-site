@@ -4536,6 +4536,24 @@
     filter: drop-shadow(0 18px 34px rgba(8, 24, 53, 0.3));
 }
 
+.sendit-hud-wheel.locked .signal-sector,
+.sendit-hud-wheel.locked .signal-label,
+.sendit-hud-wheel.locked .option-sector,
+.sendit-hud-wheel.locked .option-label {
+    pointer-events: none !important;
+    cursor: default !important;
+}
+
+.sendit-hud-wheel.locked .signal-sector,
+.sendit-hud-wheel.locked .option-sector {
+    opacity: 0.35;
+}
+
+.sendit-hud-wheel.locked .signal-label,
+.sendit-hud-wheel.locked .option-label {
+    opacity: 0.4;
+}
+
 .wheel-sector {
     fill: rgba(12, 30, 64, 0.5);
     stroke: rgba(121, 157, 212, 0.22);
@@ -4756,6 +4774,15 @@
 
 .sendit-core-btn.ready {
     background: radial-gradient(circle at 35% 24%, #2f7cff 0%, #1f5ec8 56%, #1a4ba0 100%);
+}
+
+.sendit-core-btn.cooldown {
+    background: linear-gradient(135deg, #245cc9 0%, #1a4699 100%);
+    box-shadow:
+        0 10px 20px rgba(18, 52, 122, 0.34),
+        inset 0 1px 0 rgba(235, 244, 255, 0.18),
+        inset 0 -1px 0 rgba(11, 34, 82, 0.3);
+    opacity: 0.96;
 }
 
 .sendit-core-btn::before {
