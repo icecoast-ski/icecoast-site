@@ -770,6 +770,7 @@
         const sendItVerifyFlavorByResort = {};
         const sendItStateLabelByResort = {};
         const sendItCooldownCtaByResort = {};
+        const sendItPostVoteAwaitByResort = {};
         const SENDIT_TEST_UNLIMITED_RESORTS = new Set([]);
         const SENDIT_TEST_ON_MOUNTAIN_RESORTS = new Set(['camelback']);
         const SENDIT_TEST_UNLOCK_ONLY_RESORTS = new Set(['camelback']);
@@ -1123,6 +1124,13 @@
             persistSendItCooldownState();
         }
 
+        function clearSendItLocalCooldown(resortId) {
+            if (sendItCooldownUntilByResort[resortId]) {
+                delete sendItCooldownUntilByResort[resortId];
+                persistSendItCooldownState();
+            }
+        }
+
         function getSendItCooldownCta(resortId) {
             if (!sendItCooldownCtaByResort[resortId]) {
                 sendItCooldownCtaByResort[resortId] = pickRandomLabel(SENDIT_COOLDOWN_CTA_OPTIONS);
@@ -1130,8 +1138,9 @@
             return sendItCooldownCtaByResort[resortId];
         }
 
-        function getSendItDirectionText(canVote, radialReady, selection, activeGroup) {
+        function getSendItDirectionText(canVote, radialReady, selection, activeGroup, isPostVoteAwait) {
             if (!canVote) return 'Tap center to verify on-mountain.';
+            if (isPostVoteAwait) return '';
             if (radialReady) return 'Dialed in. SEND IT!';
             if (!selection || !selection.difficulty) return 'Choose your trail.';
             if (activeGroup === 'wind') return 'Is it windy?';
@@ -1802,12 +1811,14 @@
                 showSendItToast('Slope Signal SENT');
                 triggerHaptic([18, 28, 16, 36, 22]);
                 setSendItLocalCooldown(resortId, payload?.cooldownMinutes);
+                sendItPostVoteAwaitByResort[resortId] = true;
                 sendItReadySlamByResort[resortId] = false;
                 renderResorts();
             } catch (e) {
                 triggerHaptic([24, 34, 24]);
                 if (e?.code === 'SENDIT_COOLDOWN') {
                     setSendItLocalCooldown(resortId, e.retryAfterMinutes);
+                    sendItPostVoteAwaitByResort[resortId] = true;
                     renderResorts();
                     alert(getSendItCooldownMessage(e.retryAfterMinutes));
                     return;
@@ -1863,6 +1874,7 @@
             const canVote = hasCoords && sendItUnlockedResorts.has(resort.id);
             const cooldownRemainingMinutes = getSendItCooldownRemainingMinutes(resort.id);
             const isCooldownActive = canVote && cooldownRemainingMinutes > 0;
+            const isPostVoteAwait = canVote && !!sendItPostVoteAwaitByResort[resort.id];
             const selectedSignals = getSendItSignalSelection(resort.id);
             const liveCrowdMode = isValidSendItCrowd(sendIt.crowdMode) ? sendIt.crowdMode : null;
             const liveWindMode = isValidSendItWind(sendIt.windMode) ? sendIt.windMode : null;
@@ -1914,7 +1926,7 @@
             const selectedDifficultyTitle = SENDIT_DIFFICULTY_OPTIONS.find((opt) => opt.key === selectedSignals.difficulty)?.title || '';
             const showSecondary = !!selectedSignals.difficulty;
             const selectedGroups = SENDIT_GROUP_ORDER.filter((key) => !!selectedSignals[key]);
-            const locklineVisible = (selectedSignals.difficulty && selectedGroups.length > 0) ? 'visible' : '';
+            const locklineVisible = (!isPostVoteAwait && selectedSignals.difficulty && selectedGroups.length > 0) ? 'visible' : '';
             const doFinalSlam = !!sendItReadySlamByResort[resort.id];
             const locklineModeClass = doFinalSlam ? 'final-slam' : (locklineVisible ? 'soft' : '');
             if (doFinalSlam) {
@@ -1924,13 +1936,15 @@
                 <span class="lock-item"><img src="${SENDIT_GROUP_ICON_PATHS[group]}" alt="${group} locked"></span>
                 ${idx < selectedGroups.length - 1 ? '<span class="lock-plus">+</span>' : ''}
             `).join('');
-            const centerIcon = canVote && !isCooldownActive && selectedSignals.difficulty && !radialReady && activeGroup
+            const centerIcon = canVote && !isPostVoteAwait && !isCooldownActive && selectedSignals.difficulty && !radialReady && activeGroup
                 ? `<img class="send-core-icon send-core-icon-stage ${activeGroup === 'hazard' ? 'icon-hazard' : ''}" src="${SENDIT_GROUP_ICON_PATHS[activeGroup]}" alt="${activeGroup} icon">`
                 : '';
             const centerLabel = canVote
-                ? (isCooldownActive ? `<span class="line-stack">${getSendItCooldownCta(resort.id)}</span>` : getSendItStepLabel(selectedSignals, activeGroup))
+                ? (isPostVoteAwait ? `<span class="line-stack">${getSendItCooldownCta(resort.id)}</span>` : getSendItStepLabel(selectedSignals, activeGroup))
                 : '<span class="line-stack">I\'M HERE!</span>';
-            const radialWheelMarkup = buildSendItWheelMarkup(resort.id, selectedSignals, activeGroup, canVote);
+            const radialWheelMarkup = isPostVoteAwait
+                ? ''
+                : buildSendItWheelMarkup(resort.id, selectedSignals, activeGroup, canVote);
             const radialEnterClass = sendItUnlockTransitionByResort[resort.id] ? 'unlock-enter' : '';
             if (sendItUnlockTransitionByResort[resort.id]) {
                 sendItUnlockTransitionByResort[resort.id] = false;
@@ -1939,9 +1953,10 @@
                 canVote,
                 radialReady,
                 selectedSignals,
-                activeGroup
+                activeGroup,
+                isPostVoteAwait
             );
-            const radialPulseClass = !canVote || isCooldownActive
+            const radialPulseClass = !canVote || isCooldownActive || isPostVoteAwait
                 ? ''
                 : (!selectedSignals.difficulty
                     ? 'pulse-difficulty'
@@ -1950,10 +1965,10 @@
                       <div class="sendit-hud-radial unlocked ${radialPulseClass}">
                         ${radialWheelMarkup}
                         <button
-                          class="sendit-core-btn ${radialReady && !isCooldownActive ? 'ready' : ''} ${isCooldownActive ? 'cooldown' : ''}"
-                          data-sendit-action="${canVote ? 'vote-radial' : 'unlock'}"
+                          class="sendit-core-btn ${radialReady && !isCooldownActive && !isPostVoteAwait ? 'ready' : ''} ${(isCooldownActive || isPostVoteAwait) ? 'cooldown' : ''}"
+                          data-sendit-action="${canVote ? (isPostVoteAwait ? 'restart-signal' : 'vote-radial') : 'unlock'}"
                           data-resort-id="${resort.id}"
-                          ${(canVote && !radialReady) ? 'disabled' : ''}
+                          ${(canVote && !isPostVoteAwait && !radialReady) ? 'disabled' : ''}
                           type="button">${centerIcon}<span class="send-core-label">${centerLabel}</span></button>
                         <div class="selection-lockline ${canVote ? locklineVisible : ''} ${canVote ? locklineModeClass : ''}">${canVote ? locklineMarkup : ''}</div>
                         <div class="sendit-radial-direction">${radialDirectionText}</div>
@@ -2552,6 +2567,27 @@ const backgroundSizeByResort = {
                 }
                 setTimeout(() => target.classList.remove('rail-slam'), 600);
                 await unlockSendItForResort(resortId, target);
+                return;
+            }
+
+            if (action === 'restart-signal') {
+                const cooldownRemaining = getSendItCooldownRemainingMinutes(resortId);
+                if (cooldownRemaining > 0) {
+                    alert(getSendItCooldownMessage(cooldownRemaining));
+                    return;
+                }
+                clearSendItLocalCooldown(resortId);
+                sendItPostVoteAwaitByResort[resortId] = false;
+                sendItSignalSelectionByResort[resortId] = {
+                    crowd: null,
+                    wind: null,
+                    slope: null,
+                    hazard: null,
+                    difficulty: '',
+                    activeGroup: SENDIT_GROUP_ORDER[0]
+                };
+                sendItReadySlamByResort[resortId] = false;
+                renderResorts();
                 return;
             }
 
