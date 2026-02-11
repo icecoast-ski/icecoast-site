@@ -761,11 +761,11 @@
         let sendItMaxAccuracyMeters = 200;
         const SENDIT_DEVICE_ID_KEY = 'icecoast_sendit_device_id';
         const sendItUnlockedResorts = new Set();
-        const SENDIT_TEST_UNLOCKED_RESORTS = new Set([]);
+        const SENDIT_TEST_UNLOCKED_RESORTS = new Set(['camelback']);
         const sendItButtonCopyByResort = {};
         const sendItVerifyFlavorByResort = {};
         const sendItStateLabelByResort = {};
-        const SENDIT_TEST_UNLIMITED_RESORTS = new Set([]);
+        const SENDIT_TEST_UNLIMITED_RESORTS = new Set(['camelback']);
         const SENDIT_TEST_ON_MOUNTAIN_RESORTS = new Set([]);
         const DEFAULT_LIFT_CLOSE_HOUR = 16;
         const NIGHT_SKI_CLOSE_HOURS = {
@@ -797,7 +797,36 @@
             { key: 'breezy', label: 'Breezy' },
             { key: 'nuking', label: 'Blasting' }
         ];
-        const SENDIT_DEFAULT_SIGNALS = { crowd: 'normal', wind: 'breezy' };
+        const SENDIT_SLOPE_OPTIONS = [
+            { key: 'edges', label: 'Sharpen Edges' },
+            { key: 'good', label: 'Good Laps' },
+            { key: 'full', label: 'Full Send' }
+        ];
+        const SENDIT_HAZARD_OPTIONS = [
+            { key: 'icy', label: 'Icy' },
+            { key: 'swarm', label: 'Jerry Swarm' },
+            { key: 'clear', label: 'All Clear' }
+        ];
+        const SENDIT_DIFFICULTY_OPTIONS = [
+            { key: 'green', label: '●', score: 20, title: 'Green Circle' },
+            { key: 'blue', label: '■', score: 60, title: 'Blue Square' },
+            { key: 'black', label: '◆', score: 80, title: 'Black Diamond' },
+            { key: 'double', label: '◆◆', score: 100, title: 'Double Black' }
+        ];
+        const SENDIT_GROUP_ORDER = ['wind', 'crowd', 'hazard', 'slope'];
+        const SENDIT_GROUP_META = {
+            wind: { icon: '🌬️', label: 'Wind' },
+            crowd: { icon: '🚡', label: 'Crowd' },
+            hazard: { icon: '⚠️', label: 'Hazard' },
+            slope: { icon: '⛷️', label: 'Slope' }
+        };
+        const SENDIT_GROUP_ICON_PATHS = {
+            wind: './slope-signal-lab-2d/assets/wind.png',
+            crowd: './slope-signal-lab-2d/assets/lift.png',
+            hazard: './slope-signal-lab-2d/assets/caution.png',
+            slope: './slope-signal-lab-2d/assets/slope.png'
+        };
+        const SENDIT_DEFAULT_SIGNALS = { crowd: 'normal', wind: 'breezy', slope: 'good', hazard: 'clear', difficulty: '' };
         const SENDIT_HISTORY_MIN_VOTES = 2;
         const SENDIT_PAYOFF_PHRASES = {
             nodata: [
@@ -910,6 +939,7 @@
             }
         };
         const sendItSignalSelectionByResort = {};
+        const sendItReadySlamByResort = {};
         const SENDIT_COOLDOWN_OPTIONS = [
             'Easy, legend. icecoast patrol says wait {minutes}m before your next call.',
             'You already dropped your vote. Take a hot-lap and check back in {minutes}m.',
@@ -989,6 +1019,18 @@
             return SENDIT_WIND_OPTIONS.some((opt) => opt.key === value);
         }
 
+        function isValidSendItSlope(value) {
+            return SENDIT_SLOPE_OPTIONS.some((opt) => opt.key === value);
+        }
+
+        function isValidSendItHazard(value) {
+            return SENDIT_HAZARD_OPTIONS.some((opt) => opt.key === value);
+        }
+
+        function isValidSendItDifficulty(value) {
+            return SENDIT_DIFFICULTY_OPTIONS.some((opt) => opt.key === value);
+        }
+
         function getSendItCrowdLabel(value) {
             const match = SENDIT_CROWD_OPTIONS.find((opt) => opt.key === value);
             return match ? match.label : 'Normal';
@@ -1005,7 +1047,11 @@
             const fromSummary = sendItSummaryByResort?.[resortId] || {};
             const seeded = {
                 crowd: isValidSendItCrowd(fromSummary.crowdMode) ? fromSummary.crowdMode : SENDIT_DEFAULT_SIGNALS.crowd,
-                wind: isValidSendItWind(fromSummary.windMode) ? fromSummary.windMode : SENDIT_DEFAULT_SIGNALS.wind
+                wind: isValidSendItWind(fromSummary.windMode) ? fromSummary.windMode : SENDIT_DEFAULT_SIGNALS.wind,
+                slope: SENDIT_DEFAULT_SIGNALS.slope,
+                hazard: SENDIT_DEFAULT_SIGNALS.hazard,
+                difficulty: SENDIT_DEFAULT_SIGNALS.difficulty,
+                activeGroup: SENDIT_GROUP_ORDER[0]
             };
             sendItSignalSelectionByResort[resortId] = seeded;
             return seeded;
@@ -1014,8 +1060,105 @@
         function setSendItSignalSelection(resortId, key, value) {
             if (key === 'crowd' && !isValidSendItCrowd(value)) return;
             if (key === 'wind' && !isValidSendItWind(value)) return;
+            if (key === 'slope' && !isValidSendItSlope(value)) return;
+            if (key === 'hazard' && !isValidSendItHazard(value)) return;
+            if (key === 'difficulty' && !isValidSendItDifficulty(value)) return;
             const next = { ...getSendItSignalSelection(resortId), [key]: value };
             sendItSignalSelectionByResort[resortId] = next;
+        }
+
+        function getNextSendItGroup(selection) {
+            return SENDIT_GROUP_ORDER.find((key) => !selection[key]) || '';
+        }
+
+        function canSubmitSendItSelection(selection) {
+            if (!selection || !isValidSendItDifficulty(selection.difficulty)) return false;
+            return SENDIT_GROUP_ORDER.every((key) => !!selection[key]);
+        }
+
+        function getSendItScoreFromSelection(selection) {
+            if (!selection || !isValidSendItDifficulty(selection.difficulty)) return 60;
+            const match = SENDIT_DIFFICULTY_OPTIONS.find((opt) => opt.key === selection.difficulty);
+            return match ? match.score : 60;
+        }
+
+        function polarPoint(cx, cy, r, aDeg) {
+            const a = (aDeg * Math.PI) / 180;
+            return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+        }
+
+        function sectorPathData(cx, cy, rIn, rOut, aStart, aEnd) {
+            const p1 = polarPoint(cx, cy, rOut, aStart);
+            const p2 = polarPoint(cx, cy, rOut, aEnd);
+            const p3 = polarPoint(cx, cy, rIn, aEnd);
+            const p4 = polarPoint(cx, cy, rIn, aStart);
+            const large = Math.abs(aEnd - aStart) > 180 ? 1 : 0;
+            return [
+                `M ${p1.x} ${p1.y}`,
+                `A ${rOut} ${rOut} 0 ${large} 1 ${p2.x} ${p2.y}`,
+                `L ${p3.x} ${p3.y}`,
+                `A ${rIn} ${rIn} 0 ${large} 0 ${p4.x} ${p4.y}`,
+                'Z'
+            ].join(' ');
+        }
+
+        function buildSendItWheelMarkup(resortId, selectedSignals, activeGroup) {
+            const difficultyCfg = [
+                { key: 'green', glyph: '●', center: -150 },
+                { key: 'blue', glyph: '■', center: -108 },
+                { key: 'black', glyph: '◆', center: -66 },
+                { key: 'double', glyph: '◆◆', center: -24 }
+            ];
+
+            const diffSectors = difficultyCfg.map((cfg) => {
+                const active = selectedSignals.difficulty === cfg.key ? 'active' : '';
+                const d = sectorPathData(300, 300, 106, 196, cfg.center - 20, cfg.center + 20);
+                const lp = polarPoint(300, 300, (106 + 196) / 2, cfg.center);
+                const rotation = cfg.center + 90;
+                const glyph = cfg.key === 'double' ? '◆ ◆' : cfg.glyph;
+                return `
+                    <path class="wheel-sector signal-sector ${active}" d="${d}" data-sendit-action="select-difficulty" data-resort-id="${resortId}" data-value="${cfg.key}"></path>
+                    <text class="wheel-label signal-label ${active}" data-sendit-action="select-difficulty" data-resort-id="${resortId}" data-value="${cfg.key}" x="${lp.x}" y="${lp.y}" transform="rotate(${rotation} ${lp.x} ${lp.y})">${glyph}</text>
+                `;
+            }).join('');
+
+            const optionMap = {
+                wind: SENDIT_WIND_OPTIONS,
+                crowd: SENDIT_CROWD_OPTIONS,
+                hazard: SENDIT_HAZARD_OPTIONS,
+                slope: SENDIT_SLOPE_OPTIONS
+            };
+            const opts = optionMap[activeGroup] || [];
+            const offsets = [-44, 0, 44];
+            const showSecondary = !!selectedSignals.difficulty;
+            const optionSectors = showSecondary ? opts.map((opt, i) => {
+                const center = -90 + offsets[i];
+                const d = sectorPathData(300, 300, 210, 292, center - 21, center + 21);
+                const active = selectedSignals[activeGroup] === opt.key ? 'active' : '';
+                const guideId = `sendit-guide-${resortId}-${activeGroup}-${i}`;
+                const radius = (210 + 292) / 2;
+                const start = center - 17;
+                const end = center + 17;
+                const a = polarPoint(300, 300, radius, start);
+                const b = polarPoint(300, 300, radius, end);
+                return `
+                    <path class="wheel-sector option-sector ${active}" d="${d}" data-sendit-action="select-option" data-resort-id="${resortId}" data-group="${activeGroup}" data-value="${opt.key}"></path>
+                    <path id="${guideId}" class="label-guide" d="M ${a.x} ${a.y} A ${radius} ${radius} 0 0 1 ${b.x} ${b.y}"></path>
+                    <text class="wheel-label option-label ${active}" data-sendit-action="select-option" data-resort-id="${resortId}" data-group="${activeGroup}" data-value="${opt.key}">
+                      <textPath href="#${guideId}" startOffset="50%" text-anchor="middle">${opt.label.toUpperCase()}</textPath>
+                    </text>
+                `;
+            }).join('') : '';
+
+            return `
+                <div class="sendit-radial-rings">
+                    <div class="ring ring-c"></div>
+                </div>
+                <svg class="sendit-hud-wheel" viewBox="0 0 600 600" aria-label="Slope Signal radial">
+                    <g>${diffSectors}</g>
+                    <g>${optionSectors}</g>
+                </svg>
+            `;
         }
 
         function getSendItOutOfRangeMessage(distanceMiles, requiredMiles) {
@@ -1249,6 +1392,61 @@
             return `${windText}. ${crowdText}.`;
         }
 
+        function normalizeDifficultyKey(raw) {
+            const v = String(raw || '').trim().toLowerCase();
+            if (!v) return '';
+            if (v === 'green' || v === 'green-circle' || v === 'greencircle') return 'green';
+            if (v === 'blue' || v === 'blue-square' || v === 'bluesquare') return 'blue';
+            if (v === 'black' || v === 'black-diamond' || v === 'blackdiamond') return 'black';
+            if (v === 'double' || v === 'double-black' || v === 'doubleblack' || v === 'double-black-diamond' || v === 'doubleblackdiamond') return 'double';
+            return '';
+        }
+
+        function getSlopeSignalDifficultyMix(sendIt) {
+            const zero = { green: 0, blue: 0, black: 0, double: 0, total: 0 };
+            if (!sendIt || typeof sendIt !== 'object') return zero;
+            const candidates = [
+                sendIt.difficultyMix,
+                sendIt.difficultyCounts,
+                sendIt.difficultyBreakdown,
+                sendIt.trailMix,
+                sendIt.lineMix
+            ];
+
+            let counts = null;
+            for (const source of candidates) {
+                if (!source || typeof source !== 'object') continue;
+                const next = { green: 0, blue: 0, black: 0, double: 0 };
+                let found = false;
+                Object.entries(source).forEach(([k, v]) => {
+                    const key = normalizeDifficultyKey(k);
+                    const num = Number(v);
+                    if (key && Number.isFinite(num) && num > 0) {
+                        next[key] += num;
+                        found = true;
+                    }
+                });
+                if (found) {
+                    counts = next;
+                    break;
+                }
+            }
+            if (!counts) return zero;
+            const total = counts.green + counts.blue + counts.black + counts.double;
+            if (!Number.isFinite(total) || total <= 0) return zero;
+            return {
+                green: counts.green,
+                blue: counts.blue,
+                black: counts.black,
+                double: counts.double,
+                greenPct: Math.round((counts.green / total) * 100),
+                bluePct: Math.round((counts.blue / total) * 100),
+                blackPct: Math.round((counts.black / total) * 100),
+                doublePct: Math.round((counts.double / total) * 100),
+                total
+            };
+        }
+
         function getSlopeSignal24hSummary(resort, score24h, votes24h, crowdMode, windMode) {
             const regionKey = resort?.region || 'default';
             const phraseBank = SENDIT_24H_SUMMARY_BY_REGION[regionKey] || SENDIT_24H_SUMMARY_BY_REGION.default;
@@ -1385,7 +1583,7 @@
 
             const skier = document.createElement('span');
             skier.className = `sendit-skier-launch ${isFullSend ? 'fullsend' : 'normal'}`;
-            skier.textContent = '\u26f7\ufe0f';
+            skier.setAttribute('aria-hidden', 'true');
             skier.style.left = `${Math.round(startX)}px`;
             skier.style.top = `${Math.round(startY)}px`;
             skier.style.setProperty('--land-x', `${Math.round(railStartX)}px`);
@@ -1652,41 +1850,60 @@
             );
             const sendItSubtitleSecondary = getSlopeSignalContextLine(liveCrowdMode, liveWindMode);
             const sendItPrompt = '';
+            const difficultyMix = getSlopeSignalDifficultyMix(sendIt);
+            const hasDifficultyMix = difficultyMix.total >= SENDIT_HISTORY_MIN_VOTES;
+            const difficultyMixMarkup = hasDifficultyMix
+                ? `<div class="sendit-line-mix" aria-label="Slope Signal line mix">
+                     <span class="mix-pill mix-green" title="Green Circle calls"><span class="mix-glyph">●</span><span class="mix-value">${difficultyMix.green} calls</span></span>
+                     <span class="mix-pill mix-blue" title="Blue Square calls"><span class="mix-glyph">■</span><span class="mix-value">${difficultyMix.blue} calls</span></span>
+                     <span class="mix-pill mix-black" title="Black Diamond calls"><span class="mix-glyph">◆</span><span class="mix-value">${difficultyMix.black} calls</span></span>
+                     <span class="mix-pill mix-double" title="Double Black Diamond calls"><span class="mix-glyph">◆◆</span><span class="mix-value">${difficultyMix.double} calls</span></span>
+                   </div>`
+                : `<div class="sendit-line-mix sendit-line-mix-empty">Line mix building. First chair takes lead.</div>`;
+            const activeGroup = SENDIT_GROUP_ORDER.includes(selectedSignals.activeGroup)
+                ? selectedSignals.activeGroup
+                : (getNextSendItGroup(selectedSignals) || SENDIT_GROUP_ORDER[0]);
+            const groupOptionsMap = {
+                wind: SENDIT_WIND_OPTIONS,
+                crowd: SENDIT_CROWD_OPTIONS,
+                hazard: SENDIT_HAZARD_OPTIONS,
+                slope: SENDIT_SLOPE_OPTIONS
+            };
+            const radialOptions = groupOptionsMap[activeGroup] || [];
+            const radialReady = canSubmitSendItSelection(selectedSignals);
+            const selectedDifficultyTitle = SENDIT_DIFFICULTY_OPTIONS.find((opt) => opt.key === selectedSignals.difficulty)?.title || '';
+            const showSecondary = !!selectedSignals.difficulty;
+            const selectedGroups = SENDIT_GROUP_ORDER.filter((key) => !!selectedSignals[key]);
+            const locklineVisible = (selectedSignals.difficulty && selectedGroups.length > 0) ? 'visible' : '';
+            const doFinalSlam = !!sendItReadySlamByResort[resort.id];
+            const locklineModeClass = doFinalSlam ? 'final-slam' : (locklineVisible ? 'soft' : '');
+            if (doFinalSlam) {
+                sendItReadySlamByResort[resort.id] = false;
+            }
+            const locklineMarkup = selectedGroups.map((group, idx) => `
+                <span class="lock-item"><img src="${SENDIT_GROUP_ICON_PATHS[group]}" alt="${group} locked"></span>
+                ${idx < selectedGroups.length - 1 ? '<span class="lock-plus">+</span>' : ''}
+            `).join('');
+            const centerIcon = selectedSignals.difficulty && !radialReady && activeGroup
+                ? `<img class="send-core-icon ${activeGroup === 'hazard' ? 'icon-hazard' : ''}" src="${SENDIT_GROUP_ICON_PATHS[activeGroup]}" alt="${activeGroup} icon">`
+                : '';
+            const centerLabel = radialReady
+                ? 'SEND IT!'
+                : (!selectedSignals.difficulty ? '<span class="line-stack">CHOOSE<br>YOUR<br>LINE</span>' : '');
+            const radialWheelMarkup = buildSendItWheelMarkup(resort.id, selectedSignals, activeGroup);
             const sendItControls = !hasCoords ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>` : canVote
-                ? `<div class="sendit-signal-group">
-                        <div class="sendit-signal-row">
-                          <span class="sendit-signal-label">Crowd</span>
-                          <div class="sendit-segmented">
-                            ${SENDIT_CROWD_OPTIONS.map((opt) => `
-                              <button
-                                class="sendit-choice-btn ${selectedSignals.crowd === opt.key ? 'active' : ''}"
-                                data-sendit-action="select-crowd"
-                                data-resort-id="${resort.id}"
-                                data-value="${opt.key}"
-                                type="button">${opt.label}</button>`).join('')}
-                          </div>
-                        </div>
-                        <div class="sendit-signal-row">
-                          <span class="sendit-signal-label">Wind</span>
-                          <div class="sendit-segmented">
-                            ${SENDIT_WIND_OPTIONS.map((opt) => `
-                              <button
-                                class="sendit-choice-btn ${selectedSignals.wind === opt.key ? 'active' : ''}"
-                                data-sendit-action="select-wind"
-                                data-resort-id="${resort.id}"
-                                data-value="${opt.key}"
-                                type="button">${opt.label}</button>`).join('')}
-                          </div>
-                        </div>
+                ? `<div class="sendit-radial" data-resort-id="${resort.id}">
+                      <div class="sendit-hud-radial unlocked">
+                        ${radialWheelMarkup}
+                        <button
+                          class="sendit-core-btn ${radialReady ? 'ready' : ''}"
+                          data-sendit-action="vote-radial"
+                          data-resort-id="${resort.id}"
+                          ${radialReady ? '' : 'disabled'}
+                          type="button">${centerIcon}<span class="send-core-label">${centerLabel}</span></button>
+                        <div class="selection-lockline ${locklineVisible} ${locklineModeClass}">${locklineMarkup}</div>
                       </div>
-                      <div class="sendit-signal-row sendit-slope-row">
-                        <span class="sendit-signal-label">Slope</span>
-                        <div class="sendit-vote-row">
-                          <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="20">${sendItButtonCopy.low}</button>
-                          <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="60">${sendItButtonCopy.mid}</button>
-                          <button class="sendit-vote-btn" data-sendit-action="vote" data-resort-id="${resort.id}" data-score="100">${sendItButtonCopy.high}</button>
-                        </div>
-                      </div>`
+                    </div>`
                 : `<button class="sendit-unlock-btn sendit-unlock-cta" data-sendit-action="unlock" data-resort-id="${resort.id}">⚡ I'M ON THE MOUNTAIN!</button>
                    <div class="sendit-locked-note"><span class="sendit-lock-icon" aria-hidden="true">🔒</span> One-time check to unlock local voting.</div>`;
 
@@ -1907,6 +2124,7 @@ const backgroundSizeByResort = {
                       </span>
                       ${sendItSubtitleSecondary ? `<span class="sendit-subtitle-flavor">${sendItSubtitleSecondary}</span>` : ''}
                     </div>
+                    ${difficultyMixMarkup}
                   </div>
                   ${sendItPrompt}
                   ${sendItControls}
@@ -2293,9 +2511,61 @@ const backgroundSizeByResort = {
                 return;
             }
 
+            if (action === 'select-difficulty') {
+                const difficulty = target.dataset.value;
+                setSendItSignalSelection(resortId, 'difficulty', difficulty);
+                const current = getSendItSignalSelection(resortId);
+                // Lab flow: changing difficulty resets the radial sequence.
+                current.wind = null;
+                current.crowd = null;
+                current.hazard = null;
+                current.slope = null;
+                current.activeGroup = SENDIT_GROUP_ORDER[0];
+                sendItSignalSelectionByResort[resortId] = { ...current };
+                sendItReadySlamByResort[resortId] = false;
+                renderResorts();
+                return;
+            }
+
+            if (action === 'select-group') {
+                const group = target.dataset.group;
+                if (!SENDIT_GROUP_ORDER.includes(group)) return;
+                const current = getSendItSignalSelection(resortId);
+                sendItSignalSelectionByResort[resortId] = { ...current, activeGroup: group };
+                renderResorts();
+                return;
+            }
+
+            if (action === 'select-option') {
+                const group = target.dataset.group;
+                const value = target.dataset.value;
+                if (!SENDIT_GROUP_ORDER.includes(group)) return;
+                const before = getSendItSignalSelection(resortId);
+                const wasReady = canSubmitSendItSelection(before);
+                setSendItSignalSelection(resortId, group, value);
+                const current = getSendItSignalSelection(resortId);
+                const nextGroup = getNextSendItGroup(current) || '';
+                sendItSignalSelectionByResort[resortId] = { ...current, activeGroup: nextGroup };
+                const isReady = canSubmitSendItSelection(current);
+                sendItReadySlamByResort[resortId] = !wasReady && isReady;
+                renderResorts();
+                return;
+            }
+
             if (action === 'vote') {
                 const score = Number(target.dataset.score);
                 const signalSelection = getSendItSignalSelection(resortId);
+                await submitSendItVote(resortId, score, signalSelection, target);
+                return;
+            }
+
+            if (action === 'vote-radial') {
+                const signalSelection = getSendItSignalSelection(resortId);
+                if (!canSubmitSendItSelection(signalSelection)) {
+                    showSendItToast('Finish your loadout', 'Pick difficulty + wind + crowd + hazard + slope');
+                    return;
+                }
+                const score = getSendItScoreFromSelection(signalSelection);
                 await submitSendItVote(resortId, score, signalSelection, target);
             }
         });
