@@ -743,8 +743,8 @@
         const sendItCooldownCtaByResort = {};
         const sendItPostVoteAwaitByResort = {};
         const SENDIT_TEST_UNLIMITED_RESORTS = new Set([]);
-        const SENDIT_TEST_ON_MOUNTAIN_RESORTS = new Set(['camelback']);
-        const SENDIT_TEST_UNLOCK_ONLY_RESORTS = new Set(['camelback']);
+        const SENDIT_TEST_ON_MOUNTAIN_RESORTS = new Set([]);
+        const SENDIT_TEST_UNLOCK_ONLY_RESORTS = new Set([]);
         const DEFAULT_LIFT_CLOSE_HOUR = 16;
         const NIGHT_SKI_CLOSE_HOURS = {
             camelback: { weekday: 21, weekend: 21 },
