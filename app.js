@@ -1,4 +1,3 @@
-        // SVG Icon templates (Airbnb-style minimalist)
         const icons = {
             ticket: `<svg class="icon-ticket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>
@@ -69,7 +68,6 @@
             const isCanada = resort.region === "canada";
             const isArcticAlert = manualCondition.includes('arctic blast');
 
-            // Condition flags
             const heavySnow = snow24h >= 8;
             const freshPow = snow24h >= 4;
             const someSnow = snow24h >= 1;
@@ -343,16 +341,12 @@
             return options[Math.floor(Math.random() * options.length)];
         }
 
-        // Calculate IceCoast rating dynamically from live weather + manual snow data
-        // Weights: 40% Snow, 20% Temp, 20% Wind, 20% Conditions
         function calculateRating(weather, snowfall) {
-            // Fallbacks when live data is missing
             const safeWeather = weather || {};
             const safeSnowfall = snowfall || {};
 
             let score = 0;
 
-            // 1. SNOW – use 24h/48h from snowfall object if present
             const snow24h = parseInt(safeSnowfall.snowfall24h ?? safeSnowfall['24h'] ?? 0, 10);
             const snow48h = parseInt(safeSnowfall.snowfall48h ?? safeSnowfall['48h'] ?? 0, 10);
             let snowScore = 0;
@@ -363,7 +357,6 @@
             else snowScore = snow48h > 0 ? 2 : 1;
             score += snowScore * 0.4;
 
-            // 2. TEMPERATURE – guard weather.temp
             const temp = typeof safeWeather.temp === 'number' ? safeWeather.temp : 25; // neutral default
             let tempScore = 0;
             if (temp >= 15 && temp <= 30) tempScore = 5;
@@ -373,7 +366,6 @@
             else tempScore = 1;
             score += tempScore * 0.2;
 
-            // 3. WIND – guard weather.wind
             const windSpeed = parseInt(safeWeather.wind ?? 0, 10);
             let windScore = 0;
             if (windSpeed <= 10) windScore = 5;
@@ -383,7 +375,6 @@
             else windScore = 1;
             score += windScore * 0.2;
 
-            // 4. CONDITIONS – guard weather.condition
             const condition = (safeWeather.condition || '').toLowerCase();
             let conditionScore = 3;
             if (condition.includes('snow')) conditionScore = 5;
@@ -392,7 +383,6 @@
             else if (condition.includes('rain') || condition.includes('drizzle')) conditionScore = 1;
             score += conditionScore * 0.2;
 
-            // Round to 1–5
             return Math.max(1, Math.min(5, Math.round(score)));
         }
 
@@ -536,7 +526,6 @@
         }
 
         const RESORT_PASS_MEMBERSHIP = {
-            // Epic
             'jack-frost': ['epic'],
             'big-boulder': ['epic'],
             'hunter': ['epic'],
@@ -545,7 +534,6 @@
             'stowe': ['epic'],
             'wildcat': ['epic'],
 
-            // Ikon
             'camelback': ['ikon'],
             'blue-mountain': ['ikon'],
             'stratton': ['ikon'],
@@ -557,10 +545,8 @@
             'sugarloaf': ['ikon'],
             'tremblant': ['ikon'],
             'le-massif': ['ikon'],
-            // Jiminy is Ikon "bonus mountain" (limited access days), still surfaced as Ikon badge.
             'jiminy-peak': ['ikon'],
 
-            // Windham is no longer Ikon
             'windham': []
         };
 
@@ -575,9 +561,7 @@
             });
         }
 
-        // Static social scores from recurring reviews/lists; manual admin overrides can still replace these.
         const RESORT_APRES_FAMILY_SCORE = {
-            // Poconos / PA
             'camelback': { apres: 3, family: 5 },
             'blue-mountain': { apres: 3, family: 3 },
             'jack-frost': { apres: 2, family: 3 },
@@ -587,19 +571,16 @@
             'big-boulder': { apres: 3, family: 2 },
             'montage': { apres: 2, family: 3 },
 
-            // NY
             'hunter': { apres: 3, family: 3 },
             'windham': { apres: 3, family: 4 },
             'belleayre': { apres: 2, family: 5 },
             'whiteface': { apres: 4, family: 4 },
             'gore-mountain': { apres: 2, family: 4 },
 
-            // MA / CT
             'jiminy-peak': { apres: 3, family: 5 },
             'wachusett': { apres: 2, family: 4 },
             'mohawk': { apres: 1, family: 4 },
 
-            // Vermont
             'stratton': { apres: 4, family: 4 },
             'mount-snow': { apres: 4, family: 4 },
             'killington': { apres: 5, family: 3 },
@@ -612,7 +593,6 @@
             'jay-peak': { apres: 3, family: 4 },
             'burke': { apres: 2, family: 3 },
 
-            // NH / ME
             'loon': { apres: 3, family: 4 },
             'brettonwoods': { apres: 3, family: 5 },
             'waterville': { apres: 3, family: 4 },
@@ -622,7 +602,6 @@
             'sugarloaf': { apres: 4, family: 4 },
             'saddleback': { apres: 2, family: 3 },
 
-            // Canada
             'tremblant': { apres: 5, family: 5 },
             'mont-sainte-anne': { apres: 3, family: 4 },
             'le-massif': { apres: 2, family: 3 },
@@ -643,9 +622,7 @@
             });
         }
 
-        // Static glade score: 3 = best glades, 2 = decent glades, 1 = some glades
         const RESORT_GLADE_SCORE = {
-            // Poconos / PA
             'camelback': 1,
             'blue-mountain': 1,
             'jack-frost': 0,
@@ -655,19 +632,16 @@
             'big-boulder': 0,
             'montage': 1,
 
-            // NY
             'hunter': 2,
             'windham': 1,
             'belleayre': 2,
             'whiteface': 3,
             'gore-mountain': 3,
 
-            // MA / CT
             'jiminy-peak': 1,
             'wachusett': 0,
             'mohawk': 1,
 
-            // Vermont
             'stratton': 2,
             'mount-snow': 1,
             'killington': 2,
@@ -680,7 +654,6 @@
             'jay-peak': 3,
             'burke': 2,
 
-            // NH / ME
             'loon': 2,
             'brettonwoods': 2,
             'waterville': 2,
@@ -690,7 +663,6 @@
             'sugarloaf': 3,
             'saddleback': 3,
 
-            // Canada
             'tremblant': 2,
             'mont-sainte-anne': 2,
             'le-massif': 3,
@@ -708,7 +680,6 @@
             });
         }
 
-        // Static drive-time data: 3 closest major cities (approximate, non-live)
         const REGION_DRIVE_TIMES = {
             'poconos': { 'NYC': '1h 50m', 'Philadelphia': '1h 45m', 'Newark': '1h 35m' },
             'catskills': { 'NYC': '2h 30m', 'Albany': '1h 10m', 'Newark': '2h 40m' },
@@ -1153,8 +1124,6 @@
         function getSendItScoreFromSelection(selection) {
             if (!selection || !isValidSendItDifficulty(selection.difficulty)) return 60;
 
-            // Sentiment-first scoring:
-            // left = bad (0), middle = neutral (1), right = good (2)
             const rankMap = {
                 wind: { nuking: 0, breezy: 1, calm: 2 },
                 crowd: { swarm: 0, normal: 1, quiet: 2 },
@@ -1168,7 +1137,6 @@
             const snowRank = rankMap.slope[selection.slope] ?? 1;
             const avgRank = (windRank + crowdRank + hazardRank + snowRank) / 4;
 
-            // 0 -> 20, 1 -> 60, 2 -> 100
             return Math.round(20 + avgRank * 40);
         }
 
@@ -1627,7 +1595,6 @@
                     navigator.vibrate(pattern);
                 }
             } catch (e) {
-                // Ignore haptics failures silently.
             }
         }
 
@@ -1752,7 +1719,6 @@
                     voteLon = resortCoords.lon;
                     voteAccuracy = 10;
                     if (isUnlimitedTest) {
-                        // Fresh synthetic token to bypass cooldown while testing this resort UI.
                         deviceId = `test-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
                     }
                 } else {
@@ -1834,7 +1800,6 @@
         }
 
         function createResortCard(resort) {
-            // ── Safe fallbacks for nested data ──
             const vertical = resort.elevation?.vertical ?? '—';
             const trailsOpen = resort.trails?.open ?? '—';
             const trailsClosed = resort.trails?.closed ?? '—';
@@ -2018,21 +1983,18 @@
             const metricsFeelsLike = `${metricsFeelsLikeBase}${feelsLikeWarning}`;
             const metricsWind = weather.wind ?? '—';
             const signalLead = sendItSubtitlePrimary;
-            // POWDER / FRESH badges safely
             const hasSignificantSnow = parseInt(resort.snowfall24h || '0', 10) >= 6;
             let snowBadge = '';
             if (hasSignificantSnow) {
                 snowBadge = `<div class="snow-alert-badge">${resort.snowfall24h || 0}″ FRESH POW</div>`;
             }
 
-            // Unique resort art is now one file per resort id in /v2/resort-art.
 const backgroundImageByResort = {
     'camelback': 'camelback.jpg',
     'cannon': 'cannon.jpg?v=20260208ab'
 };
 const backgroundImageFile = backgroundImageByResort[resort.id] || `${resort.id}.jpg`;
 
-            // Fine-tuned focal points so peaks/bases are framed better per resort.
 const backgroundPositionByResort = {
     'camelback': 'center 30%',
     'blue-mountain': 'center 36%',
@@ -2076,7 +2038,6 @@ const backgroundPositionByResort = {
 };
 
 
-            // Keep a slight zoom to hide white borders in source art without heavy pixelation.
 const backgroundSizeByResort = {
     'camelback': '100%',
     'blue-mountain': '100%',
@@ -2349,7 +2310,6 @@ const backgroundSizeByResort = {
         }
 
 
-        // Filter state
         let filterState = {
             region: 'all',
             pass: 'all',
@@ -2376,12 +2336,10 @@ const backgroundSizeByResort = {
         function applyFilters() {
             let filtered = Array.isArray(resorts) ? resorts.filter(Boolean) : [];
 
-            // Region filter
             if (filterState.region !== 'all') {
                 filtered = filtered.filter(r => r.region === filterState.region);
             }
 
-            // Pass filter
             if (filterState.pass === 'ikon') {
                 filtered = filtered.filter(r => r.passes && r.passes.includes('ikon'));
             } else if (filterState.pass === 'epic') {
@@ -2390,7 +2348,6 @@ const backgroundSizeByResort = {
                 filtered = filtered.filter(r => !r.passes || r.passes.length === 0);
             }
 
-            // Vibe filter
             if (filterState.vibe === 'sendit') {
                 const ranked = (filtered.length > 0 ? [...filtered] : [...(Array.isArray(resorts) ? resorts.filter(Boolean) : [])]);
                 ranked.sort((a, b) => {
@@ -2405,7 +2362,6 @@ const backgroundSizeByResort = {
                 filtered = filtered.filter(r => r.rating === 0); // Impossible - will always show no results
             }
 
-            // Sorting
             switch (filterState.sort) {
                 case 'rating-high':
                     filtered.sort((a, b) => b.rating - a.rating);
@@ -2480,7 +2436,6 @@ const backgroundSizeByResort = {
             grid.innerHTML = filtered.map(resort => createResortCard(resort)).join('');
         }
 
-        // Region filter buttons
         document.querySelectorAll('[data-region]').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('[data-region]').forEach(b => b.classList.remove('active'));
@@ -2489,7 +2444,6 @@ const backgroundSizeByResort = {
                 renderResorts();
             });
         });
-        // Legal accordion toggle
         function toggleLegal() {
             const accordion = document.getElementById('legalAccordion');
             const toggle = document.querySelector('.legal-toggle');
@@ -2497,7 +2451,6 @@ const backgroundSizeByResort = {
             accordion.classList.toggle('open');
             toggle.classList.toggle('active');
         }
-        // Pass filter buttons
         document.querySelectorAll('[data-pass]').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('[data-pass]').forEach(b => b.classList.remove('active'));
@@ -2507,7 +2460,6 @@ const backgroundSizeByResort = {
             });
         });
 
-        // Vibe filter buttons
         document.querySelectorAll('[data-vibe]').forEach(btn => {
             btn.addEventListener('click', () => {
                 document.querySelectorAll('[data-vibe]').forEach(b => b.classList.remove('active'));
@@ -2517,24 +2469,12 @@ const backgroundSizeByResort = {
             });
         });
 
-        // Sort dropdown
         document.getElementById('sortSelect').addEventListener('change', (e) => {
             filterState.sort = e.target.value;
             renderResorts();
         });
 
-        // ========================================
-        // LIVE DATA: Liftie (Lifts) + OpenWeather (Weather)
-        // ========================================
-        //
-        // DATA SOURCES:
-        //   🌤️ Weather: OpenWeather API via Cloudflare Worker
-        //   🚡 Lifts: Liftie API via Cloudflare Worker (22/28 resorts)
-        //   ❄️ Snowfall: MANUAL updates
-        //
-        // Resorts NOT on Liftie: elk, bearcreek, jackfrost, bigboulder, montage, belleayre
 
-        // Configuration - UPDATE THIS URL AFTER DEPLOYING YOUR WORKER
         const WORKER_URL = 'https://cloudflare-worker.rickt123-0f8.workers.dev/';
         const REFRESH_INTERVAL = 15 * 60 * 1000; // 15 min
         const SENDIT_UI_REFRESH_INTERVAL = 12 * 1000; // keep CTA/cooldown state fresh without page reload
@@ -2553,7 +2493,6 @@ const backgroundSizeByResort = {
         applySendItTestUnlocks();
         renderResorts();
 
-        // Keep Slope Signal button/cooldown state current even if user doesn't interact.
         setInterval(() => {
             const hasCooldownState = Object.keys(sendItCooldownUntilByResort || {}).length > 0;
             const hasPostVoteState = Object.values(sendItPostVoteAwaitByResort || {}).some(Boolean);
@@ -2631,7 +2570,6 @@ const backgroundSizeByResort = {
                 const difficulty = target.dataset.value;
                 setSendItSignalSelection(resortId, 'difficulty', difficulty);
                 const current = getSendItSignalSelection(resortId);
-                // Lab flow: changing difficulty resets the radial sequence.
                 current.wind = null;
                 current.crowd = null;
                 current.hazard = null;
@@ -2743,7 +2681,6 @@ const backgroundSizeByResort = {
                     const live = apiData[resort.id];
                     if (!live) return;
 
-                    // ── Weather (OpenWeather) ──
                     if (live.weather) {
                         const temp = typeof live.weather.temp === 'number' ? live.weather.temp : null;
                         const feelsLike = typeof live.weather.feelsLike === 'number' ? live.weather.feelsLike : null;
@@ -2761,7 +2698,6 @@ const backgroundSizeByResort = {
                         resort.hasLiveWeather = true;
                     }
 
-                    // ── Forecast (OpenWeather) ──
                     if (live.forecast && live.forecast.length >= 3) {
                         resort.forecast = live.forecast.slice(0, 3).map(day => {
                             const dayTemp = typeof day.temp === 'number' ? day.temp : null;
@@ -2775,7 +2711,6 @@ const backgroundSizeByResort = {
                         });
                     }
 
-                    // ── Lift Status (Liftie) ──
                     if (live.lifts) {
                         if (!resort.lifts || typeof resort.lifts !== 'object') {
                             resort.lifts = {};
@@ -2788,7 +2723,6 @@ const backgroundSizeByResort = {
                         resort.hasLiveUpdate = true;
                         resort.hasLiveLifts = true;
 
-                        // Store individual lift details for the dropdown
                         if (live.lifts.details) {
                             resort.liftDetails = live.lifts.details;
                         }
@@ -2796,7 +2730,6 @@ const backgroundSizeByResort = {
                     }
                 });
 
-                // Recalculate ratings
                 resorts.forEach(resort => {
                     if (Number.isFinite(Number(resort.manualRating))) {
                         resort.rating = Math.max(1, Math.min(5, Number(resort.manualRating)));
@@ -2852,26 +2785,21 @@ const backgroundSizeByResort = {
             document.body.appendChild(statusDiv);
         }
 
-        // Initialize
         loadLiveData().catch(err => console.warn('Initial load failed:', err));
         setInterval(loadLiveData, REFRESH_INTERVAL);
 
-        // 🎿 EPIC RAIL SLAM - Click Handler with Delayed Scroll
         document.addEventListener('DOMContentLoaded', () => {
             const ctaBtn = document.querySelector('.cta-btn');
             if (ctaBtn) {
                 ctaBtn.addEventListener('click', function(e) {
                     e.preventDefault(); // Prevent any default behavior
 
-                    // Add the slam animation class
                     this.classList.add('rail-slam');
 
-                    // Haptic feedback on mobile
                     if (navigator.vibrate) {
                         navigator.vibrate([50, 30, 50, 20, 30]);
                     }
 
-                    // Wait for slam effect, then scroll
                     setTimeout(() => {
                         const filters = document.querySelector('.filters');
                         if (filters) {
@@ -2884,7 +2812,6 @@ const backgroundSizeByResort = {
                         }
                     }, 500); // 500ms delay for slam effect (animation is 600ms)
 
-                    // Remove animation class after it completes
                     setTimeout(() => {
                         this.classList.remove('rail-slam');
                     }, 600);
@@ -2892,8 +2819,6 @@ const backgroundSizeByResort = {
             }
         });
 
-        // Mobile rating bubble scroll activation
-        // Detects when rating bubbles scroll into viewport and activates them
         if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
             const observerOptions = {
                 root: null,
@@ -2905,7 +2830,6 @@ const backgroundSizeByResort = {
                 entries.forEach(entry => {
                     const bubble = entry.target;
 
-                    // Activate when bubble is visible in the viewport sweet spot
                     if (entry.isIntersecting && entry.intersectionRatio > 0.1) {
                         bubble.classList.add('mobile-active');
                     } else {
@@ -2914,10 +2838,8 @@ const backgroundSizeByResort = {
                 });
             }, observerOptions);
 
-            // Observe all rating bubbles (with a slight delay to ensure DOM is ready)
             const observeRatingBubbles = () => {
                 document.querySelectorAll('.rating-text').forEach(bubble => {
-                    // Only observe if not already observed
                     if (!bubble.hasAttribute('data-observed')) {
                         bubble.setAttribute('data-observed', 'true');
                         bubbleObserver.observe(bubble);
@@ -2925,10 +2847,8 @@ const backgroundSizeByResort = {
                 });
             };
 
-            // Initial observation
             setTimeout(observeRatingBubbles, 100);
 
-            // Watch for new bubbles being added (when filters change, etc.)
             const resortGrid = document.getElementById('resortGrid');
             if (resortGrid) {
                 const gridObserver = new MutationObserver(() => {
@@ -2942,7 +2862,6 @@ const backgroundSizeByResort = {
             }
         }
 
-        // 🏔️ BACK TO TOP BUTTON - Show/Hide & Click Handler
         const backToTopBtn = document.getElementById('backToTop');
 
         if (backToTopBtn) {
@@ -2955,25 +2874,19 @@ const backgroundSizeByResort = {
                 }
             }
 
-            // Show/hide on scroll
             window.addEventListener('scroll', toggleBackToTop);
 
-            // Initial check
             toggleBackToTop();
 
-            // Click handler - SKIER JUMPS INTO GONDOLA, RIDES TO TOP
             backToTopBtn.addEventListener('click', function() {
                 if (this.classList.contains('launching')) return;
 
-                // Add launch animation
                 this.classList.add('launching');
 
-                // Haptic feedback - multiple bumps like loading into gondola
                 if (navigator.vibrate) {
                     navigator.vibrate([40, 30, 40, 30, 40]);
                 }
 
-                // Delay scroll so gondola ride is visible first.
                 setTimeout(() => {
                     window.scrollTo({
                         top: 0,
@@ -2981,11 +2894,9 @@ const backgroundSizeByResort = {
                     });
                 }, 1700);
 
-                // Remove animation class after gondola ride completes
                 setTimeout(() => {
                     this.classList.remove('launching');
 
-                    // Force reset of pseudo-elements (defensive fix for mobile)
                     const beforeEl = window.getComputedStyle(this, '::before');
                     const afterEl = window.getComputedStyle(this, '::after');
                     void beforeEl.transform; // Force reflow

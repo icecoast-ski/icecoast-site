@@ -26,7 +26,7 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Header - Ultra Compact */
+        
         header {
             background: var(--white);
             padding: 0.75rem 1.5rem;
@@ -152,7 +152,7 @@
             }
         }
 
-        /* Sub-header (below white bar) */
+        
         .sub-header {
             background: var(--off-white);
             padding: 1rem 1.5rem;
@@ -200,7 +200,7 @@
             box-shadow: 0 4px 8px rgba(74, 144, 164, 0.4);
         }
 
-        /* 🎿 EPIC RAIL SLAM ANIMATION */
+        
         @keyframes railSlam {
             0% {
                 transform: translateY(-2px) rotate(0deg);
@@ -296,8 +296,8 @@
             animation: sparkBurst 0.4s ease-out;
         }
 
-        /* 🏔️ BACK TO TOP BUTTON - Send It Energy */
-        /* BACK TO TOP BUTTON - Fixed & Polished */
+        
+        
         .back-to-top {
             position: fixed;
             bottom: 30px;
@@ -323,7 +323,7 @@
             transform: translateY(0) scale(1);
         }
 
-        /* Sparkle effect on hover - looks like snow! */
+        
         .back-to-top:hover:not(.launching) {
             transform: translateY(-5px) scale(1.1);
             animation: snowSparkle 1.2s ease-in-out infinite;
@@ -409,7 +409,7 @@
             }
         }
 
-        /* Skier icon inside button */
+        
         .back-to-top::before {
             content: '⛷️';
             position: absolute;
@@ -425,19 +425,19 @@
             z-index: 3;
         }
 
-        /* Reset skier when NOT launching */
+        
         .back-to-top:not(.launching)::before {
             transform: translate(-50%, -50%) !important;
             opacity: 1 !important;
             animation: none !important;
         }
 
-        /* On hover, skier jumps up slightly */
+        
         .back-to-top:hover:not(.launching)::before {
             transform: translate(-50%, -60%) scale(1.1);
         }
 
-        /* Gondola - hidden by default */
+        
         .back-to-top::after {
             content: '🚡';
             position: absolute;
@@ -450,14 +450,14 @@
             z-index: 2;
         }
 
-        /* Reset gondola when NOT launching */
+        
         .back-to-top:not(.launching)::after {
             opacity: 0 !important;
             transform: translate(-50%, -50%) !important;
             animation: none !important;
         }
 
-        /* Launching animations */
+        
         .back-to-top.launching {
             animation: gondolaAscend 3.8s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
         }
@@ -528,7 +528,7 @@
             }
         }
 
-        /* Mobile adjustments */
+        
         @media (max-width: 768px) {
             .back-to-top {
                 width: 50px;
@@ -545,7 +545,7 @@
                 font-size: 2rem;
             }
 
-            /* Disable hover effects on mobile */
+            
             .back-to-top:hover:not(.launching) {
                 transform: translateY(0) scale(1);
                 animation: none;
@@ -579,7 +579,7 @@
             transform: translateY(0);
         }
 
-        /* Filters - Single Compact Row */
+        
         .filters {
             max-width: 1400px;
             margin: 0.5rem auto;
@@ -652,7 +652,7 @@
             box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.1);
         }
 
-        /* Hide filter labels on mobile, keep just icons */
+        
         @media (max-width: 900px) {
             .filter-group {
                 padding: 0.4rem 0.5rem;
@@ -669,7 +669,7 @@
             }
         }
 
-        /* Resort Grid */
+        
         .resort-grid {
             max-width: 1400px;
             margin: 0 auto;
@@ -702,7 +702,7 @@
             overflow: hidden;
             position: relative;
         }
-        /* Resort card backgrounds - using CSS variables for scalability */
+        
         .resort-card {
             position: relative;
         }
@@ -714,161 +714,15 @@
             background-repeat: no-repeat;
         }
 
-        /* Text overlay removed - images now show with their true colors */
+        
 
-        /* Ensure text and content is above background */
+        
         .resort-header > * {
             position: relative;
             z-index: 2;
         }
 
-        /* OLD RESORT-SPECIFIC RULES - REMOVE THIS ENTIRE SECTION
-        .resort-card[data-resort="camelback"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 40%;
-        }
-
-        .resort-card[data-resort="blue"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 15%;
-        }
-
-        .resort-card[data-resort="jackfrost"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 40%;
-        }
-
-        .resort-card[data-resort="shawnee"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 40%;
-        }
-
-        .resort-card[data-resort="bearcreek"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 40%;
-        }
-
-        .resort-card[data-resort="elk"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 50%;
-        }
-
-        .resort-card[data-resort="bigboulder"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 40%;
-        }
-
-        .resort-card[data-resort="montage"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 40%;
-        }
-
-        .resort-card[data-resort="hunter"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 15%;
-        }
-
-        .resort-card[data-resort="windham"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 40%;
-        }
-
-        .resort-card[data-resort="belleayre"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 40%;
-        }
-
-        .resort-card[data-resort="killington"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 15%;
-        }
-
-        .resort-card[data-resort="stowe"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 15%;
-        }
-
-        .resort-card[data-resort="sugarbush"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 15%;
-        }
-
-        .resort-card[data-resort="stratton"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 40%;
-        }
-
-        .resort-card[data-resort="okemo"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 40%;
-        }
-
-        .resort-card[data-resort="loon"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 15%;
-        }
-
-        .resort-card[data-resort="waterville"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 40%;
-        }
-
-        .resort-card[data-resort="cannon"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 15%;
-        }
-
-        .resort-card[data-resort="wildcat"] .resort-header {
-            background-image: linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
-                              var(--bg);
-            background-position: center 15%;
-        }
-
-
-        .resort-name {
-            font-size: 2rem;
-            font-weight: 900;
-            letter-spacing: -0.02em;
-            color: var(--charcoal);
-            margin-bottom: 0.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            gap: 0.75rem;
-            text-shadow: 0 2px 8px rgba(255, 255, 255, 1), 0 1px 3px rgba(255, 255, 255, 0.95);
-        }
-
-        .resort-name-text {
-            flex: 1;
-        }
-
-        .resort-icon {
-            width: 64px;
-            height: 64px;
-            display: inline-block;
-            object-fit: contain;
-        }
-
-        /* Custom SVG icon styles (kept for backward compatibility) */
+        
         .custom-icon {
             width: 64px;
             height: 64px;
@@ -886,7 +740,7 @@
             padding: 1.5rem;
         }
 
-        /* Rating Section */
+        
         .rating-section {
             display: flex;
             align-items: center;
@@ -945,7 +799,7 @@
             animation: bubblePop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.3s;
         }
 
-        /* Bubble pop animation on page load */
+        
         @keyframes bubblePop {
             0% {
                 transform: scale(0.8) rotate(0deg);
@@ -960,7 +814,7 @@
             }
         }
 
-        /* Comic book speech bubble tail */
+        
         .rating-text::before {
             content: '';
             position: absolute;
@@ -985,7 +839,7 @@
             border-top: 8px solid var(--white);
         }
 
-        /* Desktop hover effect */
+        
         @media (hover: hover) and (pointer: fine) {
             .resort-card:hover .rating-text {
                 transform: rotate(-5deg) scale(1.15);
@@ -993,7 +847,7 @@
             }
         }
 
-        /* Mobile scroll effect - same as desktop hover */
+        
         @media (hover: none) and (pointer: coarse) {
         .rating-text.mobile-active {
                 transform: rotate(-5deg) scale(1.15);
@@ -1785,14 +1639,14 @@
             object-fit: contain;
         }
 
-        /* Custom SVG icon styles */
+        
         .custom-icon {
             width: 28px;
             height: 28px;
             display: inline-block;
         }
 
-        /* Conditions Highlight */
+        
         .conditions-highlight {
             background: linear-gradient(135deg, var(--primary-blue), var(--ocean-blue));
             color: var(--white);
@@ -1816,7 +1670,7 @@
             letter-spacing: -0.02em;
         }
 
-        /* Info Grid */
+        
         .info-grid {
             display: grid;
             gap: 1rem;
@@ -1853,7 +1707,7 @@
             font-size: 0.9rem;
         }
 
-        /* Trail Status */
+        
         .trail-status {
             display: flex;
             gap: 0.5rem;
@@ -1878,7 +1732,7 @@
             color: var(--coral);
         }
 
-        /* Pass Badges */
+        
         .pass-badge {
             padding: 0.25rem 0.5rem;
             border-radius: 4px;
@@ -1910,7 +1764,7 @@
             margin-left: 0.4rem;
         }
 
-        /* Snow Alert Badge */
+        
         .snow-alert-badge {
             display: inline-flex;
             align-items: center;
@@ -1998,7 +1852,7 @@
             50% { transform: scale(1.05); }
         }
 
-        /* Family-owned badge */
+        
         .family-badge {
             position: absolute;
             bottom: 0;
@@ -2014,7 +1868,7 @@
             box-shadow: 0 2px 4px rgba(0,0,0,0.15);
         }
 
-        /* Apres & Family ratings */
+        
         .extra-ratings {
             display: flex;
             gap: 1.5rem;
@@ -2041,7 +1895,7 @@
             font-size: 0.85rem;
         }
 
-        /* 3-Day Forecast */
+        
         .forecast-details {
             margin-top: 1rem;
             border: 1px solid var(--light-grey);
@@ -2106,7 +1960,7 @@
             margin-top: 0.2rem;
         }
 
-        /* Lift Status Dropdown */
+        
         .lift-details {
             border: 1px solid var(--light-grey);
             border-radius: 8px;
@@ -2232,7 +2086,7 @@
             font-style: italic;
         }
 
-        /* Weather Section */
+        
         .weather-section {
             margin-top: 1.25rem;
             padding-top: 1.25rem;
@@ -2323,7 +2177,7 @@
             color: var(--charcoal);
         }
 
-        /* Distance Info */
+        
         .distance-info {
             margin-top: 1.25rem;
             padding: 1rem;
@@ -2359,7 +2213,7 @@
             display: inline-block;
         }
 
-        /* Loading State */
+        
         .loading {
             text-align: center;
             padding: 4rem;
@@ -2367,13 +2221,13 @@
             color: var(--medium-grey);
         }
 
-        /* SVG Icons - Airbnb style */
+        
         .icon-ticket {
             width: 20px;
             height: 20px;
         }
 
-        /* Ski Footer */
+        
         .ski-footer {
             background: linear-gradient(180deg, var(--white) 0%, var(--snow) 100%);
             padding: 4rem 1.5rem 3rem;
@@ -2527,7 +2381,7 @@
             font-weight: 700;
             color: var(--charcoal);
         }
-        /* Icecoast Patrol CTA */
+        
         .patrol-cta {
             max-width: 600px;
             margin: 2rem auto 3rem;
@@ -2674,7 +2528,7 @@
             margin: 0 auto;
         }
 
-        /* Accordion Toggle Button */
+        
         .legal-toggle {
             background: var(--charcoal);
             color: white;
@@ -2711,7 +2565,7 @@
             transform: rotate(180deg);
         }
 
-        /* Accordion Content */
+        
         .legal-accordion {
             max-height: 0;
             overflow: hidden;
@@ -2719,7 +2573,7 @@
         }
 
         .legal-accordion.open {
-            max-height: 10000px; /* Large enough for all content */
+            max-height: 10000px; 
             transition: max-height 0.8s ease-in;
         }
 
@@ -2795,7 +2649,7 @@
             }
         }
 
-        /* Responsive */
+        
         @media (max-width: 768px) {
             header {
                 padding: 0.6rem 1rem;
@@ -2954,7 +2808,7 @@
                 font-size: 0.85rem;
             }
 
-            /* Speech bubble mobile fixes */
+            
             .rating-text {
                 font-size: 0.8rem;
                 padding: 0.5rem 1rem;
@@ -3068,12 +2922,12 @@
             }
         }
 
-        /* Smooth scrolling */
+        
         html {
             scroll-behavior: smooth;
         }
 
-        /* Glade Skiing Indicator */
+        
         .glade-indicator {
             display: inline-flex;
             align-items: center;
@@ -3111,7 +2965,7 @@
             color: #F4E8D8;
         }
 
-        /* Resort-specific background positions */
+        
         .resort-card[data-resort="stowe"] .resort-header {
             background-position: center 30% !important;
         }
@@ -3128,14 +2982,14 @@
             background-position: center 40%;
         }
 
-        /* Mad River Glen - use mapped background source */
+        
         .resort-card[data-resort="mad-river-glen"] .resort-header {
             background-image: var(--bg) !important;
             background-size: var(--bg-size, 108%) !important;
             background-position: var(--bg-pos, center 42%) !important;
         }
 
-        /* Sugarloaf */
+        
         .resort-card[data-resort="sugarloaf"] .resort-header {
             background-image:
                 linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
@@ -3144,14 +2998,14 @@
             background-position: center 40%;
         }
 
-        /* Whiteface */
+        
         .resort-card[data-resort="whiteface"] .resort-header {
             background-image: var(--bg) !important;
             background-size: var(--bg-size, 108%) !important;
             background-position: var(--bg-pos, center 42%) !important;
         }
 
-        /* Gore */
+        
         .resort-card[data-resort="gore"] .resort-header {
             background-image:
                 linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
@@ -3160,7 +3014,7 @@
             background-position: center 35%;
         }
 
-        /* Mount Snow */
+        
         .resort-card[data-resort="mountsnow"] .resort-header {
             background-image:
                 linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
@@ -3169,7 +3023,7 @@
             background-position: center 40%;
         }
 
-        /* Bretton Woods */
+        
         .resort-card[data-resort="brettonwoods"] .resort-header {
             background-image:
                 linear-gradient(to bottom, rgba(255, 255, 255, 0.15), rgba(255, 255, 255, 0.08)),
@@ -3202,9 +3056,9 @@
             background-position: center 30% !important;
         }
 
-        /* END OF REMOVED RESORT-SPECIFIC RULES */
+        
 
-/* Force app.js-provided resort backgrounds (prevents legacy overrides from blank/wrong images). */
+
 .resort-card .resort-header {
     background-image: var(--bg) !important;
     background-size: var(--bg-size, 101%) !important;
@@ -3212,7 +3066,7 @@
     background-repeat: no-repeat !important;
 }
 
-/* Wildcat can run dark; add a heavier top overlay for text readability. */
+
 .resort-card[data-resort="wildcat"] .resort-header::before {
     content: "";
     position: absolute;
@@ -3232,7 +3086,7 @@
     z-index: 2;
 }
 
-/* Sugarloaf can also be low-contrast; boost top text contrast. */
+
 .resort-card[data-resort="sugarloaf"] .resort-header::before {
     content: "";
     position: absolute;
@@ -3252,7 +3106,7 @@
     z-index: 2;
 }
 
-/* Montage can run low-contrast; add stronger top shading for readability. */
+
 .resort-card[data-resort="montage"] .resort-header::before {
     content: "";
     position: absolute;
@@ -3279,7 +3133,7 @@
     z-index: 3;
 }
 
-/* Dark-image headers: use light text with dark shadow for true contrast. */
+
 .resort-card[data-resort="wildcat"] .resort-name,
 .resort-card[data-resort="sugarloaf"] .resort-name,
 .resort-card[data-resort="montage"] .resort-name {
@@ -3294,7 +3148,7 @@
     text-shadow: 0 1px 8px rgba(6, 10, 20, 0.85), 0 1px 3px rgba(6, 10, 20, 0.8);
 }
 
-/* ---------- UI Continuity Pass (v1 premium cleanup) ---------- */
+
 .resort-header {
     min-height: 184px;
     margin: 1rem 1rem 0.78rem;
@@ -3963,7 +3817,7 @@
     }
 }
 
-/* ---------- Lower Data System Alignment ---------- */
+
 .info-grid {
     gap: 0.72rem;
     margin-bottom: 0.9rem;
@@ -4156,7 +4010,7 @@
     }
 }
 
-/* ---------- Typography Continuity Pass ---------- */
+
 :root {
     --ui-title-size: 0.72rem;
     --ui-title-weight: 720;
@@ -4219,7 +4073,7 @@
     opacity: 0.9;
 }
 
-/* Mountain Ops typography should mirror Current Conditions metrics */
+
 .mountain-ops-section .info-label,
 .mountain-ops-section .lift-toggle,
 .mountain-ops-section .lift-toggle-left {
@@ -4271,7 +4125,7 @@
     color: #162234;
 }
 
-/* Header image should render clean with no tint/overlay layer */
+
 .resort-header::before,
 .resort-header::after,
 .resort-card[data-resort="wildcat"] .resort-header::before,
@@ -4281,7 +4135,7 @@
     background: none !important;
 }
 
-/* Header layout tuning: tight title/location + bottom-anchored single-row chips */
+
 .resort-header {
     padding-bottom: 2.15rem !important;
 }
@@ -4341,7 +4195,7 @@
     }
 }
 
-/* Slope Signal: remove title pill chrome */
+
 .sendit-title-pill {
     border: 0 !important;
     background: transparent !important;
@@ -4350,7 +4204,7 @@
     padding: 0 !important;
 }
 
-/* Après + Family: one shared white container, inline rows, no nested mini-cards */
+
 .extra-ratings {
     display: grid !important;
     grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -4404,7 +4258,7 @@
     }
 }
 
-/* Slope Signal: Crowd + Wind lanes */
+
 .sendit-signal-group {
     display: grid;
     gap: 0.45rem;
@@ -4461,7 +4315,7 @@
     width: 100%;
 }
 
-/* Slope Signal Radial - Lab 2D parity */
+
 .sendit-radial {
     margin: 0.52rem 0 0.6rem;
     position: relative;
@@ -4642,7 +4496,7 @@
     filter: drop-shadow(0 8px 14px rgba(22, 67, 145, 0.26));
 }
 
-/* Subtle invitation pulse on difficulty choices (in order) */
+
 .sendit-hud-radial.pulse-difficulty .signal-sector:not(.active) {
     animation: signalInvitePulse 2.6s ease-in-out infinite;
 }
@@ -4660,7 +4514,7 @@
 .sendit-hud-radial.pulse-difficulty .signal-sector[data-diff-idx="4"],
 .sendit-hud-radial.pulse-difficulty .signal-label[data-diff-idx="4"] { animation-delay: 0.66s; }
 
-/* Secondary menu pulse after difficulty is selected */
+
 .sendit-hud-radial.pulse-secondary .option-sector:not(.active) {
     animation: signalInvitePulse 2.4s ease-in-out infinite;
 }
@@ -4683,7 +4537,7 @@
     filter: drop-shadow(0 5px 10px rgba(7, 24, 52, 0.16));
 }
 
-/* Secondary menu sentiment colors: negative / neutral / positive */
+
 .option-sector[data-value="nuking"],
 .option-sector[data-value="swarm"],
 .option-sector[data-value="edges"],
@@ -5193,7 +5047,7 @@
     .send-core-icon { width: 51px; height: 51px; }
 }
 
-/* Final typography normalization for Current Conditions + Mountain Ops */
+
 .conditions-secondary-metrics .metric-temp strong {
     font-size: inherit !important;
     font-weight: 700 !important;
@@ -5201,7 +5055,7 @@
     color: #162234 !important;
 }
 
-/* Give unlock CTA more breathing room */
+
 .sendit-unlock-cta {
     margin-top: 0.5rem !important;
     margin-bottom: 0.5rem !important;
@@ -5239,7 +5093,7 @@
     display: inline !important;
 }
 
-/* Final hard lock: header location/chips + live badge color */
+
 .resort-header {
     position: relative !important;
     padding-bottom: 2.95rem !important;
@@ -5332,7 +5186,7 @@
     }
 }
 
-/* Slope Signal alignment + result hierarchy */
+
 .sendit-header {
     text-align: left !important;
     align-items: flex-start !important;
@@ -5371,7 +5225,7 @@
     gap: 0 !important;
 }
 
-/* Match Mountain Ops typography to 24h/48h Snow metric style */
+
 .mountain-ops-section .info-label,
 .mountain-ops-section .lift-toggle,
 .mountain-ops-section .lift-toggle-left,
@@ -5400,7 +5254,7 @@
     color: #34435a !important;
 }
 
-/* Final header baseline lock: keep tagline bottom-aligned with logo */
+
 .header-top {
     align-items: flex-end !important;
 }
@@ -5420,7 +5274,7 @@
     margin-bottom: 0.1rem !important;
 }
 
-/* Slope Signal secondary line should read as compact context */
+
 .sendit-subtitle-flavor {
     font-size: 0.62rem !important;
     font-weight: 620 !important;
@@ -5567,7 +5421,7 @@
     }
 }
 
-/* Slope Signal line-mix row */
+
 .sendit-line-mix {
     display: flex !important;
     flex-wrap: wrap !important;
