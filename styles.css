@@ -4806,6 +4806,36 @@
     pointer-events: none;
 }
 
+.sendit-core-btn[data-sendit-action="unlock"]:not(:disabled):hover,
+.sendit-core-btn[data-sendit-action="restart-signal"]:not(:disabled):hover {
+    transform: translate(-50%, -52%) scale(1.03);
+    filter: brightness(1.08) saturate(1.08);
+    box-shadow:
+        0 18px 30px rgba(30, 78, 175, 0.42),
+        inset 0 1px 0 rgba(235, 244, 255, 0.24),
+        inset 0 -1px 0 rgba(11, 34, 82, 0.34),
+        inset 0 10px 16px rgba(255, 255, 255, 0.1);
+}
+
+.sendit-core-btn[data-sendit-action="unlock"]:not(:disabled):hover::before,
+.sendit-core-btn[data-sendit-action="restart-signal"]:not(:disabled):hover::before {
+    opacity: 0.95;
+    animation: senditUnlockHoverPulse 1.05s ease-in-out infinite;
+}
+
+.sendit-core-btn[data-sendit-action="unlock"]:not(:disabled):active,
+.sendit-core-btn[data-sendit-action="restart-signal"]:not(:disabled):active {
+    transform: translate(-50%, -50%) scale(0.985);
+}
+
+.sendit-core-btn[data-sendit-action="unlock"]:focus-visible {
+    outline: none;
+    box-shadow:
+        0 0 0 3px rgba(214, 232, 255, 0.95),
+        0 0 0 7px rgba(61, 131, 255, 0.45),
+        0 14px 26px rgba(30, 78, 175, 0.34);
+}
+
 .sendit-core-btn.ready {
     animation: sendReadyPulse 0.95s ease-in-out infinite;
 }
@@ -4980,6 +5010,11 @@
       0 0 0 0 rgba(78, 142, 255, 0.0);
     transform: translate(-50%, -50%) scale(1);
   }
+}
+
+@keyframes senditUnlockHoverPulse {
+    0%, 100% { transform: scale(0.96); opacity: 0.5; }
+    50% { transform: scale(1.05); opacity: 0.95; }
 }
 
 @keyframes senditUnlockOut {
