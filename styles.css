@@ -4125,6 +4125,10 @@
     box-shadow: 0 6px 16px rgba(30, 78, 175, 0.35);
 }
 
+.sendit-unlock-cta.unlocking-out {
+    animation: senditUnlockOut 180ms cubic-bezier(0.2, 0.85, 0.24, 1) forwards;
+}
+
 .rating-section {
     margin-bottom: 0.48rem;
     padding: 0.78rem;
@@ -4721,6 +4725,18 @@
     z-index: 0;
 }
 
+.sendit-radial.unlock-enter {
+    animation: senditRadialEnter 260ms cubic-bezier(0.18, 0.9, 0.24, 1) both;
+}
+
+.sendit-radial.unlock-enter::before {
+    animation: senditRadialOverlayEnter 260ms ease-out both;
+}
+
+.sendit-radial.unlock-enter .sendit-hud-radial {
+    animation: senditRadialWheelEnter 280ms cubic-bezier(0.16, 0.88, 0.26, 1) both;
+}
+
 .sendit-hud-radial {
     position: relative;
     min-height: 300px;
@@ -4923,6 +4939,18 @@
     animation: sendReadyPulse 0.95s ease-in-out infinite;
 }
 
+.sendit-core-btn.rail-slam {
+    animation: railSlam 0.6s cubic-bezier(0.36, 0, 0.66, -0.56);
+}
+
+.sendit-core-btn.rail-slam::before {
+    animation: impactRipple 0.5s ease-out;
+}
+
+.sendit-core-btn.rail-slam::after {
+    animation: sparkBurst 0.4s ease-out;
+}
+
 .sendit-core-btn.is-submitting {
     opacity: 0.82;
     pointer-events: none;
@@ -5075,6 +5103,50 @@
       inset 0 7px 14px rgba(255, 255, 255, 0.08),
       0 0 0 0 rgba(78, 142, 255, 0.0);
     transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+@keyframes senditUnlockOut {
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+    filter: saturate(1) blur(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-8px) scale(0.96);
+    filter: saturate(0.9) blur(0.6px);
+  }
+}
+
+@keyframes senditRadialEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes senditRadialOverlayEnter {
+  0% {
+    opacity: 0.72;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes senditRadialWheelEnter {
+  0% {
+    opacity: 0;
+    transform: translateY(74px) scale(0.705);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(60px) scale(0.742);
   }
 }
 

@@ -1784,7 +1784,7 @@
                 const settleDelayMs = Number(score) >= 100 ? 2350 : 2050;
                 await new Promise(resolve => setTimeout(resolve, settleDelayMs));
                 showSendItToast('Slope Signal SENT');
-                triggerHaptic([18, 26, 18]);
+                triggerHaptic([18, 28, 16, 36, 22]);
                 renderResorts();
             } catch (e) {
                 triggerHaptic([24, 34, 24]);
@@ -2587,6 +2587,9 @@ const backgroundSizeByResort = {
                     showSendItToast('Finish your loadout', 'Pick difficulty + wind + crowd + hazard + slope');
                     return;
                 }
+                target.classList.add('rail-slam');
+                triggerHaptic([14, 24, 12]);
+                setTimeout(() => target.classList.remove('rail-slam'), 560);
                 const score = getSendItScoreFromSelection(signalSelection);
                 await submitSendItVote(resortId, score, signalSelection, target);
             }
