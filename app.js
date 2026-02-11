@@ -1918,30 +1918,33 @@
                 <span class="lock-item"><img src="${SENDIT_GROUP_ICON_PATHS[group]}" alt="${group} locked"></span>
                 ${idx < selectedGroups.length - 1 ? '<span class="lock-plus">+</span>' : ''}
             `).join('');
-            const centerIcon = selectedSignals.difficulty && !radialReady && activeGroup
+            const centerIcon = canVote && selectedSignals.difficulty && !radialReady && activeGroup
                 ? `<img class="send-core-icon ${activeGroup === 'hazard' ? 'icon-hazard' : ''}" src="${SENDIT_GROUP_ICON_PATHS[activeGroup]}" alt="${activeGroup} icon">`
                 : '';
-            const centerLabel = getSendItStepLabel(selectedSignals, activeGroup);
+            const centerLabel = canVote
+                ? getSendItStepLabel(selectedSignals, activeGroup)
+                : '<span class="line-stack">I\'M ON<br>THE MOUNTAIN</span>';
             const radialWheelMarkup = buildSendItWheelMarkup(resort.id, selectedSignals, activeGroup);
             const radialEnterClass = sendItUnlockTransitionByResort[resort.id] ? 'unlock-enter' : '';
             if (sendItUnlockTransitionByResort[resort.id]) {
                 sendItUnlockTransitionByResort[resort.id] = false;
             }
-            const sendItControls = !hasCoords ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>` : canVote
-                ? `<div class="sendit-radial ${radialEnterClass}" data-resort-id="${resort.id}">
+            const radialDirectionText = canVote
+                ? 'Tap the highlighted wedge at 12 o’clock.'
+                : 'Tap center to verify on-mountain.';
+            const sendItControls = !hasCoords ? `<div class="sendit-locked-note">Coordinates missing for this resort.</div>` : `<div class="sendit-radial ${radialEnterClass}" data-resort-id="${resort.id}">
                       <div class="sendit-hud-radial unlocked">
                         ${radialWheelMarkup}
                         <button
                           class="sendit-core-btn ${radialReady ? 'ready' : ''}"
-                          data-sendit-action="vote-radial"
+                          data-sendit-action="${canVote ? 'vote-radial' : 'unlock'}"
                           data-resort-id="${resort.id}"
-                          ${radialReady ? '' : 'disabled'}
+                          ${(canVote && !radialReady) ? 'disabled' : ''}
                           type="button">${centerIcon}<span class="send-core-label">${centerLabel}</span></button>
-                        <div class="selection-lockline ${locklineVisible} ${locklineModeClass}">${locklineMarkup}</div>
+                        <div class="selection-lockline ${canVote ? locklineVisible : ''} ${canVote ? locklineModeClass : ''}">${canVote ? locklineMarkup : ''}</div>
+                        <div class="sendit-radial-direction">${radialDirectionText}</div>
                       </div>
-                    </div>`
-                : `<button class="sendit-unlock-btn sendit-unlock-cta" data-sendit-action="unlock" data-resort-id="${resort.id}">⚡ I'M ON THE MOUNTAIN!</button>
-                   <div class="sendit-locked-note"><span class="sendit-lock-icon" aria-hidden="true">🔒</span> One-time check to unlock local voting.</div>`;
+                    </div>`;
 
             const heroChips = [];
             if (hasLiveWeather) heroChips.push({ cls: 'chip-weather', label: 'Live Weather' });
@@ -2170,7 +2173,7 @@ const backgroundSizeByResort = {
                   </div>
                   ${sendItPrompt}
                   ${sendItControls}
-                  ${canVote ? `<div class="sendit-locked-note sendit-usage-hint">Tap the highlighted wedge at 12 o’clock.</div>
+                  ${canVote ? `<div class="sendit-locked-note sendit-usage-hint">Set crowd + wind then send your slope signal.</div>
                   <div class="sendit-history-divider" aria-hidden="true"></div>
                   <div class="sendit-history-row" aria-label="Slope Signal history">
                     <span class="sendit-history-item"><strong>24h</strong> <em>${sendItSummary24h}</em></span>
