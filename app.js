@@ -720,6 +720,7 @@
             'jay-peak': { 'Montreal': '1h 50m', 'Burlington': '1h 30m', 'Boston': '3h 55m' },
             'sunday-river': { 'Portland': '1h 30m', 'Boston': '3h 20m', 'Montreal': '4h 35m' },
             'sugarloaf': { 'Portland': '2h 25m', 'Boston': '4h 00m', 'Montreal': '4h 20m' },
+            'saddleback': { 'Portland': '2h 30m', 'Boston': '4h 20m', 'Montreal': '4h 30m' },
             'tremblant': { 'Montreal': '1h 45m', 'Ottawa': '2h 10m', 'Burlington': '2h 50m' },
             'mont-sainte-anne': { 'Quebec City': '0h 40m', 'Montreal': '3h 10m', 'Burlington': '3h 20m' },
             'le-massif': { 'Quebec City': '1h 05m', 'Montreal': '4h 10m', 'Burlington': '4h 20m' },
@@ -2406,13 +2407,6 @@ const backgroundSizeByResort = {
                     filtered.sort((a, b) => {
                         const aSnow = (a.snowfall && a.snowfall['24h']) ? parseInt(a.snowfall['24h']) : 0;
                         const bSnow = (b.snowfall && b.snowfall['24h']) ? parseInt(b.snowfall['24h']) : 0;
-                        return bSnow - aSnow;
-                    });
-                    break;
-                case 'snow-7d':
-                    filtered.sort((a, b) => {
-                        const aSnow = (a.snowfall && a.snowfall['7d']) ? parseInt(a.snowfall['7d']) : 0;
-                        const bSnow = (b.snowfall && b.snowfall['7d']) ? parseInt(b.snowfall['7d']) : 0;
                         return bSnow - aSnow;
                     });
                     break;
