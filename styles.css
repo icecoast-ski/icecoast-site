@@ -4057,7 +4057,6 @@
     text-transform: none;
 }
 
-.rating-stars .star,
 .ticket-price,
 .distance-item strong,
 .lift-toggle-counts,
@@ -4067,6 +4066,11 @@
     font-size: var(--ui-value-size);
     font-weight: var(--ui-value-weight);
     color: var(--ui-value-color);
+}
+
+.rating-stars .star {
+    font-size: var(--ui-value-size);
+    font-weight: var(--ui-value-weight);
 }
 
 .sendit-subtitle-flavor {
