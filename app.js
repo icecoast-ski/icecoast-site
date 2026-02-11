@@ -769,6 +769,7 @@
         const sendItButtonCopyByResort = {};
         const sendItVerifyFlavorByResort = {};
         const sendItStateLabelByResort = {};
+        const sendItCooldownCtaByResort = {};
         const SENDIT_TEST_UNLIMITED_RESORTS = new Set([]);
         const SENDIT_TEST_ON_MOUNTAIN_RESORTS = new Set(['camelback']);
         const SENDIT_TEST_UNLOCK_ONLY_RESORTS = new Set(['camelback']);
@@ -811,6 +812,12 @@
             { key: 'icy', label: 'Icy' },
             { key: 'swarm', label: 'Jerry Swarm' },
             { key: 'clear', label: 'All Clear' }
+        ];
+        const SENDIT_COOLDOWN_CTA_OPTIONS = [
+            'SEND NEW SIGNAL',
+            'DROP ANOTHER SIGNAL',
+            'CALL AGAIN',
+            'RELOAD SIGNAL'
         ];
         const SENDIT_DIFFICULTY_OPTIONS = [
             { key: 'green', label: '●', score: 20, title: 'Green Circle' },
@@ -1112,7 +1119,15 @@
         function setSendItLocalCooldown(resortId, minutes) {
             const safeMinutes = Math.max(1, Math.round(Number(minutes) || getSendItCooldownMinutesForResort(resortId)));
             sendItCooldownUntilByResort[resortId] = Date.now() + (safeMinutes * 60 * 1000);
+            sendItCooldownCtaByResort[resortId] = pickRandomLabel(SENDIT_COOLDOWN_CTA_OPTIONS);
             persistSendItCooldownState();
+        }
+
+        function getSendItCooldownCta(resortId) {
+            if (!sendItCooldownCtaByResort[resortId]) {
+                sendItCooldownCtaByResort[resortId] = pickRandomLabel(SENDIT_COOLDOWN_CTA_OPTIONS);
+            }
+            return sendItCooldownCtaByResort[resortId];
         }
 
         function getSendItDirectionText(canVote, radialReady, selection, activeGroup) {
@@ -1913,7 +1928,7 @@
                 ? `<img class="send-core-icon send-core-icon-stage ${activeGroup === 'hazard' ? 'icon-hazard' : ''}" src="${SENDIT_GROUP_ICON_PATHS[activeGroup]}" alt="${activeGroup} icon">`
                 : '';
             const centerLabel = canVote
-                ? (isCooldownActive ? '<span class="line-stack">SEND NEW SIGNAL</span>' : getSendItStepLabel(selectedSignals, activeGroup))
+                ? (isCooldownActive ? `<span class="line-stack">${getSendItCooldownCta(resort.id)}</span>` : getSendItStepLabel(selectedSignals, activeGroup))
                 : '<span class="line-stack">I\'M HERE!</span>';
             const radialWheelMarkup = buildSendItWheelMarkup(resort.id, selectedSignals, activeGroup, canVote);
             const radialEnterClass = sendItUnlockTransitionByResort[resort.id] ? 'unlock-enter' : '';
