@@ -3645,12 +3645,20 @@
 }
 
 .sendit-section {
+    margin-top: 0.92rem;
     margin-bottom: 0.78rem;
     border-radius: 16px;
     background: #ffffff;
     border: 1px solid rgba(15, 23, 42, 0.08);
     box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
     padding: 0.82rem;
+}
+
+.resort-card-divider {
+    height: 1px;
+    width: 100%;
+    margin-top: 0.72rem;
+    background: linear-gradient(90deg, rgba(20, 64, 137, 0.05) 0%, rgba(20, 64, 137, 0.28) 50%, rgba(20, 64, 137, 0.05) 100%);
 }
 
 .sendit-section::before,

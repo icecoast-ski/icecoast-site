@@ -2200,32 +2200,6 @@ const backgroundSizeByResort = {
                   </div>
                 </div>
 
-                <div class="sendit-section">
-                  <div class="sendit-header">
-                    <div class="sendit-title-row">
-                      <div class="sendit-title-pill">
-                        <div class="sendit-title">SLOPE SIGNAL</div>
-                      </div>
-                      <div class="sendit-explainer">Local mountain check</div>
-                    </div>
-                    <div class="sendit-subline">
-                      <span class="sendit-main-read">
-                        <span class="sendit-live-dot signal-${sendItTone}" aria-hidden="true"></span>
-                        <span class="sendit-subtitle">${signalLead}</span>
-                      </span>
-                      ${sendItSubtitleSecondary ? `<span class="sendit-subtitle-flavor">${sendItSubtitleSecondary}</span>` : ''}
-                    </div>
-                    ${difficultyMixMarkup}
-                  </div>
-                  ${sendItPrompt}
-                  ${sendItControls}
-                  ${`
-                  <div class="sendit-history-divider" aria-hidden="true"></div>
-                  <div class="sendit-history-row" aria-label="Slope Signal history">
-                    <span class="sendit-history-item"><strong>24h</strong> <em>${sendItSummary24h}</em></span>
-                  </div>`}
-                </div>
-
                 <div class="mountain-ops-section">
                   <div class="mountain-ops-title">Logistics</div>
                   <div class="info-grid">
@@ -2365,6 +2339,33 @@ const backgroundSizeByResort = {
                         : '<div class="distance-item">Drive time unavailable</div>'}
                   </div>
                 </div>
+
+                <div class="sendit-section">
+                  <div class="sendit-header">
+                    <div class="sendit-title-row">
+                      <div class="sendit-title-pill">
+                        <div class="sendit-title">SLOPE SIGNAL</div>
+                      </div>
+                      <div class="sendit-explainer">Local mountain check</div>
+                    </div>
+                    <div class="sendit-subline">
+                      <span class="sendit-main-read">
+                        <span class="sendit-live-dot signal-${sendItTone}" aria-hidden="true"></span>
+                        <span class="sendit-subtitle">${signalLead}</span>
+                      </span>
+                      ${sendItSubtitleSecondary ? `<span class="sendit-subtitle-flavor">${sendItSubtitleSecondary}</span>` : ''}
+                    </div>
+                    ${difficultyMixMarkup}
+                  </div>
+                  ${sendItPrompt}
+                  ${sendItControls}
+                  ${`
+                  <div class="sendit-history-divider" aria-hidden="true"></div>
+                  <div class="sendit-history-row" aria-label="Slope Signal history">
+                    <span class="sendit-history-item"><strong>24h</strong> <em>${sendItSummary24h}</em></span>
+                  </div>`}
+                </div>
+                <div class="resort-card-divider" aria-hidden="true"></div>
               </div>
             </div>
           `;
