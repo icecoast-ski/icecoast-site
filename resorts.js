@@ -32,7 +32,7 @@ const RESORTS = [
         lon: -75.5209,
         vertical: 1082,
         liftsTotal: 16,
-        liftie: 'bluemountain'
+        liftie: 'blue-mountain'
     },
     {
         id: 'jack-frost',
