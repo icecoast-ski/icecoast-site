@@ -2384,8 +2384,8 @@ const backgroundSizeByResort = {
 
 
         let filterState = {
-            region: 'all',
-            pass: 'all',
+            regions: [],
+            passes: [],
             vibe: 'all',
             sort: 'rating-high', // Start with best conditions
             search: ''
@@ -2420,22 +2420,26 @@ const backgroundSizeByResort = {
                 });
             }
 
-            if (filterState.region !== 'all') {
-                if (filterState.region === 'new-york') {
-                    filtered = filtered.filter((r) => r.region === 'catskills' || r.region === 'adirondacks');
-                } else {
-                    filtered = filtered.filter(r => r.region === filterState.region);
-                }
+            if (Array.isArray(filterState.regions) && filterState.regions.length > 0) {
+                filtered = filtered.filter((r) => {
+                    return filterState.regions.some((selectedRegion) => {
+                        if (selectedRegion === 'new-york') {
+                            return r.region === 'catskills' || r.region === 'adirondacks';
+                        }
+                        return r.region === selectedRegion;
+                    });
+                });
             }
 
-            if (filterState.pass === 'ikon') {
-                filtered = filtered.filter(r => r.passes && r.passes.includes('ikon'));
-            } else if (filterState.pass === 'epic') {
-                filtered = filtered.filter(r => r.passes && r.passes.includes('epic'));
-            } else if (filterState.pass === 'indy') {
-                filtered = filtered.filter(r => r.passes && r.passes.includes('indy'));
-            } else if (filterState.pass === 'none') {
-                filtered = filtered.filter(r => !r.passes || r.passes.length === 0);
+            if (Array.isArray(filterState.passes) && filterState.passes.length > 0) {
+                filtered = filtered.filter((r) => {
+                    return filterState.passes.some((selectedPass) => {
+                        if (selectedPass === 'none') {
+                            return !r.passes || r.passes.length === 0;
+                        }
+                        return r.passes && r.passes.includes(selectedPass);
+                    });
+                });
             }
 
             if (filterState.vibe === 'sendit') {
@@ -2519,11 +2523,43 @@ const backgroundSizeByResort = {
             grid.innerHTML = filtered.map(resort => createResortCard(resort)).join('');
         }
 
+        function syncRegionFilterButtons() {
+            const selected = new Set(filterState.regions || []);
+            document.querySelectorAll('[data-region]').forEach((b) => {
+                const val = b.dataset.region;
+                if (val === 'all') {
+                    b.classList.toggle('active', selected.size === 0);
+                } else {
+                    b.classList.toggle('active', selected.has(val));
+                }
+            });
+        }
+
+        function syncPassFilterButtons() {
+            const selected = new Set(filterState.passes || []);
+            document.querySelectorAll('[data-pass]').forEach((b) => {
+                const val = b.dataset.pass;
+                if (val === 'all') {
+                    b.classList.toggle('active', selected.size === 0);
+                } else {
+                    b.classList.toggle('active', selected.has(val));
+                }
+            });
+        }
+
         document.querySelectorAll('[data-region]').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('[data-region]').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                filterState.region = btn.dataset.region;
+                const value = btn.dataset.region;
+                const selected = new Set(filterState.regions || []);
+                if (value === 'all') {
+                    selected.clear();
+                } else if (selected.has(value)) {
+                    selected.delete(value);
+                } else {
+                    selected.add(value);
+                }
+                filterState.regions = Array.from(selected);
+                syncRegionFilterButtons();
                 renderResorts();
             });
         });
@@ -2536,9 +2572,17 @@ const backgroundSizeByResort = {
         }
         document.querySelectorAll('[data-pass]').forEach(btn => {
             btn.addEventListener('click', () => {
-                document.querySelectorAll('[data-pass]').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                filterState.pass = btn.dataset.pass;
+                const value = btn.dataset.pass;
+                const selected = new Set(filterState.passes || []);
+                if (value === 'all') {
+                    selected.clear();
+                } else if (selected.has(value)) {
+                    selected.delete(value);
+                } else {
+                    selected.add(value);
+                }
+                filterState.passes = Array.from(selected);
+                syncPassFilterButtons();
                 renderResorts();
             });
         });
@@ -2591,6 +2635,8 @@ const backgroundSizeByResort = {
             }, { passive: false });
         }
         syncSearchClearButton();
+        syncRegionFilterButtons();
+        syncPassFilterButtons();
 
 
         const WORKER_URL = 'https://cloudflare-worker.rickt123-0f8.workers.dev/';
