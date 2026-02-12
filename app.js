@@ -2382,7 +2382,11 @@ const backgroundSizeByResort = {
             }
 
             if (filterState.region !== 'all') {
-                filtered = filtered.filter(r => r.region === filterState.region);
+                if (filterState.region === 'new-york') {
+                    filtered = filtered.filter((r) => r.region === 'catskills' || r.region === 'adirondacks');
+                } else {
+                    filtered = filtered.filter(r => r.region === filterState.region);
+                }
             }
 
             if (filterState.pass === 'ikon') {
