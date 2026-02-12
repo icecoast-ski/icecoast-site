@@ -129,17 +129,27 @@
             <button type="button" id="clearResortSearch" class="filter-search-clear" aria-label="Clear search">&times;</button>
         </div>
         <div class="filter-group">
+            <span class="filter-label">Sort:</span>
+            <select class="sort-select" id="sortSelect">
+                <option value="rating-high">Best Conditions</option>
+                <option value="rating-low">Worst Conditions</option>
+                <option value="snow-24h">Most Snow (24h)</option>
+                <option value="price-low">Lowest Price</option>
+                <option value="price-high">Highest Price</option>
+            </select>
+
+            <span class="filter-divider" aria-hidden="true">|</span>
             <span class="filter-label">Region:</span>
             <button class="filter-btn active" data-region="all">All</button>
-            <button class="filter-btn" data-region="poconos">Pennsylvania</button>
-            <button class="filter-btn" data-region="new-york">New York</button>
+            <button class="filter-btn" data-region="poconos">PA</button>
+            <button class="filter-btn" data-region="new-york">NY</button>
             <button class="filter-btn" data-region="vermont-south">Southern VT</button>
             <button class="filter-btn" data-region="vermont-central">Central VT</button>
             <button class="filter-btn" data-region="vermont-north">Northern VT</button>
-            <button class="filter-btn" data-region="massachusetts">Massachusetts</button>
+            <button class="filter-btn" data-region="massachusetts">MA</button>
             <button class="filter-btn" data-region="connecticut">Connecticut</button>
-            <button class="filter-btn" data-region="white-mountains">New Hampshire</button>
-            <button class="filter-btn" data-region="maine">Maine</button>
+            <button class="filter-btn" data-region="white-mountains">NH</button>
+            <button class="filter-btn" data-region="maine">ME</button>
             <button class="filter-btn" data-region="canada">🍁 Oh, Canada!</button>
 
             <span class="filter-label" style="margin-left: 1rem;">Pass:</span>
@@ -152,15 +162,6 @@
             <button class="filter-btn active" data-vibe="all">All</button>
             <button class="filter-btn" data-vibe="sendit">Send it</button>
             <button class="filter-btn" data-vibe="avoid">Avoid</button>
-
-            <span class="filter-label" style="margin-left: 1rem;">Sort:</span>
-            <select class="sort-select" id="sortSelect">
-                <option value="rating-high">Best Conditions</option>
-                <option value="rating-low">Worst Conditions</option>
-                <option value="snow-24h">Most Snow (24h)</option>
-                <option value="price-low">Lowest Price</option>
-                <option value="price-high">Highest Price</option>
-            </select>
         </div>
     </div>
 

@@ -683,6 +683,14 @@
             min-width: 60px;
         }
 
+        .filter-divider {
+            color: #c1cad8;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin: 0 0.12rem;
+            user-select: none;
+        }
+
         .filter-btn {
             padding: 0.4rem 0.75rem;
             border: 1.5px solid var(--light-grey);
