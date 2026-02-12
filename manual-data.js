@@ -591,8 +591,8 @@ window.MANUAL_RESORT_OVERRIDES = {
     "conditions": "Machine Groomed",
     "icecoastRating": 4,
     "liftTicket": {
-      "weekday": "$102",
-      "weekend": "$112"
+      "weekday": "$89",
+      "weekend": "$99"
     },
     "parking": "Free",
     "dynamicPricing": false,
