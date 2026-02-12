@@ -1,13 +1,9 @@
-// ICECOAST Cloudflare Worker - KV-Based Scalable Architecture
-// Serves cached weather/lift data from KV + "Send It Meter" local voting.
 
 const DEFAULT_SENDIT_RADIUS_MILES = 1.5;
 const SENDIT_MAX_ACCURACY_METERS = 200;
 const SENDIT_KEY_PREFIX = "sendit_votes_";
-const SENDIT_SOFT_COOLDOWN_MS = 20 * 60 * 1000;
-const SENDIT_RESORT_COOLDOWN_OVERRIDES_MS = {
-  camelback: 1 * 60 * 1000,
-};
+const SENDIT_SOFT_COOLDOWN_MS = 12 * 60 * 1000;
+const SENDIT_RESORT_COOLDOWN_OVERRIDES_MS = {};
 const SENDIT_MAX_VOTES_PER_HOUR = 3;
 const SENDIT_MAX_VOTES_PER_DAY = 8;
 const SENDIT_WINDOW_1H_MS = 60 * 60 * 1000;
@@ -17,12 +13,13 @@ const SENDIT_WINDOW_48H_MS = 48 * 60 * 60 * 1000;
 const SENDIT_WINDOW_72H_MS = 72 * 60 * 60 * 1000;
 const SENDIT_ALLOWED_CROWD = new Set(["quiet", "normal", "swarm"]);
 const SENDIT_ALLOWED_WIND = new Set(["calm", "breezy", "nuking"]);
+const SENDIT_ALLOWED_HAZARD = new Set(["clear", "icy", "swarm"]);
 const SENDIT_ALLOWED_DIFFICULTY = new Set(["green", "blue", "black", "double"]);
 const SENDIT_DEFAULT_CROWD = "normal";
 const SENDIT_DEFAULT_WIND = "breezy";
+const SENDIT_DEFAULT_HAZARD = "clear";
 const SENDIT_DEFAULT_DIFFICULTY = "blue";
 const SENDIT_RESORT_KEY_OVERRIDES = {
-  // Reset Blue Mountain from prior test snapshots by writing/reading a fresh key.
   "blue-mountain": "sendit_votes_blue-mountain_live",
 };
 const SENDIT_RESORT_RADIUS_OVERRIDES = {
@@ -65,6 +62,8 @@ const RESORT_COORDS = {
   waterville: { lat: 43.9686, lon: -71.5292 },
   cannon: { lat: 44.1593, lon: -71.7012 },
   wildcat: { lat: 44.2665, lon: -71.242 },
+  sunapee: { lat: 43.3653, lon: -72.0546 },
+  "pats-peak": { lat: 43.1775, lon: -71.8440 },
   "sunday-river": { lat: 44.4768, lon: -70.8601 },
   sugarloaf: { lat: 45.0359, lon: -70.3166 },
   saddleback: { lat: 44.9345, lon: -70.513 },
@@ -172,6 +171,11 @@ async function loadSendItSummary(env) {
             row?.windVotes,
             SENDIT_ALLOWED_WIND,
             SENDIT_DEFAULT_WIND,
+          ),
+          hazardMode: getTopMode(
+            row?.hazardVotes,
+            SENDIT_ALLOWED_HAZARD,
+            SENDIT_DEFAULT_HAZARD,
           ),
           difficultyMix: buildDifficultyMix(row, voteEvents),
         },
@@ -282,15 +286,17 @@ function computeSendItVoteWeight({
       : Infinity;
 
   let weight = 1;
-  if (millisSinceLast < cooldownMs) weight *= 0.25;
-  if (votesLastHour >= SENDIT_MAX_VOTES_PER_HOUR) weight *= 0.35;
-  if (votes24h >= SENDIT_MAX_VOTES_PER_DAY) weight *= 0.2;
+  // Cooldown is enforced separately as a hard gate; keep accepted votes near full weight.
+  if (votesLastHour >= SENDIT_MAX_VOTES_PER_HOUR) weight *= 0.85;
+  if (votes24h >= SENDIT_MAX_VOTES_PER_DAY) weight *= 0.75;
+
+  // If a voter keeps submitting nearly identical takes repeatedly, trim slightly.
   if (
     Number.isFinite(Number(lastScore)) &&
-    Math.abs(Number(score) - Number(lastScore)) >= 60 &&
-    millisSinceLast < 30 * 60 * 1000
+    Math.abs(Number(score) - Number(lastScore)) <= 5 &&
+    millisSinceLast < 45 * 60 * 1000
   ) {
-    weight *= 0.6;
+    weight *= 0.9;
   }
 
   const clampedWeight = Math.max(0.05, Math.min(1, Number(weight.toFixed(3))));
@@ -552,15 +558,16 @@ export default {
         await env.ICECOASTDATA.put(
           key,
           JSON.stringify({
-            voteCount: 0,
-            totalScore: 0,
-            weightedVoteTotal: 0,
-            weightedScoreTotal: 0,
-            crowdVotes: {},
-            windVotes: {},
-            difficultyVotes: {},
-            recentVotes: [],
-            voteTimestamps: [],
+          voteCount: 0,
+          totalScore: 0,
+          weightedVoteTotal: 0,
+          weightedScoreTotal: 0,
+          crowdVotes: {},
+          windVotes: {},
+          hazardVotes: {},
+          difficultyVotes: {},
+          recentVotes: [],
+          voteTimestamps: [],
             voteEvents: [],
             updatedAt: new Date().toISOString(),
             resetByAdmin: true,
@@ -619,6 +626,11 @@ export default {
           body?.wind,
           SENDIT_ALLOWED_WIND,
           SENDIT_DEFAULT_WIND,
+        );
+        const hazard = normalizeMode(
+          body?.hazard,
+          SENDIT_ALLOWED_HAZARD,
+          SENDIT_DEFAULT_HAZARD,
         );
         const difficulty = normalizeMode(
           body?.difficulty,
@@ -722,6 +734,7 @@ export default {
         const current = (await env.ICECOASTDATA.get(key, "json")) || {
           voteCount: 0,
           totalScore: 0,
+          hazardVotes: {},
         };
 
         const priorRecentVotes = Array.isArray(current.recentVotes)
@@ -751,6 +764,7 @@ export default {
           score,
           crowd,
           wind,
+          hazard,
           difficulty,
           weight: voteWeightMeta.weight,
         });
@@ -781,6 +795,11 @@ export default {
           wind,
           voteWeightMeta.weight,
         );
+        const hazardVotes = bumpModeCount(
+          current.hazardVotes,
+          hazard,
+          voteWeightMeta.weight,
+        );
         const difficultyVotes = bumpModeCount(
           current.difficultyVotes,
           difficulty,
@@ -793,6 +812,7 @@ export default {
           weightedScoreTotal,
           crowdVotes,
           windVotes,
+          hazardVotes,
           difficultyVotes,
           recentVotes: priorRecentVotes,
           voteTimestamps,
@@ -852,6 +872,11 @@ export default {
                 windVotes,
                 SENDIT_ALLOWED_WIND,
                 SENDIT_DEFAULT_WIND,
+              ),
+              hazardMode: getTopMode(
+                hazardVotes,
+                SENDIT_ALLOWED_HAZARD,
+                SENDIT_DEFAULT_HAZARD,
               ),
               difficultyMix: buildDifficultyMix(updated, voteEvents),
             },

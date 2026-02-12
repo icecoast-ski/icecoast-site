@@ -542,6 +542,7 @@
             'okemo': ['epic'],
             'stowe': ['epic'],
             'wildcat': ['epic'],
+            'sunapee': ['epic'],
 
             'camelback': ['ikon'],
             'blue-mountain': ['ikon'],
@@ -616,6 +617,8 @@
             'waterville': { apres: 3, family: 4 },
             'cannon': { apres: 1, family: 3 },
             'wildcat': { apres: 1, family: 2 },
+            'sunapee': { apres: 2, family: 4 },
+            'pats-peak': { apres: 2, family: 5 },
             'sunday-river': { apres: 4, family: 5 },
             'sugarloaf': { apres: 4, family: 4 },
             'saddleback': { apres: 2, family: 3 },
@@ -677,6 +680,8 @@
             'waterville': 2,
             'cannon': 2,
             'wildcat': 3,
+            'sunapee': 1,
+            'pats-peak': 0,
             'sunday-river': 2,
             'sugarloaf': 3,
             'saddleback': 3,
@@ -718,6 +723,8 @@
             'killington': { 'NYC': '4h 45m', 'Boston': '3h 10m', 'Montreal': '3h 15m' },
             'stowe': { 'Montreal': '2h 20m', 'Boston': '3h 10m', 'NYC': '5h 10m' },
             'jay-peak': { 'Montreal': '1h 50m', 'Burlington': '1h 30m', 'Boston': '3h 55m' },
+            'sunapee': { 'Boston': '1h 45m', 'NYC': '4h 20m', 'Hartford': '2h 15m' },
+            'pats-peak': { 'Boston': '1h 30m', 'NYC': '4h 25m', 'Hartford': '2h 10m' },
             'sunday-river': { 'Portland': '1h 30m', 'Boston': '3h 20m', 'Montreal': '4h 35m' },
             'sugarloaf': { 'Portland': '2h 25m', 'Boston': '4h 00m', 'Montreal': '4h 20m' },
             'saddleback': { 'Portland': '2h 30m', 'Boston': '4h 20m', 'Montreal': '4h 30m' },
@@ -2010,7 +2017,9 @@
 
 const backgroundImageByResort = {
     'camelback': 'camelback.jpg',
-    'cannon': 'cannon.jpg?v=20260208ab'
+    'cannon': 'cannon.jpg?v=20260208ab',
+    'sunapee': 'waterville.jpg',
+    'pats-peak': 'wachusett.jpg'
 };
 const backgroundImageFile = backgroundImageByResort[resort.id] || `${resort.id}.jpg`;
 
@@ -2047,6 +2056,8 @@ const backgroundPositionByResort = {
     'waterville': 'center 34%',
     'cannon': 'center 24%',
     'wildcat': 'center 30%',
+    'sunapee': 'center 35%',
+    'pats-peak': 'center 43%',
     'sunday-river': 'center 38%',
     'sugarloaf': 'center 48%',
     'saddleback': 'center 27%',
@@ -2076,6 +2087,8 @@ const backgroundSizeByResort = {
     'waterville': '101%',
     'cannon': '101%',
     'wildcat': '101%',
+    'sunapee': '101%',
+    'pats-peak': '101%',
     'sugarloaf': '101%',
     'saddleback': '101%',
     'whiteface': '101%',

@@ -1,6 +1,6 @@
 /**
  * 🎿 ICECOAST Resort Data - Single Source of Truth
- * This file contains all 39 resort definitions used across:
+ * This file contains all 41 resort definitions used across:
  * - Frontend (index.html)
  * - Cloudflare Worker (cloudflare-worker.js)
  * - Scheduled Worker (icecoast-scheduler.js)
@@ -366,7 +366,7 @@ const RESORTS = [
         liftie: 'burke'
     },
 
-    // ========== NEW HAMPSHIRE & MAINE - 8 resorts ==========
+    // ========== NEW HAMPSHIRE & MAINE - 10 resorts ==========
     {
         id: 'loon',
         name: 'Loon Mountain',
@@ -431,6 +431,32 @@ const RESORTS = [
         vertical: 2112,
         liftsTotal: 5,
         liftie: 'wildcat'
+    },
+    {
+        id: 'sunapee',
+        name: 'Mount Sunapee',
+        icon: '🏔️',
+        location: 'Newbury, NH',
+        region: 'white-mountains',
+        familyOwned: false,
+        lat: 43.3653,
+        lon: -72.0546,
+        vertical: 1510,
+        liftsTotal: 9,
+        liftie: 'mount-sunapee'
+    },
+    {
+        id: 'pats-peak',
+        name: "Pat's Peak",
+        icon: '⛷️',
+        location: 'Henniker, NH',
+        region: 'white-mountains',
+        familyOwned: true,
+        lat: 43.1775,
+        lon: -71.8440,
+        vertical: 770,
+        liftsTotal: 11,
+        liftie: 'pats-peak'
     },
     {
         id: 'sunday-river',
