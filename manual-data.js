@@ -3,7 +3,7 @@
  * Generated from admin.html
  */
 window.MANUAL_RESORT_OVERRIDES_META = {
-  "updatedAt": "2026-02-12T15:50:26.561Z"
+  "updatedAt": "2026-02-12T19:25:09Z"
 };
 window.MANUAL_RESORT_OVERRIDES = {
   "blue-mountain": {
@@ -23,7 +23,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-09T01:41:32.768Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "camelback": {
     "conditions": "Packed Powder",
@@ -42,7 +42,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-09T01:37:04.536Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "gore-mountain": {
     "conditions": "Packed Powder",
@@ -61,7 +61,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 4,
     "snowfall48h": 4,
-    "_patrolUpdatedAt": "2026-02-11T18:38:07.143Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "hunter": {
     "conditions": "Machine Groomed",
@@ -75,7 +75,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-11T18:36:17.326Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "jay-peak": {
     "conditions": "Machine Groomed",
@@ -94,7 +94,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 4,
     "snowfall48h": 6,
-    "_patrolUpdatedAt": "2026-02-11T18:31:14.120Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "killington": {
     "conditions": "Powder",
@@ -113,7 +113,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 4,
     "snowfall48h": 4,
-    "_patrolUpdatedAt": "2026-02-12T15:50:26.560Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "loon": {
     "conditions": "Machine Groomed",
@@ -132,7 +132,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 4,
     "snowfall48h": 4,
-    "_patrolUpdatedAt": "2026-02-11T18:33:59.619Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "tremblant": {
     "conditions": "Powder",
@@ -151,7 +151,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 7,
     "snowfall48h": 7,
-    "_patrolUpdatedAt": "2026-02-12T14:21:15.794Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "mount-snow": {
     "conditions": "Machine Groomed",
@@ -170,7 +170,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 4,
     "snowfall48h": 5,
-    "_patrolUpdatedAt": "2026-02-11T18:29:55.178Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "okemo": {
     "conditions": "Powder",
@@ -189,7 +189,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 4,
     "snowfall48h": 4,
-    "_patrolUpdatedAt": "2026-02-11T18:30:43.249Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "smugglers-notch": {
     "conditions": "Packed Powder",
@@ -208,7 +208,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 5,
     "snowfall48h": 5,
-    "_patrolUpdatedAt": "2026-02-11T18:31:56.599Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "stowe": {
     "conditions": "Powder",
@@ -227,7 +227,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 6,
     "snowfall48h": 6,
-    "_patrolUpdatedAt": "2026-02-11T18:25:48.028Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "stratton": {
     "conditions": "Powder",
@@ -247,7 +247,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 4,
     "snowfall48h": 4,
-    "_patrolUpdatedAt": "2026-02-11T18:27:17.740Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "sugarbush": {
     "conditions": "Packed Powder",
@@ -266,7 +266,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 6,
     "snowfall48h": 6,
-    "_patrolUpdatedAt": "2026-02-11T18:26:41.875Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "sugarloaf": {
     "conditions": "Powder",
@@ -285,7 +285,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 4,
     "snowfall48h": 4,
-    "_patrolUpdatedAt": "2026-02-11T18:33:05.828Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "sunday-river": {
     "conditions": "Machine Groomed",
@@ -304,7 +304,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 5,
     "snowfall48h": 6,
-    "_patrolUpdatedAt": "2026-02-11T18:32:27.666Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "whiteface": {
     "conditions": "Powder",
@@ -323,7 +323,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 6,
     "snowfall48h": 6,
-    "_patrolUpdatedAt": "2026-02-11T18:35:16.963Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "windham": {
     "conditions": "Machine Groomed",
@@ -342,7 +342,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-11T18:37:27.167Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "belleayre": {
     "conditions": "Machine Groomed",
@@ -360,7 +360,7 @@ window.MANUAL_RESORT_OVERRIDES = {
       "total": 8
     },
     "snowfall24h": 3,
-    "_patrolUpdatedAt": "2026-02-12T14:09:19.409Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "brettonwoods": {
     "conditions": "Powder",
@@ -379,7 +379,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 12,
     "snowfall48h": 18,
-    "_patrolUpdatedAt": "2026-02-12T14:07:05.942Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "burke": {
     "conditions": "Powder",
@@ -398,7 +398,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 3,
     "snowfall48h": 9,
-    "_patrolUpdatedAt": "2026-02-12T14:03:18.136Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "cannon": {
     "conditions": "Powder",
@@ -417,7 +417,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 6,
     "snowfall48h": 16,
-    "_patrolUpdatedAt": "2026-02-12T14:03:58.301Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "jiminy-peak": {
     "conditions": "Packed Powder",
@@ -434,7 +434,7 @@ window.MANUAL_RESORT_OVERRIDES = {
       "total": 9
     },
     "snowfall24h": 4,
-    "_patrolUpdatedAt": "2026-02-12T14:10:06.143Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "le-massif": {
     "conditions": "Powder",
@@ -453,7 +453,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 3,
     "snowfall48h": 4,
-    "_patrolUpdatedAt": "2026-02-12T14:15:14.219Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "mad-river-glen": {
     "conditions": "Powder",
@@ -472,7 +472,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 4,
     "snowfall48h": 12,
-    "_patrolUpdatedAt": "2026-02-12T14:02:35.024Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "mont-sutton": {
     "conditions": "Powder",
@@ -491,7 +491,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 4,
     "snowfall48h": 7,
-    "_patrolUpdatedAt": "2026-02-12T14:15:49.613Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "mont-sainte-anne": {
     "conditions": "Powder",
@@ -510,7 +510,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 2,
     "snowfall48h": 4,
-    "_patrolUpdatedAt": "2026-02-12T14:12:15.376Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "sunapee": {
     "conditions": "Packed Powder",
@@ -530,7 +530,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 1,
     "snowfall48h": 6,
-    "_patrolUpdatedAt": "2026-02-12T14:07:46.953Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "pats-peak": {
     "conditions": "Packed Powder",
@@ -550,7 +550,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 6,
     "snowfall48h": 6,
-    "_patrolUpdatedAt": "2026-02-12T14:08:17.145Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "pico": {
     "conditions": "Powder",
@@ -569,7 +569,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 3,
     "snowfall48h": 6,
-    "_patrolUpdatedAt": "2026-02-12T14:00:53.729Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "saddleback": {
     "conditions": "Powder",
@@ -588,7 +588,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 4,
     "snowfall48h": 8,
-    "_patrolUpdatedAt": "2026-02-12T14:11:39.458Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "wachusett": {
     "conditions": "Machine Groomed",
@@ -606,7 +606,7 @@ window.MANUAL_RESORT_OVERRIDES = {
       "total": 8
     },
     "snowfall24h": 0,
-    "_patrolUpdatedAt": "2026-02-12T14:11:13.952Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "waterville": {
     "conditions": "Powder",
@@ -625,7 +625,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 6,
     "snowfall48h": 7,
-    "_patrolUpdatedAt": "2026-02-12T14:05:56.586Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "wildcat": {
     "conditions": "Powder",
@@ -644,7 +644,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 1,
     "snowfall48h": 5,
-    "_patrolUpdatedAt": "2026-02-12T14:05:12.847Z"
+    "_patrolUpdatedAt": "2026-02-12T19:25:09Z"
   },
   "bear-creek": {
     "conditions": "Machine Groomed",
