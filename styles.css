@@ -752,20 +752,16 @@
 
             .filter-label {
                 min-width: 50px;
-                font-size: 0.7rem;
+                font-size: 0.69rem;
             }
 
             .filter-btn, .sort-select {
-                font-size: 0.7rem;
+                font-size: 0.69rem;
                 padding: 0.35rem 0.6rem;
             }
 
             .filter-group .filter-label[style*="margin-left"] {
                 margin-left: 0.5rem !important;
-            }
-
-            .filter-btn-canada {
-                font-size: 0.6rem;
             }
 
         }
