@@ -3,7 +3,7 @@
  * Generated from admin.html
  */
 window.MANUAL_RESORT_OVERRIDES_META = {
-  "updatedAt": "2026-02-12T14:21:15.794Z"
+  "updatedAt": "2026-02-12T15:50:26.561Z"
 };
 window.MANUAL_RESORT_OVERRIDES = {
   "blue-mountain": {
@@ -106,14 +106,14 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": true,
     "trails": {
-      "open": 97
+      "open": 155
     },
     "lifts": {
       "total": 21
     },
     "snowfall24h": 4,
     "snowfall48h": 4,
-    "_patrolUpdatedAt": "2026-02-11T18:24:52.988Z"
+    "_patrolUpdatedAt": "2026-02-12T15:50:26.560Z"
   },
   "loon": {
     "conditions": "Machine Groomed",
