@@ -3,7 +3,7 @@
  * Generated from admin.html
  */
 window.MANUAL_RESORT_OVERRIDES_META = {
-  "updatedAt": "2026-02-11T18:58:06.462Z"
+  "updatedAt": "2026-02-12T02:19:27.080Z"
 };
 window.MANUAL_RESORT_OVERRIDES = {
   "blue-mountain": {
@@ -508,6 +508,46 @@ window.MANUAL_RESORT_OVERRIDES = {
     "snowfall24h": 2,
     "snowfall48h": 2,
     "_patrolUpdatedAt": "2026-02-11T18:48:48.131Z"
+  },
+  "sunapee": {
+    "conditions": "Powder",
+    "icecoastRating": 5,
+    "vertical": 1510,
+    "liftTicket": {
+      "weekday": "$61+",
+      "weekend": "$123+"
+    },
+    "parking": "Free",
+    "dynamicPricing": true,
+    "trails": {
+      "open": 65
+    },
+    "lifts": {
+      "total": 8
+    },
+    "snowfall24h": 5,
+    "snowfall48h": 5,
+    "_patrolUpdatedAt": "2026-02-12T02:19:27.079Z"
+  },
+  "pats-peak": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 5,
+    "vertical": 770,
+    "liftTicket": {
+      "weekday": "$66",
+      "weekend": "$102"
+    },
+    "parking": "Free",
+    "dynamicPricing": false,
+    "trails": {
+      "open": 27
+    },
+    "lifts": {
+      "total": 11
+    },
+    "snowfall24h": 6,
+    "snowfall48h": 6,
+    "_patrolUpdatedAt": "2026-02-12T02:19:11.866Z"
   },
   "pico": {
     "conditions": "Powder",
