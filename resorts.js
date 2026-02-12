@@ -266,7 +266,7 @@ const RESORTS = [
         name: 'Okemo Mountain',
         icon: '🏔️',
         location: 'Ludlow, VT',
-        region: 'vermont-central',
+        region: 'vermont-south',
         familyOwned: false,
         lat: 43.4057,
         lon: -72.7196,
