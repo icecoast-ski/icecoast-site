@@ -42,26 +42,26 @@
       background: var(--card);
       border: 1px solid var(--line);
       border-radius: 12px;
-      padding: 1rem;
+      padding: .78rem;
       box-shadow: 0 8px 20px rgba(17, 24, 39, .04);
     }
     .row {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: .75rem;
-      margin-bottom: .75rem;
+      gap: .5rem;
+      margin-bottom: .48rem;
     }
     .row-3 {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr;
-      gap: .75rem;
-      margin-bottom: .75rem;
+      gap: .5rem;
+      margin-bottom: .48rem;
     }
     .row-4 {
       display: grid;
       grid-template-columns: 1fr 1fr 1fr 1fr;
-      gap: .75rem;
-      margin-bottom: .75rem;
+      gap: .5rem;
+      margin-bottom: .48rem;
     }
     label {
       display: block;
@@ -69,15 +69,15 @@
       text-transform: uppercase;
       letter-spacing: .05em;
       color: var(--muted);
-      margin-bottom: .3rem;
+      margin-bottom: .2rem;
       font-weight: 700;
     }
     input, select, textarea {
       width: 100%;
       border: 1px solid var(--line);
       border-radius: 8px;
-      padding: .56rem .62rem;
-      font-size: .93rem;
+      padding: .45rem .56rem;
+      font-size: .88rem;
       background: #fff;
       color: var(--ink);
     }
@@ -115,8 +115,13 @@
       color: var(--danger);
       border: 1px solid #f0cbc6;
     }
+    .danger-soft {
+      background: #fff7ed;
+      color: #9a3412;
+      border: 1px solid #fed7aa;
+    }
     .meta {
-      margin-top: .7rem;
+      margin-top: .45rem;
       font-size: .82rem;
       color: var(--muted);
     }
@@ -138,10 +143,25 @@
       margin-left: .45rem;
       font-weight: 700;
     }
+    .manual-lifts-banner {
+      display: none;
+      margin: .12rem 0 .45rem;
+      padding: .4rem .55rem;
+      border-radius: 8px;
+      border: 1px solid #fed7aa;
+      background: #fff7ed;
+      color: #9a3412;
+      font-size: .78rem;
+      font-weight: 700;
+      letter-spacing: .01em;
+    }
+    .manual-lifts-banner.show {
+      display: block;
+    }
     .split {
       display: grid;
       grid-template-columns: 1.45fr .95fr;
-      gap: 1rem;
+      gap: .7rem;
     }
     @media (max-width: 920px) {
       .split, .row, .row-3, .row-4 { grid-template-columns: 1fr; }
@@ -151,7 +171,7 @@
 <body>
   <div class="wrap">
     <h1>icecoast Manual Update Panel</h1>
-    <p class="sub">Update morning manual data (including conditions and lifts), then export one <code>manual-data.js</code> file and upload it to GitHub.</p>
+    <p class="sub">Update morning manual data (conditions, trails/lifts, 24h/48h snow), then export one <code>manual-data.js</code> file and upload it to GitHub.</p>
 
     <div class="split">
       <section class="card">
@@ -193,6 +213,7 @@
             </select>
           </div>
         </div>
+        <div id="manualLiftsBanner" class="manual-lifts-banner">Manual lift update required for this resort (Liftie not available).</div>
 
         <div class="row-4">
           <div>
@@ -213,7 +234,7 @@
           </div>
         </div>
 
-        <div class="row-3">
+        <div class="row">
           <div>
             <label for="snow24">24h Snow (inches)</label>
             <input id="snow24" type="number" min="0" step="1" />
@@ -221,10 +242,6 @@
           <div>
             <label for="snow48">48h Snow (inches)</label>
             <input id="snow48" type="number" min="0" step="1" />
-          </div>
-          <div>
-            <label for="snow7d">7d Snow (inches)</label>
-            <input id="snow7d" type="number" min="0" step="1" />
           </div>
         </div>
 
@@ -266,7 +283,7 @@
 
         <div class="row">
           <div>
-            <label for="apres">Apres (0-5)</label>
+            <label for="apres">Après (0-5)</label>
             <input id="apres" type="number" min="0" max="5" step="1" />
           </div>
           <div>
@@ -279,6 +296,7 @@
           <button class="primary" id="saveResortBtn">Save This Resort</button>
           <button class="outline" id="saveNextBtn">Save + Next Resort</button>
           <button class="danger" id="clearResortBtn">Clear This Resort Override</button>
+          <button class="danger-soft" id="resetSignalBtn">Reset Slope Signal (This Resort)</button>
         </div>
         <div class="meta" id="resortMeta"></div>
         <div class="status" id="editStatus"></div>
@@ -297,7 +315,7 @@
           Upload this file to:
           <code>manual-data.js</code>
           <br />
-          Then commit to GitHub and redeploy.
+          Then commit to GitHub and redeploy. Legacy <code>snowfall7d</code> keys are auto-removed on export.
         </div>
         <div class="status" id="exportStatus"></div>
       </section>
@@ -321,7 +339,7 @@
         label: 'Tier 2 - Lite / Every Other Day Full',
         ids: [
           'pico', 'mad-river-glen', 'burke', 'cannon', 'wildcat', 'waterville', 'brettonwoods',
-          'belleayre', 'jiminy-peak', 'wachusett', 'saddleback', 'mont-sainte-anne',
+          'sunapee', 'pats-peak', 'belleayre', 'jiminy-peak', 'wachusett', 'saddleback', 'mont-sainte-anne',
           'le-massif', 'mont-sutton'
         ]
       },
@@ -334,6 +352,19 @@
     ];
     const overrides = JSON.parse(JSON.stringify(window.MANUAL_RESORT_OVERRIDES || {}));
     const resortsById = new Map(resorts.map(r => [r.id, r]));
+    const ADMIN_REGION_LABELS = {
+      'poconos': 'Pennsylvania',
+      'catskills': 'New York',
+      'adirondacks': 'New York',
+      'massachusetts': 'Massachusetts',
+      'connecticut': 'Connecticut',
+      'vermont-south': 'Vermont (South)',
+      'vermont-central': 'Vermont (Central)',
+      'vermont-north': 'Vermont (North)',
+      'white-mountains': 'New Hampshire',
+      'maine': 'Maine',
+      'canada': 'Canada'
+    };
 
     function getTierRankMap() {
       const tierRank = {};
@@ -357,6 +388,7 @@
       resortSelect: document.getElementById('resortSelect'),
       regionView: document.getElementById('regionView'),
       liftieView: document.getElementById('liftieView'),
+      manualLiftsBanner: document.getElementById('manualLiftsBanner'),
       conditions: document.getElementById('conditions'),
       icecoastRating: document.getElementById('icecoastRating'),
       apres: document.getElementById('apres'),
@@ -372,10 +404,10 @@
       liftsTotal: document.getElementById('liftsTotal'),
       snow24: document.getElementById('snow24'),
       snow48: document.getElementById('snow48'),
-      snow7d: document.getElementById('snow7d'),
       saveResortBtn: document.getElementById('saveResortBtn'),
       saveNextBtn: document.getElementById('saveNextBtn'),
       clearResortBtn: document.getElementById('clearResortBtn'),
+      resetSignalBtn: document.getElementById('resetSignalBtn'),
       resortMeta: document.getElementById('resortMeta'),
       editStatus: document.getElementById('editStatus'),
       exportText: document.getElementById('exportText'),
@@ -386,9 +418,99 @@
       exportStatus: document.getElementById('exportStatus')
     };
 
+    const ADMIN_STORAGE = {
+      workerUrl: 'icecoast_admin_worker_url',
+      adminToken: 'icecoast_admin_token'
+    };
+
     function setStatus(node, text, cls) {
       node.textContent = text || '';
       node.className = `status ${cls || ''}`.trim();
+    }
+
+    function getSavedAdminConfig() {
+      let workerUrl = '';
+      let adminToken = '';
+      try {
+        workerUrl = localStorage.getItem(ADMIN_STORAGE.workerUrl) || '';
+        adminToken = localStorage.getItem(ADMIN_STORAGE.adminToken) || '';
+      } catch (_) {}
+      return { workerUrl, adminToken };
+    }
+
+    function saveAdminConfig(workerUrl, adminToken) {
+      try {
+        if (workerUrl) localStorage.setItem(ADMIN_STORAGE.workerUrl, workerUrl);
+        if (typeof adminToken === 'string') localStorage.setItem(ADMIN_STORAGE.adminToken, adminToken);
+      } catch (_) {}
+    }
+
+    function promptForAdminConfig() {
+      const saved = getSavedAdminConfig();
+      const workerPrompt = saved.workerUrl || 'https://YOUR-WORKER-SUBDOMAIN.workers.dev';
+      const workerUrlInput = prompt('Enter your Cloudflare Worker URL (no trailing slash):', workerPrompt);
+      if (!workerUrlInput) return null;
+      const workerUrl = workerUrlInput.trim().replace(/\/+$/, '');
+      if (!/^https?:\/\//i.test(workerUrl)) {
+        alert('Worker URL must start with http:// or https://');
+        return null;
+      }
+      const tokenPrompt = saved.adminToken || '';
+      const adminTokenInput = prompt('Enter ADMIN_HEALTH_TOKEN (required for reset endpoints):', tokenPrompt);
+      if (adminTokenInput === null) return null;
+      const adminToken = adminTokenInput.trim();
+      saveAdminConfig(workerUrl, adminToken);
+      return { workerUrl, adminToken };
+    }
+
+    async function resetSlopeSignalForCurrentResort() {
+      const resort = getCurrentResort();
+      if (!resort) return;
+
+      const confirmed = confirm(`Reset Slope Signal votes for ${resort.name}? This cannot be undone.`);
+      if (!confirmed) return;
+
+      let cfg = getSavedAdminConfig();
+      if (!cfg.workerUrl || !cfg.adminToken) {
+        const prompted = promptForAdminConfig();
+        if (!prompted) {
+          setStatus(el.editStatus, 'Reset canceled.', 'warn');
+          return;
+        }
+        cfg = prompted;
+      }
+
+      el.resetSignalBtn.disabled = true;
+      const originalText = el.resetSignalBtn.textContent;
+      el.resetSignalBtn.textContent = 'Resetting...';
+
+      try {
+        const endpoint = new URL('/admin/sendit/reset', cfg.workerUrl);
+        endpoint.searchParams.set('resortId', resort.id);
+        const resp = await fetch(endpoint.toString(), {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-Admin-Token': cfg.adminToken
+          }
+        });
+        const payload = await resp.json().catch(() => ({}));
+        if (!resp.ok) {
+          if (resp.status === 401) {
+            const refresh = promptForAdminConfig();
+            if (refresh) setStatus(el.editStatus, 'Token updated. Click reset again.', 'warn');
+            else setStatus(el.editStatus, 'Reset failed: unauthorized.', 'warn');
+            return;
+          }
+          throw new Error(payload?.error || `Reset failed (${resp.status})`);
+        }
+        setStatus(el.editStatus, `Slope Signal reset for ${resort.name}.`, 'ok');
+      } catch (err) {
+        setStatus(el.editStatus, `Reset failed: ${err.message}`, 'warn');
+      } finally {
+        el.resetSignalBtn.disabled = false;
+        el.resetSignalBtn.textContent = originalText;
+      }
     }
 
     function numberOrNull(value) {
@@ -427,6 +549,11 @@
       return !!(resort && typeof resort.liftie === 'string' && resort.liftie !== 'null');
     }
 
+    function formatAdminRegion(regionKey) {
+      if (!regionKey) return '';
+      return ADMIN_REGION_LABELS[regionKey] || regionKey;
+    }
+
     function getCurrentResort() {
       const id = el.resortSelect.value;
       return resorts.find(r => r.id === id) || null;
@@ -463,8 +590,9 @@
       const patch = overrides[resortId] || {};
       const liftieEnabled = hasLiftieCoverage(resort);
 
-      el.regionView.value = resort.region || '';
+      el.regionView.value = formatAdminRegion(resort.region);
       el.liftieView.value = liftieEnabled ? `Yes (${resort.liftie})` : 'No (manual lift input recommended)';
+      el.manualLiftsBanner.classList.toggle('show', !liftieEnabled);
       setConditionSelectValue(patch.conditions ?? '');
       el.icecoastRating.value = patch.icecoastRating ?? '';
       el.apres.value = patch.apres ?? '';
@@ -480,7 +608,6 @@
       el.liftsTotal.value = patch.lifts?.total ?? resort.liftsTotal ?? '';
       el.snow24.value = patch.snowfall24h ?? '';
       el.snow48.value = patch.snowfall48h ?? '';
-      el.snow7d.value = patch.snowfall7d ?? '';
 
       const isEdited = !!overrides[resortId];
       el.resortMeta.innerHTML = isEdited
@@ -539,8 +666,6 @@
       if (snow24 !== null) patch.snowfall24h = Math.max(0, Math.round(snow24));
       const snow48 = numberOrNull(el.snow48.value);
       if (snow48 !== null) patch.snowfall48h = Math.max(0, Math.round(snow48));
-      const snow7d = numberOrNull(el.snow7d.value);
-      if (snow7d !== null) patch.snowfall7d = Math.max(0, Math.round(snow7d));
 
       return patch;
     }
@@ -549,15 +674,10 @@
       return !patch || Object.keys(patch).length === 0;
     }
 
-    function stripPatchMeta(patch) {
-      if (!patch || typeof patch !== 'object') return {};
-      const copy = JSON.parse(JSON.stringify(patch));
-      delete copy._patrolUpdatedAt;
-      return copy;
-    }
-
-    function patchesEqual(a, b) {
-      return JSON.stringify(stripPatchMeta(a)) === JSON.stringify(stripPatchMeta(b));
+    function sanitizePatchForExport(patch) {
+      const clean = JSON.parse(JSON.stringify(patch || {}));
+      delete clean.snowfall7d;
+      return clean;
     }
 
     function saveCurrentResort() {
@@ -567,12 +687,7 @@
       if (isPatchEmpty(patch)) {
         delete overrides[resort.id];
       } else {
-        const existing = overrides[resort.id] || {};
-        if (!patchesEqual(existing, patch)) {
-          patch._patrolUpdatedAt = new Date().toISOString();
-        } else if (typeof existing._patrolUpdatedAt === 'string' && existing._patrolUpdatedAt) {
-          patch._patrolUpdatedAt = existing._patrolUpdatedAt;
-        }
+        patch._patrolUpdatedAt = new Date().toISOString();
         overrides[resort.id] = patch;
       }
       loadFormForResort(resort.id);
@@ -592,13 +707,14 @@
     function renderExportText() {
       const sorted = {};
       orderedResorts.forEach(r => {
-        if (overrides[r.id]) sorted[r.id] = overrides[r.id];
+        if (overrides[r.id]) sorted[r.id] = sanitizePatchForExport(overrides[r.id]);
       });
       const out = [
         '/*',
         ' * ICECOAST manual resort overrides',
         ' * Generated from admin.html',
         ' */',
+        `window.MANUAL_RESORT_OVERRIDES_META = ${JSON.stringify({ updatedAt: new Date().toISOString() }, null, 2)};`,
         `window.MANUAL_RESORT_OVERRIDES = ${JSON.stringify(sorted, null, 2)};`,
         ''
       ].join('\n');
@@ -648,7 +764,7 @@
       'mohawk': 'https://www.mohawkmtn.com/snow-report/',
       'stratton': 'https://www.stratton.com/the-mountain/mountain-report',
       'mount-snow': 'https://www.mountsnow.com/ski-ride/snow-report/',
-      'killington': 'https://map.killington.com/conditions/snow-report/printable-report/',
+      'killington': 'https://www.killington.com/the-mountain/conditions-weather/current-conditions-weather/',
       'okemo': 'https://www.okemo.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx',
       'pico': 'https://map.picomountain.com/conditions/snow-report/printable-report/',
       'sugarbush': 'https://www.sugarbush.com/mountain/conditions',
@@ -662,6 +778,8 @@
       'waterville': 'https://www.waterville.com/snow-report-maps/',
       'cannon': 'https://www.cannonmt.com/mountain-report',
       'wildcat': 'https://www.skiwildcat.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx',
+      'sunapee': 'https://www.mountsunapee.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx',
+      'pats-peak': 'https://www.patspeak.com/snow-report/',
       'sunday-river': 'https://www.sundayriver.com/mountain-report',
       'sugarloaf': 'https://www.sugarloaf.com/mountain-report',
       'saddleback': 'https://www.saddlebackmaine.com/mountain-report/',
@@ -752,6 +870,7 @@
       renderExportText();
       setStatus(el.editStatus, `Cleared override for ${resort.name}.`, 'warn');
     });
+    el.resetSignalBtn.addEventListener('click', resetSlopeSignalForCurrentResort);
     el.downloadBtn.addEventListener('click', downloadExport);
     el.copyBtn.addEventListener('click', copyExport);
     el.refreshBtn.addEventListener('click', renderExportText);

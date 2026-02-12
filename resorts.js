@@ -70,7 +70,7 @@ const RESORTS = [
         lat: 40.7434,
         lon: -76.0493,
         vertical: 510,
-        liftsTotal: 7,
+        liftsTotal: 6,
         liftie: 'null'
     },
     {
