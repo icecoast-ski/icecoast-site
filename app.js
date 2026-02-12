@@ -2549,6 +2549,14 @@ const backgroundSizeByResort = {
 
         const resortSearchInput = document.getElementById('resortSearch');
         const clearResortSearchBtn = document.getElementById('clearResortSearch');
+        function clearResortSearchField() {
+            if (!resortSearchInput) return;
+            resortSearchInput.value = '';
+            filterState.search = '';
+            syncSearchClearButton();
+            renderResorts();
+            resortSearchInput.focus();
+        }
         function syncSearchClearButton() {
             if (!clearResortSearchBtn || !resortSearchInput) return;
             const hasValue = (resortSearchInput.value || '').trim().length > 0;
@@ -2562,13 +2570,15 @@ const backgroundSizeByResort = {
             });
         }
         if (clearResortSearchBtn && resortSearchInput) {
-            clearResortSearchBtn.addEventListener('click', () => {
-                resortSearchInput.value = '';
-                filterState.search = '';
-                syncSearchClearButton();
-                renderResorts();
-                resortSearchInput.focus();
+            clearResortSearchBtn.addEventListener('click', clearResortSearchField);
+            clearResortSearchBtn.addEventListener('pointerdown', (event) => {
+                event.preventDefault();
+                clearResortSearchField();
             });
+            clearResortSearchBtn.addEventListener('touchend', (event) => {
+                event.preventDefault();
+                clearResortSearchField();
+            }, { passive: false });
         }
         syncSearchClearButton();
 
