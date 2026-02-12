@@ -411,14 +411,14 @@
 
         
         .back-to-top::before {
-            content: '⛷️';
+            content: '🚡';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             width: auto;
             height: auto;
-            font-size: 1.7rem;
+            font-size: 1.95rem;
             line-height: 1;
             opacity: 1;
             transition: transform 0.3s ease;
@@ -439,15 +439,15 @@
 
         
         .back-to-top::after {
-            content: '🚡';
+            content: '⛷️';
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 2.5rem;
+            font-size: 1.55rem;
             opacity: 0;
             pointer-events: none;
-            z-index: 2;
+            z-index: 4;
         }
 
         
@@ -463,11 +463,11 @@
         }
 
         .back-to-top.launching::before {
-            animation: skierJumpIn 0.72s ease-out forwards;
+            animation: gondolaCabin 3.8s ease-in-out forwards;
         }
 
         .back-to-top.launching::after {
-            animation: gondolaCabin 3.8s ease-in-out forwards;
+            animation: skierJumpIn 0.72s ease-out forwards;
         }
 
         @keyframes skierJumpIn {
@@ -538,11 +538,11 @@
             }
 
             .back-to-top::before {
-                font-size: 1.45rem;
+                font-size: 1.75rem;
             }
 
             .back-to-top::after {
-                font-size: 2rem;
+                font-size: 1.35rem;
             }
 
             
