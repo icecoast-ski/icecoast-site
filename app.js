@@ -2548,12 +2548,29 @@ const backgroundSizeByResort = {
         });
 
         const resortSearchInput = document.getElementById('resortSearch');
+        const clearResortSearchBtn = document.getElementById('clearResortSearch');
+        function syncSearchClearButton() {
+            if (!clearResortSearchBtn || !resortSearchInput) return;
+            const hasValue = (resortSearchInput.value || '').trim().length > 0;
+            clearResortSearchBtn.classList.toggle('visible', hasValue);
+        }
         if (resortSearchInput) {
             resortSearchInput.addEventListener('input', (e) => {
                 filterState.search = e.target.value || '';
+                syncSearchClearButton();
                 renderResorts();
             });
         }
+        if (clearResortSearchBtn && resortSearchInput) {
+            clearResortSearchBtn.addEventListener('click', () => {
+                resortSearchInput.value = '';
+                filterState.search = '';
+                syncSearchClearButton();
+                renderResorts();
+                resortSearchInput.focus();
+            });
+        }
+        syncSearchClearButton();
 
 
         const WORKER_URL = 'https://cloudflare-worker.rickt123-0f8.workers.dev/';

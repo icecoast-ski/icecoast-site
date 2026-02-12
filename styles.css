@@ -588,11 +588,12 @@
 
         .filter-search-wrap {
             margin-bottom: 0.55rem;
+            position: relative;
         }
 
         .filter-search-input {
             width: 100%;
-            padding: 0.72rem 1rem;
+            padding: 0.72rem 2.85rem 0.72rem 1rem;
             border: 1.5px solid rgba(20, 64, 137, 0.16);
             background: var(--white);
             border-radius: 999px;
@@ -613,6 +614,44 @@
             outline: none;
             border-color: var(--primary-blue);
             box-shadow: 0 0 0 3px rgba(31, 94, 200, 0.14);
+        }
+
+        .filter-search-clear {
+            position: absolute;
+            right: 0.56rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 1.75rem;
+            height: 1.75rem;
+            border: 0;
+            border-radius: 999px;
+            background: rgba(20, 64, 137, 0.12);
+            color: #144089;
+            font-family: inherit;
+            font-size: 0.84rem;
+            font-weight: 800;
+            line-height: 1;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.16s ease, background 0.16s ease, transform 0.16s ease;
+        }
+
+        .filter-search-clear.visible {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .filter-search-clear:hover {
+            background: rgba(20, 64, 137, 0.2);
+            transform: translateY(-50%) scale(1.04);
+        }
+
+        .filter-search-clear:active {
+            transform: translateY(-50%) scale(0.97);
         }
 
         .filter-group {
@@ -685,7 +724,7 @@
         @media (max-width: 900px) {
             .filter-search-input {
                 font-size: 16px;
-                padding: 0.62rem 0.88rem;
+                padding: 0.62rem 2.7rem 0.62rem 0.88rem;
             }
 
             .filter-group {
