@@ -2906,37 +2906,6 @@ const backgroundSizeByResort = {
         loadLiveData().catch(err => console.warn('Initial load failed:', err));
         setInterval(loadLiveData, REFRESH_INTERVAL);
 
-        document.addEventListener('DOMContentLoaded', () => {
-            const ctaBtn = document.querySelector('.cta-btn');
-            if (ctaBtn) {
-                ctaBtn.addEventListener('click', function(e) {
-                    e.preventDefault(); // Prevent any default behavior
-
-                    this.classList.add('rail-slam');
-
-                    if (navigator.vibrate) {
-                        navigator.vibrate([50, 30, 50, 20, 30]);
-                    }
-
-                    setTimeout(() => {
-                        const filters = document.querySelector('.filters');
-                        if (filters) {
-                            const headerHeight = document.querySelector('header').offsetHeight;
-                            const filtersTop = filters.getBoundingClientRect().top + window.pageYOffset;
-                            window.scrollTo({
-                                top: filtersTop - headerHeight - 10,
-                                behavior: 'smooth'
-                            });
-                        }
-                    }, 500); // 500ms delay for slam effect (animation is 600ms)
-
-                    setTimeout(() => {
-                        this.classList.remove('rail-slam');
-                    }, 600);
-                });
-            }
-        });
-
         if ('ontouchstart' in window || navigator.maxTouchPoints > 0) {
             const observerOptions = {
                 root: null,
