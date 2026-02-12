@@ -2776,9 +2776,10 @@
             }
 
             .sub-tagline {
-                font-size: 0.7rem;
-                line-height: 1.2;
+                font-size: 0.66rem;
+                line-height: 1.15;
                 letter-spacing: -0.01em;
+                white-space: nowrap;
             }
 
             .cta-btn {
