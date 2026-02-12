@@ -1891,8 +1891,6 @@
             const sendIt = sendItSummaryByResort[resort.id] || {};
             const showLiftMoon = isAfterLiftClose(resort.id);
             const hasFreshPatrol = !!resort.hasPatrolUpdate && !!resort.patrolUpdatedAt;
-            const hasLiveWeather = !!resort.hasLiveWeather;
-            const hasLiveLifts = !!resort.hasLiveLifts;
             const sendItButtonCopy = getSendItButtonCopy(resort.id);
             const sendItVotes = Number.isFinite(sendIt.votes) ? sendIt.votes : 0;
             const sendItScoreValue = Number.isFinite(sendIt.score) ? sendIt.score : null;
@@ -2005,8 +2003,6 @@
                     </div>`;
 
             const heroChips = [];
-            if (hasLiveWeather) heroChips.push({ cls: 'chip-weather', label: 'Live Weather' });
-            if (hasLiveLifts) heroChips.push({ cls: 'chip-lifts', label: 'Live Lifts' });
             if (resort.glades > 0) {
                 heroChips.push({
                     cls: 'chip-glades',
