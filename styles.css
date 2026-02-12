@@ -752,11 +752,11 @@
 
             .filter-label {
                 min-width: 50px;
-                font-size: 0.69rem;
+                font-size: 0.7rem;
             }
 
             .filter-btn, .sort-select {
-                font-size: 0.69rem;
+                font-size: 0.7rem;
                 padding: 0.35rem 0.6rem;
             }
 
