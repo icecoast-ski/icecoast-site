@@ -565,6 +565,7 @@
             'waterville': ['indy'],
             'saddleback': ['indy'],
             'mont-sutton': ['indy'],
+            'pats-peak': ['indy'],
 
             'windham': []
         };
