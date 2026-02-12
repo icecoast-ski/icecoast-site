@@ -703,7 +703,6 @@
                 }
             });
         }
-
         const REGION_DRIVE_TIMES = {
             'poconos': { 'NYC': '1h 50m', 'Philadelphia': '1h 45m', 'Newark': '1h 35m' },
             'catskills': { 'NYC': '2h 30m', 'Albany': '1h 10m', 'Newark': '2h 40m' },
@@ -715,51 +714,51 @@
             'vermont-north': { 'Montreal': '1h 40m', 'Boston': '3h 45m', 'NYC': '5h 25m' },
             'white-mountains': { 'Boston': '2h 20m', 'Portland': '1h 35m', 'NYC': '5h 10m' },
             'maine': { 'Portland': '1h 45m', 'Boston': '3h 20m', 'Montreal': '4h 25m' },
-            'canada': { 'Montreal': '1h 35m', 'Quebec City': '1h 20m', 'Burlington': '2h 35m' }
+            'canada': { 'Montreal': '1h 35m', 'Quebec City': '1h 20m', 'Burlington': '2h 35m' },
         };
 
         const RESORT_DRIVE_TIME_OVERRIDES = {
-            'camelback': { 'NYC': '2h 00m', 'Philadelphia': '2h 20m', 'Newark': '1h 40m' },
-            'blue-mountain': { 'NYC': '2h 15m', 'Philadelphia': '1h 50m', 'Newark': '2h 00m' },
-            'jack-frost': { 'NYC': '2h 15m', 'Philadelphia': '2h 10m', 'Newark': '1h 55m' },
-            'shawnee': { 'NYC': '2h 00m', 'Philadelphia': '2h 35m', 'Newark': '1h 40m' },
-            'bear-creek': { 'NYC': '2h 55m', 'Philadelphia': '2h 10m', 'Newark': '2h 40m' },
-            'elk': { 'NYC': '3h 05m', 'Philadelphia': '3h 00m', 'Newark': '2h 45m' },
-            'big-boulder': { 'NYC': '2h 20m', 'Philadelphia': '2h 05m', 'Newark': '2h 00m' },
-            'montage': { 'NYC': '2h 35m', 'Philadelphia': '2h 20m', 'Newark': '2h 15m' },
-            'hunter': { 'NYC': '2h 45m', 'Albany': '1h 20m', 'Newark': '2h 35m' },
-            'windham': { 'NYC': '3h 05m', 'Albany': '1h 20m', 'Newark': '2h 55m' },
-            'belleayre': { 'NYC': '3h 00m', 'Albany': '1h 55m', 'Newark': '2h 50m' },
-            'whiteface': { 'Albany': '3h 15m', 'Montreal': '2h 30m', 'NYC': '6h 20m' },
-            'gore-mountain': { 'Albany': '1h 55m', 'Montreal': '3h 20m', 'NYC': '5h 00m' },
-            'jiminy-peak': { 'Boston': '3h 15m', 'NYC': '3h 45m', 'Albany': '0h 55m' },
-            'wachusett': { 'Boston': '1h 25m', 'NYC': '4h 25m', 'Albany': '3h 05m' },
-            'mohawk': { 'Hartford': '1h 00m', 'NYC': '2h 05m', 'Boston': '3h 00m' },
-            'stratton': { 'NYC': '4h 55m', 'Boston': '3h 30m', 'Albany': '1h 55m' },
-            'mount-snow': { 'NYC': '4h 50m', 'Boston': '3h 15m', 'Albany': '1h 50m' },
-            'killington': { 'Boston': '3h 40m', 'NYC': '5h 50m', 'Montreal': '4h 00m' },
-            'okemo': { 'Boston': '3h 15m', 'NYC': '5h 25m', 'Montreal': '4h 25m' },
-            'pico': { 'Boston': '3h 35m', 'NYC': '5h 40m', 'Montreal': '3h 55m' },
-            'sugarbush': { 'Boston': '4h 05m', 'NYC': '6h 45m', 'Montreal': '3h 00m' },
-            'mad-river-glen': { 'Boston': '4h 10m', 'NYC': '6h 35m', 'Montreal': '2h 50m' },
-            'stowe': { 'Montreal': '2h 25m', 'Boston': '4h 20m', 'NYC': '7h 20m' },
-            'smugglers-notch': { 'Montreal': '2h 15m', 'Boston': '4h 20m', 'NYC': '7h 15m' },
-            'jay-peak': { 'Montreal': '2h 20m', 'Boston': '4h 40m', 'NYC': '8h 00m' },
-            'burke': { 'Montreal': '3h 10m', 'Boston': '3h 55m', 'NYC': '7h 10m' },
-            'loon': { 'Boston': '2h 40m', 'Portland': '2h 30m', 'NYC': '7h 00m' },
-            'brettonwoods': { 'Boston': '3h 35m', 'Portland': '2h 00m', 'NYC': '7h 50m' },
-            'waterville': { 'Boston': '2h 40m', 'Portland': '2h 35m', 'NYC': '6h 55m' },
-            'cannon': { 'Boston': '2h 45m', 'Portland': '2h 50m', 'NYC': '7h 05m' },
-            'wildcat': { 'Boston': '3h 45m', 'Portland': '2h 05m', 'NYC': '8h 10m' },
-            'sunapee': { 'Boston': '2h 10m', 'Portland': '2h 55m', 'NYC': '5h 50m' },
-            'pats-peak': { 'Boston': '1h 45m', 'Portland': '2h 30m', 'NYC': '5h 40m' },
-            'sunday-river': { 'Portland': '1h 55m', 'Boston': '3h 55m', 'Montreal': '4h 35m' },
-            'sugarloaf': { 'Portland': '4h 05m', 'Boston': '6h 05m', 'Montreal': '5h 55m' },
-            'saddleback': { 'Portland': '3h 10m', 'Boston': '5h 05m', 'Montreal': '5h 15m' },
-            'tremblant': { 'Montreal': '2h 00m', 'Quebec City': '4h 55m', 'Burlington': '3h 55m' },
-            'mont-sainte-anne': { 'Montreal': '4h 00m', 'Quebec City': '0h 40m', 'Burlington': '5h 25m' },
-            'le-massif': { 'Montreal': '4h 35m', 'Quebec City': '1h 15m', 'Burlington': '6h 00m' },
-            'mont-sutton': { 'Montreal': '2h 05m', 'Quebec City': '4h 10m', 'Burlington': '1h 45m' },
+            'camelback': { 'NYC': '1h 50m', 'Philadelphia': '1h 55m', 'Newark': '1h 30m' },
+            'blue-mountain': { 'NYC': '2h 00m', 'Philadelphia': '1h 35m', 'Newark': '1h 40m' },
+            'jack-frost': { 'NYC': '2h 00m', 'Philadelphia': '2h 00m', 'Newark': '1h 40m' },
+            'shawnee': { 'NYC': '1h 30m', 'Philadelphia': '1h 50m', 'Newark': '1h 10m' },
+            'bear-creek': { 'NYC': '2h 25m', 'Philadelphia': '1h 45m', 'Newark': '2h 10m' },
+            'elk': { 'NYC': '2h 25m', 'Philadelphia': '2h 45m', 'Newark': '2h 05m' },
+            'big-boulder': { 'NYC': '2h 05m', 'Philadelphia': '2h 00m', 'Newark': '1h 45m' },
+            'montage': { 'NYC': '2h 10m', 'Philadelphia': '2h 10m', 'Newark': '1h 50m' },
+            'hunter': { 'NYC': '2h 25m', 'Albany': '0h 55m', 'Newark': '2h 15m' },
+            'windham': { 'NYC': '2h 35m', 'Albany': '0h 50m', 'Newark': '2h 25m' },
+            'belleayre': { 'NYC': '2h 20m', 'Albany': '1h 15m', 'Newark': '2h 10m' },
+            'whiteface': { 'Albany': '2h 50m', 'Montreal': '2h 15m', 'NYC': '5h 25m' },
+            'gore-mountain': { 'Albany': '1h 45m', 'Montreal': '3h 00m', 'NYC': '4h 20m' },
+            'jiminy-peak': { 'Boston': '2h 40m', 'NYC': '3h 00m', 'Albany': '0h 35m' },
+            'wachusett': { 'Boston': '1h 10m', 'NYC': '3h 35m', 'Albany': '2h 05m' },
+            'mohawk': { 'Hartford': '0h 50m', 'NYC': '1h 55m', 'Boston': '2h 50m' },
+            'stratton': { 'NYC': '3h 40m', 'Boston': '2h 30m', 'Albany': '1h 20m' },
+            'mount-snow': { 'NYC': '3h 40m', 'Boston': '2h 25m', 'Albany': '1h 10m' },
+            'killington': { 'Boston': '2h 55m', 'NYC': '4h 30m', 'Montreal': '3h 10m' },
+            'okemo': { 'NYC': '4h 10m', 'Boston': '2h 35m', 'Albany': '1h 45m' },
+            'pico': { 'Boston': '3h 00m', 'NYC': '4h 30m', 'Montreal': '3h 05m' },
+            'sugarbush': { 'Boston': '3h 25m', 'NYC': '5h 10m', 'Montreal': '2h 25m' },
+            'mad-river-glen': { 'Boston': '3h 30m', 'NYC': '5h 15m', 'Montreal': '2h 15m' },
+            'stowe': { 'Montreal': '2h 00m', 'Boston': '3h 45m', 'NYC': '5h 45m' },
+            'smugglers-notch': { 'Montreal': '2h 00m', 'Boston': '3h 45m', 'NYC': '5h 45m' },
+            'jay-peak': { 'Montreal': '1h 55m', 'Boston': '4h 15m', 'NYC': '6h 30m' },
+            'burke': { 'Montreal': '2h 30m', 'Boston': '3h 35m', 'NYC': '6h 05m' },
+            'loon': { 'Boston': '2h 15m', 'Portland': '1h 50m', 'NYC': '5h 20m' },
+            'brettonwoods': { 'Boston': '3h 00m', 'Portland': '2h 15m', 'NYC': '5h 40m' },
+            'waterville': { 'Boston': '2h 05m', 'Portland': '2h 10m', 'NYC': '5h 10m' },
+            'cannon': { 'Boston': '2h 30m', 'Portland': '2h 20m', 'NYC': '5h 25m' },
+            'wildcat': { 'Boston': '3h 20m', 'Portland': '2h 10m', 'NYC': '5h 50m' },
+            'sunapee': { 'Boston': '1h 50m', 'Portland': '2h 35m', 'NYC': '4h 45m' },
+            'pats-peak': { 'Boston': '1h 25m', 'Portland': '2h 00m', 'NYC': '4h 35m' },
+            'sunday-river': { 'Portland': '1h 35m', 'Boston': '3h 20m', 'Montreal': '3h 25m' },
+            'sugarloaf': { 'Portland': '2h 20m', 'Boston': '4h 10m', 'Montreal': '3h 45m' },
+            'saddleback': { 'Portland': '2h 15m', 'Boston': '3h 55m', 'Montreal': '3h 35m' },
+            'tremblant': { 'Montreal': '1h 50m', 'Quebec City': '3h 40m', 'Burlington': '3h 05m' },
+            'mont-sainte-anne': { 'Montreal': '3h 45m', 'Quebec City': '0h 35m', 'Burlington': '4h 30m' },
+            'le-massif': { 'Montreal': '4h 05m', 'Quebec City': '1h 15m', 'Burlington': '5h 05m' },
+            'mont-sutton': { 'Montreal': '1h 40m', 'Quebec City': '3h 00m', 'Burlington': '1h 25m' },
         };
 
         function applyResortDriveTimes() {
@@ -777,6 +776,16 @@
                     resort.distance = {};
                 }
             });
+        }
+
+        function parseDriveTimeMinutes(value) {
+            const raw = String(value || '').trim().toLowerCase();
+            const hoursMatch = raw.match(/(\d+)\s*h/);
+            const minsMatch = raw.match(/(\d+)\s*m/);
+            const hours = hoursMatch ? Number(hoursMatch[1]) : 0;
+            const mins = minsMatch ? Number(minsMatch[1]) : 0;
+            const total = (hours * 60) + mins;
+            return Number.isFinite(total) && total > 0 ? total : Number.POSITIVE_INFINITY;
         }
 
         const DEFAULT_SEND_IT_RADIUS_MILES = 1.5;
@@ -1869,7 +1878,8 @@
 
             const passes = resort.passes || [];
             const distance = resort.distance || {};
-            const distanceEntries = Object.entries(distance);
+            const distanceEntries = Object.entries(distance)
+                .sort(([, aTime], [, bTime]) => parseDriveTimeMinutes(aTime) - parseDriveTimeMinutes(bTime));
             const weather = resort.weather || {};
             const forecast = resort.forecast || [];
 
