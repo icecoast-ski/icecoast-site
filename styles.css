@@ -926,6 +926,14 @@
             border-color: rgba(20, 64, 137, 0.34);
         }
 
+        .share-action-link {
+            text-decoration: none;
+        }
+
+        .share-action-btn.is-hidden {
+            display: none !important;
+        }
+
         .share-modal-status {
             min-height: 1.05rem;
             margin: 0.62rem 0 0;

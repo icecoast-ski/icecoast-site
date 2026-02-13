@@ -75,7 +75,7 @@
     </script>
     <link rel="icon" type="image/svg+xml"
       href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzAwNjZGRiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMwMDUyQ0MiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDwhLS0gT3V0ZXIgY2lyY2xlIHdpdGggZ3JhZGllbnQgLS0+CiAgPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAiIGZpbGw9InVybCgjYmcpIiAvPgoKICA8IS0tIExlZnQgc2tpIHdpdGggYmluZGluZyAtLT4KICA8cmVjdCB4PSIyOCIgeT0iNiIgd2lkdGg9IjQiIGhlaWdodD0iNTIiIHJ4PSIyIiByeT0iMiIgZmlsbD0iI0ZGRkZGRiIgdHJhbnNmb3JtPSJyb3RhdGUoLTI4IDMyIDMyKSIgLz4KICA8cmVjdCB4PSIyNyIgeT0iNCIgd2lkdGg9IjUiIGhlaWdodD0iMyIgcng9IjEiIGZpbGw9IiNGRjVBNUYiIHRyYW5zZm9ybT0icm90YXRlKC0yOCAzMiAzMikiIC8+CiAgPHJlY3QgeD0iMjgiIHk9IjI5IiB3aWR0aD0iNCIgaGVpZ2h0PSI2IiByeD0iMSIgZmlsbD0iIzAwQTY5OSIgdHJhbnNmb3JtPSJyb3RhdGUoLTI4IDMyIDMyKSIgLz4KCiAgPCEtLSBSaWdodCBza2kgd2l0aCBiaW5kaW5nIC0tPgogIDxyZWN0IHg9IjMyIiB5PSI2IiB3aWR0aD0iNCIgaGVpZ2h0PSI1MiIgcng9IjIiIHJ5PSIyIiBmaWxsPSIjRkZGRkZGIiB0cmFuc2Zvcm09InJvdGF0ZSgyOCAzMiAzMikiIC8+CiAgPHJlY3QgeD0iMzIiIHk9IjQiIHdpZHRoPSI1IiBoZWlnaHQ9IjMiIHJ4PSIxIiBmaWxsPSIjRkY1QTVGIiB0cmFuc2Zvcm09InJvdGF0ZSgyOCAzMiAzMikiIC8+CiAgPHJlY3QgeD0iMzIiIHk9IjI5IiB3aWR0aD0iNCIgaGVpZ2h0PSI2IiByeD0iMSIgZmlsbD0iIzAwQTY5OSIgdHJhbnNmb3JtPSJyb3RhdGUoMjggMzIgMzIpIiAvPgoKICA8IS0tIENlbnRlciBzbm93IGJ1cnN0IC0tPgogIDxjaXJjbGUgY3g9IjMyIiBjeT0iMzIiIHI9IjQiIGZpbGw9IiNGRkZGRkYiIG9wYWNpdHk9IjAuNCIvPgogIDxjaXJjbGUgY3g9IjMyIiBjeT0iMzIiIHI9IjIiIGZpbGw9IiNGRkZGRkYiLz4KPC9zdmc+">
-    <link rel="stylesheet" href="styles.css?v=20260212c4">
+    <link rel="stylesheet" href="styles.css?v=20260212c6">
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE98TE3N2J"></script>
     <script>
@@ -171,7 +171,7 @@
     <div class="share-modal-overlay" id="shareModalOverlay" aria-hidden="true">
         <div class="share-modal" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
             <div class="share-modal-head">
-                <h3 id="shareModalTitle">Share Resort</h3>
+                <h3 id="shareModalTitle">Share Resort Conditions</h3>
                 <button type="button" class="share-modal-close" id="shareModalClose" aria-label="Close share">×</button>
             </div>
             <p class="share-modal-resort" id="shareModalResort">Resort</p>
@@ -181,6 +181,7 @@
                 <button type="button" class="share-action-btn" id="shareFacebookBtn">Share on Facebook</button>
                 <button type="button" class="share-action-btn" id="shareXBtn">Share on X</button>
                 <button type="button" class="share-action-btn" id="shareDownloadBtn">Download image</button>
+                <a class="share-action-btn share-action-link is-hidden" id="shareSaveImageLink" href="#" download target="_blank" rel="noopener noreferrer">Save image now</a>
             </div>
             <p class="share-modal-status" id="shareModalStatus" aria-live="polite"></p>
         </div>
@@ -318,7 +319,7 @@
             </footer>
     <script src="resorts.js?v=20260212b1"></script>
     <script src="manual-data.js?v=20260212a1"></script>
-    <script src="app.js?v=20260212d6"></script>
+    <script src="app.js?v=20260212d7"></script>
     <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
 </body>
 </html>

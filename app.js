@@ -2667,17 +2667,28 @@ const backgroundSizeByResort = {
         const shareModalResort = document.getElementById('shareModalResort');
         const shareModalStatus = document.getElementById('shareModalStatus');
         const shareDownloadBtn = document.getElementById('shareDownloadBtn');
+        const shareSaveImageLink = document.getElementById('shareSaveImageLink');
         const shareCopyBtn = document.getElementById('shareCopyBtn');
         const shareNativeBtn = document.getElementById('shareNativeBtn');
         const shareXBtn = document.getElementById('shareXBtn');
         const shareFacebookBtn = document.getElementById('shareFacebookBtn');
         let activeSharePayload = null;
+        let activeShareImageUrl = null;
 
         function closeShareModal() {
             if (!shareModalOverlay) return;
             shareModalOverlay.classList.remove('open');
             shareModalOverlay.setAttribute('aria-hidden', 'true');
             if (shareModalStatus) shareModalStatus.textContent = '';
+            if (shareSaveImageLink) {
+                shareSaveImageLink.classList.add('is-hidden');
+                shareSaveImageLink.removeAttribute('href');
+                shareSaveImageLink.removeAttribute('download');
+            }
+            if (activeShareImageUrl) {
+                URL.revokeObjectURL(activeShareImageUrl);
+                activeShareImageUrl = null;
+            }
             activeSharePayload = null;
         }
 
@@ -2703,6 +2714,15 @@ const backgroundSizeByResort = {
             }
             if (shareModalStatus) {
                 shareModalStatus.textContent = '';
+            }
+            if (shareSaveImageLink) {
+                shareSaveImageLink.classList.add('is-hidden');
+                shareSaveImageLink.removeAttribute('href');
+                shareSaveImageLink.removeAttribute('download');
+            }
+            if (activeShareImageUrl) {
+                URL.revokeObjectURL(activeShareImageUrl);
+                activeShareImageUrl = null;
             }
             if (shareNativeBtn) {
                 const isTouchDevice = (typeof window !== 'undefined')
@@ -2958,6 +2978,11 @@ const backgroundSizeByResort = {
                     const ua = (navigator.userAgent || '').toLowerCase();
                     const isIOS = /iphone|ipad|ipod/.test(ua);
                     const finalizeDownload = (imageUrl) => {
+                        if (shareSaveImageLink) {
+                            shareSaveImageLink.href = imageUrl;
+                            shareSaveImageLink.download = fileName;
+                            shareSaveImageLink.classList.remove('is-hidden');
+                        }
                         if (isIOS) {
                             window.open(imageUrl, '_blank', 'noopener,noreferrer');
                             setShareStatus('Image opened in a new tab. Long-press to save.');
@@ -2984,8 +3009,11 @@ const backgroundSizeByResort = {
                                 return;
                             }
                             const imageUrl = URL.createObjectURL(blob);
+                            if (activeShareImageUrl) {
+                                URL.revokeObjectURL(activeShareImageUrl);
+                            }
+                            activeShareImageUrl = imageUrl;
                             finalizeDownload(imageUrl);
-                            setTimeout(() => URL.revokeObjectURL(imageUrl), 8000);
                         }, 'image/png');
                     } else {
                         const dataUrl = canvas.toDataURL('image/png');
