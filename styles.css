@@ -804,6 +804,136 @@
             position: relative;
         }
 
+        .resort-share-btn {
+            border: 1px solid rgba(255, 255, 255, 0.42);
+            background: #1f5ec8;
+            color: #ffffff;
+            border-radius: 16px;
+            width: 2.5rem;
+            height: 2.5rem;
+            padding: 0;
+            cursor: pointer;
+            transition: background 0.18s ease, transform 0.18s ease;
+            backdrop-filter: blur(4px);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: -0.5rem;
+            margin-right: -0.45rem;
+        }
+
+        .resort-share-btn:hover {
+            background: #144089;
+            transform: translateY(-1px);
+        }
+
+        .resort-share-icon {
+            width: 2rem;
+            height: 2rem;
+            display: block;
+            object-fit: contain;
+            filter: brightness(0) invert(1);
+            opacity: 1;
+        }
+
+        .resort-card.share-focus {
+            box-shadow: 0 0 0 3px rgba(31, 94, 200, 0.35), 0 8px 20px rgba(0, 0, 0, 0.18);
+            transition: box-shadow 0.3s ease;
+        }
+
+        .share-modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(4, 15, 34, 0.46);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10020;
+            padding: 1rem;
+        }
+
+        .share-modal-overlay.open {
+            display: flex;
+        }
+
+        .share-modal {
+            width: min(460px, 100%);
+            background: #ffffff;
+            border-radius: 14px;
+            border: 1px solid rgba(24, 46, 82, 0.12);
+            box-shadow: 0 14px 35px rgba(9, 22, 45, 0.24);
+            padding: 0.95rem;
+        }
+
+        .share-modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 0.6rem;
+            margin-bottom: 0.25rem;
+        }
+
+        .share-modal-head h3 {
+            margin: 0;
+            color: #102243;
+            font-size: 1rem;
+            letter-spacing: -0.01em;
+        }
+
+        .share-modal-close {
+            border: 0;
+            background: #eef3fb;
+            color: #14385f;
+            width: 1.9rem;
+            height: 1.9rem;
+            border-radius: 999px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            line-height: 1;
+            cursor: pointer;
+        }
+
+        .share-modal-resort {
+            margin: 0 0 0.65rem;
+            color: #4a5f7e;
+            font-size: 0.82rem;
+            font-weight: 600;
+        }
+
+        .share-modal-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 0.52rem;
+        }
+
+        .share-action-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(20, 64, 137, 0.22);
+            background: #f9fbff;
+            color: #123a66;
+            border-radius: 10px;
+            padding: 0.56rem 0.62rem;
+            font-size: 0.78rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.18s ease;
+        }
+
+        .share-action-btn:hover {
+            background: #ebf2ff;
+            border-color: rgba(20, 64, 137, 0.34);
+        }
+
+        .share-modal-status {
+            min-height: 1.05rem;
+            margin: 0.62rem 0 0;
+            color: #31537b;
+            font-size: 0.72rem;
+            font-weight: 600;
+        }
+
         .resort-header {
             background-image: var(--bg);
             background-size: var(--bg-size, 108%);

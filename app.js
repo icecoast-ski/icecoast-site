@@ -2140,7 +2140,7 @@ const backgroundSizeByResort = {
             const backgroundSize = backgroundSizeByResort[resort.id] || '101%';
 
             return `
-            <div class="resort-card" data-region="${resort.region}" data-resort="${resort.id}">
+            <div class="resort-card" id="resort-${resort.id}" data-region="${resort.region}" data-resort="${resort.id}">
               <div class="resort-header" style="--bg: url('resort-art/${backgroundImageFile}'); --bg-pos: ${backgroundPos}; --bg-size: ${backgroundSize};">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;">
                   <div style="flex:1;">
@@ -2149,6 +2149,9 @@ const backgroundSizeByResort = {
                     </h2>
                     <p class="resort-location">${resort.location}</p>
                   </div>
+                  <button class="resort-share-btn" data-share-resort="${resort.id}" type="button" aria-label="Share ${resort.name}">
+                    <img class="resort-share-icon" src="resort-source/share.png" alt="" aria-hidden="true">
+                  </button>
                 </div>
                 ${heroChipMarkup ? `<div class="status-chips status-chips-bottom">${heroChipMarkup}</div>` : ''}
                 ${snowBadge}
@@ -2386,6 +2389,10 @@ const backgroundSizeByResort = {
             sort: 'rating-high', // Start with best conditions
             search: ''
         };
+        const deepLinkResortId = (typeof window !== 'undefined')
+            ? (new URLSearchParams(window.location.search).get('resort') || '').trim().toLowerCase()
+            : '';
+        let deepLinkHandled = false;
 
         function getSlopeSignalSortScore(resort) {
             if (!resort || typeof resort !== 'object') {
@@ -2517,6 +2524,27 @@ const backgroundSizeByResort = {
             }
 
             grid.innerHTML = filtered.map(resort => createResortCard(resort)).join('');
+            focusResortFromDeepLink();
+        }
+
+        const PUBLIC_SHARE_BASE_URL = 'https://icecoast.ski/';
+
+        function getResortShareUrl(resortId) {
+            const shareUrl = new URL(PUBLIC_SHARE_BASE_URL);
+            shareUrl.searchParams.set('resort', resortId);
+            return shareUrl.toString();
+        }
+
+        function focusResortFromDeepLink() {
+            if (deepLinkHandled || !deepLinkResortId) return;
+            const card = document.querySelector(`.resort-card[data-resort="${deepLinkResortId}"]`);
+            if (!card) return;
+            deepLinkHandled = true;
+            setTimeout(() => {
+                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                card.classList.add('share-focus');
+                setTimeout(() => card.classList.remove('share-focus'), 2200);
+            }, 120);
         }
 
         function syncRegionFilterButtons() {
@@ -2633,6 +2661,380 @@ const backgroundSizeByResort = {
         syncSearchClearButton();
         syncRegionFilterButtons();
         syncPassFilterButtons();
+
+        const shareModalOverlay = document.getElementById('shareModalOverlay');
+        const shareModalClose = document.getElementById('shareModalClose');
+        const shareModalResort = document.getElementById('shareModalResort');
+        const shareModalStatus = document.getElementById('shareModalStatus');
+        const shareDownloadBtn = document.getElementById('shareDownloadBtn');
+        const shareCopyBtn = document.getElementById('shareCopyBtn');
+        const shareNativeBtn = document.getElementById('shareNativeBtn');
+        const shareXBtn = document.getElementById('shareXBtn');
+        const shareFacebookBtn = document.getElementById('shareFacebookBtn');
+        let activeSharePayload = null;
+
+        function closeShareModal() {
+            if (!shareModalOverlay) return;
+            shareModalOverlay.classList.remove('open');
+            shareModalOverlay.setAttribute('aria-hidden', 'true');
+            if (shareModalStatus) shareModalStatus.textContent = '';
+            activeSharePayload = null;
+        }
+
+        function openShareModal(resortId) {
+            if (!shareModalOverlay) return;
+            const resort = resorts.find((r) => r.id === resortId);
+            if (!resort) return;
+            const url = getResortShareUrl(resortId);
+            const snowfall24ForBubble = resort?.snowfall?.['24h'] ?? resort?.snowfall24h ?? '0';
+            const ratingForBubble = Math.max(0, Math.min(5, Math.round(Number(resort.rating) || 0)));
+            const bubblePhrase = getRatingText(ratingForBubble, snowfall24ForBubble, resort);
+            const conditionLabel = (resort.conditions || 'Current conditions').trim();
+            const text = `${conditionLabel} @ ${resort.name}! ${bubblePhrase} | ${url}`;
+            activeSharePayload = {
+                resortId,
+                name: resort.name,
+                url,
+                text
+            };
+
+            if (shareModalResort) {
+                shareModalResort.textContent = resort.name;
+            }
+            if (shareModalStatus) {
+                shareModalStatus.textContent = '';
+            }
+            if (shareNativeBtn) {
+                const isTouchDevice = (typeof window !== 'undefined')
+                    && (window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0);
+                const canNativeShare = typeof navigator !== 'undefined'
+                    && typeof navigator.share === 'function'
+                    && isTouchDevice;
+                shareNativeBtn.style.display = canNativeShare ? 'inline-flex' : 'none';
+            }
+
+            shareModalOverlay.classList.add('open');
+            shareModalOverlay.setAttribute('aria-hidden', 'false');
+        }
+
+        function setShareStatus(text) {
+            if (!shareModalStatus) return;
+            shareModalStatus.textContent = text || '';
+        }
+
+        function loadImageForShare(src) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                if (/^https?:\/\//i.test(src)) {
+                    img.crossOrigin = 'anonymous';
+                }
+                img.onload = () => resolve(img);
+                img.onerror = reject;
+                img.src = src;
+            });
+        }
+
+        function drawRoundRect(ctx, x, y, w, h, r) {
+            const radius = Math.max(0, Math.min(r, Math.min(w, h) / 2));
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.arcTo(x + w, y, x + w, y + h, radius);
+            ctx.arcTo(x + w, y + h, x, y + h, radius);
+            ctx.arcTo(x, y + h, x, y, radius);
+            ctx.arcTo(x, y, x + w, y, radius);
+            ctx.closePath();
+        }
+
+        function drawImageCover(ctx, img, x, y, w, h) {
+            const scale = Math.max(w / img.width, h / img.height);
+            const dw = img.width * scale;
+            const dh = img.height * scale;
+            const dx = x + (w - dw) / 2;
+            const dy = y + (h - dh) / 2;
+            ctx.drawImage(img, dx, dy, dw, dh);
+        }
+
+        function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
+            const words = String(text || '').split(/\s+/).filter(Boolean);
+            const lines = [];
+            let line = '';
+            words.forEach((word) => {
+                const testLine = line ? `${line} ${word}` : word;
+                if (ctx.measureText(testLine).width <= maxWidth || !line) {
+                    line = testLine;
+                } else {
+                    lines.push(line);
+                    line = word;
+                }
+            });
+            if (line) lines.push(line);
+            lines.forEach((ln, idx) => {
+                ctx.fillText(ln, x, y + (idx * lineHeight));
+            });
+            return lines.length;
+        }
+
+        async function buildResortShareImage(resort) {
+            const width = 1200;
+            const height = 1720;
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            if (!ctx) return null;
+
+            ctx.fillStyle = '#f3f7fd';
+            ctx.fillRect(0, 0, width, height);
+
+            // Brand header
+            ctx.fillStyle = '#ffffff';
+            ctx.fillRect(0, 0, width, 170);
+            ctx.fillStyle = '#131a27';
+            ctx.font = '800 72px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText('ice', 64, 105);
+            const iceWidth = ctx.measureText('ice').width;
+            ctx.fillStyle = '#1f5ec8';
+            ctx.fillText('coast', 64 + iceWidth + 8, 105);
+            ctx.fillStyle = '#34435a';
+            ctx.font = '600 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText('know the snow before you go', 64, 145);
+
+            const artFile = backgroundImageByResort[resort.id] || `${resort.id}.jpg`;
+            const artUrl = new URL(`resort-art/${artFile}`, window.location.href).toString();
+
+            try {
+                const art = await loadImageForShare(artUrl);
+                drawImageCover(ctx, art, 0, 170, width, 650);
+            } catch (_) {
+                ctx.fillStyle = '#dbe8fb';
+                ctx.fillRect(0, 170, width, 650);
+            }
+
+            const headerFade = ctx.createLinearGradient(0, 170, 0, 820);
+            headerFade.addColorStop(0, 'rgba(6, 17, 38, 0.18)');
+            headerFade.addColorStop(0.7, 'rgba(6, 17, 38, 0.42)');
+            headerFade.addColorStop(1, 'rgba(6, 17, 38, 0.64)');
+            ctx.fillStyle = headerFade;
+            ctx.fillRect(0, 170, width, 650);
+
+            ctx.fillStyle = '#ffffff';
+            ctx.font = '800 72px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText(resort.name || 'Resort', 64, 710);
+            ctx.font = '500 34px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
+            ctx.fillText(resort.location || '', 64, 760);
+
+            const panelY = 780;
+            drawRoundRect(ctx, 30, panelY, width - 60, height - panelY - 30, 34);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+
+            ctx.fillStyle = '#132a4c';
+            ctx.font = '700 38px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText('CURRENT CONDITIONS', 72, 710);
+
+            ctx.fillStyle = '#144089';
+            ctx.font = '800 72px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText(String(resort.conditions || 'Unknown'), 72, 790);
+
+            const snow24 = resort?.snowfall?.['24h'] || '0';
+            const snow48 = resort?.snowfall?.['48h'] || '0';
+            const temp = resort?.weather?.temp != null ? `${Math.round(Number(resort.weather.temp))}°F` : 'n/a';
+            const wind = resort?.weather?.wind || 'n/a';
+
+            ctx.fillStyle = '#34435a';
+            ctx.font = '600 34px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText(`24h Snow ${snow24}"`, 72, 850);
+            ctx.fillText(`48h Snow ${snow48}"`, 380, 850);
+            ctx.fillText(`Temp ${temp}`, 680, 850);
+            ctx.fillText(`Wind ${wind}`, 900, 850);
+
+            ctx.fillStyle = '#132a4c';
+            ctx.font = '700 38px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText('ICECOAST RATING', 72, 940);
+
+            const rating = Math.max(0, Math.min(5, Math.round(Number(resort.rating) || 0)));
+            const stars = `${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}`;
+            ctx.fillStyle = '#dca73f';
+            ctx.font = '700 58px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText(stars, 72, 1010);
+
+            const snowfall24ForBubble = resort?.snowfall?.['24h'] ?? resort?.snowfall24h ?? '0';
+            const ratingBubbleText = getRatingText(rating, snowfall24ForBubble, resort);
+            const bubbleX = 420;
+            const bubbleY = 938;
+            const bubbleW = 700;
+            const bubbleH = 118;
+            drawRoundRect(ctx, bubbleX, bubbleY, bubbleW, bubbleH, 22);
+            ctx.fillStyle = 'rgba(243, 248, 255, 0.98)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(20, 64, 137, 0.24)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(bubbleX + 18, bubbleY + bubbleH - 16);
+            ctx.lineTo(bubbleX - 8, bubbleY + bubbleH + 4);
+            ctx.lineTo(bubbleX + 24, bubbleY + bubbleH - 2);
+            ctx.closePath();
+            ctx.fillStyle = 'rgba(243, 248, 255, 0.98)';
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = '#144089';
+            ctx.font = '700 36px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            drawWrappedText(ctx, ratingBubbleText, bubbleX + 26, bubbleY + 48, bubbleW - 48, 42);
+
+            ctx.fillStyle = '#132a4c';
+            ctx.font = '700 38px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText('LOGISTICS', 72, 1100);
+
+            const liftTicketWeekend = resort?.liftTicket?.weekend || resort?.liftTicket?.weekday || 'n/a';
+            const parking = resort?.parking || 'n/a';
+            const verticalDrop = resort?.verticalDrop || 'n/a';
+            const trailsOpen = resort?.trails?.open || '0';
+            const trailsTotal = resort?.trails?.total || '0';
+            const liftsOpen = resort?.lifts?.open ?? resort?.liftStatus?.open ?? null;
+            const liftsTotal = resort?.lifts?.total ?? resort?.liftStatus?.total ?? null;
+            const liftText = liftsOpen != null && liftsTotal != null ? `${liftsOpen}/${liftsTotal}` : 'n/a';
+
+            ctx.fillStyle = '#34435a';
+            ctx.font = '600 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText(`Lift Ticket ${liftTicketWeekend}`, 72, 1162);
+            ctx.fillText(`Parking ${parking}`, 72, 1212);
+            ctx.fillText(`Vertical Drop ${verticalDrop}`, 72, 1262);
+            ctx.fillText(`Trails ${trailsOpen}/${trailsTotal}`, 600, 1162);
+            ctx.fillText(`Lifts ${liftText}`, 600, 1212);
+
+            ctx.fillStyle = '#58729a';
+            ctx.font = '600 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText('icecoast.ski', 72, 1630);
+
+            return canvas;
+        }
+
+        if (shareModalClose) {
+            shareModalClose.addEventListener('click', closeShareModal);
+        }
+        if (shareModalOverlay) {
+            shareModalOverlay.addEventListener('click', (event) => {
+                if (event.target === shareModalOverlay) {
+                    closeShareModal();
+                }
+            });
+        }
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'Escape' && shareModalOverlay?.classList.contains('open')) {
+                closeShareModal();
+            }
+        });
+
+        if (shareCopyBtn) {
+            shareCopyBtn.addEventListener('click', async () => {
+                if (!activeSharePayload) return;
+                try {
+                    await navigator.clipboard.writeText(activeSharePayload.url);
+                    setShareStatus('Link copied.');
+                } catch (_) {
+                    setShareStatus('Copy blocked. You can copy from the address bar.');
+                }
+            });
+        }
+
+        if (shareDownloadBtn) {
+            shareDownloadBtn.addEventListener('click', async () => {
+                if (!activeSharePayload) return;
+                try {
+                    setShareStatus('Generating image...');
+                    const resort = resorts.find((r) => r.id === activeSharePayload.resortId);
+                    if (!resort) {
+                        setShareStatus('Resort data not found.');
+                        return;
+                    }
+                    const canvas = await buildResortShareImage(resort);
+                    if (!canvas) {
+                        setShareStatus('Image generation unavailable.');
+                        return;
+                    }
+                    const fileName = `${activeSharePayload.resortId}-icecoast.png`;
+                    const ua = (navigator.userAgent || '').toLowerCase();
+                    const isIOS = /iphone|ipad|ipod/.test(ua);
+                    const finalizeDownload = (imageUrl) => {
+                        if (isIOS) {
+                            window.open(imageUrl, '_blank', 'noopener,noreferrer');
+                            setShareStatus('Image opened in a new tab. Long-press to save.');
+                            return;
+                        }
+                        const link = document.createElement('a');
+                        link.href = imageUrl;
+                        link.download = fileName;
+                        document.body.appendChild(link);
+                        link.click();
+                        link.remove();
+                        setShareStatus('Image downloaded.');
+                    };
+
+                    if (typeof canvas.toBlob === 'function') {
+                        canvas.toBlob((blob) => {
+                            if (!blob) {
+                                try {
+                                    const dataUrl = canvas.toDataURL('image/png');
+                                    finalizeDownload(dataUrl);
+                                } catch (_) {
+                                    setShareStatus('Image export failed. Try Copy link instead.');
+                                }
+                                return;
+                            }
+                            const imageUrl = URL.createObjectURL(blob);
+                            finalizeDownload(imageUrl);
+                            setTimeout(() => URL.revokeObjectURL(imageUrl), 8000);
+                        }, 'image/png');
+                    } else {
+                        const dataUrl = canvas.toDataURL('image/png');
+                        finalizeDownload(dataUrl);
+                    }
+                } catch (_) {
+                    setShareStatus('Image capture failed. Try Copy link instead.');
+                }
+            });
+        }
+
+        if (shareNativeBtn) {
+            shareNativeBtn.addEventListener('click', async () => {
+                const isTouchDevice = (typeof window !== 'undefined')
+                    && (window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0);
+                if (!activeSharePayload || typeof navigator.share !== 'function' || !isTouchDevice) return;
+                try {
+                    await navigator.share({
+                        title: activeSharePayload.name,
+                        text: activeSharePayload.text
+                    });
+                    setShareStatus('Shared.');
+                } catch (_) {}
+            });
+        }
+
+        if (shareXBtn) {
+            shareXBtn.addEventListener('click', () => {
+                if (!activeSharePayload) return;
+                const href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(activeSharePayload.text)}`;
+                window.open(href, '_blank', 'noopener,noreferrer');
+            });
+        }
+
+        if (shareFacebookBtn) {
+            shareFacebookBtn.addEventListener('click', () => {
+                if (!activeSharePayload) return;
+                const href = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(activeSharePayload.url)}&quote=${encodeURIComponent(activeSharePayload.text)}`;
+                window.open(href, '_blank', 'noopener,noreferrer');
+            });
+        }
+
+        document.addEventListener('click', (event) => {
+            const shareTarget = event.target.closest('[data-share-resort]');
+            if (!shareTarget) return;
+            const resortId = shareTarget.dataset.shareResort;
+            if (!resortId) return;
+            openShareModal(resortId);
+        });
 
 
         const WORKER_URL = 'https://cloudflare-worker.rickt123-0f8.workers.dev/';
