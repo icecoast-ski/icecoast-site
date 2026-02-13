@@ -2774,6 +2774,16 @@ const backgroundSizeByResort = {
             ctx.drawImage(img, dx, dy, dw, dh);
         }
 
+        function getShareArtFile(resortId) {
+            const shareArtOverrides = {
+                'camelback': 'camelback.jpg',
+                'cannon': 'cannon.jpg?v=20260208ab',
+                'sunapee': 'waterville.jpg',
+                'pats-peak': 'wachusett.jpg'
+            };
+            return shareArtOverrides[resortId] || `${resortId}.jpg`;
+        }
+
         function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
             const words = String(text || '').split(/\s+/).filter(Boolean);
             const lines = [];
@@ -2819,7 +2829,7 @@ const backgroundSizeByResort = {
             ctx.font = '600 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
             ctx.fillText('know the snow before you go', 64, 145);
 
-            const artFile = backgroundImageByResort[resort.id] || `${resort.id}.jpg`;
+            const artFile = getShareArtFile(resort.id);
             const artUrl = new URL(`resort-art/${artFile}`, window.location.href).toString();
 
             try {
@@ -3019,8 +3029,8 @@ const backgroundSizeByResort = {
                         const dataUrl = canvas.toDataURL('image/png');
                         finalizeDownload(dataUrl);
                     }
-                } catch (_) {
-                    setShareStatus('Image capture failed. Try Copy link instead.');
+                } catch (error) {
+                    setShareStatus(`Image capture failed${error?.message ? `: ${error.message}` : ''}. Try Copy link instead.`);
                 }
             });
         }
