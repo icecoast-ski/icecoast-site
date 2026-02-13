@@ -2158,6 +2158,7 @@ const backgroundSizeByResort = {
               </div>
 
               <div class="resort-body">
+                <div class="resort-unified-panel">
                 <div class="conditions-highlight">
                   <div class="conditions-top">
                     <div class="conditions-label">Current Conditions</div>
@@ -2374,6 +2375,7 @@ const backgroundSizeByResort = {
                   <div class="sendit-history-row" aria-label="Slope Signal history">
                     <span class="sendit-history-item"><strong>24h</strong> <em>${sendItSummary24h}</em></span>
                   </div>`}
+                </div>
                 </div>
                 <div class="resort-card-divider" aria-hidden="true"></div>
               </div>

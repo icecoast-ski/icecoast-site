@@ -3491,6 +3491,59 @@
     padding: 0 1rem 1rem;
 }
 
+.resort-unified-panel {
+    background: #ffffff;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    border-radius: 16px;
+    box-shadow: 0 3px 10px rgba(15, 23, 42, 0.06);
+    padding: 0.88rem;
+}
+
+.resort-unified-panel .conditions-highlight,
+.resort-unified-panel .rating-section,
+.resort-unified-panel .mountain-ops-section,
+.resort-unified-panel .sendit-section {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+}
+
+.resort-unified-panel .conditions-highlight,
+.resort-unified-panel .rating-section,
+.resort-unified-panel .mountain-ops-section,
+.resort-unified-panel .extra-ratings,
+.resort-unified-panel .distance-info {
+    margin-bottom: 0.85rem;
+}
+
+.resort-unified-panel .extra-ratings,
+.resort-unified-panel .distance-info,
+.resort-unified-panel .sendit-section {
+    margin-top: 0;
+    padding-top: 0.85rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.resort-unified-panel .extra-ratings {
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.resort-unified-panel .distance-info {
+    border-radius: 0;
+    border: 0;
+    box-shadow: none;
+    padding-left: 0;
+    padding-right: 0;
+    margin-bottom: 0.9rem;
+}
+
+.resort-unified-panel .sendit-section {
+    margin-bottom: 0;
+}
+
 .conditions-highlight {
     background: #ffffff;
     color: var(--charcoal);
