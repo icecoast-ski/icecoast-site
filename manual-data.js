@@ -3,7 +3,7 @@
  * Generated from admin.html
  */
 window.MANUAL_RESORT_OVERRIDES_META = {
-  "updatedAt": "2026-02-13T13:46:02.499Z"
+  "updatedAt": "2026-02-13T16:31:58.232Z"
 };
 window.MANUAL_RESORT_OVERRIDES = {
   "blue-mountain": {
@@ -650,7 +650,7 @@ window.MANUAL_RESORT_OVERRIDES = {
   },
   "bear-creek": {
     "conditions": "Machine Groomed",
-    "icecoastRating": 2,
+    "icecoastRating": 3,
     "dynamicPricing": false,
     "trails": {
       "open": 23
@@ -660,7 +660,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:45:17.118Z"
+    "_patrolUpdatedAt": "2026-02-13T16:31:58.232Z"
   },
   "big-boulder": {
     "conditions": "Packed Powder",
