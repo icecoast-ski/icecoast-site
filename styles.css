@@ -3487,6 +3487,15 @@
     color: #fff6ec;
 }
 
+.status-chip.chip-pow {
+    background: linear-gradient(135deg, #00b8ff 0%, #1f7bff 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 10px rgba(0, 140, 255, 0.38);
+    animation: pulse 2s ease-in-out infinite;
+    order: 99;
+    margin-left: auto;
+}
+
 .resort-body {
     padding: 0 1rem 1rem;
 }
@@ -3532,6 +3541,7 @@
 }
 
 .resort-unified-panel .distance-info {
+    background: transparent;
     border-radius: 0;
     border: 0;
     box-shadow: none;
@@ -3542,6 +3552,14 @@
 
 .resort-unified-panel .sendit-section {
     margin-bottom: 0;
+}
+
+.sendit-section {
+    overflow: visible !important;
+}
+
+.sendit-radial {
+    overflow: visible !important;
 }
 
 .conditions-highlight {

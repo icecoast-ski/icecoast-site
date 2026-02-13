@@ -2011,6 +2011,13 @@
             } else if (resort.familyOwned) {
                 heroChips.push({ cls: 'chip-family', label: 'Family-Owned' });
             }
+            const hasSignificantSnow = parseInt(resort.snowfall24h || '0', 10) >= 6;
+            if (hasSignificantSnow) {
+                heroChips.push({
+                    cls: 'chip-pow',
+                    label: `${resort.snowfall24h || 0}″ Fresh Pow`
+                });
+            }
             const heroChipMarkup = heroChips.slice(0, 3)
                 .map((chip) => `<span class="status-chip ${chip.cls}">${chip.label}</span>`)
                 .join('');
@@ -2043,11 +2050,6 @@
             const metricsFeelsLike = `${metricsFeelsLikeBase}${feelsLikeWarning}`;
             const metricsWind = weather.wind ?? '—';
             const signalLead = sendItSubtitlePrimary;
-            const hasSignificantSnow = parseInt(resort.snowfall24h || '0', 10) >= 6;
-            let snowBadge = '';
-            if (hasSignificantSnow) {
-                snowBadge = `<div class="snow-alert-badge">${resort.snowfall24h || 0}″ FRESH POW</div>`;
-            }
 
 const backgroundImageByResort = {
     'camelback': 'camelback.jpg',
@@ -2154,7 +2156,6 @@ const backgroundSizeByResort = {
                   </button>
                 </div>
                 ${heroChipMarkup ? `<div class="status-chips status-chips-bottom">${heroChipMarkup}</div>` : ''}
-                ${snowBadge}
               </div>
 
               <div class="resort-body">
@@ -2807,117 +2808,107 @@ const backgroundSizeByResort = {
         }
 
         async function buildResortShareImage(resort) {
-            const width = 1200;
-            const height = 1720;
+            const width = 1080;
+            const height = 1480;
             const canvas = document.createElement('canvas');
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext('2d');
             if (!ctx) return null;
 
-            ctx.fillStyle = '#f3f7fd';
+            ctx.fillStyle = '#eef3fb';
             ctx.fillRect(0, 0, width, height);
 
-            // Brand header
             ctx.fillStyle = '#ffffff';
-            ctx.fillRect(0, 0, width, 170);
+            ctx.fillRect(0, 0, width, 120);
             ctx.fillStyle = '#131a27';
-            ctx.font = '800 72px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-            ctx.fillText('ice', 64, 105);
+            ctx.font = '800 54px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText('ice', 44, 74);
             const iceWidth = ctx.measureText('ice').width;
             ctx.fillStyle = '#1f5ec8';
-            ctx.fillText('coast', 64 + iceWidth + 8, 105);
+            ctx.fillText('coast', 44 + iceWidth + 6, 74);
             ctx.fillStyle = '#34435a';
-            ctx.font = '600 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-            ctx.fillText('know the snow before you go', 64, 145);
+            ctx.font = '600 22px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText('know the snow before you go', 44, 104);
+
+            const cardX = 28;
+            const cardY = 136;
+            const cardW = width - 56;
+            const cardH = height - cardY - 28;
+            const headerH = 360;
+
+            drawRoundRect(ctx, cardX, cardY, cardW, cardH, 28);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(15, 23, 42, 0.1)';
+            ctx.lineWidth = 1;
+            ctx.stroke();
 
             const artFile = getShareArtFile(resort.id);
             const artUrl = new URL(`resort-art/${artFile}`, window.location.href).toString();
+            ctx.save();
+            drawRoundRect(ctx, cardX, cardY, cardW, headerH, 28);
+            ctx.clip();
 
             try {
                 const art = await loadImageForShare(artUrl);
-                drawImageCover(ctx, art, 0, 170, width, 650);
+                drawImageCover(ctx, art, cardX, cardY, cardW, headerH);
             } catch (_) {
                 ctx.fillStyle = '#dbe8fb';
-                ctx.fillRect(0, 170, width, 650);
+                ctx.fillRect(cardX, cardY, cardW, headerH);
             }
 
-            const headerFade = ctx.createLinearGradient(0, 170, 0, 820);
-            headerFade.addColorStop(0, 'rgba(6, 17, 38, 0.18)');
-            headerFade.addColorStop(0.7, 'rgba(6, 17, 38, 0.42)');
-            headerFade.addColorStop(1, 'rgba(6, 17, 38, 0.64)');
+            const headerFade = ctx.createLinearGradient(0, cardY + 90, 0, cardY + headerH);
+            headerFade.addColorStop(0, 'rgba(6, 17, 38, 0.08)');
+            headerFade.addColorStop(0.65, 'rgba(6, 17, 38, 0.36)');
+            headerFade.addColorStop(1, 'rgba(6, 17, 38, 0.66)');
             ctx.fillStyle = headerFade;
-            ctx.fillRect(0, 170, width, 650);
+            ctx.fillRect(cardX, cardY, cardW, headerH);
+            ctx.restore();
 
             ctx.fillStyle = '#ffffff';
-            ctx.font = '800 72px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-            ctx.fillText(resort.name || 'Resort', 64, 710);
-            ctx.font = '500 34px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-            ctx.fillStyle = 'rgba(255, 255, 255, 0.92)';
-            ctx.fillText(resort.location || '', 64, 760);
+            ctx.font = '800 66px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText(resort.name || 'Resort', cardX + 30, cardY + headerH - 74);
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.94)';
+            ctx.font = '600 34px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText(resort.location || '', cardX + 30, cardY + headerH - 30);
 
-            const panelY = 780;
-            drawRoundRect(ctx, 30, panelY, width - 60, height - panelY - 30, 34);
-            ctx.fillStyle = '#ffffff';
-            ctx.fill();
+            let y = cardY + headerH + 42;
+            const left = cardX + 34;
+            const contentW = cardW - 68;
 
-            ctx.fillStyle = '#132a4c';
-            ctx.font = '700 38px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-            ctx.fillText('CURRENT CONDITIONS', 72, 710);
+            ctx.fillStyle = '#263246';
+            ctx.font = '700 30px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText('CURRENT CONDITIONS', left, y);
+            y += 54;
 
             ctx.fillStyle = '#144089';
-            ctx.font = '800 72px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-            ctx.fillText(String(resort.conditions || 'Unknown'), 72, 790);
+            ctx.font = '800 64px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText(String(resort.conditions || 'Unknown'), left, y);
+            y += 56;
 
             const snow24 = resort?.snowfall?.['24h'] || '0';
             const snow48 = resort?.snowfall?.['48h'] || '0';
             const temp = resort?.weather?.temp != null ? `${Math.round(Number(resort.weather.temp))}°F` : 'n/a';
             const wind = resort?.weather?.wind || 'n/a';
-
+            const metrics = [`24h Snow ${snow24}"`, `48h Snow ${snow48}"`, `Temp ${temp}`, `Wind ${wind}`];
+            const colW = contentW / 4;
             ctx.fillStyle = '#34435a';
-            ctx.font = '600 34px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-            ctx.fillText(`24h Snow ${snow24}"`, 72, 850);
-            ctx.fillText(`48h Snow ${snow48}"`, 380, 850);
-            ctx.fillText(`Temp ${temp}`, 680, 850);
-            ctx.fillText(`Wind ${wind}`, 900, 850);
+            ctx.font = '700 22px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            metrics.forEach((m, i) => ctx.fillText(m, left + i * colW, y));
+            y += 24;
 
-            ctx.fillStyle = '#132a4c';
-            ctx.font = '700 38px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-            ctx.fillText('ICECOAST RATING', 72, 940);
-
-            const rating = Math.max(0, Math.min(5, Math.round(Number(resort.rating) || 0)));
-            const stars = `${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}`;
-            ctx.fillStyle = '#dca73f';
-            ctx.font = '700 58px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-            ctx.fillText(stars, 72, 1010);
-
-            const snowfall24ForBubble = resort?.snowfall?.['24h'] ?? resort?.snowfall24h ?? '0';
-            const ratingBubbleText = getRatingText(rating, snowfall24ForBubble, resort);
-            const bubbleX = 420;
-            const bubbleY = 938;
-            const bubbleW = 700;
-            const bubbleH = 118;
-            drawRoundRect(ctx, bubbleX, bubbleY, bubbleW, bubbleH, 22);
-            ctx.fillStyle = 'rgba(243, 248, 255, 0.98)';
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(20, 64, 137, 0.24)';
-            ctx.lineWidth = 2;
-            ctx.stroke();
+            ctx.strokeStyle = 'rgba(15, 23, 42, 0.1)';
             ctx.beginPath();
-            ctx.moveTo(bubbleX + 18, bubbleY + bubbleH - 16);
-            ctx.lineTo(bubbleX - 8, bubbleY + bubbleH + 4);
-            ctx.lineTo(bubbleX + 24, bubbleY + bubbleH - 2);
-            ctx.closePath();
-            ctx.fillStyle = 'rgba(243, 248, 255, 0.98)';
-            ctx.fill();
+            ctx.moveTo(left, y + 14);
+            ctx.lineTo(left + contentW, y + 14);
             ctx.stroke();
-            ctx.fillStyle = '#144089';
-            ctx.font = '700 36px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-            drawWrappedText(ctx, ratingBubbleText, bubbleX + 26, bubbleY + 48, bubbleW - 48, 42);
+            y += 58;
 
-            ctx.fillStyle = '#132a4c';
-            ctx.font = '700 38px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-            ctx.fillText('LOGISTICS', 72, 1100);
+            ctx.fillStyle = '#263246';
+            ctx.font = '800 50px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText('LOGISTICS', left, y);
+            y += 54;
 
             const liftTicketWeekend = resort?.liftTicket?.weekend || resort?.liftTicket?.weekday || 'n/a';
             const parking = resort?.parking || 'n/a';
@@ -2929,16 +2920,96 @@ const backgroundSizeByResort = {
             const liftText = liftsOpen != null && liftsTotal != null ? `${liftsOpen}/${liftsTotal}` : 'n/a';
 
             ctx.fillStyle = '#34435a';
-            ctx.font = '600 32px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-            ctx.fillText(`Lift Ticket ${liftTicketWeekend}`, 72, 1162);
-            ctx.fillText(`Parking ${parking}`, 72, 1212);
-            ctx.fillText(`Vertical Drop ${verticalDrop}`, 72, 1262);
-            ctx.fillText(`Trails ${trailsOpen}/${trailsTotal}`, 600, 1162);
-            ctx.fillText(`Lifts ${liftText}`, 600, 1212);
+            ctx.font = '800 27px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            const c2 = left + (contentW / 2) + 12;
+            ctx.fillText(`Lift Ticket ${liftTicketWeekend}`, left, y);
+            ctx.fillText(`Trails ${trailsOpen}/${trailsTotal}`, c2, y);
+            y += 50;
+            ctx.fillText(`Parking ${parking}`, left, y);
+            ctx.fillText(`Lifts ${liftText}`, c2, y);
+            y += 50;
+            ctx.fillText(`Vertical Drop ${verticalDrop}`, left, y);
+            y += 28;
+
+            ctx.strokeStyle = 'rgba(15, 23, 42, 0.1)';
+            ctx.beginPath();
+            ctx.moveTo(left, y + 10);
+            ctx.lineTo(left + contentW, y + 10);
+            ctx.stroke();
+            y += 54;
+
+            ctx.fillStyle = '#263246';
+            ctx.font = '700 46px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText('ICECOAST RATING', left, y);
+            y += 58;
+
+            const rating = Math.max(0, Math.min(5, Math.round(Number(resort.rating) || 0)));
+            const stars = `${'★'.repeat(rating)}${'☆'.repeat(5 - rating)}`;
+            ctx.fillStyle = '#dca73f';
+            ctx.font = '700 72px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText(stars, left, y);
+
+            const snowfall24ForBubble = resort?.snowfall?.['24h'] ?? resort?.snowfall24h ?? '0';
+            const ratingBubbleText = getRatingText(rating, snowfall24ForBubble, resort);
+            const bubbleX = left + 300;
+            const bubbleY = y - 56;
+            const bubbleW = contentW - 300;
+            const bubbleH = 86;
+            drawRoundRect(ctx, bubbleX, bubbleY, bubbleW, bubbleH, 22);
+            ctx.fillStyle = '#f6f8fc';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(20, 64, 137, 0.24)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(bubbleX + 16, bubbleY + bubbleH - 12);
+            ctx.lineTo(bubbleX - 6, bubbleY + bubbleH + 4);
+            ctx.lineTo(bubbleX + 22, bubbleY + bubbleH - 2);
+            ctx.closePath();
+            ctx.fillStyle = '#f6f8fc';
+            ctx.fill();
+            ctx.stroke();
+            ctx.fillStyle = '#144089';
+            ctx.font = '700 24px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            drawWrappedText(ctx, ratingBubbleText, bubbleX + 18, bubbleY + 36, bubbleW - 30, 28);
+            y += 72;
+
+            ctx.strokeStyle = 'rgba(15, 23, 42, 0.1)';
+            ctx.beginPath();
+            ctx.moveTo(left, y + 10);
+            ctx.lineTo(left + contentW, y + 10);
+            ctx.stroke();
+            y += 54;
+
+            const apresScore = Math.max(0, Math.min(5, Math.round(Number(resort.apres) || 0)));
+            const familyScore = Math.max(0, Math.min(5, Math.round(Number(resort.family) || 0)));
+            const beerRow = `${'🍺'.repeat(apresScore)}${'·'.repeat(5 - apresScore)}`;
+            const familyRow = `${'👶'.repeat(familyScore)}${'·'.repeat(5 - familyScore)}`;
+            ctx.fillStyle = '#2a3b55';
+            ctx.font = '700 24px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText(`Après ${beerRow}`, left, y);
+            ctx.fillText(`Family ${familyRow}`, c2, y);
+            y += 52;
+
+            const distanceEntries = Object.entries(resort.distance || {})
+                .sort(([, aTime], [, bTime]) => parseDriveTimeMinutes(aTime) - parseDriveTimeMinutes(bTime))
+                .slice(0, 3);
+            if (distanceEntries.length > 0) {
+                ctx.fillStyle = '#263246';
+                ctx.font = '700 34px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+                ctx.fillText('DRIVE TIME', left, y);
+                y += 38;
+                ctx.fillStyle = '#34435a';
+                ctx.font = '700 20px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+                distanceEntries.forEach(([city, time]) => {
+                    ctx.fillText(`${city} ${time}`, left, y);
+                    y += 28;
+                });
+            }
 
             ctx.fillStyle = '#58729a';
-            ctx.font = '600 28px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
-            ctx.fillText('icecoast.ski', 72, 1630);
+            ctx.font = '700 24px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            ctx.fillText('icecoast.ski', left, height - 42);
 
             return canvas;
         }
