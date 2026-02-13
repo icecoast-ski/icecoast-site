@@ -2873,6 +2873,35 @@ const backgroundSizeByResort = {
             ctx.font = '600 34px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
             ctx.fillText(resort.location || '', cardX + 30, cardY + headerH - 30);
 
+            const chipItems = [];
+            const gladesScore = Number(resort.glades) || 0;
+            if (gladesScore > 0) {
+                chipItems.push({
+                    text: gladesScore >= 3 ? 'ELITE GLADES' : (gladesScore === 2 ? 'EXCELLENT GLADES' : 'SOME GLADES'),
+                    bg: '#5f7448',
+                    fg: '#f4f8ff'
+                });
+            } else if (resort.familyOwned) {
+                chipItems.push({ text: 'FAMILY-OWNED', bg: '#7b5a3e', fg: '#fff6ec' });
+            }
+            const pow24h = parseInt(resort?.snowfall?.['24h'] ?? resort?.snowfall24h ?? '0', 10);
+            if (pow24h >= 6) {
+                chipItems.push({ text: `${pow24h}" FRESH POW`, bg: '#1f7bff', fg: '#ffffff' });
+            }
+            let chipX = cardX + 28;
+            const chipY = cardY + headerH - 6;
+            chipItems.slice(0, 3).forEach((chip) => {
+                ctx.font = '760 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+                const chipW = Math.ceil(ctx.measureText(chip.text).width) + 28;
+                const chipH = 34;
+                drawRoundRect(ctx, chipX, chipY, chipW, chipH, 999);
+                ctx.fillStyle = chip.bg;
+                ctx.fill();
+                ctx.fillStyle = chip.fg;
+                ctx.fillText(chip.text, chipX + 14, chipY + 22);
+                chipX += chipW + 10;
+            });
+
             let y = cardY + headerH + 42;
             const left = cardX + 34;
             const contentW = cardW - 68;
@@ -2880,6 +2909,22 @@ const backgroundSizeByResort = {
             ctx.fillStyle = '#263246';
             ctx.font = '700 30px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
             ctx.fillText('CURRENT CONDITIONS', left, y);
+            const confidenceText = (() => {
+                const ts = Date.parse(resort.patrolUpdatedAt || '');
+                if (Number.isFinite(ts)) {
+                    const hoursOld = (Date.now() - ts) / (60 * 60 * 1000);
+                    if (hoursOld <= 24) return 'Confidence: High';
+                    if (hoursOld <= 48) return 'Confidence: Medium';
+                }
+                return 'Confidence: Basic';
+            })();
+            ctx.font = '760 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+            const confW = Math.ceil(ctx.measureText(confidenceText).width) + 24;
+            drawRoundRect(ctx, left + contentW - confW, y - 26, confW, 30, 8);
+            ctx.fillStyle = '#e8f1ff';
+            ctx.fill();
+            ctx.fillStyle = '#1f3b68';
+            ctx.fillText(confidenceText, left + contentW - confW + 12, y - 6);
             y += 54;
 
             ctx.fillStyle = '#144089';
@@ -3058,26 +3103,13 @@ const backgroundSizeByResort = {
                         return;
                     }
                     const fileName = `${activeSharePayload.resortId}-icecoast.png`;
-                    const ua = (navigator.userAgent || '').toLowerCase();
-                    const isIOS = /iphone|ipad|ipod/.test(ua);
-                    const finalizeDownload = (imageUrl) => {
+                    const finalizeImageReady = (imageUrl) => {
                         if (shareSaveImageLink) {
                             shareSaveImageLink.href = imageUrl;
                             shareSaveImageLink.download = fileName;
                             shareSaveImageLink.classList.remove('is-hidden');
                         }
-                        if (isIOS) {
-                            window.open(imageUrl, '_blank', 'noopener,noreferrer');
-                            setShareStatus('Image opened in a new tab. Long-press to save.');
-                            return;
-                        }
-                        const link = document.createElement('a');
-                        link.href = imageUrl;
-                        link.download = fileName;
-                        document.body.appendChild(link);
-                        link.click();
-                        link.remove();
-                        setShareStatus('Image downloaded.');
+                        setShareStatus('Image ready. Tap "Save image now".');
                     };
 
                     if (typeof canvas.toBlob === 'function') {
@@ -3085,7 +3117,7 @@ const backgroundSizeByResort = {
                             if (!blob) {
                                 try {
                                     const dataUrl = canvas.toDataURL('image/png');
-                                    finalizeDownload(dataUrl);
+                                    finalizeImageReady(dataUrl);
                                 } catch (_) {
                                     setShareStatus('Image export failed. Try Copy link instead.');
                                 }
@@ -3096,11 +3128,11 @@ const backgroundSizeByResort = {
                                 URL.revokeObjectURL(activeShareImageUrl);
                             }
                             activeShareImageUrl = imageUrl;
-                            finalizeDownload(imageUrl);
+                            finalizeImageReady(imageUrl);
                         }, 'image/png');
                     } else {
                         const dataUrl = canvas.toDataURL('image/png');
-                        finalizeDownload(dataUrl);
+                        finalizeImageReady(dataUrl);
                     }
                 } catch (error) {
                     setShareStatus(`Image capture failed${error?.message ? `: ${error.message}` : ''}. Try Copy link instead.`);
