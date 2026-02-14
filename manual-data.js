@@ -3,7 +3,7 @@
  * Generated from admin.html
  */
 window.MANUAL_RESORT_OVERRIDES_META = {
-  "updatedAt": "2026-02-13T16:31:58.232Z"
+  "updatedAt": "2026-02-14T13:43:38.835Z"
 };
 window.MANUAL_RESORT_OVERRIDES = {
   "blue-mountain": {
@@ -16,14 +16,14 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": true,
     "trails": {
-      "open": 38
+      "open": 40
     },
     "lifts": {
       "total": 7
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:31:27.576Z"
+    "_patrolUpdatedAt": "2026-02-14T13:32:54.337Z"
   },
   "camelback": {
     "conditions": "Packed Powder",
@@ -42,7 +42,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:31:05.683Z"
+    "_patrolUpdatedAt": "2026-02-14T13:32:29.607Z"
   },
   "gore-mountain": {
     "conditions": "Packed Powder",
@@ -54,28 +54,28 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": true,
     "trails": {
-      "open": 91
+      "open": 99
     },
     "lifts": {
       "total": 14
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:29:53.793Z"
+    "_patrolUpdatedAt": "2026-02-14T13:31:00.796Z"
   },
   "hunter": {
-    "conditions": "Machine Groomed",
+    "conditions": "Snow Groomed",
     "icecoastRating": 4,
     "dynamicPricing": false,
     "trails": {
-      "open": 57
+      "open": 59
     },
     "lifts": {
       "total": 13
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:27:29.609Z"
+    "_patrolUpdatedAt": "2026-02-14T13:30:13.427Z"
   },
   "jay-peak": {
     "conditions": "Packed Powder",
@@ -92,9 +92,9 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 9
     },
-    "snowfall24h": 2,
-    "snowfall48h": 12,
-    "_patrolUpdatedAt": "2026-02-13T13:22:23.947Z"
+    "snowfall24h": 0,
+    "snowfall48h": 3,
+    "_patrolUpdatedAt": "2026-02-14T13:26:06.585Z"
   },
   "killington": {
     "conditions": "Packed Powder",
@@ -111,9 +111,9 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 21
     },
-    "snowfall24h": 2,
-    "snowfall48h": 5,
-    "_patrolUpdatedAt": "2026-02-13T13:15:02.191Z"
+    "snowfall24h": 0,
+    "snowfall48h": 2,
+    "_patrolUpdatedAt": "2026-02-14T13:21:26.310Z"
   },
   "loon": {
     "conditions": "Packed Powder",
@@ -132,7 +132,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:26:03.894Z"
+    "_patrolUpdatedAt": "2026-02-14T13:28:33.947Z"
   },
   "tremblant": {
     "conditions": "Packed Powder",
@@ -149,12 +149,12 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 14
     },
-    "snowfall24h": 0,
-    "snowfall48h": 2,
-    "_patrolUpdatedAt": "2026-02-13T13:30:35.463Z"
+    "snowfall24h": 1,
+    "snowfall48h": 1,
+    "_patrolUpdatedAt": "2026-02-14T13:32:19.995Z"
   },
   "mount-snow": {
-    "conditions": "Packed Powder",
+    "conditions": "Snow Groomed",
     "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$99+",
@@ -163,14 +163,14 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": true,
     "trails": {
-      "open": 82
+      "open": 81
     },
     "lifts": {
       "total": 20
     },
     "snowfall24h": 0,
-    "snowfall48h": 4,
-    "_patrolUpdatedAt": "2026-02-13T13:21:17.963Z"
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-14T13:24:28.945Z"
   },
   "okemo": {
     "conditions": "Powder",
@@ -182,14 +182,14 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": false,
     "trails": {
-      "open": 114
+      "open": 120
     },
     "lifts": {
       "total": 20
     },
     "snowfall24h": 0,
-    "snowfall48h": 4,
-    "_patrolUpdatedAt": "2026-02-13T13:21:53.897Z"
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-14T13:25:22.634Z"
   },
   "smugglers-notch": {
     "conditions": "Packed Powder",
@@ -207,11 +207,10 @@ window.MANUAL_RESORT_OVERRIDES = {
       "total": 8
     },
     "snowfall24h": 0,
-    "snowfall48h": 5,
-    "_patrolUpdatedAt": "2026-02-13T13:23:54.429Z"
+    "_patrolUpdatedAt": "2026-02-14T13:27:10.289Z"
   },
   "stowe": {
-    "conditions": "Powder",
+    "conditions": "Packed Powder",
     "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$125+",
@@ -226,11 +225,11 @@ window.MANUAL_RESORT_OVERRIDES = {
       "total": 12
     },
     "snowfall24h": 0,
-    "snowfall48h": 7,
-    "_patrolUpdatedAt": "2026-02-13T13:15:46.779Z"
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-14T13:22:24.496Z"
   },
   "stratton": {
-    "conditions": "Packed Powder",
+    "conditions": "Machine Groomed",
     "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$88+",
@@ -246,11 +245,11 @@ window.MANUAL_RESORT_OVERRIDES = {
       "total": 14
     },
     "snowfall24h": 0,
-    "snowfall48h": 8,
-    "_patrolUpdatedAt": "2026-02-13T13:17:00.228Z"
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-14T13:23:43.933Z"
   },
   "sugarbush": {
-    "conditions": "Packed Powder",
+    "conditions": "Machine Groomed",
     "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$129+",
@@ -259,17 +258,17 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": true,
     "trails": {
-      "open": 108
+      "open": 111
     },
     "lifts": {
       "total": 16
     },
     "snowfall24h": 0,
-    "snowfall48h": 6,
-    "_patrolUpdatedAt": "2026-02-13T13:16:26.961Z"
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-14T13:23:07.039Z"
   },
   "sugarloaf": {
-    "conditions": "Powder",
+    "conditions": "Packed Powder",
     "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$68+",
@@ -284,8 +283,8 @@ window.MANUAL_RESORT_OVERRIDES = {
       "total": 13
     },
     "snowfall24h": 0,
-    "snowfall48h": 6,
-    "_patrolUpdatedAt": "2026-02-13T13:25:31.328Z"
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-14T13:28:04.425Z"
   },
   "sunday-river": {
     "conditions": "Machine Groomed",
@@ -304,11 +303,11 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:24:49.502Z"
+    "_patrolUpdatedAt": "2026-02-14T13:27:38.606Z"
   },
   "whiteface": {
-    "conditions": "Packed Powder",
-    "icecoastRating": 5,
+    "conditions": "Loose Granular",
+    "icecoastRating": 4,
     "liftTicket": {
       "weekday": "$80+",
       "weekend": "$107+"
@@ -322,7 +321,8 @@ window.MANUAL_RESORT_OVERRIDES = {
       "total": 11
     },
     "snowfall24h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:26:53.952Z"
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-14T13:29:39.209Z"
   },
   "windham": {
     "conditions": "Packed Powder",
@@ -341,7 +341,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:28:34.343Z"
+    "_patrolUpdatedAt": "2026-02-14T13:30:29.350Z"
   },
   "belleayre": {
     "conditions": "Machine Groomed",
@@ -359,8 +359,8 @@ window.MANUAL_RESORT_OVERRIDES = {
       "total": 8
     },
     "snowfall24h": 0,
-    "snowfall48h": 3,
-    "_patrolUpdatedAt": "2026-02-13T13:39:38.859Z"
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-14T13:39:36.570Z"
   },
   "brettonwoods": {
     "conditions": "Powder",
@@ -379,10 +379,10 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 13,
-    "_patrolUpdatedAt": "2026-02-13T13:37:06.423Z"
+    "_patrolUpdatedAt": "2026-02-14T13:37:16.361Z"
   },
   "burke": {
-    "conditions": "Packed Powder",
+    "conditions": "Machine Groomed",
     "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$25+",
@@ -398,7 +398,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 9,
-    "_patrolUpdatedAt": "2026-02-13T13:33:31.524Z"
+    "_patrolUpdatedAt": "2026-02-14T13:34:27.167Z"
   },
   "cannon": {
     "conditions": "Machine Groomed",
@@ -415,9 +415,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 10
     },
-    "snowfall24h": 0,
-    "snowfall48h": 6,
-    "_patrolUpdatedAt": "2026-02-13T13:34:17.101Z"
+    "_patrolUpdatedAt": "2026-02-14T13:35:20.139Z"
   },
   "jiminy-peak": {
     "conditions": "Machine Groomed",
@@ -434,8 +432,7 @@ window.MANUAL_RESORT_OVERRIDES = {
       "total": 9
     },
     "snowfall24h": 0,
-    "snowfall48h": 5,
-    "_patrolUpdatedAt": "2026-02-13T13:40:16.593Z"
+    "_patrolUpdatedAt": "2026-02-14T13:40:00.848Z"
   },
   "le-massif": {
     "conditions": "Packed Powder",
@@ -452,9 +449,9 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 7
     },
-    "snowfall24h": 0,
+    "snowfall24h": 5,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:43:45.753Z"
+    "_patrolUpdatedAt": "2026-02-14T13:42:04.819Z"
   },
   "mad-river-glen": {
     "conditions": "Packed Powder",
@@ -473,10 +470,10 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:32:58.087Z"
+    "_patrolUpdatedAt": "2026-02-14T13:33:52.771Z"
   },
   "mont-sutton": {
-    "conditions": "Packed Powder",
+    "conditions": "Snow Groomed",
     "icecoastRating": 5,
     "liftTicket": {
       "weekday": "$51+",
@@ -490,9 +487,9 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 9
     },
-    "snowfall24h": 1,
-    "snowfall48h": 4,
-    "_patrolUpdatedAt": "2026-02-13T13:44:29.971Z"
+    "snowfall24h": 0,
+    "snowfall48h": 1,
+    "_patrolUpdatedAt": "2026-02-14T13:42:41.185Z"
   },
   "mont-sainte-anne": {
     "conditions": "Packed Powder",
@@ -510,11 +507,11 @@ window.MANUAL_RESORT_OVERRIDES = {
       "total": 11
     },
     "snowfall24h": 0,
-    "snowfall48h": 2,
-    "_patrolUpdatedAt": "2026-02-13T13:42:36.294Z"
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-14T13:41:19.865Z"
   },
   "sunapee": {
-    "conditions": "Packed Powder",
+    "conditions": "Snow Groomed",
     "icecoastRating": 5,
     "vertical": 1510,
     "liftTicket": {
@@ -531,7 +528,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:38:32.963Z"
+    "_patrolUpdatedAt": "2026-02-14T13:37:48.769Z"
   },
   "pats-peak": {
     "conditions": "Packed Powder",
@@ -549,9 +546,9 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 11
     },
-    "snowfall24h": 0,
+    "snowfall24h": 6,
     "snowfall48h": 6,
-    "_patrolUpdatedAt": "2026-02-13T13:39:05.773Z"
+    "_patrolUpdatedAt": "2026-02-14T13:38:11.351Z"
   },
   "pico": {
     "conditions": "Packed Powder",
@@ -568,9 +565,9 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 7
     },
-    "snowfall24h": 2,
-    "snowfall48h": 6,
-    "_patrolUpdatedAt": "2026-02-13T13:32:15.217Z"
+    "snowfall24h": 0,
+    "snowfall48h": 2,
+    "_patrolUpdatedAt": "2026-02-14T13:33:35.185Z"
   },
   "saddleback": {
     "conditions": "Packed Powder",
@@ -582,14 +579,14 @@ window.MANUAL_RESORT_OVERRIDES = {
     "parking": "Free",
     "dynamicPricing": true,
     "trails": {
-      "open": 68
+      "open": 67
     },
     "lifts": {
       "total": 6
     },
-    "snowfall24h": 1,
-    "snowfall48h": 1,
-    "_patrolUpdatedAt": "2026-02-13T13:41:12.586Z"
+    "snowfall24h": 0,
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-14T13:40:40.613Z"
   },
   "wachusett": {
     "conditions": "Machine Groomed",
@@ -608,7 +605,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:40:42.235Z"
+    "_patrolUpdatedAt": "2026-02-14T13:40:19.793Z"
   },
   "waterville": {
     "conditions": "Packed Powder",
@@ -626,8 +623,8 @@ window.MANUAL_RESORT_OVERRIDES = {
       "total": 11
     },
     "snowfall24h": 0,
-    "snowfall48h": 6,
-    "_patrolUpdatedAt": "2026-02-13T13:35:50.381Z"
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-14T13:36:49.916Z"
   },
   "wildcat": {
     "conditions": "Powder",
@@ -645,8 +642,8 @@ window.MANUAL_RESORT_OVERRIDES = {
       "total": 5
     },
     "snowfall24h": 0,
-    "snowfall48h": 1,
-    "_patrolUpdatedAt": "2026-02-13T13:34:57.966Z"
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-14T13:35:52.971Z"
   },
   "bear-creek": {
     "conditions": "Machine Groomed",
@@ -660,7 +657,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T16:31:58.232Z"
+    "_patrolUpdatedAt": "2026-02-14T13:43:08.085Z"
   },
   "big-boulder": {
     "conditions": "Packed Powder",
@@ -674,7 +671,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:44:50.050Z"
+    "_patrolUpdatedAt": "2026-02-14T13:42:50.684Z"
   },
   "elk": {
     "conditions": "Machine Groomed",
@@ -689,7 +686,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 1,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:45:31.568Z"
+    "_patrolUpdatedAt": "2026-02-14T13:43:18.803Z"
   },
   "jack-frost": {
     "conditions": "Packed Powder",
@@ -703,7 +700,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:44:48.009Z"
+    "_patrolUpdatedAt": "2026-02-14T13:42:46.537Z"
   },
   "mohawk": {
     "conditions": "Variable",
@@ -723,7 +720,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:46:02.499Z"
+    "_patrolUpdatedAt": "2026-02-14T13:43:38.835Z"
   },
   "montage": {
     "conditions": "Machine Groomed",
@@ -738,7 +735,7 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:45:50.394Z"
+    "_patrolUpdatedAt": "2026-02-14T13:43:30.337Z"
   },
   "shawnee": {
     "conditions": "Machine Groomed",
@@ -752,6 +749,6 @@ window.MANUAL_RESORT_OVERRIDES = {
     },
     "snowfall24h": 0,
     "snowfall48h": 0,
-    "_patrolUpdatedAt": "2026-02-13T13:45:07.112Z"
+    "_patrolUpdatedAt": "2026-02-14T13:42:57.487Z"
   }
 };
