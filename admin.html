@@ -197,6 +197,7 @@
               <option value="">Select condition...</option>
               <option value="Powder">Powder</option>
               <option value="Packed Powder">Packed Powder</option>
+              <option value="Snow Groomed">Snow Groomed</option>
               <option value="Machine Groomed">Machine Groomed</option>
               <option value="Variable">Variable</option>
               <option value="Hardpack">Hardpack</option>
@@ -236,12 +237,12 @@
 
         <div class="row">
           <div>
-            <label for="snow24">24h Snow (inches)</label>
-            <input id="snow24" type="number" min="0" step="1" />
+            <label for="snow24">24h Snow (inches, accepts cm)</label>
+            <input id="snow24" type="text" inputmode="decimal" placeholder='12 or 30cm' />
           </div>
           <div>
-            <label for="snow48">48h Snow (inches)</label>
-            <input id="snow48" type="number" min="0" step="1" />
+            <label for="snow48">48h Snow (inches, accepts cm)</label>
+            <input id="snow48" type="text" inputmode="decimal" placeholder='20 or 50cm' />
           </div>
         </div>
 
@@ -339,14 +340,16 @@
         label: 'Tier 2 - Lite / Every Other Day Full',
         ids: [
           'pico', 'mad-river-glen', 'burke', 'cannon', 'wildcat', 'waterville', 'brettonwoods',
-          'sunapee', 'pats-peak', 'belleayre', 'jiminy-peak', 'wachusett', 'saddleback', 'mont-sainte-anne',
+          'sunapee', 'pats-peak', 'ragged-mountain', 'belleayre', 'plattekill', 'jiminy-peak', 'wachusett',
+          'catamount', 'berkshire-east', 'bolton-valley', 'saddleback', 'mont-sainte-anne',
           'le-massif', 'mont-sutton'
         ]
       },
       {
         label: 'Tier 3 - Exceptions / Weekend Focus',
         ids: [
-          'jack-frost', 'big-boulder', 'shawnee', 'bear-creek', 'elk', 'montage', 'mohawk'
+          'jack-frost', 'big-boulder', 'shawnee', 'bear-creek', 'elk', 'montage', 'mohawk',
+          'black-mountain', 'magic-mountain'
         ]
       }
     ];
@@ -417,6 +420,8 @@
       openConditionsBtn: document.getElementById('openConditionsBtn'),
       exportStatus: document.getElementById('exportStatus')
     };
+    let loadedFormSnapshot = '';
+    let currentResortId = null;
 
     const ADMIN_STORAGE = {
       workerUrl: 'icecoast_admin_worker_url',
@@ -519,6 +524,36 @@
       return Number.isFinite(n) ? n : null;
     }
 
+    function parseSnowfallToInchesOrNull(value) {
+      const raw = cleanString(String(value ?? ''));
+      if (!raw) return null;
+      const normalized = raw.toLowerCase().replace(',', '.');
+      const match = normalized.match(/-?\d+(\.\d+)?/);
+      if (!match) return null;
+      const amount = Number(match[0]);
+      if (!Number.isFinite(amount)) return null;
+      const isCm = /\bcm\b|centimet|centimeter|centimetre/.test(normalized);
+      return isCm ? (amount / 2.54) : amount;
+    }
+
+    function normalizeSnowInputInches(inputEl) {
+      if (!inputEl) return;
+      const parsed = parseSnowfallToInchesOrNull(inputEl.value);
+      if (parsed === null) return;
+      inputEl.value = String(Math.max(0, Math.round(parsed)));
+    }
+
+    function stableStringify(value) {
+      if (Array.isArray(value)) {
+        return `[${value.map(stableStringify).join(',')}]`;
+      }
+      if (value && typeof value === 'object') {
+        const keys = Object.keys(value).sort();
+        return `{${keys.map((k) => `${JSON.stringify(k)}:${stableStringify(value[k])}`).join(',')}}`;
+      }
+      return JSON.stringify(value);
+    }
+
     function cleanString(value) {
       if (typeof value !== 'string') return '';
       return value.trim();
@@ -613,6 +648,9 @@
       el.resortMeta.innerHTML = isEdited
         ? `Editing <strong>${resort.name}</strong> <span class="pill">Override saved</span> ${liftieEnabled ? '' : '<span class="pill">Manual lifts</span>'}`
         : `Editing <strong>${resort.name}</strong>${liftieEnabled ? '' : ' <span class="pill">Manual lifts</span>'}`;
+
+      currentResortId = resortId;
+      loadedFormSnapshot = stableStringify(sanitizePatchForExport(buildPatchFromForm()));
     }
 
     function buildPatchFromForm() {
@@ -662,9 +700,9 @@
         if (liftsTotal !== null) patch.lifts.total = Math.max(0, Math.round(liftsTotal));
       }
 
-      const snow24 = numberOrNull(el.snow24.value);
+      const snow24 = parseSnowfallToInchesOrNull(el.snow24.value);
       if (snow24 !== null) patch.snowfall24h = Math.max(0, Math.round(snow24));
-      const snow48 = numberOrNull(el.snow48.value);
+      const snow48 = parseSnowfallToInchesOrNull(el.snow48.value);
       if (snow48 !== null) patch.snowfall48h = Math.max(0, Math.round(snow48));
 
       return patch;
@@ -680,9 +718,9 @@
       return clean;
     }
 
-    function saveCurrentResort() {
-      const resort = getCurrentResort();
-      if (!resort) return;
+    function savePatchForResortId(resortId, options = {}) {
+      const resort = resortsById.get(resortId);
+      if (!resort) return false;
       const patch = buildPatchFromForm();
       if (isPatchEmpty(patch)) {
         delete overrides[resort.id];
@@ -690,9 +728,24 @@
         patch._patrolUpdatedAt = new Date().toISOString();
         overrides[resort.id] = patch;
       }
-      loadFormForResort(resort.id);
       renderExportText();
-      setStatus(el.editStatus, `Saved ${resort.name}.`, 'ok');
+      if (!options.silent) {
+        loadFormForResort(resort.id);
+        setStatus(el.editStatus, `Saved ${resort.name}.`, 'ok');
+      }
+      return true;
+    }
+
+    function saveCurrentResort() {
+      const resort = getCurrentResort();
+      if (!resort) return;
+      savePatchForResortId(resort.id);
+    }
+
+    function hasUnsavedResortChanges() {
+      if (!currentResortId) return false;
+      const currentSnapshot = stableStringify(sanitizePatchForExport(buildPatchFromForm()));
+      return currentSnapshot !== loadedFormSnapshot;
     }
 
     function goToNextResort() {
@@ -757,10 +810,13 @@
       'hunter': 'https://www.huntermtn.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx',
       'windham': 'https://www.windhammountainclub.com/mountain-report/',
       'belleayre': 'https://www.belleayre.com/mountain/snow-report/',
+      'plattekill': 'https://plattekill.com/conditions-report/',
       'whiteface': 'https://whiteface.com/mountain/conditions/',
       'gore-mountain': 'https://goremountain.com/the-mountain/conditions/',
       'jiminy-peak': 'https://www.jiminypeak.com/the-mountain/mountain-information/snow-report/',
       'wachusett': 'https://www.wachusett.com/the-mountain/your-visit/snow-report/',
+      'catamount': 'https://www.catamountski.com/mountain-report/',
+      'berkshire-east': 'https://berkshireeast.com/snow-report',
       'mohawk': 'https://www.mohawkmtn.com/snow-report/',
       'stratton': 'https://www.stratton.com/the-mountain/mountain-report',
       'mount-snow': 'https://www.mountsnow.com/ski-ride/snow-report/',
@@ -773,13 +829,17 @@
       'smugglers-notch': 'https://www.smuggs.com/conditions/winter-report',
       'jay-peak': 'https://digital.jaypeakresort.com/conditions/snow-report/',
       'burke': 'https://skiburke.com/the-mountain/weather-conditions/',
+      'bolton-valley': 'https://www.boltonvalley.com/winter/snow-conditions/',
       'loon': 'https://www.loonmtn.com/mountain-report',
       'brettonwoods': 'https://www.brettonwoods.com/snow-trail-report/',
       'waterville': 'https://www.waterville.com/snow-report-maps/',
       'cannon': 'https://www.cannonmt.com/mountain-report',
       'wildcat': 'https://www.skiwildcat.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx',
+      'black-mountain': 'https://blackmt.com/snow-report/',
+      'ragged-mountain': 'https://raggedmountainresort.com/mountain-report/',
       'sunapee': 'https://www.mountsunapee.com/the-mountain/mountain-conditions/snow-and-weather-report.aspx',
       'pats-peak': 'https://www.patspeak.com/snow-report/',
+      'magic-mountain': 'https://magicmtn.com/snow-report/',
       'sunday-river': 'https://www.sundayriver.com/mountain-report',
       'sugarloaf': 'https://www.sugarloaf.com/mountain-report',
       'saddleback': 'https://www.saddlebackmaine.com/mountain-report/',
@@ -854,9 +914,24 @@
     }
 
     el.resortSelect.addEventListener('change', () => {
-      loadFormForResort(el.resortSelect.value);
-      setStatus(el.editStatus, '', '');
+      const nextResortId = el.resortSelect.value;
+      if (currentResortId && nextResortId !== currentResortId && hasUnsavedResortChanges()) {
+        const resort = resortsById.get(currentResortId);
+        const shouldSave = confirm(`Unsaved changes for ${resort?.name || 'current resort'}. Save before switching?`);
+        if (shouldSave) {
+          savePatchForResortId(currentResortId, { silent: true });
+        } else {
+          setStatus(el.editStatus, `Switched resorts without saving ${resort?.name || 'previous edits'}.`, 'warn');
+        }
+      }
+      loadFormForResort(nextResortId);
+      if (!hasUnsavedResortChanges()) {
+        setStatus(el.editStatus, '', '');
+      }
     });
+
+    el.snow24.addEventListener('blur', () => normalizeSnowInputInches(el.snow24));
+    el.snow48.addEventListener('blur', () => normalizeSnowInputInches(el.snow48));
     el.saveResortBtn.addEventListener('click', saveCurrentResort);
     el.saveNextBtn.addEventListener('click', () => {
       saveCurrentResort();
