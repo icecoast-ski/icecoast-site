@@ -1,6 +1,6 @@
 /**
  * 🎿 ICECOAST Resort Data - Single Source of Truth
- * This file contains all 41 resort definitions used across:
+ * This file contains all 48 resort definitions used across:
  * - Frontend (index.html)
  * - Cloudflare Worker (cloudflare-worker.js)
  * - Scheduled Worker (icecoast-scheduler.js)
@@ -113,7 +113,7 @@ const RESORTS = [
         liftie: 'null'
     },
 
-    // ========== NEW YORK - 5 resorts ==========
+    // ========== NEW YORK - 6 resorts ==========
     {
         id: 'hunter',
         name: 'Hunter Mountain',
@@ -154,6 +154,19 @@ const RESORTS = [
         liftie: 'belleayre'
     },
     {
+        id: 'plattekill',
+        name: 'Plattekill Mountain',
+        icon: '⛰️',
+        location: 'Roxbury, NY',
+        region: 'catskills',
+        familyOwned: true,
+        lat: 42.3037,
+        lon: -74.6538,
+        vertical: 1100,
+        liftsTotal: 5,
+        liftie: 'null'
+    },
+    {
         id: 'whiteface',
         name: 'Whiteface Mountain',
         icon: '🏔️',
@@ -180,7 +193,7 @@ const RESORTS = [
         liftie: 'gore-mountain'
     },
 
-    // ========== MASSACHUSETTS & CONNECTICUT - 3 resorts ==========
+    // ========== MASSACHUSETTS & CONNECTICUT - 5 resorts ==========
     {
         id: 'jiminy-peak',
         name: 'Jiminy Peak',
@@ -208,6 +221,32 @@ const RESORTS = [
         liftie: 'wachusett'
     },
     {
+        id: 'catamount',
+        name: 'Catamount Mountain',
+        icon: '🏔️',
+        location: 'South Egremont, MA',
+        region: 'massachusetts',
+        familyOwned: true,
+        lat: 42.1847,
+        lon: -73.2602,
+        vertical: 1000,
+        liftsTotal: 8,
+        liftie: 'null'
+    },
+    {
+        id: 'berkshire-east',
+        name: 'Berkshire East',
+        icon: '⛰️',
+        location: 'Charlemont, MA',
+        region: 'massachusetts',
+        familyOwned: true,
+        lat: 42.6201,
+        lon: -72.8915,
+        vertical: 1180,
+        liftsTotal: 5,
+        liftie: 'null'
+    },
+    {
         id: 'mohawk',
         name: 'Mohawk Mountain',
         icon: '🏔️',
@@ -221,7 +260,7 @@ const RESORTS = [
         liftie: 'mohawk-mountain'
     },
 
-    // ========== VERMONT - 11 resorts ==========
+    // ========== VERMONT - 13 resorts ==========
     {
         id: 'stratton',
         name: 'Stratton Mountain',
@@ -365,8 +404,34 @@ const RESORTS = [
         liftsTotal: 5,
         liftie: 'burke'
     },
+    {
+        id: 'bolton-valley',
+        name: 'Bolton Valley',
+        icon: '🏔️',
+        location: 'Bolton Valley, VT',
+        region: 'vermont-north',
+        familyOwned: true,
+        lat: 44.4216,
+        lon: -72.8514,
+        vertical: 1704,
+        liftsTotal: 6,
+        liftie: 'null'
+    },
+    {
+        id: 'magic-mountain',
+        name: 'Magic Mountain',
+        icon: '🎿',
+        location: 'Londonderry, VT',
+        region: 'vermont-south',
+        familyOwned: true,
+        lat: 43.2013,
+        lon: -72.7791,
+        vertical: 1500,
+        liftsTotal: 5,
+        liftie: 'null'
+    },
 
-    // ========== NEW HAMPSHIRE & MAINE - 10 resorts ==========
+    // ========== NEW HAMPSHIRE & MAINE - 12 resorts ==========
     {
         id: 'loon',
         name: 'Loon Mountain',
@@ -431,6 +496,32 @@ const RESORTS = [
         vertical: 2112,
         liftsTotal: 5,
         liftie: 'wildcat'
+    },
+    {
+        id: 'black-mountain',
+        name: 'Black Mountain',
+        icon: '⚫',
+        location: 'Jackson, NH',
+        region: 'white-mountains',
+        familyOwned: true,
+        lat: 44.1890,
+        lon: -71.1649,
+        vertical: 1100,
+        liftsTotal: 3,
+        liftie: 'null'
+    },
+    {
+        id: 'ragged-mountain',
+        name: 'Ragged Mountain',
+        icon: '⛰️',
+        location: 'Danbury, NH',
+        region: 'white-mountains',
+        familyOwned: true,
+        lat: 43.4864,
+        lon: -71.8420,
+        vertical: 1250,
+        liftsTotal: 6,
+        liftie: 'null'
     },
     {
         id: 'sunapee',
