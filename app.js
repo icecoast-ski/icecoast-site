@@ -2543,7 +2543,8 @@ const backgroundSizeByResort = {
                     const sendIt = sendItSummaryByResort?.[r.id] || {};
                     const votes24h = Number.isFinite(Number(sendIt.votes24h)) ? Number(sendIt.votes24h) : 0;
                     const score24h = Number.isFinite(Number(sendIt.score24h)) ? Number(sendIt.score24h) : null;
-                    const score = score24h;
+                    const scoreOverall = Number.isFinite(Number(sendIt.score)) ? Number(sendIt.score) : null;
+                    const score = score24h !== null ? score24h : scoreOverall;
 
                     if (votes24h < 1 || !Number.isFinite(score)) {
                         return false;
