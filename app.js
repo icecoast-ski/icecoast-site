@@ -2060,6 +2060,10 @@
             const powWatch72 = Number.isFinite(Number(powWatch?.totals?.snow72))
                 ? `${Number(powWatch.totals.snow72).toFixed(1)}"`
                 : '—';
+            const powWatchBandRaw = String(powWatch?.band || '').trim();
+            const powWatchStatusLabel = powWatchBandRaw === 'POW WATCH ON'
+                ? 'ON'
+                : (powWatchBandRaw === 'POW WATCH BUILDING' ? 'BUILDING' : 'QUIET');
 
 const backgroundImageByResort = {
     'camelback': 'camelback.jpg',
@@ -2186,7 +2190,10 @@ const backgroundSizeByResort = {
                     <span>Wind <strong>${metricsWind}</strong></span>
                   </div>
                   <div class="pow-watch-inline">
-                    <div class="pow-watch-head">POW WATCH</div>
+                    <div class="pow-watch-top">
+                      <div class="pow-watch-head">POW WATCH</div>
+                      <div class="pow-watch-badge">${powWatchStatusLabel}</div>
+                    </div>
                     <div class="pow-watch-sub">Next 72h snow potential</div>
                     <div class="pow-watch-metrics">
                       <span>24h <strong>${powWatch24}"</strong></span>
