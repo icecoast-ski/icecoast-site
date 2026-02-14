@@ -2474,18 +2474,15 @@ const backgroundSizeByResort = {
                 });
             }
 
-            if (filterState.vibe === 'sendit') {
-                const ranked = [...filtered];
-                ranked.sort((a, b) => {
-                    const aSignal = getSlopeSignalSortScore(a);
-                    const bSignal = getSlopeSignalSortScore(b);
-                    if (bSignal.score !== aSignal.score) return bSignal.score - aSignal.score; // best first
-                    if (bSignal.votes !== aSignal.votes) return bSignal.votes - aSignal.votes;
-                    return (Number(b.rating) || 0) - (Number(a.rating) || 0);
+            if (filterState.vibe === 'on') {
+                filtered = filtered.filter((r) => String(r?.powWatch?.band || '').trim() === 'POW WATCH ON');
+            } else if (filterState.vibe === 'building') {
+                filtered = filtered.filter((r) => String(r?.powWatch?.band || '').trim() === 'POW WATCH BUILDING');
+            } else if (filterState.vibe === 'quiet') {
+                filtered = filtered.filter((r) => {
+                    const band = String(r?.powWatch?.band || '').trim();
+                    return !band || band === 'POW WATCH QUIET';
                 });
-                return ranked;
-            } else if (filterState.vibe === 'avoid') {
-                filtered = filtered.filter(r => r.rating === 0); // Impossible - will always show no results
             }
 
             switch (filterState.sort) {
@@ -2546,7 +2543,7 @@ const backgroundSizeByResort = {
                     "avoid grom says sketchy in spots. Locals still get quality laps with good line choice.",
                     "avoid grom called it firm and fast. Time to polish technique and send controlled."
                 ];
-                const messages = filterState.vibe === 'avoid' ? avoidMessages : snarkMessages;
+                const messages = filterState.vibe === 'quiet' ? avoidMessages : snarkMessages;
                 const randomMessage = messages[Math.floor(Math.random() * messages.length)];
                 grid.innerHTML = `<div class="loading" style="grid-column: 1/-1;">${randomMessage}</div>`;
                 return;
