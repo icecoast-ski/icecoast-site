@@ -3,7 +3,7 @@
  * Generated from admin.html
  */
 window.MANUAL_RESORT_OVERRIDES_META = {
-  "updatedAt": "2026-02-14T13:43:38.835Z"
+  "updatedAt": "2026-02-14T14:45:06.833Z"
 };
 window.MANUAL_RESORT_OVERRIDES = {
   "blue-mountain": {
@@ -362,6 +362,34 @@ window.MANUAL_RESORT_OVERRIDES = {
     "snowfall48h": 0,
     "_patrolUpdatedAt": "2026-02-14T13:39:36.570Z"
   },
+  "berkshire-east": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 4,
+    "dynamicPricing": false,
+    "trails": {
+      "open": 33
+    },
+    "lifts": {
+      "open": 4,
+      "total": 5
+    },
+    "_patrolUpdatedAt": "2026-02-14T14:39:28.304Z"
+  },
+  "bolton-valley": {
+    "conditions": "Packed Powder",
+    "icecoastRating": 5,
+    "dynamicPricing": false,
+    "trails": {
+      "open": 71
+    },
+    "lifts": {
+      "open": 5,
+      "total": 6
+    },
+    "snowfall24h": 1,
+    "snowfall48h": 11,
+    "_patrolUpdatedAt": "2026-02-14T14:38:16.025Z"
+  },
   "brettonwoods": {
     "conditions": "Powder",
     "icecoastRating": 5,
@@ -416,6 +444,19 @@ window.MANUAL_RESORT_OVERRIDES = {
       "total": 10
     },
     "_patrolUpdatedAt": "2026-02-14T13:35:20.139Z"
+  },
+  "catamount": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 3,
+    "dynamicPricing": false,
+    "trails": {
+      "open": 39
+    },
+    "lifts": {
+      "open": 6,
+      "total": 8
+    },
+    "_patrolUpdatedAt": "2026-02-14T14:41:46.657Z"
   },
   "jiminy-peak": {
     "conditions": "Machine Groomed",
@@ -569,6 +610,34 @@ window.MANUAL_RESORT_OVERRIDES = {
     "snowfall48h": 2,
     "_patrolUpdatedAt": "2026-02-14T13:33:35.185Z"
   },
+  "plattekill": {
+    "conditions": "Packed Powder",
+    "icecoastRating": 4,
+    "dynamicPricing": false,
+    "trails": {
+      "open": 41
+    },
+    "lifts": {
+      "open": 4,
+      "total": 5
+    },
+    "_patrolUpdatedAt": "2026-02-14T14:43:57.862Z"
+  },
+  "ragged-mountain": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 4,
+    "dynamicPricing": false,
+    "trails": {
+      "open": 57
+    },
+    "lifts": {
+      "open": 6,
+      "total": 6
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-14T14:45:06.833Z"
+  },
   "saddleback": {
     "conditions": "Packed Powder",
     "icecoastRating": 5,
@@ -673,6 +742,21 @@ window.MANUAL_RESORT_OVERRIDES = {
     "snowfall48h": 0,
     "_patrolUpdatedAt": "2026-02-14T13:42:50.684Z"
   },
+  "black-mountain": {
+    "conditions": "Machine Groomed",
+    "icecoastRating": 3,
+    "dynamicPricing": false,
+    "trails": {
+      "open": 61
+    },
+    "lifts": {
+      "open": 5,
+      "total": 5
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-14T14:37:00.916Z"
+  },
   "elk": {
     "conditions": "Machine Groomed",
     "icecoastRating": 3,
@@ -701,6 +785,20 @@ window.MANUAL_RESORT_OVERRIDES = {
     "snowfall24h": 0,
     "snowfall48h": 0,
     "_patrolUpdatedAt": "2026-02-14T13:42:46.537Z"
+  },
+  "magic-mountain": {
+    "conditions": "Snow Groomed",
+    "icecoastRating": 3,
+    "dynamicPricing": false,
+    "trails": {
+      "open": 48
+    },
+    "lifts": {
+      "total": 5
+    },
+    "snowfall24h": 0,
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-14T14:36:03.263Z"
   },
   "mohawk": {
     "conditions": "Variable",
