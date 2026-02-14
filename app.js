@@ -2464,6 +2464,7 @@ const backgroundSizeByResort = {
             regions: [],
             passes: [],
             vibe: 'all',
+            signal: 'all',
             sort: 'rating-high', // Start with best conditions
             search: ''
         };
@@ -2534,6 +2535,18 @@ const backgroundSizeByResort = {
                 });
             }
 
+            if (filterState.signal === 'send') {
+                filtered = filtered.filter((r) => {
+                    const { score } = getSlopeSignalSortScore(r);
+                    return Number.isFinite(score) && score >= 70;
+                });
+            } else if (filterState.signal === 'avoid') {
+                filtered = filtered.filter((r) => {
+                    const { score } = getSlopeSignalSortScore(r);
+                    return Number.isFinite(score) && score < 45;
+                });
+            }
+
             switch (filterState.sort) {
                 case 'rating-high':
                     filtered.sort((a, b) => b.rating - a.rating);
@@ -2592,7 +2605,7 @@ const backgroundSizeByResort = {
                     "avoid grom says sketchy in spots. Locals still get quality laps with good line choice.",
                     "avoid grom called it firm and fast. Time to polish technique and send controlled."
                 ];
-                const messages = filterState.vibe === 'quiet' ? avoidMessages : snarkMessages;
+                const messages = (filterState.vibe === 'quiet' || filterState.signal === 'avoid') ? avoidMessages : snarkMessages;
                 const randomMessage = messages[Math.floor(Math.random() * messages.length)];
                 grid.innerHTML = `<div class="loading" style="grid-column: 1/-1;">${randomMessage}</div>`;
                 return;
@@ -2691,6 +2704,15 @@ const backgroundSizeByResort = {
                 document.querySelectorAll('[data-vibe]').forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
                 filterState.vibe = btn.dataset.vibe;
+                renderResorts();
+            });
+        });
+
+        document.querySelectorAll('[data-signal]').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('[data-signal]').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                filterState.signal = btn.dataset.signal;
                 renderResorts();
             });
         });
