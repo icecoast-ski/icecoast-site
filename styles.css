@@ -3732,6 +3732,43 @@
     vertical-align: -0.04em;
 }
 
+.pow-watch-inline {
+    margin-top: 0.58rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.pow-watch-head {
+    font-size: 0.74rem;
+    font-weight: 800;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: #1f2f46;
+    line-height: 1;
+}
+
+.pow-watch-sub {
+    margin-top: 0.28rem;
+    font-size: 0.64rem;
+    font-weight: 650;
+    color: #51627c;
+    line-height: 1.2;
+}
+
+.pow-watch-metrics {
+    margin-top: 0.38rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.44rem 0.9rem;
+    font-size: 0.74rem;
+    color: #34435a;
+}
+
+.pow-watch-metrics strong {
+    color: #162234;
+    font-weight: 800;
+}
+
 .forecast-inline {
     margin-top: 0.62rem;
     border-top: 1px solid rgba(15, 23, 42, 0.08);

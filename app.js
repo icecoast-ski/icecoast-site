@@ -2050,6 +2050,16 @@
             const metricsFeelsLike = `${metricsFeelsLikeBase}${feelsLikeWarning}`;
             const metricsWind = weather.wind ?? '—';
             const signalLead = sendItSubtitlePrimary;
+            const powWatch = resort.powWatch || null;
+            const powWatch24 = Number.isFinite(Number(powWatch?.totals?.snow24))
+                ? `${Number(powWatch.totals.snow24).toFixed(1)}"`
+                : '—';
+            const powWatch48 = Number.isFinite(Number(powWatch?.totals?.snow48))
+                ? `${Number(powWatch.totals.snow48).toFixed(1)}"`
+                : '—';
+            const powWatch72 = Number.isFinite(Number(powWatch?.totals?.snow72))
+                ? `${Number(powWatch.totals.snow72).toFixed(1)}"`
+                : '—';
 
 const backgroundImageByResort = {
     'camelback': 'camelback.jpg',
@@ -2174,6 +2184,15 @@ const backgroundSizeByResort = {
                     <span class="metric-temp">Temp <strong>${metricsTemp}</strong></span>
                     <span>Feels Like <strong>${metricsFeelsLike}</strong></span>
                     <span>Wind <strong>${metricsWind}</strong></span>
+                  </div>
+                  <div class="pow-watch-inline">
+                    <div class="pow-watch-head">POW WATCH</div>
+                    <div class="pow-watch-sub">Next 72h snow potential</div>
+                    <div class="pow-watch-metrics">
+                      <span>24h <strong>${powWatch24}"</strong></span>
+                      <span>48h <strong>${powWatch48}"</strong></span>
+                      <span>72h <strong>${powWatch72}"</strong></span>
+                    </div>
                   </div>
                   <details class="forecast-inline">
                     <summary class="forecast-inline-toggle">

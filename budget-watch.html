@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Icecoast API Budget Watch</title>
+  <style>
+    :root {
+      --bg: #eef1f6;
+      --card: #ffffff;
+      --text: #1b2a44;
+      --muted: #5b6b84;
+      --line: rgba(23, 35, 56, 0.12);
+      --ok: #2f9e44;
+      --warn: #f59f00;
+      --bad: #e03131;
+      --blue: #144089;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      padding: 1rem;
+    }
+    .wrap { max-width: 980px; margin: 0 auto; }
+    .head {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      align-items: end;
+      margin-bottom: 1rem;
+    }
+    .title {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--blue);
+      margin-right: auto;
+    }
+    .input {
+      min-width: 360px;
+      flex: 1 1 420px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.55rem 0.7rem;
+      background: #fff;
+      color: #1f2f4a;
+    }
+    .btn {
+      border: 0;
+      border-radius: 10px;
+      background: var(--blue);
+      color: #fff;
+      padding: 0.58rem 0.8rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 0.8rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 0.85rem;
+    }
+    .k {
+      color: var(--muted);
+      font-size: 0.8rem;
+      margin-bottom: 0.25rem;
+    }
+    .v {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.01em;
+    }
+    .pill {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 8px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      margin-top: 0.4rem;
+      border: 1px solid transparent;
+    }
+    .ok { background: rgba(47, 158, 68, 0.13); color: #226c35; border-color: rgba(47, 158, 68, 0.25); }
+    .warn { background: rgba(245, 159, 0, 0.13); color: #8a5a00; border-color: rgba(245, 159, 0, 0.25); }
+    .bad { background: rgba(224, 49, 49, 0.13); color: #8f2222; border-color: rgba(224, 49, 49, 0.25); }
+    .bar {
+      width: 100%;
+      height: 9px;
+      background: #e6ebf3;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 0.45rem;
+    }
+    .fill { height: 100%; width: 0%; background: var(--ok); transition: width .25s ease; }
+    .meta {
+      margin-top: 0.75rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+      line-height: 1.35;
+    }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      font-size: 0.74rem;
+      background: #f6f8fc;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0.55rem;
+      margin-top: 0.45rem;
+      white-space: pre-wrap;
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">
+      <div class="title">Icecoast API Budget Watch</div>
+      <input id="endpoint" class="input" placeholder="https://YOUR-SCHEDULER.workers.dev/budget-status" />
+      <button id="refreshBtn" class="btn">Refresh</button>
+    </div>
+
+    <div class="grid">
+      <section class="card">
+        <div class="k">OpenWeather Daily Usage</div>
+        <div id="owVal" class="v">—</div>
+        <div class="bar"><div id="owFill" class="fill"></div></div>
+        <span id="owPill" class="pill">Waiting</span>
+      </section>
+
+      <section class="card">
+        <div class="k">Visual Crossing Daily Usage</div>
+        <div id="vcVal" class="v">—</div>
+        <div class="bar"><div id="vcFill" class="fill"></div></div>
+        <span id="vcPill" class="pill">Waiting</span>
+      </section>
+
+      <section class="card">
+        <div class="k">Projected VC Monthly Cost</div>
+        <div id="vcCost" class="v">$—</div>
+        <span id="vcCostPill" class="pill">Waiting</span>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top:0.8rem;">
+      <div class="k">Scheduler Config</div>
+      <div id="config" class="mono">—</div>
+      <div class="meta" id="meta">Last poll: never</div>
+    </section>
+  </div>
+
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const endpointInput = $('endpoint');
+    const refreshBtn = $('refreshBtn');
+    const STORAGE_KEY = 'icecoast_budget_watch_endpoint';
+
+    function statusClass(percent) {
+      if (percent >= 90) return 'bad';
+      if (percent >= 70) return 'warn';
+      return 'ok';
+    }
+
+    function setBar(fillEl, pillEl, percent) {
+      const p = Math.max(0, Math.min(100, Number(percent) || 0));
+      fillEl.style.width = p + '%';
+      fillEl.style.background = p >= 90 ? 'var(--bad)' : (p >= 70 ? 'var(--warn)' : 'var(--ok)');
+      pillEl.className = 'pill ' + statusClass(p);
+      pillEl.textContent = p + '% of daily budget';
+    }
+
+    function setCostPill(value) {
+      const n = Number(value) || 0;
+      const cls = n >= 10 ? 'bad' : (n >= 7 ? 'warn' : 'ok');
+      const pill = $('vcCostPill');
+      pill.className = 'pill ' + cls;
+      pill.textContent = n >= 10 ? 'Over target' : (n >= 7 ? 'Watch closely' : 'Healthy');
+    }
+
+    async function refresh() {
+      const endpoint = (endpointInput.value || '').trim();
+      if (!endpoint) return;
+      localStorage.setItem(STORAGE_KEY, endpoint);
+
+      try {
+        const res = await fetch(endpoint, { cache: 'no-store' });
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+
+        const owUsed = data?.usage?.weatherApiCalls ?? 0;
+        const owBudget = data?.budgets?.weatherDailyBudget ?? 0;
+        const owPct = data?.usage?.weatherPercent ?? 0;
+
+        const vcUsed = data?.usage?.vcRecords ?? 0;
+        const vcBudget = data?.budgets?.vcDailyBudget ?? 0;
+        const vcPct = data?.usage?.vcPercent ?? 0;
+        const vcCost = data?.usage?.projectedVcMonthlyCostUsd ?? 0;
+
+        $('owVal').textContent = `${owUsed} / ${owBudget}`;
+        $('vcVal').textContent = `${vcUsed} / ${vcBudget}`;
+        $('vcCost').textContent = `$${Number(vcCost).toFixed(2)}`;
+
+        setBar($('owFill'), $('owPill'), owPct);
+        setBar($('vcFill'), $('vcPill'), vcPct);
+        setCostPill(vcCost);
+
+        $('config').textContent =
+`day: ${data.day}
+slice: ${data.scheduler.sliceSize} every ${data.scheduler.sliceIntervalMinutes}m
+weather refresh: ${data.scheduler.weatherRefreshMinutes}m
+pow watch refresh: ${data.scheduler.vcRefreshMinutes}m
+max weather fetches/run: ${data.scheduler.maxWeatherFetchesPerRun}
+max vc fetches/run: ${data.scheduler.maxVcFetchesPerRun}
+thresholds: ${(data?.budgets?.thresholds || []).join(', ')}
+last metadata update: ${data?.metadata?.lastUpdated || 'n/a'}`;
+
+        $('meta').textContent = `Last poll: ${new Date().toLocaleString()} | Worker now: ${data.nowUtc}`;
+      } catch (e) {
+        $('meta').textContent = `Error: ${e.message}`;
+      }
+    }
+
+    refreshBtn.addEventListener('click', refresh);
+    endpointInput.value = localStorage.getItem(STORAGE_KEY) || '';
+    if (endpointInput.value) refresh();
+    setInterval(refresh, 60 * 1000);
+  </script>
+</body>
+</html>
