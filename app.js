@@ -2538,15 +2538,21 @@ const backgroundSizeByResort = {
                 });
             }
 
-            if (filterState.signal === 'send') {
+            if (filterState.signal === 'send' || filterState.signal === 'avoid') {
                 filtered = filtered.filter((r) => {
-                    const { score } = getSlopeSignalSortScore(r);
-                    return Number.isFinite(score) && score >= 70;
-                });
-            } else if (filterState.signal === 'avoid') {
-                filtered = filtered.filter((r) => {
-                    const { score } = getSlopeSignalSortScore(r);
-                    return Number.isFinite(score) && score < 45;
+                    const sendIt = sendItSummaryByResort?.[r.id] || {};
+                    const votes24h = Number.isFinite(Number(sendIt.votes24h)) ? Number(sendIt.votes24h) : 0;
+                    const score24h = Number.isFinite(Number(sendIt.score24h)) ? Number(sendIt.score24h) : null;
+                    const score = score24h;
+
+                    if (votes24h < 1 || !Number.isFinite(score)) {
+                        return false;
+                    }
+
+                    if (filterState.signal === 'send') {
+                        return score >= 70;
+                    }
+                    return score < 45;
                 });
             }
 
