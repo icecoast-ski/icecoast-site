@@ -294,8 +294,8 @@ const RESORTS = [
         location: 'Killington, VT',
         region: 'vermont-central',
         familyOwned: false,
-        lat: 43.6317,
-        lon: -72.8057,
+        lat: 43.6172,
+        lon: -72.8035,
         vertical: 3050,
         liftsTotal: 21,
         liftie: 'killington'

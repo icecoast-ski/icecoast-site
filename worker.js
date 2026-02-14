@@ -52,7 +52,7 @@ const RESORT_COORDS = {
   stratton: { lat: 43.1172, lon: -72.9094 },
   "mount-snow": { lat: 42.9714, lon: -72.8963 },
   "magic-mountain": { lat: 43.2013, lon: -72.7791 },
-  killington: { lat: 43.6317, lon: -72.8057 },
+  killington: { lat: 43.6172, lon: -72.8035 },
   okemo: { lat: 43.4057, lon: -72.7196 },
   pico: { lat: 43.6597, lon: -72.8521 },
   sugarbush: { lat: 44.1513, lon: -72.8821 },

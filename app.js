@@ -601,7 +601,7 @@
             'hunter': { apres: 3, family: 3 },
             'windham': { apres: 3, family: 4 },
             'belleayre': { apres: 2, family: 5 },
-            'plattekill': { apres: 2, family: 3 },
+            'plattekill': { apres: 3, family: 4 },
             'whiteface': { apres: 4, family: 4 },
             'gore-mountain': { apres: 2, family: 4 },
 
@@ -629,9 +629,9 @@
             'waterville': { apres: 3, family: 4 },
             'cannon': { apres: 1, family: 3 },
             'wildcat': { apres: 1, family: 2 },
-            'black-mountain': { apres: 1, family: 3 },
-            'magic-mountain': { apres: 2, family: 2 },
-            'ragged-mountain': { apres: 2, family: 4 },
+            'black-mountain': { apres: 2, family: 4 },
+            'magic-mountain': { apres: 3, family: 2 },
+            'ragged-mountain': { apres: 2, family: 5 },
             'sunapee': { apres: 2, family: 4 },
             'pats-peak': { apres: 2, family: 5 },
             'sunday-river': { apres: 4, family: 5 },
@@ -671,14 +671,14 @@
             'hunter': 2,
             'windham': 1,
             'belleayre': 2,
-            'plattekill': 2,
+            'plattekill': 3,
             'whiteface': 3,
             'gore-mountain': 3,
 
             'jiminy-peak': 1,
             'wachusett': 0,
             'catamount': 1,
-            'berkshire-east': 2,
+            'berkshire-east': 1,
             'mohawk': 1,
 
             'stratton': 2,
@@ -692,16 +692,16 @@
             'smugglers-notch': 3,
             'jay-peak': 3,
             'burke': 2,
-            'bolton-valley': 2,
+            'bolton-valley': 3,
 
             'loon': 2,
             'brettonwoods': 2,
             'waterville': 2,
             'cannon': 2,
             'wildcat': 3,
-            'black-mountain': 1,
-            'magic-mountain': 2,
-            'ragged-mountain': 1,
+            'black-mountain': 2,
+            'magic-mountain': 3,
+            'ragged-mountain': 2,
             'sunapee': 1,
             'pats-peak': 0,
             'sunday-river': 2,
@@ -902,7 +902,7 @@
             slope: './slope-signal-lab-2d/assets/slope.png'
         };
         const SENDIT_DEFAULT_SIGNALS = { crowd: 'normal', wind: 'breezy', slope: 'good', hazard: 'clear', difficulty: '' };
-        const SENDIT_HISTORY_MIN_VOTES = 2;
+        const SENDIT_HISTORY_MIN_VOTES = 1;
         const SENDIT_PAYOFF_PHRASES = {
             nodata: [
                 'First Chair',
