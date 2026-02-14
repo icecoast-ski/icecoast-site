@@ -2092,6 +2092,9 @@
             const powWatchStatusLabel = powWatchBandRaw === 'POW WATCH ON'
                 ? 'ON'
                 : (powWatchBandRaw === 'POW WATCH BUILDING' ? 'BUILDING' : 'QUIET');
+            const powWatchBadgeClass = powWatchStatusLabel === 'ON'
+                ? 'pow-watch-on'
+                : (powWatchStatusLabel === 'BUILDING' ? 'pow-watch-building' : 'pow-watch-quiet');
 
 const backgroundImageByResort = {
     'camelback': 'camelback.jpg',
@@ -2241,7 +2244,7 @@ const backgroundSizeByResort = {
                   <div class="pow-watch-inline">
                     <div class="pow-watch-top">
                       <div class="pow-watch-head">POW WATCH</div>
-                      <div class="pow-watch-badge">${powWatchStatusLabel}</div>
+                      <div class="pow-watch-badge ${powWatchBadgeClass}">${powWatchStatusLabel}</div>
                     </div>
                     <div class="pow-watch-sub">Next 72h snow potential</div>
                     <div class="pow-watch-metrics">
