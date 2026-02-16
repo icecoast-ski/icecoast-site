@@ -2080,13 +2080,13 @@
             const signalLead = sendItSubtitlePrimary;
             const powWatch = resort.powWatch || null;
             const powWatch24 = Number.isFinite(Number(powWatch?.totals?.snow24))
-                ? `${Number(powWatch.totals.snow24).toFixed(1)}"`
+                ? `${Number(powWatch.totals.snow24).toFixed(1)}`
                 : '0.0';
             const powWatch48 = Number.isFinite(Number(powWatch?.totals?.snow48))
-                ? `${Number(powWatch.totals.snow48).toFixed(1)}"`
+                ? `${Number(powWatch.totals.snow48).toFixed(1)}`
                 : '0.0';
             const powWatch72 = Number.isFinite(Number(powWatch?.totals?.snow72))
-                ? `${Number(powWatch.totals.snow72).toFixed(1)}"`
+                ? `${Number(powWatch.totals.snow72).toFixed(1)}`
                 : '0.0';
             const powWatchBandRaw = String(powWatch?.band || '').trim();
             const powWatchStatusLabel = powWatchBandRaw === 'POW WATCH ON'
