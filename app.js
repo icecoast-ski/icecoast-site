@@ -3527,6 +3527,25 @@ const backgroundSizeByResort = {
                         });
                     }
 
+                    if (live.powWatch && typeof live.powWatch === 'object') {
+                        const totals = live.powWatch.totals || {};
+                        const toNumOrNull = (v) => {
+                            const n = Number(v);
+                            return Number.isFinite(n) ? n : null;
+                        };
+                        resort.powWatch = {
+                            provider: typeof live.powWatch.provider === 'string' ? live.powWatch.provider : null,
+                            updatedAt: typeof live.powWatch.updatedAt === 'string' ? live.powWatch.updatedAt : null,
+                            band: typeof live.powWatch.band === 'string' ? live.powWatch.band : '',
+                            days: Array.isArray(live.powWatch.days) ? live.powWatch.days.slice(0, 3) : [],
+                            totals: {
+                                snow24: toNumOrNull(totals.snow24),
+                                snow48: toNumOrNull(totals.snow48),
+                                snow72: toNumOrNull(totals.snow72),
+                            }
+                        };
+                    }
+
                     if (live.lifts) {
                         if (!resort.lifts || typeof resort.lifts !== 'object') {
                             resort.lifts = {};
