@@ -2125,6 +2125,8 @@
                 ];
             const chartSource = compactSeries.length ? compactSeries : fallbackSegments;
             const maxSeriesVal = chartSource.length ? Math.max(...chartSource, 0.1) : 0.1;
+            const chartMaxLabel = `${maxSeriesVal.toFixed(1)}"`;
+            const chartMidLabel = `${(maxSeriesVal / 2).toFixed(1)}"`;
             const chartBars = chartSource.length
                 ? chartSource.map((v) => {
                     const h = Math.max(6, Math.round((Math.max(0, v) / maxSeriesVal) * 34));
@@ -2336,9 +2338,17 @@ const backgroundSizeByResort = {
                           <span>${windHoldRiskLabel}</span>
                         </div>
                         <div class="pow-watch-window-note">${chartExplainer}</div>
-                        <div class="pow-watch-chart" aria-label="Hourly snow trend next 72 hours">
-                          ${chartBars}
+                        <div class="pow-watch-chart-wrap">
+                          <div class="pow-watch-chart-axis">
+                            <span>${chartMaxLabel}</span>
+                            <span>${chartMidLabel}</span>
+                            <span>0.0"</span>
+                          </div>
+                          <div class="pow-watch-chart" aria-label="Hourly snow trend next 72 hours">
+                            ${chartBars}
+                          </div>
                         </div>
+                        <div class="pow-watch-chart-units">Bar height = forecast inches per 3-hour block.</div>
                         <div class="pow-watch-chart-scale">
                           <span>Now</span>
                           <span>24h</span>

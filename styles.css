@@ -3962,6 +3962,26 @@
     background: linear-gradient(180deg, rgba(31, 94, 200, 0.05) 0%, rgba(31, 94, 200, 0.02) 100%);
 }
 
+.pow-watch-chart-wrap {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 0.28rem;
+    align-items: stretch;
+}
+
+.pow-watch-chart-axis {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-end;
+    min-width: 2rem;
+    font-size: 0.58rem;
+    color: #6b7f97;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+    padding: 0.34rem 0 0.14rem;
+}
+
 .pow-chart-bar {
     flex: 1 1 0;
     min-width: 3px;
@@ -3975,6 +3995,14 @@
     color: #5a6f8c;
     font-weight: 650;
     padding: 0.14rem 0.25rem;
+}
+
+.pow-watch-chart-units {
+    margin-top: 0.14rem;
+    font-size: 0.62rem;
+    color: #6a7d96;
+    font-weight: 650;
+    line-height: 1.2;
 }
 
 .pow-watch-chart-scale {
