@@ -3732,6 +3732,78 @@
     vertical-align: -0.04em;
 }
 
+.metric-warning-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border: 0;
+    background: transparent;
+    color: #34435a;
+    font-size: 1.08em;
+    line-height: 1;
+    margin-left: 0.14rem;
+    padding: 0;
+    cursor: pointer;
+    vertical-align: -0.04em;
+}
+
+.metric-warning-btn::after {
+    content: attr(data-tip);
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 8px);
+    transform: translateX(-50%) translateY(-2px);
+    min-width: 168px;
+    max-width: 220px;
+    border-radius: 8px;
+    border: 1px solid rgba(20, 64, 137, 0.22);
+    background: #f4f8ff;
+    color: #284368;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.12);
+    font-size: 0.62rem;
+    font-weight: 700;
+    line-height: 1.28;
+    letter-spacing: 0;
+    text-transform: none;
+    padding: 0.36rem 0.46rem;
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transition: opacity 0.18s ease, transform 0.18s ease, visibility 0.18s ease;
+    z-index: 20;
+}
+
+.metric-warning-btn::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: calc(100% + 2px);
+    transform: translateX(-50%);
+    width: 8px;
+    height: 8px;
+    border-left: 1px solid rgba(20, 64, 137, 0.22);
+    border-top: 1px solid rgba(20, 64, 137, 0.22);
+    background: #f4f8ff;
+    rotate: 45deg;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.18s ease, visibility 0.18s ease;
+    z-index: 21;
+}
+
+.metric-warning-btn:hover::after,
+.metric-warning-btn:hover::before,
+.metric-warning-btn:focus::after,
+.metric-warning-btn:focus::before {
+    opacity: 1;
+    visibility: visible;
+}
+
+.metric-warning-btn:focus::after {
+    transform: translateX(-50%) translateY(0);
+}
+
 .pow-watch-inline {
     margin-top: 0.58rem;
     padding-top: 0.5rem;
@@ -3873,6 +3945,13 @@
     font-weight: 800;
 }
 
+.pow-watch-window-note {
+    font-size: 0.66rem;
+    color: #5a6f8c;
+    font-weight: 650;
+    line-height: 1.25;
+}
+
 .pow-watch-chart {
     min-height: 44px;
     padding: 0.34rem 0.1rem 0.12rem;
@@ -3896,6 +3975,16 @@
     color: #5a6f8c;
     font-weight: 650;
     padding: 0.14rem 0.25rem;
+}
+
+.pow-watch-chart-scale {
+    margin-top: 0.14rem;
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.62rem;
+    color: #6a7d96;
+    font-weight: 700;
+    letter-spacing: 0.01em;
 }
 
 .forecast-inline {

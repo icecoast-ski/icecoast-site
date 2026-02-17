@@ -2072,11 +2072,7 @@
                 ? weather.feelsLike
                 : (typeof weather.feelsLikeF === 'string' ? parseFloat(weather.feelsLikeF) : null);
             const metricsFeelsLikeBase = weather.feelsLikeF ?? (typeof weather.feelsLike === 'number' ? `${weather.feelsLike}°` : '—');
-            const feelsLikeWarning = Number.isFinite(feelsLikeValue) && feelsLikeValue <= -10
-                ? ' <span class="cold-warning-icon" aria-hidden="true">⚠︎</span>'
-                : '';
-            const metricsFeelsLike = `${metricsFeelsLikeBase}${feelsLikeWarning}`;
-            const metricsWind = weather.wind ?? '—';
+            const metricsWindBase = weather.wind ?? '—';
             const signalLead = sendItSubtitlePrimary;
             const powWatch = resort.powWatch || null;
             const powWatch24 = Number.isFinite(Number(powWatch?.totals?.snow24))
@@ -2099,9 +2095,20 @@
             const windHoldRiskLabel = windHoldRiskLevelRaw === 'HIGH'
                 ? 'HIGH'
                 : (windHoldRiskLevelRaw === 'MODERATE' ? 'MODERATE' : 'LOW');
+            const windWarningTip = windHoldRiskLabel === 'HIGH'
+                ? 'High wind-hold risk: expect possible lift delays or closures.'
+                : 'Moderate wind-hold risk: check lift status before you drive.';
             const windHoldGust = Number.isFinite(Number(powWatch?.windHoldRisk?.maxGustMph))
                 ? Math.round(Number(powWatch.windHoldRisk.maxGustMph))
                 : null;
+            const feelsLikeWarning = Number.isFinite(feelsLikeValue) && feelsLikeValue <= -10
+                ? ` <button class="metric-warning-btn" type="button" aria-label="Cold warning" data-tip="Extreme cold can bite fast. Cover skin and check exposed lifts.">⚠︎</button>`
+                : '';
+            const windRiskWarning = windHoldRiskLabel !== 'LOW'
+                ? ` <button class="metric-warning-btn" type="button" aria-label="Wind warning" data-tip="${windWarningTip}">⚠︎</button>`
+                : '';
+            const metricsFeelsLike = `${metricsFeelsLikeBase}${feelsLikeWarning}`;
+            const metricsWind = `${metricsWindBase}${windRiskWarning}`;
             const powDays = Array.isArray(powWatch?.days) ? powWatch.days : [];
             const snowSeries72 = Array.isArray(powWatch?.hourly?.snowSeries72)
                 ? powWatch.hourly.snowSeries72.map((v) => Number(v)).filter((v) => Number.isFinite(v))
@@ -2124,12 +2131,27 @@
                     return `<span class="pow-chart-bar" style="height:${h}px"></span>`;
                 }).join('')
                 : '<span class="pow-chart-empty">No measurable hourly snow in current model run.</span>';
-            const peakLabel = typeof powWatch?.hourly?.peakLabel === 'string' && powWatch.hourly.peakLabel
-                ? powWatch.hourly.peakLabel
-                : (powDays[0]?.date ? `Day ${powDays[0].date}` : '—');
+            const peakTsMs = Date.parse(String(powWatch?.hourly?.peakTs || ''));
+            const peakLabel = Number.isFinite(peakTsMs)
+                ? (() => {
+                    const peakDt = new Date(peakTsMs);
+                    const nowDt = new Date();
+                    const dayDiff = Math.floor((new Date(peakDt.getFullYear(), peakDt.getMonth(), peakDt.getDate()) - new Date(nowDt.getFullYear(), nowDt.getMonth(), nowDt.getDate())) / 86400000);
+                    const dayLabel = dayDiff === 0
+                        ? 'Today'
+                        : (dayDiff === 1 ? 'Tomorrow' : peakDt.toLocaleDateString('en-US', { weekday: 'short' }));
+                    const hourLabel = peakDt.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+                    return `${dayLabel} ${hourLabel}`;
+                })()
+                : (powDays[0]?.date
+                    ? `${new Date(`${powDays[0].date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'short' })} daytime`
+                    : 'No strong snow pulse yet');
             const peakSnowPerHour = Number.isFinite(Number(powWatch?.hourly?.peakSnowPerHour))
                 ? Number(powWatch.hourly.peakSnowPerHour).toFixed(2)
                 : Number(powWatch24).toFixed(1);
+            const chartExplainer = compactSeries.length
+                ? 'Each bar shows forecast snowfall in a 3-hour block.'
+                : 'Hourly model still filling in. Bars use day-by-day snowfall totals.';
 
 const backgroundImageByResort = {
     'camelback': 'camelback.jpg',
@@ -2298,7 +2320,7 @@ const backgroundSizeByResort = {
                       </summary>
                       <div class="pow-watch-window-grid">
                         <div class="pow-watch-window-labels">
-                          <span>Peak Hour</span>
+                          <span>Most Active Snow Time</span>
                           <span>${peakLabel}</span>
                         </div>
                         <div class="pow-watch-window-labels">
@@ -2313,8 +2335,15 @@ const backgroundSizeByResort = {
                           <span>Wind Hold Risk</span>
                           <span>${windHoldRiskLabel}</span>
                         </div>
+                        <div class="pow-watch-window-note">${chartExplainer}</div>
                         <div class="pow-watch-chart" aria-label="Hourly snow trend next 72 hours">
                           ${chartBars}
+                        </div>
+                        <div class="pow-watch-chart-scale">
+                          <span>Now</span>
+                          <span>24h</span>
+                          <span>48h</span>
+                          <span>72h</span>
                         </div>
                       </div>
                     </details>
