@@ -3945,11 +3945,11 @@
     font-weight: 800;
 }
 
-.pow-watch-window-note {
-    font-size: 0.66rem;
-    color: #5a6f8c;
-    font-weight: 650;
-    line-height: 1.25;
+.pow-watch-chart-head {
+    font-size: 0.7rem;
+    color: #425570;
+    font-weight: 700;
+    line-height: 1.2;
 }
 
 .pow-watch-chart {
@@ -3999,6 +3999,14 @@
 
 .pow-watch-chart-units {
     margin-top: 0.14rem;
+    font-size: 0.62rem;
+    color: #6a7d96;
+    font-weight: 650;
+    line-height: 1.2;
+}
+
+.pow-watch-chart-fallback {
+    margin-top: 0.08rem;
     font-size: 0.62rem;
     color: #6a7d96;
     font-weight: 650;
