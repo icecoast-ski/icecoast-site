@@ -2151,9 +2151,9 @@
             const peakSnowPerHour = Number.isFinite(Number(powWatch?.hourly?.peakSnowPerHour))
                 ? Number(powWatch.hourly.peakSnowPerHour).toFixed(2)
                 : Number(powWatch24).toFixed(1);
-            const chartFallbackNote = compactSeries.length
-                ? ''
-                : 'Using day-by-day snowfall totals while hourly guidance fills in.';
+            const chartLegend = compactSeries.length
+                ? 'Taller bars = heavier forecast snowfall.'
+                : 'Taller bars = heavier forecast snowfall (daily trend view).';
 
 const backgroundImageByResort = {
     'camelback': 'camelback.jpg',
@@ -2309,14 +2309,13 @@ const backgroundPositionByResort = {
                             ${chartBars}
                           </div>
                         </div>
-                        <div class="pow-watch-chart-units">Bar height = forecast inches per 3-hour block.</div>
-                        ${chartFallbackNote ? `<div class="pow-watch-chart-fallback">${chartFallbackNote}</div>` : ''}
                         <div class="pow-watch-chart-scale">
                           <span>Now</span>
                           <span>24h</span>
                           <span>48h</span>
                           <span>72h</span>
                         </div>
+                        <div class="pow-watch-chart-units">${chartLegend}</div>
                       </div>
                     </details>
                   </div>
