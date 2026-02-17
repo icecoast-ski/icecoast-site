@@ -2084,7 +2084,7 @@
             const powWatch72 = Number.isFinite(Number(powWatch?.totals?.snow72))
                 ? `${Number(powWatch.totals.snow72).toFixed(1)}`
                 : '0.0';
-            const powWatchBandRaw = String(powWatch?.band || '').trim();
+            const powWatchBandRaw = getPowWatchBandForResort(resort);
             const powWatchStatusLabel = powWatchBandRaw === 'POW WATCH ON'
                 ? 'ON'
                 : (powWatchBandRaw === 'POW WATCH BUILDING' ? 'BUILDING' : 'QUIET');
@@ -2261,6 +2261,31 @@ const backgroundPositionByResort = {
                     <span>Feels Like <strong>${metricsFeelsLike}</strong></span>
                     <span>Wind <strong>${metricsWind}</strong></span>
                   </div>
+                  <details class="forecast-inline">
+                    <summary class="forecast-inline-toggle">
+                      <span class="forecast-inline-left">
+                        <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.4rem;">
+                          ${icons.calendar}
+                        </span>
+                        3-Day Forecast
+                      </span>
+                      <span class="forecast-inline-chevron" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                      </span>
+                    </summary>
+                    <div class="forecast-grid">
+                      ${forecast.map(day => `
+                        <div class="forecast-day">
+                          <div class="forecast-day-name">${day.day}</div>
+                          <div class="forecast-icon">${day.icon}</div>
+                          <div class="forecast-temp">${day.tempF ?? (typeof day.temp === 'number' ? `${day.temp}°` : '—')}</div>
+                          <div class="forecast-snow">${typeof day.snow === 'number' ? `${day.snow}"` : (day.snow ?? '—')}</div>
+                        </div>
+                      `).join('')}
+                    </div>
+                  </details>
                   <div class="pow-watch-inline">
                     <div class="pow-watch-top">
                       <div class="pow-watch-head">POW WATCH</div>
@@ -2319,31 +2344,6 @@ const backgroundPositionByResort = {
                       </div>
                     </details>
                   </div>
-                  <details class="forecast-inline">
-                    <summary class="forecast-inline-toggle">
-                      <span class="forecast-inline-left">
-                        <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.4rem;">
-                          ${icons.calendar}
-                        </span>
-                        3-Day Forecast
-                      </span>
-                      <span class="forecast-inline-chevron" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                          <polyline points="6 9 12 15 18 9"></polyline>
-                        </svg>
-                      </span>
-                    </summary>
-                    <div class="forecast-grid">
-                      ${forecast.map(day => `
-                        <div class="forecast-day">
-                          <div class="forecast-day-name">${day.day}</div>
-                          <div class="forecast-icon">${day.icon}</div>
-                          <div class="forecast-temp">${day.tempF ?? (typeof day.temp === 'number' ? `${day.temp}°` : '—')}</div>
-                          <div class="forecast-snow">${typeof day.snow === 'number' ? `${day.snow}"` : (day.snow ?? '—')}</div>
-                        </div>
-                      `).join('')}
-                    </div>
-                  </details>
                 </div>
 
                 <div class="rating-section">
@@ -2558,6 +2558,20 @@ const backgroundPositionByResort = {
             };
         }
 
+        function getPowWatchBandForResort(resort) {
+            const totals = resort?.powWatch?.totals || {};
+            const days = Array.isArray(resort?.powWatch?.days) ? resort.powWatch.days : [];
+            const snow24 = Number(totals.snow24) || 0;
+            const snow48 = Number(totals.snow48) || 0;
+            const snow72 = Number(totals.snow72) || 0;
+            const day0Snow = Number(days?.[0]?.snow) || 0;
+            const day1Snow = Number(days?.[1]?.snow) || 0;
+
+            if (snow24 >= 2 || day0Snow >= 2) return 'POW WATCH ON';
+            if (snow48 >= 2 || snow72 >= 4 || day1Snow >= 2) return 'POW WATCH BUILDING';
+            return 'POW WATCH QUIET';
+        }
+
         function applyFilters() {
             let filtered = Array.isArray(resorts) ? resorts.filter(Boolean) : [];
             const searchTerm = (filterState.search || '').trim().toLowerCase();
@@ -2594,14 +2608,11 @@ const backgroundPositionByResort = {
             }
 
             if (filterState.vibe === 'on') {
-                filtered = filtered.filter((r) => String(r?.powWatch?.band || '').trim() === 'POW WATCH ON');
+                filtered = filtered.filter((r) => getPowWatchBandForResort(r) === 'POW WATCH ON');
             } else if (filterState.vibe === 'building') {
-                filtered = filtered.filter((r) => String(r?.powWatch?.band || '').trim() === 'POW WATCH BUILDING');
+                filtered = filtered.filter((r) => getPowWatchBandForResort(r) === 'POW WATCH BUILDING');
             } else if (filterState.vibe === 'quiet') {
-                filtered = filtered.filter((r) => {
-                    const band = String(r?.powWatch?.band || '').trim();
-                    return !band || band === 'POW WATCH QUIET';
-                });
+                filtered = filtered.filter((r) => getPowWatchBandForResort(r) === 'POW WATCH QUIET');
             }
 
             if (filterState.signal === 'send' || filterState.signal === 'avoid') {
@@ -2705,7 +2716,9 @@ const backgroundPositionByResort = {
             if (!card) return;
             deepLinkHandled = true;
             setTimeout(() => {
-                card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                const headerEl = card.querySelector('.resort-header') || card;
+                const headerTop = headerEl.getBoundingClientRect().top + window.scrollY;
+                window.scrollTo({ top: Math.max(0, headerTop - 10), behavior: 'smooth' });
                 card.classList.add('share-focus');
                 setTimeout(() => card.classList.remove('share-focus'), 2200);
             }, 120);
@@ -2898,12 +2911,7 @@ const backgroundPositionByResort = {
                 activeShareImageUrl = null;
             }
             if (shareNativeBtn) {
-                const isTouchDevice = (typeof window !== 'undefined')
-                    && (window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0);
-                const canNativeShare = typeof navigator !== 'undefined'
-                    && typeof navigator.share === 'function'
-                    && isTouchDevice;
-                shareNativeBtn.style.display = canNativeShare ? 'inline-flex' : 'none';
+                shareNativeBtn.style.display = 'inline-flex';
             }
 
             shareModalOverlay.classList.add('open');
@@ -3336,16 +3344,15 @@ const backgroundPositionByResort = {
 
         if (shareNativeBtn) {
             shareNativeBtn.addEventListener('click', async () => {
-                const isTouchDevice = (typeof window !== 'undefined')
-                    && (window.matchMedia('(pointer: coarse)').matches || navigator.maxTouchPoints > 0);
-                if (!activeSharePayload || typeof navigator.share !== 'function' || !isTouchDevice) return;
+                if (!activeSharePayload) return;
+                const smsText = activeSharePayload.text;
+                const smsHref = `sms:?&body=${encodeURIComponent(smsText)}`;
                 try {
-                    await navigator.share({
-                        title: activeSharePayload.name,
-                        text: activeSharePayload.text
-                    });
-                    setShareStatus('Shared.');
-                } catch (_) {}
+                    window.location.href = smsHref;
+                    setShareStatus('Opening text app...');
+                } catch (_) {
+                    setShareStatus('Text share unavailable on this device.');
+                }
             });
         }
 
