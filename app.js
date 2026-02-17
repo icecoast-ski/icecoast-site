@@ -2095,6 +2095,35 @@
             const powWatchBadgeClass = powWatchStatusLabel === 'ON'
                 ? 'pow-watch-on'
                 : (powWatchStatusLabel === 'BUILDING' ? 'pow-watch-building' : 'pow-watch-quiet');
+            const windHoldRiskLevelRaw = String(powWatch?.windHoldRisk?.level || 'LOW').toUpperCase();
+            const windHoldRiskLabel = windHoldRiskLevelRaw === 'HIGH'
+                ? 'HIGH'
+                : (windHoldRiskLevelRaw === 'MODERATE' ? 'MODERATE' : 'LOW');
+            const windHoldRiskClass = windHoldRiskLabel === 'HIGH'
+                ? 'wind-risk-high'
+                : (windHoldRiskLabel === 'MODERATE' ? 'wind-risk-moderate' : 'wind-risk-low');
+            const windHoldGust = Number.isFinite(Number(powWatch?.windHoldRisk?.maxGustMph))
+                ? Math.round(Number(powWatch.windHoldRisk.maxGustMph))
+                : null;
+            const snowSeries72 = Array.isArray(powWatch?.hourly?.snowSeries72)
+                ? powWatch.hourly.snowSeries72.map((v) => Number(v)).filter((v) => Number.isFinite(v))
+                : [];
+            const compactSeries = snowSeries72.length
+                ? snowSeries72.filter((_, idx) => idx % 3 === 0).slice(0, 24)
+                : [];
+            const maxSeriesVal = compactSeries.length ? Math.max(...compactSeries, 0.1) : 0.1;
+            const chartBars = compactSeries.length
+                ? compactSeries.map((v) => {
+                    const h = Math.max(6, Math.round((Math.max(0, v) / maxSeriesVal) * 34));
+                    return `<span class="pow-chart-bar" style="height:${h}px"></span>`;
+                }).join('')
+                : '<span class="pow-chart-empty">No measurable hourly snow in current model run.</span>';
+            const peakLabel = typeof powWatch?.hourly?.peakLabel === 'string' && powWatch.hourly.peakLabel
+                ? powWatch.hourly.peakLabel
+                : '—';
+            const peakSnowPerHour = Number.isFinite(Number(powWatch?.hourly?.peakSnowPerHour))
+                ? Number(powWatch.hourly.peakSnowPerHour).toFixed(2)
+                : '0.00';
 
 const backgroundImageByResort = {
     'camelback': 'camelback.jpg',
@@ -2244,7 +2273,10 @@ const backgroundSizeByResort = {
                   <div class="pow-watch-inline">
                     <div class="pow-watch-top">
                       <div class="pow-watch-head">POW WATCH</div>
-                      <div class="pow-watch-badge ${powWatchBadgeClass}">${powWatchStatusLabel}</div>
+                      <div class="pow-watch-badges-right">
+                        <div class="pow-watch-badge ${powWatchBadgeClass}">${powWatchStatusLabel}</div>
+                        <div class="pow-watch-badge wind-risk ${windHoldRiskClass}">Wind Hold Risk: ${windHoldRiskLabel}</div>
+                      </div>
                     </div>
                     <div class="pow-watch-sub">Next 72h snow potential</div>
                     <div class="pow-watch-metrics">
@@ -2252,6 +2284,33 @@ const backgroundSizeByResort = {
                       <span>48h <strong>${powWatch48}"</strong></span>
                       <span>72h <strong>${powWatch72}"</strong></span>
                     </div>
+                    <details class="pow-watch-details">
+                      <summary class="pow-watch-details-toggle">
+                        <span>View snow window</span>
+                        <span class="pow-watch-details-chevron" aria-hidden="true">
+                          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                          </svg>
+                        </span>
+                      </summary>
+                      <div class="pow-watch-window-grid">
+                        <div class="pow-watch-window-labels">
+                          <span>Peak Hour</span>
+                          <span>${peakLabel}</span>
+                        </div>
+                        <div class="pow-watch-window-labels">
+                          <span>Peak Rate</span>
+                          <span>${peakSnowPerHour}" / hr</span>
+                        </div>
+                        <div class="pow-watch-window-labels">
+                          <span>Max Gust</span>
+                          <span>${windHoldGust !== null ? `${windHoldGust} mph` : '—'}</span>
+                        </div>
+                        <div class="pow-watch-chart" aria-label="Hourly snow trend next 72 hours">
+                          ${chartBars}
+                        </div>
+                      </div>
+                    </details>
                   </div>
                   <details class="forecast-inline">
                     <summary class="forecast-inline-toggle">
@@ -3529,6 +3588,8 @@ const backgroundSizeByResort = {
 
                     if (live.powWatch && typeof live.powWatch === 'object') {
                         const totals = live.powWatch.totals || {};
+                        const hourly = live.powWatch.hourly || {};
+                        const windHoldRisk = live.powWatch.windHoldRisk || {};
                         const toNumOrNull = (v) => {
                             const n = Number(v);
                             return Number.isFinite(n) ? n : null;
@@ -3542,7 +3603,19 @@ const backgroundSizeByResort = {
                                 snow24: toNumOrNull(totals.snow24),
                                 snow48: toNumOrNull(totals.snow48),
                                 snow72: toNumOrNull(totals.snow72),
-                            }
+                            },
+                            hourly: {
+                                snowSeries24: Array.isArray(hourly.snowSeries24) ? hourly.snowSeries24.slice(0, 24).map(toNumOrNull).filter((v) => v !== null) : [],
+                                snowSeries48: Array.isArray(hourly.snowSeries48) ? hourly.snowSeries48.slice(0, 48).map(toNumOrNull).filter((v) => v !== null) : [],
+                                snowSeries72: Array.isArray(hourly.snowSeries72) ? hourly.snowSeries72.slice(0, 72).map(toNumOrNull).filter((v) => v !== null) : [],
+                                peakTs: typeof hourly.peakTs === 'string' ? hourly.peakTs : null,
+                                peakLabel: typeof hourly.peakLabel === 'string' ? hourly.peakLabel : null,
+                                peakSnowPerHour: toNumOrNull(hourly.peakSnowPerHour),
+                            },
+                            windHoldRisk: {
+                                level: typeof windHoldRisk.level === 'string' ? windHoldRisk.level : 'LOW',
+                                maxGustMph: toNumOrNull(windHoldRisk.maxGustMph),
+                            },
                         };
                     }
 

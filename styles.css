@@ -3745,6 +3745,14 @@
     gap: 0.5rem;
 }
 
+.pow-watch-badges-right {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.34rem;
+    flex-wrap: wrap;
+}
+
 .pow-watch-head {
     font-size: 0.74rem;
     font-weight: 800;
@@ -3789,6 +3797,27 @@
     animation: pulse 2s ease-in-out infinite;
 }
 
+.pow-watch-badge.wind-risk {
+    animation: none;
+    box-shadow: none;
+    font-size: 0.56rem;
+}
+
+.pow-watch-badge.wind-risk-low {
+    background: #e8f1ff;
+    color: #1f3b68;
+}
+
+.pow-watch-badge.wind-risk-moderate {
+    background: #dbeafe;
+    color: #1f4d96;
+}
+
+.pow-watch-badge.wind-risk-high {
+    background: #fde8e8;
+    color: #8b2f2f;
+}
+
 .pow-watch-sub {
     margin-top: 0.28rem;
     font-size: 0.64rem;
@@ -3809,6 +3838,93 @@
 .pow-watch-metrics strong {
     color: #162234;
     font-weight: 800;
+}
+
+.pow-watch-details {
+    margin-top: 0.34rem;
+    border-top: 1px solid rgba(15, 23, 42, 0.08);
+    padding-top: 0.4rem;
+}
+
+.pow-watch-details-toggle {
+    padding: 0.2rem 0;
+    background: transparent;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 0.71rem;
+    color: #334155;
+    list-style: none;
+    user-select: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.pow-watch-details-toggle::-webkit-details-marker {
+    display: none;
+}
+
+.pow-watch-details-chevron {
+    width: 16px;
+    height: 16px;
+    color: #64748b;
+    transition: transform 0.2s ease;
+    flex-shrink: 0;
+}
+
+.pow-watch-details-chevron svg {
+    width: 100%;
+    height: 100%;
+}
+
+.pow-watch-details[open] .pow-watch-details-chevron {
+    transform: rotate(180deg);
+}
+
+.pow-watch-window-grid {
+    margin-top: 0.3rem;
+    display: grid;
+    gap: 0.34rem;
+}
+
+.pow-watch-window-labels {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    font-size: 0.7rem;
+    color: #425570;
+    font-weight: 700;
+}
+
+.pow-watch-window-labels span:last-child {
+    color: #1e2d43;
+    font-weight: 800;
+}
+
+.pow-watch-chart {
+    min-height: 44px;
+    padding: 0.34rem 0.1rem 0.12rem;
+    display: flex;
+    align-items: flex-end;
+    gap: 2px;
+    border-radius: 8px;
+    background: linear-gradient(180deg, rgba(31, 94, 200, 0.05) 0%, rgba(31, 94, 200, 0.02) 100%);
+}
+
+.pow-chart-bar {
+    flex: 1 1 0;
+    min-width: 3px;
+    border-radius: 3px 3px 0 0;
+    background: linear-gradient(180deg, #2d79e6 0%, #1f5ec8 100%);
+    box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+
+.pow-chart-empty {
+    font-size: 0.68rem;
+    color: #5a6f8c;
+    font-weight: 650;
+    padding: 0.14rem 0.25rem;
 }
 
 .forecast-inline {
