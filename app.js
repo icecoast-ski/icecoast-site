@@ -2168,7 +2168,10 @@ const backgroundImageByResort = {
     'sunapee': 'waterville.jpg',
     'pats-peak': 'wachusett.jpg'
 };
-const backgroundImageFile = backgroundImageByResort[resort.id] || `${resort.id}.jpg`;
+const backgroundLegacyFile = backgroundImageByResort[resort.id] || `${resort.id}.jpg`;
+const backgroundLegacyBase = String(backgroundLegacyFile).replace(/\?.*$/, '');
+const backgroundStem = backgroundLegacyBase.replace(/\.(png|jpe?g|webp)$/i, '');
+const backgroundVar = `url('new-resort-art/${backgroundStem}.png'), url('resort-art/${backgroundLegacyFile}')`;
 
 const backgroundPositionByResort = {
     'camelback': 'center 30%',
@@ -2221,54 +2224,12 @@ const backgroundPositionByResort = {
     'mont-sutton': 'center 31%'
 };
 
-
-const backgroundSizeByResort = {
-    'camelback': '100%',
-    'blue-mountain': '100%',
-    'jack-frost': '101%',
-    'shawnee': '100%',
-    'bear-creek': '100%',
-    'elk': '100%',
-    'mohawk': '100%',
-    'catamount': '101%',
-    'berkshire-east': '101%',
-    'plattekill': '101%',
-    'wachusett': '100%',
-    'windham': '101%',
-    'stratton': '101%',
-    'okemo': '100%',
-    'pico': '100%',
-    'sugarbush': '101%',
-    'burke': '101%',
-    'brettonwoods': '101%',
-    'waterville': '101%',
-    'cannon': '101%',
-    'wildcat': '101%',
-    'sunapee': '101%',
-    'pats-peak': '101%',
-    'sugarloaf': '101%',
-    'saddleback': '101%',
-    'whiteface': '101%',
-    'gore-mountain': '101%',
-    'stowe': '101%',
-    'jay-peak': '101%',
-    'killington': '101%',
-    'bolton-valley': '101%',
-    'black-mountain': '101%',
-    'magic-mountain': '101%',
-    'ragged-mountain': '101%',
-    'le-massif': '101%',
-    'mad-river-glen': '101%',
-    'tremblant': '101%'
-};
-
-
             const backgroundPos = backgroundPositionByResort[resort.id] || 'center 42%';
-            const backgroundSize = backgroundSizeByResort[resort.id] || '101%';
+            const backgroundSize = 'cover';
 
             return `
             <div class="resort-card" id="resort-${resort.id}" data-region="${resort.region}" data-resort="${resort.id}">
-              <div class="resort-header" style="--bg: url('resort-art/${backgroundImageFile}'); --bg-pos: ${backgroundPos}; --bg-size: ${backgroundSize};">
+              <div class="resort-header" style="--bg: ${backgroundVar}; --bg-pos: ${backgroundPos}; --bg-size: ${backgroundSize};">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;">
                   <div style="flex:1;">
                     <h2 class="resort-name">
@@ -3004,6 +2965,16 @@ const backgroundSizeByResort = {
             return shareArtOverrides[resortId] || `${resortId}.jpg`;
         }
 
+        function getShareArtUrls(resortId) {
+            const legacyFile = getShareArtFile(resortId);
+            const legacyBase = String(legacyFile).replace(/\?.*$/, '');
+            const stem = legacyBase.replace(/\.(png|jpe?g|webp)$/i, '');
+            return [
+                new URL(`new-resort-art/${stem}.png`, window.location.href).toString(),
+                new URL(`resort-art/${legacyFile}`, window.location.href).toString(),
+            ];
+        }
+
         function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
             const words = String(text || '').split(/\s+/).filter(Boolean);
             const lines = [];
@@ -3061,14 +3032,21 @@ const backgroundSizeByResort = {
             ctx.lineWidth = 1;
             ctx.stroke();
 
-            const artFile = getShareArtFile(resort.id);
-            const artUrl = new URL(`resort-art/${artFile}`, window.location.href).toString();
+            const artUrls = getShareArtUrls(resort.id);
             ctx.save();
             drawRoundRect(ctx, cardX, cardY, cardW, headerH, 28);
             ctx.clip();
 
             try {
-                const art = await loadImageForShare(artUrl);
+                let art = null;
+                for (const url of artUrls) {
+                    try {
+                        art = await loadImageForShare(url);
+                        if (art) break;
+                    } catch (_) {
+                    }
+                }
+                if (!art) throw new Error('no art image');
                 drawImageCover(ctx, art, cardX, cardY, cardW, headerH);
             } catch (_) {
                 ctx.fillStyle = '#dbe8fb';

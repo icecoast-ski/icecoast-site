@@ -944,7 +944,7 @@
 
         .resort-header {
             background-image: var(--bg);
-            background-size: var(--bg-size, 108%);
+            background-size: var(--bg-size, cover);
             background-position: var(--bg-pos, center 42%);
             background-repeat: no-repeat;
         }
@@ -3304,7 +3304,7 @@
 
 .resort-card .resort-header {
     background-image: var(--bg) !important;
-    background-size: var(--bg-size, 101%) !important;
+    background-size: var(--bg-size, cover) !important;
     background-position: var(--bg-pos, center 42%) !important;
     background-repeat: no-repeat !important;
 }
