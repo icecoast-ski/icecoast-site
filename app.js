@@ -830,6 +830,267 @@
             return Number.isFinite(total) && total > 0 ? total : Number.POSITIVE_INFINITY;
         }
 
+        const ETA_USAGE_STORAGE_KEY = 'icecoast_eta_usage_state_v1';
+        const ETA_DEFAULT_CONFIG = {
+            enabled: true,
+            killSwitch: false,
+            maxCallsPerDay: 300,
+            maxCallsPerMonth: 8000,
+            cacheMinutes: 10,
+            timeoutMs: 9000
+        };
+        const ETA_CONFIG = {
+            ...ETA_DEFAULT_CONFIG,
+            ...((typeof window !== 'undefined' && window.ICECOAST_ETA_CONFIG && typeof window.ICECOAST_ETA_CONFIG === 'object')
+                ? window.ICECOAST_ETA_CONFIG
+                : {})
+        };
+        const GOOGLE_ROUTES_API_KEY = (typeof window !== 'undefined'
+            ? (window.ICECOAST_GOOGLE_ROUTES_API_KEY || window.GOOGLE_MAPS_API_KEY || '')
+            : '').trim();
+        const ETA_CACHE_TTL_MS = Math.max(1, Number(ETA_CONFIG.cacheMinutes || 10)) * 60 * 1000;
+        const etaStateByResort = {};
+
+        function formatEtaMinutes(totalMinutes) {
+            if (!Number.isFinite(totalMinutes) || totalMinutes <= 0) return '—';
+            const rounded = Math.max(1, Math.round(totalMinutes / 5) * 5);
+            const hours = Math.floor(rounded / 60);
+            const mins = rounded % 60;
+            return hours > 0 ? `${hours}h ${mins}m` : `${mins}m`;
+        }
+
+        function parseIsoDurationMinutes(isoDuration) {
+            const raw = String(isoDuration || '').trim();
+            const match = raw.match(/^(\d+(?:\.\d+)?)s$/i);
+            if (!match) return null;
+            const seconds = Number(match[1]);
+            if (!Number.isFinite(seconds) || seconds <= 0) return null;
+            return Math.max(1, Math.round(seconds / 60));
+        }
+
+        function getUsageDateKey() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        }
+
+        function getUsageMonthKey() {
+            const now = new Date();
+            return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+        }
+
+        function loadEtaUsageState() {
+            if (typeof localStorage === 'undefined') {
+                return { dayKey: getUsageDateKey(), monthKey: getUsageMonthKey(), dayCount: 0, monthCount: 0 };
+            }
+            try {
+                const raw = localStorage.getItem(ETA_USAGE_STORAGE_KEY);
+                const parsed = raw ? JSON.parse(raw) : {};
+                return {
+                    dayKey: parsed.dayKey || getUsageDateKey(),
+                    monthKey: parsed.monthKey || getUsageMonthKey(),
+                    dayCount: Number(parsed.dayCount) || 0,
+                    monthCount: Number(parsed.monthCount) || 0
+                };
+            } catch (_) {
+                return { dayKey: getUsageDateKey(), monthKey: getUsageMonthKey(), dayCount: 0, monthCount: 0 };
+            }
+        }
+
+        function saveEtaUsageState(state) {
+            if (typeof localStorage === 'undefined') return;
+            try {
+                localStorage.setItem(ETA_USAGE_STORAGE_KEY, JSON.stringify(state));
+            } catch (_) {
+                // no-op
+            }
+        }
+
+        function normalizeEtaUsageState(state) {
+            const next = { ...state };
+            const currentDay = getUsageDateKey();
+            const currentMonth = getUsageMonthKey();
+            if (next.monthKey !== currentMonth) {
+                next.monthKey = currentMonth;
+                next.monthCount = 0;
+                next.dayKey = currentDay;
+                next.dayCount = 0;
+            } else if (next.dayKey !== currentDay) {
+                next.dayKey = currentDay;
+                next.dayCount = 0;
+            }
+            return next;
+        }
+
+        function getEtaUsageBudgetStatus() {
+            let usage = normalizeEtaUsageState(loadEtaUsageState());
+            saveEtaUsageState(usage);
+            if (!ETA_CONFIG.enabled || ETA_CONFIG.killSwitch) {
+                return { allowed: false, reason: 'disabled' };
+            }
+            if (!GOOGLE_ROUTES_API_KEY) {
+                return { allowed: false, reason: 'no_api_key' };
+            }
+            const dayLimit = Number(ETA_CONFIG.maxCallsPerDay);
+            const monthLimit = Number(ETA_CONFIG.maxCallsPerMonth);
+            if (Number.isFinite(dayLimit) && dayLimit > 0 && usage.dayCount >= dayLimit) {
+                return { allowed: false, reason: 'daily_cap' };
+            }
+            if (Number.isFinite(monthLimit) && monthLimit > 0 && usage.monthCount >= monthLimit) {
+                return { allowed: false, reason: 'monthly_cap' };
+            }
+            return { allowed: true, usage };
+        }
+
+        function incrementEtaUsage() {
+            let usage = normalizeEtaUsageState(loadEtaUsageState());
+            usage.dayCount += 1;
+            usage.monthCount += 1;
+            saveEtaUsageState(usage);
+        }
+
+        function getEtaDisabledMessage(reason) {
+            if (reason === 'daily_cap' || reason === 'monthly_cap') {
+                return 'Live ETA cap reached. Using static drive times.';
+            }
+            if (reason === 'no_api_key') {
+                return 'Live ETA unavailable. Using static drive times.';
+            }
+            return 'Live ETA is currently off. Using static drive times.';
+        }
+
+        function getOriginHash(lat, lon) {
+            return `${lat.toFixed(2)},${lon.toFixed(2)}`;
+        }
+
+        function getCachedEtaState(resortId, originHash) {
+            const state = etaStateByResort[resortId];
+            if (!state || state.status !== 'ok' || !state.timestamp) return null;
+            if (state.originHash !== originHash) return null;
+            if ((Date.now() - state.timestamp) > ETA_CACHE_TTL_MS) return null;
+            return state;
+        }
+
+        function getCurrentPositionAsync() {
+            return new Promise((resolve, reject) => {
+                if (!navigator.geolocation) {
+                    reject(new Error('Geolocation unavailable'));
+                    return;
+                }
+                navigator.geolocation.getCurrentPosition(resolve, reject, {
+                    enableHighAccuracy: true,
+                    maximumAge: 120000,
+                    timeout: 8000
+                });
+            });
+        }
+
+        async function fetchGoogleRouteEtaMinutes(originLat, originLon, destinationLat, destinationLon) {
+            const budget = getEtaUsageBudgetStatus();
+            if (!budget.allowed) {
+                throw new Error(`ETA_DISABLED:${budget.reason}`);
+            }
+
+            incrementEtaUsage();
+
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), Number(ETA_CONFIG.timeoutMs || 9000));
+            try {
+                const resp = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Goog-Api-Key': GOOGLE_ROUTES_API_KEY,
+                        'X-Goog-FieldMask': 'routes.duration'
+                    },
+                    body: JSON.stringify({
+                        origin: {
+                            location: { latLng: { latitude: originLat, longitude: originLon } }
+                        },
+                        destination: {
+                            location: { latLng: { latitude: destinationLat, longitude: destinationLon } }
+                        },
+                        travelMode: 'DRIVE',
+                        routingPreference: 'TRAFFIC_AWARE',
+                        units: 'IMPERIAL',
+                        languageCode: 'en-US'
+                    }),
+                    signal: controller.signal
+                });
+
+                if (!resp.ok) {
+                    throw new Error(`ETA_HTTP_${resp.status}`);
+                }
+                const data = await resp.json();
+                const duration = data?.routes?.[0]?.duration;
+                const minutes = parseIsoDurationMinutes(duration);
+                if (!Number.isFinite(minutes)) {
+                    throw new Error('ETA_PARSE');
+                }
+                return minutes;
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }
+
+        async function requestResortEta(resortId) {
+            const resort = resorts.find((r) => r.id === resortId);
+            if (!resort || !Number.isFinite(Number(resort.lat)) || !Number.isFinite(Number(resort.lon))) {
+                etaStateByResort[resortId] = { status: 'error', message: 'ETA unavailable for this resort.' };
+                renderResorts();
+                return;
+            }
+
+            const budget = getEtaUsageBudgetStatus();
+            if (!budget.allowed) {
+                etaStateByResort[resortId] = { status: 'disabled', message: getEtaDisabledMessage(budget.reason) };
+                renderResorts();
+                return;
+            }
+
+            etaStateByResort[resortId] = { status: 'loading', message: 'Getting live ETA…' };
+            renderResorts();
+
+            try {
+                const position = await getCurrentPositionAsync();
+                const originLat = Number(position.coords.latitude);
+                const originLon = Number(position.coords.longitude);
+                const originHash = getOriginHash(originLat, originLon);
+                const cached = getCachedEtaState(resortId, originHash);
+                if (cached) {
+                    etaStateByResort[resortId] = { ...cached, message: `ETA now: ${cached.etaLabel}` };
+                    renderResorts();
+                    return;
+                }
+
+                const etaMinutes = await fetchGoogleRouteEtaMinutes(
+                    originLat,
+                    originLon,
+                    Number(resort.lat),
+                    Number(resort.lon)
+                );
+                const etaLabel = formatEtaMinutes(etaMinutes);
+                etaStateByResort[resortId] = {
+                    status: 'ok',
+                    etaMinutes,
+                    etaLabel,
+                    originHash,
+                    timestamp: Date.now(),
+                    message: `ETA now: ${etaLabel}`
+                };
+            } catch (error) {
+                const msg = String(error?.message || '');
+                if (msg.startsWith('ETA_DISABLED:')) {
+                    etaStateByResort[resortId] = { status: 'disabled', message: getEtaDisabledMessage(msg.split(':')[1]) };
+                } else if (msg.includes('Geolocation')) {
+                    etaStateByResort[resortId] = { status: 'error', message: 'Location access needed for live ETA.' };
+                } else {
+                    etaStateByResort[resortId] = { status: 'error', message: 'Live ETA unavailable. Using static drive times.' };
+                }
+            }
+
+            renderResorts();
+        }
+
         const DEFAULT_SEND_IT_RADIUS_MILES = 1.5;
         let sendItSummaryByResort = {};
         let sendItRadiusMiles = DEFAULT_SEND_IT_RADIUS_MILES;
@@ -1922,6 +2183,12 @@
             const distance = resort.distance || {};
             const distanceEntries = Object.entries(distance)
                 .sort(([, aTime], [, bTime]) => parseDriveTimeMinutes(aTime) - parseDriveTimeMinutes(bTime));
+            const etaState = etaStateByResort[resort.id] || null;
+            const etaButtonDisabled = !!(etaState && (etaState.status === 'loading' || etaState.status === 'disabled'));
+            const etaButtonLabel = etaState?.status === 'loading'
+                ? 'Getting ETA…'
+                : (etaState?.status === 'ok' ? 'Refresh ETA' : 'Get ETA');
+            const etaMessage = etaState?.message || '';
             const weather = resort.weather || {};
             const forecast = resort.forecast || [];
 
@@ -2305,7 +2572,6 @@ const backgroundPositionByResort = {
                           <div class="forecast-day-name">${day.day}</div>
                           <div class="forecast-icon">${day.icon}</div>
                           <div class="forecast-temp">${day.tempF ?? (typeof day.temp === 'number' ? `${day.temp}°` : '—')}</div>
-                          <div class="forecast-snow">${typeof day.snow === 'number' ? `${day.snow}"` : (day.snow ?? '—')}</div>
                         </div>
                       `).join('')}
                     </div>
@@ -2505,12 +2771,18 @@ const backgroundPositionByResort = {
                 </div>
 
                 <div class="distance-info">
-                  <div class="distance-title">
-                    <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.5rem;">
-                      ${icons.car}
-                    </span>
-                    Drive Time
+                  <div class="distance-title-row">
+                    <div class="distance-title">
+                      <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.5rem;">
+                        ${icons.car}
+                      </span>
+                      Drive Time
+                    </div>
+                    <button class="eta-btn" data-eta-action="get" data-resort-id="${resort.id}" type="button" ${etaButtonDisabled ? 'disabled' : ''}>
+                      ${etaButtonLabel}
+                    </button>
                   </div>
+                  ${etaMessage ? `<div class="distance-eta ${etaState?.status || ''}">${etaMessage}</div>` : ''}
                   <div class="distance-list">
                     ${distanceEntries.length
                         ? distanceEntries.map(([city, time]) => `
@@ -3569,6 +3841,14 @@ const backgroundPositionByResort = {
             const resortId = shareTarget.dataset.shareResort;
             if (!resortId) return;
             openShareModal(resortId);
+        });
+
+        document.addEventListener('click', async (event) => {
+            const etaTarget = event.target.closest('[data-eta-action="get"]');
+            if (!etaTarget) return;
+            const resortId = etaTarget.dataset.resortId;
+            if (!resortId) return;
+            await requestResortEta(resortId);
         });
 
 
