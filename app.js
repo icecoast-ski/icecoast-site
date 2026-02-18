@@ -1,3 +1,17 @@
+        function syncStickyHeaderHeight() {
+            const header = document.querySelector('header');
+            if (!header) return;
+            const headerHeight = Math.ceil(header.getBoundingClientRect().height);
+            document.documentElement.style.setProperty('--sticky-header-height', `${headerHeight}px`);
+        }
+
+        window.addEventListener('load', syncStickyHeaderHeight);
+        window.addEventListener('resize', syncStickyHeaderHeight);
+        if (document.fonts && document.fonts.ready) {
+            document.fonts.ready.then(syncStickyHeaderHeight);
+        }
+        syncStickyHeaderHeight();
+
         const icons = {
             ticket: `<svg class="icon-ticket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M2 9a3 3 0 0 1 0 6v2a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-2a3 3 0 0 1 0-6V7a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2Z"/>

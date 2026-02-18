@@ -10,6 +10,7 @@
             --bg-grey: #F7F7F7;
             --white: #FFFFFF;
             --snow: #FAFAFA;
+            --sticky-header-height: 58px;
         }
 
         * {
@@ -107,7 +108,7 @@
             border-top: 1px solid #d5e3fb;
             border-bottom: 1px solid #d5e3fb;
             position: sticky;
-            top: 58px;
+            top: var(--sticky-header-height);
             z-index: 95;
         }
 
@@ -3059,7 +3060,6 @@
             .newsletter-banner {
                 margin: 0;
                 padding: 0;
-                top: 49px;
             }
 
             .newsletter-banner-content {
