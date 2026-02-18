@@ -2650,7 +2650,13 @@ const backgroundPositionByResort = {
         }
 
         const deepLinkResortId = (typeof window !== 'undefined')
-            ? (new URLSearchParams(window.location.search).get('resort') || '').trim().toLowerCase()
+            ? (() => {
+                const queryResort = (new URLSearchParams(window.location.search).get('resort') || '').trim().toLowerCase();
+                if (queryResort) return queryResort;
+                const hash = String(window.location.hash || '').replace(/^#/, '').trim().toLowerCase();
+                const m = hash.match(/^resort-([a-z0-9-]+)$/);
+                return m ? m[1] : '';
+            })()
             : '';
         let deepLinkHandled = false;
 
@@ -2827,6 +2833,7 @@ const backgroundPositionByResort = {
         function getResortShareUrl(resortId) {
             const shareUrl = new URL(PUBLIC_SHARE_BASE_URL);
             shareUrl.searchParams.set('resort', resortId);
+            shareUrl.hash = `resort-${resortId}`;
             return shareUrl.toString();
         }
 
@@ -2837,8 +2844,12 @@ const backgroundPositionByResort = {
             deepLinkHandled = true;
             setTimeout(() => {
                 const headerEl = card.querySelector('.resort-header') || card;
-                const headerTop = headerEl.getBoundingClientRect().top + window.scrollY;
-                window.scrollTo({ top: Math.max(0, headerTop - 10), behavior: 'smooth' });
+                const scrollToHeaderTop = () => {
+                    const headerTop = headerEl.getBoundingClientRect().top + window.scrollY;
+                    window.scrollTo({ top: Math.max(0, headerTop), behavior: 'smooth' });
+                };
+                scrollToHeaderTop();
+                setTimeout(scrollToHeaderTop, 260);
                 card.classList.add('share-focus');
                 setTimeout(() => card.classList.remove('share-focus'), 2200);
             }, 120);
@@ -3021,12 +3032,14 @@ const backgroundPositionByResort = {
             const ratingForBubble = Math.max(0, Math.min(5, Math.round(Number(resort.rating) || 0)));
             const bubblePhrase = getRatingText(ratingForBubble, snowfall24ForBubble, resort);
             const conditionLabel = (resort.conditions || 'Current conditions').trim();
-            const text = `${conditionLabel} @ ${resort.name}! ${bubblePhrase} | ${url}`;
+            const artUrl = getPublicShareArtUrl(resortId);
+            const text = `${conditionLabel} @ ${resort.name}! ${bubblePhrase}\n${artUrl}\n${url}`;
             activeSharePayload = {
                 resortId,
                 name: resort.name,
                 url,
-                text
+                text,
+                artUrl
             };
 
             if (shareModalResort) {
@@ -3114,6 +3127,13 @@ const backgroundPositionByResort = {
                 new URL(`new-resort-art/${stem}.png`, window.location.href).toString(),
                 new URL(`resort-art/${legacyFile}`, window.location.href).toString(),
             ];
+        }
+
+        function getPublicShareArtUrl(resortId) {
+            const legacyFile = getShareArtFile(resortId);
+            const legacyBase = String(legacyFile).replace(/\?.*$/, '');
+            const stem = legacyBase.replace(/\.(png|jpe?g|webp)$/i, '');
+            return `${PUBLIC_SHARE_BASE_URL}new-resort-art/${stem}.png`;
         }
 
         function drawWrappedText(ctx, text, x, y, maxWidth, lineHeight) {
@@ -3493,7 +3513,8 @@ const backgroundPositionByResort = {
         if (shareXBtn) {
             shareXBtn.addEventListener('click', () => {
                 if (!activeSharePayload) return;
-                const href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(activeSharePayload.text)}`;
+                const xText = `${activeSharePayload.name} conditions on icecoast`;
+                const href = `https://twitter.com/intent/tweet?text=${encodeURIComponent(xText)}&url=${encodeURIComponent(activeSharePayload.url)}`;
                 window.open(href, '_blank', 'noopener,noreferrer');
             });
         }
