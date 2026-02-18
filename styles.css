@@ -131,7 +131,7 @@
             font-weight: 650;
             line-height: 1.2;
             display: inline-flex;
-            align-items: flex-start;
+            align-items: center;
             gap: 0.5rem;
             letter-spacing: -0.01em;
             min-width: 0;
@@ -142,7 +142,7 @@
             font-size: 1.08rem;
             font-weight: 700;
             line-height: 1;
-            margin-top: 0.02rem;
+            margin-top: 0;
             flex-shrink: 0;
         }
 
