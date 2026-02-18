@@ -845,9 +845,6 @@
                 ? window.ICECOAST_ETA_CONFIG
                 : {})
         };
-        const GOOGLE_ROUTES_API_KEY = (typeof window !== 'undefined'
-            ? (window.ICECOAST_GOOGLE_ROUTES_API_KEY || window.GOOGLE_MAPS_API_KEY || '')
-            : '').trim();
         const ETA_CACHE_TTL_MS = Math.max(1, Number(ETA_CONFIG.cacheMinutes || 10)) * 60 * 1000;
         const etaStateByResort = {};
 
@@ -927,9 +924,6 @@
             if (!ETA_CONFIG.enabled || ETA_CONFIG.killSwitch) {
                 return { allowed: false, reason: 'disabled' };
             }
-            if (!GOOGLE_ROUTES_API_KEY) {
-                return { allowed: false, reason: 'no_api_key' };
-            }
             const dayLimit = Number(ETA_CONFIG.maxCallsPerDay);
             const monthLimit = Number(ETA_CONFIG.maxCallsPerMonth);
             if (Number.isFinite(dayLimit) && dayLimit > 0 && usage.dayCount >= dayLimit) {
@@ -951,9 +945,6 @@
         function getEtaDisabledMessage(reason) {
             if (reason === 'daily_cap' || reason === 'monthly_cap') {
                 return 'Live ETA cap reached. Using static drive times.';
-            }
-            if (reason === 'no_api_key') {
-                return 'Live ETA unavailable. Using static drive times.';
             }
             return 'Live ETA is currently off. Using static drive times.';
         }
@@ -995,34 +986,35 @@
             const controller = new AbortController();
             const timeoutId = setTimeout(() => controller.abort(), Number(ETA_CONFIG.timeoutMs || 9000));
             try {
-                const resp = await fetch('https://routes.googleapis.com/directions/v2:computeRoutes', {
+                const etaUrl = new URL('eta', WORKER_URL).toString();
+                const resp = await fetch(etaUrl, {
                     method: 'POST',
                     headers: {
-                        'Content-Type': 'application/json',
-                        'X-Goog-Api-Key': GOOGLE_ROUTES_API_KEY,
-                        'X-Goog-FieldMask': 'routes.duration'
+                        'Content-Type': 'application/json'
                     },
                     body: JSON.stringify({
-                        origin: {
-                            location: { latLng: { latitude: originLat, longitude: originLon } }
-                        },
-                        destination: {
-                            location: { latLng: { latitude: destinationLat, longitude: destinationLon } }
-                        },
-                        travelMode: 'DRIVE',
-                        routingPreference: 'TRAFFIC_AWARE',
-                        units: 'IMPERIAL',
-                        languageCode: 'en-US'
+                        originLat,
+                        originLon,
+                        destinationLat,
+                        destinationLon
                     }),
                     signal: controller.signal
                 });
 
                 if (!resp.ok) {
+                    let payload = null;
+                    try {
+                        payload = await resp.json();
+                    } catch (_) {
+                        payload = null;
+                    }
+                    if (resp.status === 429 && payload?.reason) {
+                        throw new Error(`ETA_DISABLED:${payload.reason}`);
+                    }
                     throw new Error(`ETA_HTTP_${resp.status}`);
                 }
                 const data = await resp.json();
-                const duration = data?.routes?.[0]?.duration;
-                const minutes = parseIsoDurationMinutes(duration);
+                const minutes = Number(data?.etaMinutes);
                 if (!Number.isFinite(minutes)) {
                     throw new Error('ETA_PARSE');
                 }
