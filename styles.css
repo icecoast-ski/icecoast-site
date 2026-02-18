@@ -106,6 +106,9 @@
             background: #f7faff;
             border-top: 1px solid #d5e3fb;
             border-bottom: 1px solid #d5e3fb;
+            position: sticky;
+            top: 58px;
+            z-index: 95;
         }
 
         .newsletter-banner-content {
@@ -3056,6 +3059,7 @@
             .newsletter-banner {
                 margin: 0;
                 padding: 0;
+                top: 49px;
             }
 
             .newsletter-banner-content {
