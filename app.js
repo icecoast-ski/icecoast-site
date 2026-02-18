@@ -2858,9 +2858,17 @@ const backgroundPositionByResort = {
             deepLinkHandled = true;
             setTimeout(() => {
                 const headerEl = card.querySelector('.resort-header') || card;
+                const getStickyOffset = () => {
+                    const header = document.querySelector('header');
+                    const newsletter = document.querySelector('.newsletter-banner');
+                    const headerHeight = header ? Math.ceil(header.getBoundingClientRect().height) : 0;
+                    const newsletterHeight = newsletter ? Math.ceil(newsletter.getBoundingClientRect().height) : 0;
+                    return headerHeight + newsletterHeight + 8;
+                };
                 const scrollToHeaderTop = () => {
                     const headerTop = headerEl.getBoundingClientRect().top + window.scrollY;
-                    window.scrollTo({ top: Math.max(0, headerTop), behavior: 'smooth' });
+                    const targetTop = Math.max(0, headerTop - getStickyOffset());
+                    window.scrollTo({ top: targetTop, behavior: 'smooth' });
                 };
                 scrollToHeaderTop();
                 setTimeout(scrollToHeaderTop, 260);
