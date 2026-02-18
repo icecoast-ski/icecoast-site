@@ -2226,20 +2226,30 @@ const backgroundPositionByResort = {
 
             const backgroundPos = backgroundPositionByResort[resort.id] || 'center 42%';
             const backgroundSize = 'cover';
+            const isFavorite = isFavoriteResort(resort.id);
 
             return `
             <div class="resort-card" id="resort-${resort.id}" data-region="${resort.region}" data-resort="${resort.id}">
               <div class="resort-header" style="--bg: ${backgroundVar}; --bg-pos: ${backgroundPos}; --bg-size: ${backgroundSize};">
                 <div style="display:flex;justify-content:space-between;align-items:flex-start;width:100%;">
-                  <div style="flex:1;">
+                  <div style="flex:1;padding-right:5.8rem;">
                     <h2 class="resort-name">
                       <span class="resort-name-text">${resort.name}</span>
                     </h2>
                     <p class="resort-location">${resort.location}</p>
                   </div>
-                  <button class="resort-share-btn" data-share-resort="${resort.id}" type="button" aria-label="Share ${resort.name}">
-                    <img class="resort-share-icon" src="resort-source/share.png" alt="" aria-hidden="true">
-                  </button>
+                  <div class="resort-header-actions">
+                    <button class="resort-favorite-btn ${isFavorite ? 'active' : ''}" data-favorite-resort="${resort.id}" type="button" aria-label="${isFavorite ? 'Remove' : 'Add'} ${resort.name} ${isFavorite ? 'from' : 'to'} favorites" aria-pressed="${isFavorite ? 'true' : 'false'}">
+                      <span class="resort-favorite-icon" aria-hidden="true">
+                        <svg viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
+                          <path d="M7 3.75h10a1.25 1.25 0 0 1 1.25 1.25v15.2a.55.55 0 0 1-.9.43L12 16.4l-5.35 4.23a.55.55 0 0 1-.9-.43V5A1.25 1.25 0 0 1 7 3.75Z"></path>
+                        </svg>
+                      </span>
+                    </button>
+                    <button class="resort-share-btn" data-share-resort="${resort.id}" type="button" aria-label="Share ${resort.name}">
+                      <img class="resort-share-icon" src="resort-source/share.png" alt="" aria-hidden="true">
+                    </button>
+                  </div>
                 </div>
                 ${heroChipMarkup ? `<div class="status-chips status-chips-bottom">${heroChipMarkup}</div>` : ''}
               </div>
@@ -2537,6 +2547,108 @@ const backgroundPositionByResort = {
             sort: 'rating-high', // Start with best conditions
             search: ''
         };
+        const FAVORITES_STORAGE_KEY = 'icecoast_favorites_v1';
+        const FEATURE_TAB_STORAGE_KEY = 'icecoast_feature_tab_v1';
+        const ALLOWED_FEATURE_TABS = new Set(['all', 'favorites']);
+        let favoriteResortIds = new Set();
+        let activeFeatureTab = 'all';
+
+        function loadFavoriteResortIds() {
+            try {
+                const raw = localStorage.getItem(FAVORITES_STORAGE_KEY);
+                if (!raw) return new Set();
+                const parsed = JSON.parse(raw);
+                if (!Array.isArray(parsed)) return new Set();
+                return new Set(parsed.map((id) => String(id || '').trim()).filter(Boolean));
+            } catch (_) {
+                return new Set();
+            }
+        }
+
+        function loadActiveFeatureTab() {
+            try {
+                const stored = String(localStorage.getItem(FEATURE_TAB_STORAGE_KEY) || '').trim().toLowerCase();
+                if (ALLOWED_FEATURE_TABS.has(stored)) return stored;
+            } catch (_) {}
+            return 'all';
+        }
+
+        function saveActiveFeatureTab(tab) {
+            try {
+                localStorage.setItem(FEATURE_TAB_STORAGE_KEY, tab);
+            } catch (_) {}
+        }
+
+        function saveFavoriteResortIds() {
+            try {
+                localStorage.setItem(FAVORITES_STORAGE_KEY, JSON.stringify(Array.from(favoriteResortIds)));
+            } catch (_) {}
+        }
+
+        function isFavoriteResort(resortId) {
+            return favoriteResortIds.has(String(resortId || '').trim());
+        }
+
+        function setFavoriteResort(resortId, shouldFavorite) {
+            const id = String(resortId || '').trim();
+            if (!id) return;
+            if (shouldFavorite) {
+                favoriteResortIds.add(id);
+            } else {
+                favoriteResortIds.delete(id);
+            }
+            saveFavoriteResortIds();
+        }
+
+        function toggleFavoriteResort(resortId) {
+            const id = String(resortId || '').trim();
+            if (!id) return false;
+            const next = !favoriteResortIds.has(id);
+            setFavoriteResort(id, next);
+            return next;
+        }
+
+        function syncFeatureTabButtons() {
+            document.querySelectorAll('[data-feature-tab]').forEach((btn) => {
+                const tab = btn.dataset.featureTab;
+                btn.classList.toggle('active', tab === activeFeatureTab);
+            });
+            const favoritesTabCountEl = document.getElementById('favoritesTabCount');
+            if (favoritesTabCountEl) {
+                const count = favoriteResortIds.size;
+                favoritesTabCountEl.textContent = String(count);
+                favoritesTabCountEl.classList.toggle('visible', count > 0);
+            }
+        }
+
+        let favoriteToastTimer = null;
+        function showFavoriteToast(message) {
+            if (typeof document === 'undefined') return;
+            let toast = document.getElementById('favoriteToast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'favoriteToast';
+                toast.className = 'favorite-toast';
+                document.body.appendChild(toast);
+            }
+            toast.textContent = message;
+            toast.classList.add('show');
+            if (favoriteToastTimer) {
+                clearTimeout(favoriteToastTimer);
+            }
+            favoriteToastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 1100);
+        }
+
+        function pulseFavoritesTab() {
+            const favoritesTab = document.querySelector('[data-feature-tab="favorites"]');
+            if (!favoritesTab) return;
+            favoritesTab.classList.remove('pulse-pop');
+            void favoritesTab.offsetWidth;
+            favoritesTab.classList.add('pulse-pop');
+        }
+
         const deepLinkResortId = (typeof window !== 'undefined')
             ? (new URLSearchParams(window.location.search).get('resort') || '').trim().toLowerCase()
             : '';
@@ -2583,6 +2695,10 @@ const backgroundPositionByResort = {
                     const region = String(r?.region || '').toLowerCase();
                     return name.includes(searchTerm) || location.includes(searchTerm) || region.includes(searchTerm);
                 });
+            }
+
+            if (activeFeatureTab === 'favorites') {
+                filtered = filtered.filter((r) => favoriteResortIds.has(String(r?.id || '')));
             }
 
             if (Array.isArray(filterState.regions) && filterState.regions.length > 0) {
@@ -2675,6 +2791,10 @@ const backgroundPositionByResort = {
             const filtered = applyFilters();
 
             if (filtered.length === 0) {
+                if (activeFeatureTab === 'favorites') {
+                    grid.innerHTML = `<div class="loading" style="grid-column: 1/-1;">No favorites yet. Tap the bookmark on any resort to build your list.</div>`;
+                    return;
+                }
                 const snarkMessages = [
                     "No resorts match your filters. Ice builds character.",
                     "No resorts match your filters. Conditions: character-building.",
@@ -2806,6 +2926,17 @@ const backgroundPositionByResort = {
             });
         });
 
+        document.querySelectorAll('[data-feature-tab]').forEach((btn) => {
+            btn.addEventListener('click', () => {
+                const tab = String(btn.dataset.featureTab || '').trim();
+                if (!ALLOWED_FEATURE_TABS.has(tab)) return;
+                activeFeatureTab = tab;
+                saveActiveFeatureTab(tab);
+                syncFeatureTabButtons();
+                renderResorts();
+            });
+        });
+
         document.getElementById('sortSelect').addEventListener('change', (e) => {
             filterState.sort = e.target.value;
             renderResorts();
@@ -2847,6 +2978,9 @@ const backgroundPositionByResort = {
         syncSearchClearButton();
         syncRegionFilterButtons();
         syncPassFilterButtons();
+        favoriteResortIds = loadFavoriteResortIds();
+        activeFeatureTab = loadActiveFeatureTab();
+        syncFeatureTabButtons();
 
         const shareModalOverlay = document.getElementById('shareModalOverlay');
         const shareModalClose = document.getElementById('shareModalClose');
@@ -3373,6 +3507,20 @@ const backgroundPositionByResort = {
         }
 
         document.addEventListener('click', (event) => {
+            const favoriteTarget = event.target.closest('[data-favorite-resort]');
+            if (favoriteTarget) {
+                const resortId = favoriteTarget.dataset.favoriteResort;
+                if (!resortId) return;
+                const wasAdded = toggleFavoriteResort(resortId);
+                syncFeatureTabButtons();
+                pulseFavoritesTab();
+                if (navigator.vibrate) {
+                    navigator.vibrate(wasAdded ? [18, 12, 22] : [12]);
+                }
+                showFavoriteToast(wasAdded ? 'Saved to Favorites' : 'Removed from Favorites');
+                renderResorts();
+                return;
+            }
             const shareTarget = event.target.closest('[data-share-resort]');
             if (!shareTarget) return;
             const resortId = shareTarget.dataset.shareResort;
