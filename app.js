@@ -2181,7 +2181,9 @@
                 ? 'Getting ETA…'
                 : (etaState?.status === 'ok' ? 'Refresh ETA' : 'Get ETA');
             const etaValue = etaState?.status === 'ok' && etaState?.etaLabel ? etaState.etaLabel : '—';
-            const etaSubline = (etaState && etaState.status !== 'ok' && etaState.message) ? etaState.message : '';
+            const etaSubline = (etaState && (etaState.status === 'error' || etaState.status === 'disabled') && etaState.message)
+                ? etaState.message
+                : '';
             const weather = resort.weather || {};
             const forecast = resort.forecast || [];
 
@@ -2764,11 +2766,14 @@ const backgroundPositionByResort = {
                 </div>
 
                 <div class="distance-info">
-                  <div class="distance-title">
-                    <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.5rem;">
-                      ${icons.car}
-                    </span>
-                    Drive Time
+                  <div class="distance-title-row">
+                    <div class="distance-title">
+                      <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.5rem;">
+                        ${icons.car}
+                      </span>
+                      Drive Time
+                    </div>
+                    <div class="distance-title distance-title-right">Your drive</div>
                   </div>
                   <div class="distance-layout">
                     <div class="distance-list">
@@ -2779,12 +2784,11 @@ const backgroundPositionByResort = {
                           : '<div class="distance-item">Drive time unavailable</div>'}
                     </div>
                     <div class="distance-eta-panel">
-                      <div class="distance-eta-label">ETA from my location:</div>
                       <div class="distance-eta-value">${etaValue}</div>
                       <button class="eta-btn" data-eta-action="get" data-resort-id="${resort.id}" type="button" ${etaButtonDisabled ? 'disabled' : ''}>
                         ${etaButtonLabel}
                       </button>
-                      ${etaSubline ? `<div class="distance-eta-note ${etaState?.status || ''}">${etaSubline}</div>` : ''}
+                      <div class="distance-eta-note ${etaSubline ? (etaState?.status || '') : 'empty'}">${etaSubline || '&nbsp;'}</div>
                     </div>
                   </div>
                 </div>

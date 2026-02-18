@@ -2638,6 +2638,22 @@
             margin-bottom: 0.625rem;
         }
 
+        .distance-title-row {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+            align-items: end;
+            gap: 0.85rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .distance-title-row .distance-title {
+            margin-bottom: 0;
+        }
+
+        .distance-title-right {
+            text-align: left;
+        }
+
         .distance-layout {
             display: grid;
             grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
@@ -2679,17 +2695,8 @@
             flex-direction: column;
             align-items: center;
             justify-content: flex-start;
-            gap: 0.36rem;
-            padding-top: 0.05rem;
-        }
-
-        .distance-eta-label {
-            width: 100%;
-            text-align: left;
-            font-size: 0.875rem;
-            font-weight: 500;
-            color: var(--charcoal);
-            letter-spacing: 0;
+            gap: 0.32rem;
+            padding-top: 0.16rem;
         }
 
         .distance-eta-value {
@@ -2700,8 +2707,8 @@
             font-weight: 800;
             line-height: 1;
             letter-spacing: -0.02em;
-            margin-top: 0.05rem;
-            margin-bottom: 0.08rem;
+            margin-top: 0;
+            margin-bottom: 0.04rem;
         }
 
         .distance-eta-note {
@@ -2712,11 +2719,16 @@
             color: #64748b;
             line-height: 1.2;
             margin-top: 0.05rem;
+            min-height: 0.78rem;
         }
 
         .distance-eta-note.error,
         .distance-eta-note.disabled {
             color: #6b7280;
+        }
+
+        .distance-eta-note.empty {
+            visibility: hidden;
         }
 
         .distance-list {
