@@ -1,26 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-<!--
-    🎿 ICECOAST - East Coast Ski Conditions
-
-    📝 SETUP:
-    1. Deploy cloudflare-worker.js to Cloudflare Workers
-    2. Set OPENWEATHER_API_KEY env var in the worker
-    3. Get your worker URL
-    4. Search this file for "YOUR-SUBDOMAIN" and replace with your worker URL
-    5. Deploy to Cloudflare Pages as index.html
-
-    🌤️ DATA SOURCES:
-    - Weather: OpenWeather API via worker
-    - Lift status + individual lift names: Liftie API via worker (22/28 resorts)
-    - Snowfall: MANUAL updates via admin.html
-
-    🚡 LIFTIE COVERAGE (22/28):
-    ✅ camelback, blue, shawnee, hunter, windham, whiteface, gore
-    ✅ killington, stowe, sugarbush, stratton, okemo, jaypeak, madriverglen, mountsnow
-    ✅ loon, waterville, cannon, wildcat, brettonwoods, sundayriver, sugarloaf
-    ❌ elk, bearcreek, jackfrost, bigboulder, montage, belleayre (keep defaults)
--->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -309,7 +288,6 @@
     <script src="resorts.js?v=20260214d1"></script>
     <script src="manual-data.js?v=20260212a1"></script>
     <script>
-      window.ICECOAST_GOOGLE_ROUTES_API_KEY = "AIzaSyDMMzBIIZs_aM3YROCxY9_vQJGf6ijprQ8";
       window.ICECOAST_ETA_CONFIG = {
         enabled: true,
         killSwitch: false,
@@ -319,7 +297,7 @@
         timeoutMs: 9000
       };
     </script>
-    <script src="app.js?v=20260214d9"></script>
+    <script src="app.js?v=20260218a1"></script>
     <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
 </body>
 </html>
