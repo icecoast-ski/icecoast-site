@@ -927,8 +927,8 @@
             --header-action-right: -0.55rem;
             --header-action-size: 54px;
             --header-pass-gap: 0.16rem;
-            --header-pass-shift-x: 30px;
-            --header-pass-shift-y: -6px;
+            --header-pass-shift-x: 55px;
+            --header-pass-shift-y: -106px;
         }
 
         .resort-header-actions {
