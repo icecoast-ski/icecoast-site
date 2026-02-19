@@ -935,8 +935,8 @@
 
         .resort-header-pass-badges {
             position: absolute;
-            bottom: -0.75rem;
-            right: -0.45rem;
+            bottom: 0.38rem;
+            right: calc(0.28rem - 72px);
             display: flex;
             flex-direction: column;
             align-items: flex-end;
@@ -2684,6 +2684,13 @@
 
         .distance-title-row .distance-title {
             margin-bottom: 0;
+            width: 100%;
+            display: inline-flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            gap: 0.2rem;
         }
 
         .distance-title-right {
@@ -2693,6 +2700,13 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
+        }
+
+        .distance-title-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            line-height: 1;
         }
 
         .distance-layout {
@@ -6098,8 +6112,8 @@
     }
 
     .resort-header-pass-badges {
-        bottom: -0.75rem;
-        right: -0.45rem;
+        bottom: 0.38rem;
+        right: calc(0.28rem - 72px);
         gap: 0.28rem;
         padding-top: 0;
     }

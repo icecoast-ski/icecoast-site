@@ -2774,16 +2774,12 @@ const backgroundPositionByResort = {
                 <div class="distance-info">
                   <div class="distance-title-row">
                     <div class="distance-title">
-                      <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.5rem;">
-                        ${icons.car}
-                      </span>
-                      Drive Time
+                      <span class="distance-title-icon" aria-hidden="true">${icons.car}</span>
+                      <span>Drive Time</span>
                     </div>
                     <div class="distance-title distance-title-right">
-                      <span class="info-icon" style="display:inline-flex;vertical-align:middle;margin-right:0.35rem;">
-                        ${icons.myLocation}
-                      </span>
-                      Your drive
+                      <span class="distance-title-icon" aria-hidden="true">${icons.myLocation}</span>
+                      <span>Your drive</span>
                     </div>
                   </div>
                   <div class="distance-layout">
