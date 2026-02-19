@@ -2522,13 +2522,12 @@ const backgroundPositionByResort = {
                   <div class="resort-header-actions">
                     <button class="resort-favorite-btn ${isFavorite ? 'active' : ''}" data-favorite-resort="${resort.id}" type="button" aria-label="${isFavorite ? 'Remove' : 'Add'} ${resort.name} ${isFavorite ? 'from' : 'to'} favorites" aria-pressed="${isFavorite ? 'true' : 'false'}">
                       <span class="resort-favorite-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24" role="img" focusable="false" aria-hidden="true">
-                          <path d="M7 3.75h10a1.25 1.25 0 0 1 1.25 1.25v15.2a.55.55 0 0 1-.9.43L12 16.4l-5.35 4.23a.55.55 0 0 1-.9-.43V5A1.25 1.25 0 0 1 7 3.75Z"></path>
-                        </svg>
+                        <img class="favorite-img favorite-off" src="new-resort-art/icons/favorite.png" alt="">
+                        <img class="favorite-img favorite-on" src="new-resort-art/icons/favorite1.png" alt="">
                       </span>
                     </button>
                     <button class="resort-share-btn" data-share-resort="${resort.id}" type="button" aria-label="Share ${resort.name}">
-                      <img class="resort-share-icon" src="resort-source/share.png" alt="" aria-hidden="true">
+                      <img class="resort-share-icon" src="new-resort-art/icons/share.png" alt="" aria-hidden="true">
                     </button>
                   </div>
                 </div>
