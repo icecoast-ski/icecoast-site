@@ -2447,7 +2447,7 @@ const backgroundImageByResort = {
 const backgroundLegacyFile = backgroundImageByResort[resort.id] || `${resort.id}.jpg`;
 const backgroundLegacyBase = String(backgroundLegacyFile).replace(/\?.*$/, '');
 const backgroundStem = backgroundLegacyBase.replace(/\.(png|jpe?g|webp)$/i, '');
-const backgroundVar = `url('new-resort-art/${backgroundStem}.png'), url('resort-art/${backgroundLegacyFile}')`;
+const backgroundVar = `url('new-resort-art/${backgroundStem}.jpg'), url('new-resort-art/${backgroundStem}.png'), url('resort-art/${backgroundLegacyFile}')`;
 
 const backgroundPositionByResort = {
     'camelback': 'center 30%',
@@ -3419,6 +3419,7 @@ const backgroundPositionByResort = {
             const legacyBase = String(legacyFile).replace(/\?.*$/, '');
             const stem = legacyBase.replace(/\.(png|jpe?g|webp)$/i, '');
             return [
+                new URL(`new-resort-art/${stem}.jpg`, window.location.href).toString(),
                 new URL(`new-resort-art/${stem}.png`, window.location.href).toString(),
                 new URL(`resort-art/${legacyFile}`, window.location.href).toString(),
             ];
