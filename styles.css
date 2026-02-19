@@ -923,10 +923,12 @@
         }
 
         :root {
-            --header-action-top: -0.2rem;
-            --header-action-right: 0.28rem;
+            --header-action-top: -0.9rem;
+            --header-action-right: -0.55rem;
             --header-action-size: 64px;
             --header-pass-gap: 0.52rem;
+            --header-pass-shift-x: 30px;
+            --header-pass-shift-y: -30px;
         }
 
         .resort-header-actions {
@@ -942,8 +944,8 @@
 
         .resort-header-pass-badges {
             position: absolute;
-            top: calc(var(--header-action-top) + var(--header-action-size) + var(--header-pass-gap));
-            right: var(--header-action-right);
+            top: calc(var(--header-action-top) + var(--header-action-size) + var(--header-pass-gap) + var(--header-pass-shift-y));
+            right: calc(var(--header-action-right) + var(--header-pass-shift-x));
             bottom: auto;
             display: flex;
             flex-direction: column;
