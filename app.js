@@ -2329,6 +2329,14 @@
             const heroChipMarkup = heroChips.slice(0, 3)
                 .map((chip) => `<span class="status-chip ${chip.cls}">${chip.label}</span>`)
                 .join('');
+            const headerPassBadgeMarkup = passes.length
+                ? `<div class="resort-header-pass-badges">${passes.map((pass) => {
+                    const normalized = String(pass || '').toLowerCase();
+                    if (!['ikon', 'epic', 'indy'].includes(normalized)) return '';
+                    const label = normalized === 'ikon' ? 'Ikon Pass' : (normalized === 'epic' ? 'Epic Pass' : 'Indy Pass');
+                    return `<img class="resort-header-pass-badge pass-${normalized}" src="new-resort-art/icons/${normalized}.png" alt="${label}" loading="lazy" decoding="async">`;
+                }).join('')}</div>`
+                : '';
 
             let confidenceLevel = 'Basic';
             if (hasFreshPatrol) {
@@ -2531,6 +2539,7 @@ const backgroundPositionByResort = {
                     </button>
                   </div>
                 </div>
+                ${headerPassBadgeMarkup}
                 ${heroChipMarkup ? `<div class="status-chips status-chips-bottom">${heroChipMarkup}</div>` : ''}
               </div>
 
