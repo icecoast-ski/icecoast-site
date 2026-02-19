@@ -195,6 +195,7 @@
             <th>POW Updated</th>
             <th>Weather Updated</th>
             <th>VC 24 / 48 / 72</th>
+            <th>Model Spread 72</th>
             <th>OWM 72</th>
             <th>Spread</th>
             <th>Hourly Points</th>
@@ -204,7 +205,7 @@
           </tr>
         </thead>
         <tbody id="rows">
-          <tr><td colspan="10" class="muted">Loading…</td></tr>
+          <tr><td colspan="11" class="muted">Loading…</td></tr>
         </tbody>
       </table>
     </div>
@@ -228,6 +229,7 @@
       powAge: 'powAge',
       weatherAge: 'weatherAge',
       t72: 't72',
+      modelSpread72: 'modelSpread72',
       owm72: 'owm72',
       spread: 'spread',
       hourlyCount: 'hourlyCount',
@@ -301,6 +303,7 @@
       const t24 = toNum(resortLive?.powWatch?.totals?.snow24);
       const t48 = toNum(resortLive?.powWatch?.totals?.snow48);
       const t72 = toNum(resortLive?.powWatch?.totals?.snow72);
+      const modelSpread72 = toNum(resortLive?.powWatch?.modelSpread72);
       const monotonic = (t24 != null && t48 != null && t72 != null && t24 <= t48 && t48 <= t72);
 
       const hourly = Array.isArray(resortLive?.powWatch?.hourly?.snowSeries72)
@@ -337,9 +340,15 @@
       else if (spread <= 6) score += 4;
       else score += 1;
 
+      if (modelSpread72 == null) score += 5;
+      else if (modelSpread72 <= 1.5) score += 10;
+      else if (modelSpread72 <= 3) score += 7;
+      else if (modelSpread72 <= 5) score += 4;
+      else score += 1;
+
       score = Math.max(0, Math.min(100, Math.round(score)));
       const [confLabel, confClass] = confidenceFromScore(score);
-      return { score, confLabel, confClass, powAge, weatherAge, t24, t48, t72, owm72, spread, hourlyCount, monotonic };
+      return { score, confLabel, confClass, powAge, weatherAge, t24, t48, t72, modelSpread72, owm72, spread, hourlyCount, monotonic };
     }
 
     function renderRows() {
@@ -353,6 +362,7 @@
           thLabel('POW Updated', SORT_KEYS.powAge),
           thLabel('Weather Updated', SORT_KEYS.weatherAge),
           thLabel('VC 24 / 48 / 72', SORT_KEYS.t72),
+          thLabel('Model Spread 72', SORT_KEYS.modelSpread72),
           thLabel('OWM 72', SORT_KEYS.owm72),
           thLabel('Spread', SORT_KEYS.spread),
           thLabel('Hourly Points', SORT_KEYS.hourlyCount),
@@ -363,7 +373,7 @@
       }
 
       if (!metrics.length) {
-        rowsEl.innerHTML = '<tr><td colspan="10" class="muted">No resort rows returned.</td></tr>';
+        rowsEl.innerHTML = '<tr><td colspan="11" class="muted">No resort rows returned.</td></tr>';
         return;
       }
 
@@ -373,6 +383,7 @@
           <td>${ageLabel(m.powAge)}</td>
           <td>${ageLabel(m.weatherAge)}</td>
           <td class="mono">${m.t24?.toFixed?.(1) ?? '—'} / ${m.t48?.toFixed?.(1) ?? '—'} / ${m.t72?.toFixed?.(1) ?? '—'}</td>
+          <td class="mono">${m.modelSpread72 != null ? m.modelSpread72.toFixed(1) + '"' : '—'}</td>
           <td class="mono">${m.owm72 != null ? m.owm72.toFixed(1) : '—'}</td>
           <td class="mono">${m.spread != null ? m.spread.toFixed(1) + '"' : '—'}</td>
           <td>${m.hourlyCount}</td>
@@ -386,7 +397,7 @@
     async function loadHealth() {
       const endpoint = endpointEl.value.trim();
       localStorage.setItem('icecoast_forecast_health_endpoint', endpoint);
-      rowsEl.innerHTML = '<tr><td colspan="10" class="muted">Loading…</td></tr>';
+      rowsEl.innerHTML = '<tr><td colspan="11" class="muted">Loading…</td></tr>';
 
       try {
         const resp = await fetch(endpoint, { cache: 'no-store' });
@@ -417,7 +428,7 @@
         divergenceValEl.textContent = `${highSpread} resorts`;
         renderRows();
       } catch (err) {
-        rowsEl.innerHTML = `<tr><td colspan="10" class="muted">Failed to load: ${err.message}</td></tr>`;
+        rowsEl.innerHTML = `<tr><td colspan="11" class="muted">Failed to load: ${err.message}</td></tr>`;
       }
     }
 
