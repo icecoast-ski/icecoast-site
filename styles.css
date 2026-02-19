@@ -959,6 +959,7 @@
             opacity: 0.98;
             transform: translateZ(0);
             transition: transform 0.26s cubic-bezier(0.22, 0.61, 0.36, 1), box-shadow 0.26s ease, filter 0.26s ease;
+            pointer-events: auto;
         }
 
         .resort-header-pass-badge:hover,

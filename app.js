@@ -34,15 +34,8 @@
                 <rect x="4" y="8" width="16" height="8" rx="4" fill="#FF6600" stroke="#FF6600"/>
                 <rect x="6" y="10" width="12" height="4" rx="2" fill="none" stroke="white" stroke-width="2"/>
             </svg>`,
-            car: `<svg class="icon-ticket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/>
-                <circle cx="7" cy="17" r="2"/>
-                <circle cx="17" cy="17" r="2"/>
-            </svg>`,
-            myLocation: `<svg class="icon-ticket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M12 21s7-5.8 7-11a7 7 0 1 0-14 0c0 5.2 7 11 7 11z"/>
-                <circle cx="12" cy="10" r="2.5"/>
-            </svg>`,
+            car: `<img class="resort-icon" src="new-resort-art/icons/van.png" alt="">`,
+            myLocation: `<img class="resort-icon" src="new-resort-art/icons/location.png" alt="">`,
             wind: `<svg class="icon-ticket" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M9.59 4.59A2 2 0 1 1 11 8H2m10.59 11.41A2 2 0 1 0 14 16H2m15.73-8.27A2.5 2.5 0 1 1 19.5 12H2"/>
             </svg>`,
