@@ -2368,18 +2368,6 @@
             const powWatchStorm = Number.isFinite(Number(powWatch?.totals?.stormTotal))
                 ? `${Number(powWatch.totals.stormTotal).toFixed(1)}`
                 : '0.0';
-            const stormStartMs = Date.parse(String(powWatch?.hourly?.stormStartTs || ''));
-            const stormEndMs = Date.parse(String(powWatch?.hourly?.stormEndTs || ''));
-            const formatStormTs = (ms) => {
-                if (!Number.isFinite(ms)) return null;
-                const d = new Date(ms);
-                const day = d.toLocaleDateString('en-US', { weekday: 'short' });
-                const hour = d.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
-                return `${day} ${hour}`;
-            };
-            const stormWindowLabel = (Number(powWatchStorm) > 0 && Number.isFinite(stormStartMs) && Number.isFinite(stormEndMs))
-                ? `${formatStormTs(stormStartMs)} → ${formatStormTs(stormEndMs)}`
-                : 'No clear storm window yet';
             const powWatchBandRaw = getPowWatchBandForResort(resort);
             const powWatchStatusLabel = powWatchBandRaw === 'POW WATCH ON'
                 ? 'ON'
@@ -2450,6 +2438,20 @@
             const chartLegend = compactSeries.length
                 ? 'Taller bars = heavier forecast snowfall.'
                 : 'Taller bars = heavier forecast snowfall (daily trend view).';
+            const stormTotalNum = Number(powWatchStorm) || 0;
+            const peakTimeBrief = peakLabel && peakLabel !== 'No strong snow pulse yet'
+                ? ` Most active ${peakLabel}.`
+                : '';
+            const windBrief = windHoldRiskLabel === 'HIGH'
+                ? ' Wind may impact lift operations.'
+                : (windHoldRiskLabel === 'MODERATE' ? ' Some wind impact possible.' : '');
+            const powBrief = stormTotalNum >= 6
+                ? `Plow-day potential with ${powWatchStorm}" possible.${peakTimeBrief}${windBrief}`
+                : (stormTotalNum >= 3
+                    ? `Solid refresh setup near ${powWatchStorm}" possible.${peakTimeBrief}${windBrief}`
+                    : (stormTotalNum >= 1
+                        ? `Light top-up around ${powWatchStorm}" expected.${peakTimeBrief}${windBrief}`
+                        : `Quiet signal right now. No meaningful accumulation expected.${windBrief}`));
 
 const backgroundImageByResort = {
     'camelback': 'camelback.jpg',
@@ -2603,7 +2605,7 @@ const backgroundPositionByResort = {
                       <span>72h <strong>${powWatch72}"</strong></span>
                       <span>Storm <strong>${powWatchStorm}"</strong></span>
                     </div>
-                    <div class="pow-watch-storm-window">Storm Window: <strong>${stormWindowLabel}</strong></div>
+                    <div class="pow-watch-brief">Pow Brief: <strong>${powBrief}</strong></div>
                     <details class="pow-watch-details">
                       <summary class="pow-watch-details-toggle">
                         <span>72h Snow Timeline</span>
