@@ -2439,19 +2439,44 @@
                 ? 'Taller bars = heavier forecast snowfall.'
                 : 'Taller bars = heavier forecast snowfall (daily trend view).';
             const stormTotalNum = Number(powWatchStorm) || 0;
+            const maxSnowDay = Array.isArray(powDays) && powDays.length
+                ? powDays
+                    .map((d) => ({
+                        date: d?.date || null,
+                        snow: Number(d?.snow) || 0,
+                    }))
+                    .sort((a, b) => b.snow - a.snow)[0]
+                : null;
+            const maxSnowDayLabel = maxSnowDay?.date
+                ? new Date(`${maxSnowDay.date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'short' })
+                : null;
             const peakTimeBrief = peakLabel && peakLabel !== 'No strong snow pulse yet'
                 ? ` Most active ${peakLabel}.`
-                : '';
+                : (maxSnowDayLabel && (maxSnowDay?.snow || 0) > 0
+                    ? ` Best shot ${maxSnowDayLabel}.`
+                    : '');
             const windBrief = windHoldRiskLabel === 'HIGH'
                 ? ' Wind may impact lift operations.'
                 : (windHoldRiskLabel === 'MODERATE' ? ' Some wind impact possible.' : '');
-            const powBrief = stormTotalNum >= 6
-                ? `Plow-day potential with ${powWatchStorm}" possible.${peakTimeBrief}${windBrief}`
-                : (stormTotalNum >= 3
-                    ? `Solid refresh setup near ${powWatchStorm}" possible.${peakTimeBrief}${windBrief}`
-                    : (stormTotalNum >= 1
-                        ? `Light top-up around ${powWatchStorm}" expected.${peakTimeBrief}${windBrief}`
-                        : `Quiet signal right now. No meaningful accumulation expected.${windBrief}`));
+            const pow24Num = Number(powWatch24) || 0;
+            const pow48Num = Number(powWatch48) || 0;
+            const pow72Num = Number(powWatch72) || 0;
+            const hasForwardSnow = pow72Num >= 0.2 || (maxSnowDay?.snow || 0) >= 0.2;
+            const hasNearTermSnow = pow24Num >= 0.2;
+            let powBrief = '';
+            if (stormTotalNum >= 6) {
+                powBrief = `Plow-day potential with ${powWatchStorm}" possible.${peakTimeBrief}${windBrief}`;
+            } else if (stormTotalNum >= 3) {
+                powBrief = `Solid refresh setup near ${powWatchStorm}" possible.${peakTimeBrief}${windBrief}`;
+            } else if (stormTotalNum >= 1) {
+                powBrief = `Light refresh around ${powWatchStorm}" expected.${peakTimeBrief}${windBrief}`;
+            } else if (hasForwardSnow && !hasNearTermSnow) {
+                powBrief = `Not immediate, but snow signal builds later in the 72h window.${peakTimeBrief}${windBrief}`;
+            } else if (hasForwardSnow) {
+                powBrief = `Light flakes in the mix over the next 72h.${peakTimeBrief}${windBrief}`;
+            } else {
+                powBrief = `Quiet right now, but this updates as models roll.${windBrief}`;
+            }
 
 const backgroundImageByResort = {
     'camelback': 'camelback.jpg',
@@ -2605,7 +2630,7 @@ const backgroundPositionByResort = {
                       <span>72h <strong>${powWatch72}"</strong></span>
                       <span>Storm <strong>${powWatchStorm}"</strong></span>
                     </div>
-                    <div class="pow-watch-brief">Pow Brief: <strong>${powBrief}</strong></div>
+                    <div class="pow-watch-brief">POW Brief: <strong>${powBrief}</strong></div>
                     <details class="pow-watch-details">
                       <summary class="pow-watch-details-toggle">
                         <span>72h Snow Timeline</span>
