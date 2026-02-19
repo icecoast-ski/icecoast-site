@@ -2365,6 +2365,21 @@
             const powWatch72 = Number.isFinite(Number(powWatch?.totals?.snow72))
                 ? `${Number(powWatch.totals.snow72).toFixed(1)}`
                 : '0.0';
+            const powWatchStorm = Number.isFinite(Number(powWatch?.totals?.stormTotal))
+                ? `${Number(powWatch.totals.stormTotal).toFixed(1)}`
+                : '0.0';
+            const stormStartMs = Date.parse(String(powWatch?.hourly?.stormStartTs || ''));
+            const stormEndMs = Date.parse(String(powWatch?.hourly?.stormEndTs || ''));
+            const formatStormTs = (ms) => {
+                if (!Number.isFinite(ms)) return null;
+                const d = new Date(ms);
+                const day = d.toLocaleDateString('en-US', { weekday: 'short' });
+                const hour = d.toLocaleTimeString('en-US', { hour: 'numeric', hour12: true });
+                return `${day} ${hour}`;
+            };
+            const stormWindowLabel = (Number(powWatchStorm) > 0 && Number.isFinite(stormStartMs) && Number.isFinite(stormEndMs))
+                ? `${formatStormTs(stormStartMs)} → ${formatStormTs(stormEndMs)}`
+                : 'No clear storm window yet';
             const powWatchBandRaw = getPowWatchBandForResort(resort);
             const powWatchStatusLabel = powWatchBandRaw === 'POW WATCH ON'
                 ? 'ON'
@@ -2586,7 +2601,9 @@ const backgroundPositionByResort = {
                       <span>24h <strong>${powWatch24}"</strong></span>
                       <span>48h <strong>${powWatch48}"</strong></span>
                       <span>72h <strong>${powWatch72}"</strong></span>
+                      <span>Storm <strong>${powWatchStorm}"</strong></span>
                     </div>
+                    <div class="pow-watch-storm-window">Storm Window: <strong>${stormWindowLabel}</strong></div>
                     <details class="pow-watch-details">
                       <summary class="pow-watch-details-toggle">
                         <span>72h Snow Timeline</span>
@@ -4113,6 +4130,7 @@ const backgroundPositionByResort = {
                                 snow24: toNumOrNull(totals.snow24),
                                 snow48: toNumOrNull(totals.snow48),
                                 snow72: toNumOrNull(totals.snow72),
+                                stormTotal: toNumOrNull(totals.stormTotal),
                             },
                             hourly: {
                                 snowSeries24: Array.isArray(hourly.snowSeries24) ? hourly.snowSeries24.slice(0, 24).map(toNumOrNull).filter((v) => v !== null) : [],
@@ -4121,6 +4139,8 @@ const backgroundPositionByResort = {
                                 peakTs: typeof hourly.peakTs === 'string' ? hourly.peakTs : null,
                                 peakLabel: typeof hourly.peakLabel === 'string' ? hourly.peakLabel : null,
                                 peakSnowPerHour: toNumOrNull(hourly.peakSnowPerHour),
+                                stormStartTs: typeof hourly.stormStartTs === 'string' ? hourly.stormStartTs : null,
+                                stormEndTs: typeof hourly.stormEndTs === 'string' ? hourly.stormEndTs : null,
                             },
                             windHoldRisk: {
                                 level: typeof windHoldRisk.level === 'string' ? windHoldRisk.level : 'LOW',

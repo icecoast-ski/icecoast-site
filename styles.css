@@ -4215,6 +4215,18 @@
     font-weight: 800;
 }
 
+.pow-watch-storm-window {
+    margin-top: 0.3rem;
+    font-size: 0.68rem;
+    color: #4d5f7a;
+    line-height: 1.2;
+}
+
+.pow-watch-storm-window strong {
+    color: #22344f;
+    font-weight: 760;
+}
+
 .pow-watch-details {
     margin-top: 0.34rem;
     border-top: 1px solid rgba(15, 23, 42, 0.08);
