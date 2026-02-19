@@ -935,8 +935,8 @@
 
         .resort-header-pass-badges {
             position: absolute;
-            bottom: -0.2rem;
-            right: 0.28rem;
+            bottom: -0.75rem;
+            right: -0.45rem;
             display: flex;
             flex-direction: column;
             align-items: flex-end;
@@ -4711,6 +4711,19 @@
     }
 }
 
+/* Keep resort header art widescreen at all viewport widths */
+.resort-card .resort-header {
+    min-height: 0 !important;
+    height: auto !important;
+    aspect-ratio: 16 / 7 !important;
+}
+
+@media (max-width: 768px) {
+    .resort-card .resort-header {
+        aspect-ratio: 16 / 8 !important;
+    }
+}
+
 
 .info-grid {
     gap: 0.72rem;
@@ -6084,8 +6097,8 @@
     }
 
     .resort-header-pass-badges {
-        bottom: -0.2rem;
-        right: 0.28rem;
+        bottom: -0.75rem;
+        right: -0.45rem;
         gap: 0.28rem;
         padding-top: 0;
     }
