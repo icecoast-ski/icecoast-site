@@ -2365,9 +2365,9 @@
             const powWatch72 = Number.isFinite(Number(powWatch?.totals?.snow72))
                 ? `${Number(powWatch.totals.snow72).toFixed(1)}`
                 : '0.0';
-            const powWatchStorm = Number.isFinite(Number(powWatch?.totals?.stormTotal))
-                ? `${Number(powWatch.totals.stormTotal).toFixed(1)}`
-                : '0.0';
+            const powWatchModelSpread72 = Number.isFinite(Number(powWatch?.modelSpread72))
+                ? Number(powWatch.modelSpread72)
+                : null;
             const powWatchBandRaw = getPowWatchBandForResort(resort);
             const powWatchStatusLabel = powWatchBandRaw === 'POW WATCH ON'
                 ? 'ON'
@@ -2438,7 +2438,6 @@
             const chartLegend = compactSeries.length
                 ? 'Taller bars = heavier forecast snowfall.'
                 : 'Taller bars = heavier forecast snowfall (daily trend view).';
-            const stormTotalNum = Number(powWatchStorm) || 0;
             const maxSnowDay = Array.isArray(powDays) && powDays.length
                 ? powDays
                     .map((d) => ({
@@ -2461,15 +2460,19 @@
             const pow24Num = Number(powWatch24) || 0;
             const pow48Num = Number(powWatch48) || 0;
             const pow72Num = Number(powWatch72) || 0;
+            const rangeHalf = powWatchModelSpread72 !== null ? (powWatchModelSpread72 / 2) : 0;
+            const potentialLow = Math.max(0, pow72Num - rangeHalf);
+            const potentialHigh = Math.max(potentialLow, pow72Num + rangeHalf);
+            const potentialRangeLabel = `${potentialLow.toFixed(1)}–${potentialHigh.toFixed(1)}"`;
             const hasForwardSnow = pow72Num >= 0.2 || (maxSnowDay?.snow || 0) >= 0.2;
             const hasNearTermSnow = pow24Num >= 0.2;
             let powBrief = '';
-            if (stormTotalNum >= 6) {
-                powBrief = `Plow-day potential with ${powWatchStorm}" possible.${peakTimeBrief}${windBrief}`;
-            } else if (stormTotalNum >= 3) {
-                powBrief = `Solid refresh setup near ${powWatchStorm}" possible.${peakTimeBrief}${windBrief}`;
-            } else if (stormTotalNum >= 1) {
-                powBrief = `Light refresh around ${powWatchStorm}" expected.${peakTimeBrief}${windBrief}`;
+            if (pow72Num >= 6) {
+                powBrief = `Plow-day potential with strong snow setup.${peakTimeBrief}${windBrief}`;
+            } else if (pow72Num >= 3) {
+                powBrief = `Solid refresh setup in the next 72h.${peakTimeBrief}${windBrief}`;
+            } else if (pow72Num >= 1) {
+                powBrief = `Light refresh expected through the 72h window.${peakTimeBrief}${windBrief}`;
             } else if (hasForwardSnow && !hasNearTermSnow) {
                 powBrief = `Not immediate, but snow signal builds later in the 72h window.${peakTimeBrief}${windBrief}`;
             } else if (hasForwardSnow) {
@@ -2628,9 +2631,9 @@ const backgroundPositionByResort = {
                       <span>24h <strong>${powWatch24}"</strong></span>
                       <span>48h <strong>${powWatch48}"</strong></span>
                       <span>72h <strong>${powWatch72}"</strong></span>
-                      <span>Storm <strong>${powWatchStorm}"</strong></span>
                     </div>
                     <div class="pow-watch-brief">POW Brief: <strong>${powBrief}</strong></div>
+                    <div class="pow-watch-potential">Storm Total Potential: <strong>${potentialRangeLabel}</strong></div>
                     <details class="pow-watch-details">
                       <summary class="pow-watch-details-toggle">
                         <span>72h Snow Timeline</span>
@@ -4152,6 +4155,8 @@ const backgroundPositionByResort = {
                             provider: typeof live.powWatch.provider === 'string' ? live.powWatch.provider : null,
                             updatedAt: typeof live.powWatch.updatedAt === 'string' ? live.powWatch.updatedAt : null,
                             band: typeof live.powWatch.band === 'string' ? live.powWatch.band : '',
+                            modelSpread72: toNumOrNull(live.powWatch.modelSpread72),
+                            modelSources: Array.isArray(live.powWatch.modelSources) ? live.powWatch.modelSources.slice(0, 3) : [],
                             days: Array.isArray(live.powWatch.days) ? live.powWatch.days.slice(0, 3) : [],
                             totals: {
                                 snow24: toNumOrNull(totals.snow24),
