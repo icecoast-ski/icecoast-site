@@ -925,7 +925,7 @@
         :root {
             --header-action-top: -0.2rem;
             --header-action-right: 0.28rem;
-            --header-action-size: 2.5rem;
+            --header-action-size: 64px;
             --header-pass-gap: 0.52rem;
         }
 
@@ -979,36 +979,31 @@
 
         .resort-favorite-btn,
         .resort-share-btn {
-            border: 1px solid rgba(255, 255, 255, 0.42);
-            background: rgba(16, 40, 84, 0.58);
+            border: 0;
+            background: transparent;
             color: #ffffff;
-            border-radius: 16px;
-            width: 2.5rem;
-            height: 2.5rem;
+            border-radius: 0;
+            width: 64px;
+            height: 64px;
             padding: 0;
             cursor: pointer;
-            transition: background 0.18s ease, transform 0.18s ease;
-            backdrop-filter: blur(4px);
+            transition: transform 0.18s ease, filter 0.18s ease;
             display: inline-flex;
             align-items: center;
             justify-content: center;
         }
 
         .resort-favorite-btn {
-            background: rgba(16, 40, 84, 0.58);
-            border-color: rgba(255, 255, 255, 0.46);
             line-height: 1;
         }
 
         .resort-favorite-btn:hover {
-            background: rgba(16, 40, 84, 0.78);
             transform: translateY(-1px);
+            filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.45));
         }
 
         .resort-favorite-btn.active {
-            background: #f4c24f;
-            border-color: rgba(255, 255, 255, 0.6);
-            color: #17305f;
+            color: #ffffff;
         }
 
         .resort-favorite-btn:active {
@@ -1019,8 +1014,8 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 1.34rem;
-            height: 1.34rem;
+            width: 64px;
+            height: 64px;
             transform: translateY(-0.15px);
             pointer-events: none;
             position: relative;
@@ -1066,16 +1061,16 @@
         }
 
         .resort-share-btn:hover {
-            background: rgba(16, 40, 84, 0.78);
             transform: translateY(-1px);
+            filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.45));
         }
 
         .resort-share-icon {
-            width: 2rem;
-            height: 2rem;
+            width: 64px;
+            height: 64px;
             display: block;
             object-fit: contain;
-            filter: brightness(0) invert(1);
+            filter: none;
             opacity: 1;
         }
 
