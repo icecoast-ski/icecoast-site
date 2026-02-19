@@ -130,6 +130,19 @@
       text-transform: uppercase;
       letter-spacing: 0.06em;
       font-weight: 800;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+    th.active {
+      color: #16355f;
+      background: #eaf0fb;
+    }
+    .sort-ind {
+      display: inline-block;
+      width: 1ch;
+      margin-left: 0.22rem;
+      font-weight: 900;
     }
     .mono {
       font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
@@ -207,6 +220,21 @@
     const avgScoreValEl = document.getElementById('avgScoreVal');
     const freshPowValEl = document.getElementById('freshPowVal');
     const divergenceValEl = document.getElementById('divergenceVal');
+    let lastMetrics = [];
+    let sortState = { key: 'score', dir: 'desc' };
+
+    const SORT_KEYS = {
+      name: 'name',
+      powAge: 'powAge',
+      weatherAge: 'weatherAge',
+      t72: 't72',
+      owm72: 'owm72',
+      spread: 'spread',
+      hourlyCount: 'hourlyCount',
+      monotonic: 'monotonic',
+      confLabel: 'confLabel',
+      score: 'score'
+    };
 
     endpointEl.value = localStorage.getItem('icecoast_forecast_health_endpoint') || DEFAULT_ENDPOINT;
 
@@ -234,6 +262,28 @@
       if (score >= 80) return ['HIGH', 'ok'];
       if (score >= 60) return ['MEDIUM', 'mid'];
       return ['LOW', 'bad'];
+    }
+
+    function normalizeForSort(v) {
+      if (v == null) return Number.NEGATIVE_INFINITY;
+      if (typeof v === 'boolean') return v ? 1 : 0;
+      if (typeof v === 'string') return v.toLowerCase();
+      return v;
+    }
+
+    function compareMetrics(a, b, key, dir) {
+      const av = normalizeForSort(a[key]);
+      const bv = normalizeForSort(b[key]);
+      if (av < bv) return dir === 'asc' ? -1 : 1;
+      if (av > bv) return dir === 'asc' ? 1 : -1;
+      return a.name.localeCompare(b.name);
+    }
+
+    function thLabel(text, key) {
+      const active = sortState.key === key;
+      const ind = active ? (sortState.dir === 'asc' ? '▲' : '▼') : '·';
+      const cls = active ? 'active' : '';
+      return `<th class="${cls}" data-sort="${key}">${text}<span class="sort-ind">${ind}</span></th>`;
     }
 
     function resortNameById(id) {
@@ -292,6 +342,47 @@
       return { score, confLabel, confClass, powAge, weatherAge, t24, t48, t72, owm72, spread, hourlyCount, monotonic };
     }
 
+    function renderRows() {
+      const metrics = [...lastMetrics];
+      metrics.sort((a, b) => compareMetrics(a, b, sortState.key, sortState.dir));
+
+      const theadRow = document.querySelector('thead tr');
+      if (theadRow) {
+        theadRow.innerHTML = [
+          thLabel('Resort', SORT_KEYS.name),
+          thLabel('POW Updated', SORT_KEYS.powAge),
+          thLabel('Weather Updated', SORT_KEYS.weatherAge),
+          thLabel('VC 24 / 48 / 72', SORT_KEYS.t72),
+          thLabel('OWM 72', SORT_KEYS.owm72),
+          thLabel('Spread', SORT_KEYS.spread),
+          thLabel('Hourly Points', SORT_KEYS.hourlyCount),
+          thLabel('Monotonic', SORT_KEYS.monotonic),
+          thLabel('Confidence', SORT_KEYS.confLabel),
+          thLabel('Quality', SORT_KEYS.score)
+        ].join('');
+      }
+
+      if (!metrics.length) {
+        rowsEl.innerHTML = '<tr><td colspan="10" class="muted">No resort rows returned.</td></tr>';
+        return;
+      }
+
+      rowsEl.innerHTML = metrics.map((m) => `
+        <tr>
+          <td><strong>${m.name}</strong><div class="mono">${m.id}</div></td>
+          <td>${ageLabel(m.powAge)}</td>
+          <td>${ageLabel(m.weatherAge)}</td>
+          <td class="mono">${m.t24?.toFixed?.(1) ?? '—'} / ${m.t48?.toFixed?.(1) ?? '—'} / ${m.t72?.toFixed?.(1) ?? '—'}</td>
+          <td class="mono">${m.owm72 != null ? m.owm72.toFixed(1) : '—'}</td>
+          <td class="mono">${m.spread != null ? m.spread.toFixed(1) + '"' : '—'}</td>
+          <td>${m.hourlyCount}</td>
+          <td>${m.monotonic ? 'YES' : 'NO'}</td>
+          <td><span class="pill ${m.confClass}">${m.confLabel}</span></td>
+          <td><span class="score ${m.confClass}">${m.score}</span></td>
+        </tr>
+      `).join('');
+    }
+
     async function loadHealth() {
       const endpoint = endpointEl.value.trim();
       localStorage.setItem('icecoast_forecast_health_endpoint', endpoint);
@@ -310,8 +401,7 @@
           name: resortNameById(id),
           ...computeQuality(data[id] || {})
         }));
-
-        metrics.sort((a, b) => b.score - a.score);
+        lastMetrics = metrics;
 
         const avgScore = metrics.length
           ? Math.round(metrics.reduce((s, m) => s + m.score, 0) / metrics.length)
@@ -325,32 +415,26 @@
         avgScoreValEl.textContent = `${avgScore}/100`;
         freshPowValEl.textContent = `${freshPow}/${metrics.length}`;
         divergenceValEl.textContent = `${highSpread} resorts`;
-
-        if (!metrics.length) {
-          rowsEl.innerHTML = '<tr><td colspan="10" class="muted">No resort rows returned.</td></tr>';
-          return;
-        }
-
-        rowsEl.innerHTML = metrics.map((m) => `
-          <tr>
-            <td><strong>${m.name}</strong><div class="mono">${m.id}</div></td>
-            <td>${ageLabel(m.powAge)}</td>
-            <td>${ageLabel(m.weatherAge)}</td>
-            <td class="mono">${m.t24?.toFixed?.(1) ?? '—'} / ${m.t48?.toFixed?.(1) ?? '—'} / ${m.t72?.toFixed?.(1) ?? '—'}</td>
-            <td class="mono">${m.owm72 != null ? m.owm72.toFixed(1) : '—'}</td>
-            <td class="mono">${m.spread != null ? m.spread.toFixed(1) + '"' : '—'}</td>
-            <td>${m.hourlyCount}</td>
-            <td>${m.monotonic ? 'YES' : 'NO'}</td>
-            <td><span class="pill ${m.confClass}">${m.confLabel}</span></td>
-            <td><span class="score ${m.confClass}">${m.score}</span></td>
-          </tr>
-        `).join('');
+        renderRows();
       } catch (err) {
         rowsEl.innerHTML = `<tr><td colspan="10" class="muted">Failed to load: ${err.message}</td></tr>`;
       }
     }
 
     refreshBtn.addEventListener('click', loadHealth);
+    document.querySelector('thead').addEventListener('click', (e) => {
+      const th = e.target.closest('th[data-sort]');
+      if (!th) return;
+      const key = th.dataset.sort;
+      if (!SORT_KEYS[key]) return;
+      if (sortState.key === key) {
+        sortState.dir = sortState.dir === 'asc' ? 'desc' : 'asc';
+      } else {
+        sortState.key = key;
+        sortState.dir = (key === 'name') ? 'asc' : 'desc';
+      }
+      renderRows();
+    });
     endpointEl.addEventListener('keydown', (e) => {
       if (e.key === 'Enter') loadHealth();
     });
