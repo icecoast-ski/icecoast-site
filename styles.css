@@ -946,6 +946,8 @@
             position: absolute;
             top: calc(var(--header-action-top) + var(--header-action-size) + var(--header-pass-gap) + var(--header-pass-shift-y));
             right: calc(var(--header-action-right) + var(--header-pass-shift-x));
+            margin-top: -60px;
+            margin-right: -23px;
             bottom: auto;
             display: flex;
             flex-direction: column;
@@ -6140,6 +6142,8 @@
     .resort-header-pass-badges {
         top: calc(var(--header-action-top) + var(--header-action-size) + var(--header-pass-gap));
         right: var(--header-action-right);
+        margin-top: -60px;
+        margin-right: -23px;
         bottom: auto;
         gap: 0.28rem;
         padding-top: 0;
