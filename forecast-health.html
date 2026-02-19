@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Icecoast Forecast Health</title>
+  <style>
+    :root {
+      --bg: #eef2f8;
+      --card: #fff;
+      --ink: #1b2b46;
+      --muted: #5a6c86;
+      --line: rgba(16, 31, 56, 0.13);
+      --blue: #144089;
+      --ok: #1a9a4c;
+      --mid: #d28500;
+      --bad: #bd2c2c;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 1rem;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    .wrap {
+      max-width: 1220px;
+      margin: 0 auto;
+    }
+    .head {
+      display: grid;
+      grid-template-columns: 1fr auto auto;
+      gap: 0.55rem;
+      align-items: end;
+      margin-bottom: 0.85rem;
+    }
+    .title {
+      font-size: 1.26rem;
+      font-weight: 820;
+      color: var(--blue);
+      letter-spacing: -0.02em;
+    }
+    .input, .select {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.55rem 0.68rem;
+      background: #fff;
+      color: #233858;
+      font-size: 0.85rem;
+      min-width: 260px;
+    }
+    .btn {
+      border: 0;
+      border-radius: 10px;
+      padding: 0.58rem 0.84rem;
+      background: var(--blue);
+      color: #fff;
+      font-size: 0.82rem;
+      font-weight: 760;
+      cursor: pointer;
+    }
+    .summary {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 0.55rem;
+      margin-bottom: 0.7rem;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 0.64rem 0.7rem;
+    }
+    .k {
+      color: var(--muted);
+      font-size: 0.74rem;
+      margin-bottom: 0.18rem;
+    }
+    .v {
+      font-size: 1.03rem;
+      font-weight: 790;
+      color: #1f3350;
+      letter-spacing: -0.01em;
+    }
+    .pill {
+      display: inline-block;
+      margin-top: 0.35rem;
+      border-radius: 8px;
+      border: 1px solid transparent;
+      padding: 0.17rem 0.46rem;
+      font-size: 0.68rem;
+      font-weight: 760;
+      letter-spacing: 0.02em;
+      text-transform: uppercase;
+    }
+    .pill.ok { color: #0d6d36; background: rgba(26, 154, 76, 0.12); border-color: rgba(26, 154, 76, 0.24); }
+    .pill.mid { color: #8b5600; background: rgba(210, 133, 0, 0.13); border-color: rgba(210, 133, 0, 0.25); }
+    .pill.bad { color: #872525; background: rgba(189, 44, 44, 0.13); border-color: rgba(189, 44, 44, 0.24); }
+    .sub {
+      color: var(--muted);
+      font-size: 0.72rem;
+      margin: 0.35rem 0 0.6rem;
+    }
+    .table-wrap {
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 1100px;
+    }
+    th, td {
+      text-align: left;
+      border-bottom: 1px solid rgba(18, 35, 61, 0.08);
+      padding: 0.56rem 0.55rem;
+      vertical-align: middle;
+      font-size: 0.76rem;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 2;
+      background: #f7f9fd;
+      color: #304766;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 800;
+    }
+    .mono {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", monospace;
+      font-size: 0.7rem;
+    }
+    .score {
+      font-weight: 840;
+      font-size: 0.86rem;
+      letter-spacing: -0.01em;
+    }
+    .score.ok { color: var(--ok); }
+    .score.mid { color: var(--mid); }
+    .score.bad { color: var(--bad); }
+    .muted { color: var(--muted); }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="head">
+      <div class="title">Icecoast Forecast Health</div>
+      <input id="endpoint" class="input" />
+      <button id="refreshBtn" class="btn">Refresh</button>
+    </div>
+    <div class="summary">
+      <section class="card">
+        <div class="k">Snapshot</div>
+        <div id="snapshotVal" class="v">—</div>
+      </section>
+      <section class="card">
+        <div class="k">Average Quality Score</div>
+        <div id="avgScoreVal" class="v">—</div>
+      </section>
+      <section class="card">
+        <div class="k">Fresh Pow Models (&lt; 6h)</div>
+        <div id="freshPowVal" class="v">—</div>
+      </section>
+      <section class="card">
+        <div class="k">High Divergence (VC vs OWM)</div>
+        <div id="divergenceVal" class="v">—</div>
+      </section>
+    </div>
+    <p class="sub">
+      Accuracy score is a source-quality proxy: forecast freshness, monotonic totals (24≤48≤72), hourly coverage, and VC-vs-OWM snowfall agreement.
+    </p>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Resort</th>
+            <th>POW Updated</th>
+            <th>Weather Updated</th>
+            <th>VC 24 / 48 / 72</th>
+            <th>OWM 72</th>
+            <th>Spread</th>
+            <th>Hourly Points</th>
+            <th>Monotonic</th>
+            <th>Confidence</th>
+            <th>Quality</th>
+          </tr>
+        </thead>
+        <tbody id="rows">
+          <tr><td colspan="10" class="muted">Loading…</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <script src="./resorts.js"></script>
+  <script>
+    const DEFAULT_ENDPOINT = 'https://cloudflare-worker.rickt123-0f8.workers.dev/';
+    const endpointEl = document.getElementById('endpoint');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const rowsEl = document.getElementById('rows');
+    const snapshotValEl = document.getElementById('snapshotVal');
+    const avgScoreValEl = document.getElementById('avgScoreVal');
+    const freshPowValEl = document.getElementById('freshPowVal');
+    const divergenceValEl = document.getElementById('divergenceVal');
+
+    endpointEl.value = localStorage.getItem('icecoast_forecast_health_endpoint') || DEFAULT_ENDPOINT;
+
+    function minutesSince(iso) {
+      if (!iso) return null;
+      const ts = Date.parse(iso);
+      if (!Number.isFinite(ts)) return null;
+      return Math.max(0, Math.round((Date.now() - ts) / 60000));
+    }
+
+    function ageLabel(mins) {
+      if (mins == null) return '—';
+      if (mins < 60) return `${mins}m`;
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      return `${h}h ${m}m`;
+    }
+
+    function toNum(v) {
+      const n = Number(v);
+      return Number.isFinite(n) ? n : null;
+    }
+
+    function confidenceFromScore(score) {
+      if (score >= 80) return ['HIGH', 'ok'];
+      if (score >= 60) return ['MEDIUM', 'mid'];
+      return ['LOW', 'bad'];
+    }
+
+    function resortNameById(id) {
+      const all = Array.isArray(window.RESORTS) ? window.RESORTS : [];
+      const r = all.find((x) => x && x.id === id);
+      return r ? r.name : id;
+    }
+
+    function computeQuality(resortLive) {
+      const powAt = resortLive?.powWatch?.updatedAt || null;
+      const weatherAt = resortLive?.weatherUpdatedAt || null;
+      const powAge = minutesSince(powAt);
+      const weatherAge = minutesSince(weatherAt);
+
+      const t24 = toNum(resortLive?.powWatch?.totals?.snow24);
+      const t48 = toNum(resortLive?.powWatch?.totals?.snow48);
+      const t72 = toNum(resortLive?.powWatch?.totals?.snow72);
+      const monotonic = (t24 != null && t48 != null && t72 != null && t24 <= t48 && t48 <= t72);
+
+      const hourly = Array.isArray(resortLive?.powWatch?.hourly?.snowSeries72)
+        ? resortLive.powWatch.hourly.snowSeries72
+        : [];
+      const hourlyCount = hourly.length;
+
+      const owm72 = Array.isArray(resortLive?.forecast)
+        ? resortLive.forecast.reduce((sum, d) => sum + (toNum(d?.snow) || 0), 0)
+        : null;
+
+      const spread = (t72 != null && owm72 != null) ? Math.abs(t72 - owm72) : null;
+      let score = 0;
+
+      if (powAge != null) {
+        if (powAge <= 360) score += 40;
+        else score += Math.max(0, 40 - Math.floor((powAge - 360) / 60) * 5);
+      }
+      if (weatherAge != null) {
+        if (weatherAge <= 120) score += 20;
+        else if (weatherAge <= 240) score += 12;
+        else score += 6;
+      }
+      score += monotonic ? 20 : 0;
+
+      if (hourlyCount >= 60) score += 10;
+      else if (hourlyCount >= 36) score += 7;
+      else if (hourlyCount >= 24) score += 5;
+      else score += 2;
+
+      if (spread == null) score += 5;
+      else if (spread <= 2) score += 10;
+      else if (spread <= 4) score += 7;
+      else if (spread <= 6) score += 4;
+      else score += 1;
+
+      score = Math.max(0, Math.min(100, Math.round(score)));
+      const [confLabel, confClass] = confidenceFromScore(score);
+      return { score, confLabel, confClass, powAge, weatherAge, t24, t48, t72, owm72, spread, hourlyCount, monotonic };
+    }
+
+    async function loadHealth() {
+      const endpoint = endpointEl.value.trim();
+      localStorage.setItem('icecoast_forecast_health_endpoint', endpoint);
+      rowsEl.innerHTML = '<tr><td colspan="10" class="muted">Loading…</td></tr>';
+
+      try {
+        const resp = await fetch(endpoint, { cache: 'no-store' });
+        if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const payload = await resp.json();
+        const data = payload?.data || {};
+        const meta = payload?.snapshot || {};
+
+        const ids = Object.keys(data).filter((k) => k !== '_metadata');
+        const metrics = ids.map((id) => ({
+          id,
+          name: resortNameById(id),
+          ...computeQuality(data[id] || {})
+        }));
+
+        metrics.sort((a, b) => b.score - a.score);
+
+        const avgScore = metrics.length
+          ? Math.round(metrics.reduce((s, m) => s + m.score, 0) / metrics.length)
+          : 0;
+        const freshPow = metrics.filter((m) => m.powAge != null && m.powAge <= 360).length;
+        const highSpread = metrics.filter((m) => m.spread != null && m.spread > 6).length;
+
+        snapshotValEl.textContent = meta?.lastUpdated
+          ? `${new Date(meta.lastUpdated).toLocaleString()} (${meta?.staleMinutes ?? '—'}m old)`
+          : '—';
+        avgScoreValEl.textContent = `${avgScore}/100`;
+        freshPowValEl.textContent = `${freshPow}/${metrics.length}`;
+        divergenceValEl.textContent = `${highSpread} resorts`;
+
+        if (!metrics.length) {
+          rowsEl.innerHTML = '<tr><td colspan="10" class="muted">No resort rows returned.</td></tr>';
+          return;
+        }
+
+        rowsEl.innerHTML = metrics.map((m) => `
+          <tr>
+            <td><strong>${m.name}</strong><div class="mono">${m.id}</div></td>
+            <td>${ageLabel(m.powAge)}</td>
+            <td>${ageLabel(m.weatherAge)}</td>
+            <td class="mono">${m.t24?.toFixed?.(1) ?? '—'} / ${m.t48?.toFixed?.(1) ?? '—'} / ${m.t72?.toFixed?.(1) ?? '—'}</td>
+            <td class="mono">${m.owm72 != null ? m.owm72.toFixed(1) : '—'}</td>
+            <td class="mono">${m.spread != null ? m.spread.toFixed(1) + '"' : '—'}</td>
+            <td>${m.hourlyCount}</td>
+            <td>${m.monotonic ? 'YES' : 'NO'}</td>
+            <td><span class="pill ${m.confClass}">${m.confLabel}</span></td>
+            <td><span class="score ${m.confClass}">${m.score}</span></td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        rowsEl.innerHTML = `<tr><td colspan="10" class="muted">Failed to load: ${err.message}</td></tr>`;
+      }
+    }
+
+    refreshBtn.addEventListener('click', loadHealth);
+    endpointEl.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') loadHealth();
+    });
+    loadHealth();
+  </script>
+</body>
+</html>
