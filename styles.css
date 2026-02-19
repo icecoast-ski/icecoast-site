@@ -2651,7 +2651,12 @@
         }
 
         .distance-title-right {
-            text-align: left;
+            text-align: center;
+            justify-self: center;
+            width: 100%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
         }
 
         .distance-layout {
