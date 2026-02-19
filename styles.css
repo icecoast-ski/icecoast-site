@@ -925,10 +925,10 @@
         :root {
             --header-action-top: -0.9rem;
             --header-action-right: -0.55rem;
-            --header-action-size: 64px;
-            --header-pass-gap: 0.52rem;
+            --header-action-size: 54px;
+            --header-pass-gap: 0.16rem;
             --header-pass-shift-x: 30px;
-            --header-pass-shift-y: -30px;
+            --header-pass-shift-y: -6px;
         }
 
         .resort-header-actions {
@@ -937,7 +937,7 @@
             right: var(--header-action-right);
             display: inline-flex;
             align-items: center;
-            gap: 0.34rem;
+            gap: 0.14rem;
             margin: 0;
             z-index: 6;
         }
@@ -985,8 +985,8 @@
             background: transparent;
             color: #ffffff;
             border-radius: 0;
-            width: 64px;
-            height: 64px;
+            width: 54px;
+            height: 54px;
             padding: 0;
             cursor: pointer;
             transition: transform 0.18s ease, filter 0.18s ease;
@@ -1016,8 +1016,8 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 64px;
-            height: 64px;
+            width: 54px;
+            height: 54px;
             transform: translateY(-0.15px);
             pointer-events: none;
             position: relative;
@@ -1068,8 +1068,8 @@
         }
 
         .resort-share-icon {
-            width: 64px;
-            height: 64px;
+            width: 54px;
+            height: 54px;
             display: block;
             object-fit: contain;
             filter: none;
