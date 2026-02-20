@@ -1062,7 +1062,7 @@
             right: var(--header-action-right);
             display: inline-flex;
             align-items: center;
-            gap: 0.14rem;
+            gap: 0.08rem;
             margin: 0;
             z-index: 6;
         }
@@ -1109,11 +1109,11 @@
         .resort-favorite-btn,
         .resort-share-btn {
             border: 0;
-            background: transparent;
+            background: #144089;
             color: #ffffff;
-            border-radius: 0;
-            width: 54px;
-            height: 54px;
+            border-radius: 10px;
+            width: 40px;
+            height: 40px;
             padding: 0;
             cursor: pointer;
             transition: transform 0.18s ease, filter 0.18s ease;
@@ -1128,7 +1128,7 @@
 
         .resort-favorite-btn:hover {
             transform: translateY(-1px);
-            filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.45));
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.34));
         }
 
         .resort-favorite-btn:active {
@@ -1139,23 +1139,23 @@
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            width: 54px;
-            height: 54px;
+            width: 40px;
+            height: 40px;
             transform: translateY(-0.15px);
             pointer-events: none;
         }
 
         .favorite-bookmark-svg {
-            width: 30px;
-            height: 38px;
+            width: 20px;
+            height: 25px;
             overflow: visible;
             transform-origin: center bottom;
-            filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.34)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.28));
+            filter: none;
         }
 
         .favorite-bookmark-outline {
             fill: none;
-            stroke: #144089;
+            stroke: #ffffff;
             stroke-width: 5;
             stroke-linecap: square;
             stroke-linejoin: miter;
@@ -1205,12 +1205,12 @@
 
         .resort-share-btn:hover {
             transform: translateY(-1px);
-            filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.45));
+            filter: drop-shadow(0 2px 6px rgba(0, 0, 0, 0.34));
         }
 
         .resort-share-icon-wrap {
-            width: 30px;
-            height: 38px;
+            width: 20px;
+            height: 25px;
             position: relative;
             display: inline-flex;
             align-items: center;
@@ -1219,16 +1219,16 @@
         }
 
         .resort-share-svg {
-            width: 30px;
-            height: 38px;
+            width: 20px;
+            height: 25px;
             overflow: visible;
             display: block;
-            filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.32)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.24));
+            filter: none;
         }
 
         .resort-share-outline {
             fill: none;
-            stroke: #144089;
+            stroke: #ffffff;
             stroke-width: 4.8;
             stroke-linecap: round;
             stroke-linejoin: round;
@@ -1274,7 +1274,7 @@
             width: 4px;
             height: 4px;
             border-radius: 50%;
-            background: #144089;
+            background: #ffffff;
             top: 50%;
             left: 50%;
             margin: -2px 0 0 -2px;
