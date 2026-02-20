@@ -2379,16 +2379,22 @@
             const windHoldRiskLabel = windHoldRiskLevelRaw === 'HIGH'
                 ? 'HIGH'
                 : (windHoldRiskLevelRaw === 'MODERATE' ? 'MODERATE' : 'LOW');
-            const windWarningTip = windHoldRiskLabel === 'HIGH'
-                ? 'High wind-hold risk: expect possible lift delays or closures.'
-                : 'Moderate wind-hold risk: check lift status before you drive.';
             const windHoldGust = Number.isFinite(Number(powWatch?.windHoldRisk?.maxGustMph))
                 ? Math.round(Number(powWatch.windHoldRisk.maxGustMph))
                 : null;
             const feelsLikeWarning = Number.isFinite(feelsLikeValue) && feelsLikeValue <= -10
                 ? ` <button class="metric-warning-btn" type="button" aria-label="Cold warning" data-tip="Extreme cold can bite fast. Cover skin and check exposed lifts.">⚠︎</button>`
                 : '';
-            const windRiskWarning = windHoldRiskLabel !== 'LOW'
+            const windNowMatch = String(metricsWindBase || '').match(/-?\d+(\.\d+)?/);
+            const windGustNowMatch = String(weather.windGust || '').match(/-?\d+(\.\d+)?/);
+            const windNowMph = windNowMatch ? Number(windNowMatch[0]) : null;
+            const windGustNowMph = windGustNowMatch ? Number(windGustNowMatch[0]) : null;
+            const isCurrentWindWarning = (Number.isFinite(windNowMph) && windNowMph >= 20)
+                || (Number.isFinite(windGustNowMph) && windGustNowMph >= 30);
+            const windWarningTip = Number.isFinite(windGustNowMph)
+                ? `Current wind ${Math.round(windNowMph || 0)} mph, gusts ${Math.round(windGustNowMph)} mph. Expect variable lift operations.`
+                : `Current wind ${Math.round(windNowMph || 0)} mph. Exposure can ramp quickly at summit.`;
+            const windRiskWarning = isCurrentWindWarning
                 ? ` <button class="metric-warning-btn" type="button" aria-label="Wind warning" data-tip="${windWarningTip}">⚠︎</button>`
                 : '';
             const metricsFeelsLike = `${metricsFeelsLikeBase}${feelsLikeWarning}`;
@@ -2438,48 +2444,12 @@
             const chartLegend = compactSeries.length
                 ? 'Taller bars = heavier forecast snowfall.'
                 : 'Taller bars = heavier forecast snowfall (daily trend view).';
-            const maxSnowDay = Array.isArray(powDays) && powDays.length
-                ? powDays
-                    .map((d) => ({
-                        date: d?.date || null,
-                        snow: Number(d?.snow) || 0,
-                    }))
-                    .sort((a, b) => b.snow - a.snow)[0]
-                : null;
-            const maxSnowDayLabel = maxSnowDay?.date
-                ? new Date(`${maxSnowDay.date}T12:00:00`).toLocaleDateString('en-US', { weekday: 'short' })
-                : null;
-            const peakTimeBrief = peakLabel && peakLabel !== 'No strong snow pulse yet'
-                ? ` Most active ${peakLabel}.`
-                : (maxSnowDayLabel && (maxSnowDay?.snow || 0) > 0
-                    ? ` Best shot ${maxSnowDayLabel}.`
-                    : '');
-            const windBrief = windHoldRiskLabel === 'HIGH'
-                ? ' Wind may impact lift operations.'
-                : (windHoldRiskLabel === 'MODERATE' ? ' Some wind impact possible.' : '');
             const pow24Num = Number(powWatch24) || 0;
-            const pow48Num = Number(powWatch48) || 0;
             const pow72Num = Number(powWatch72) || 0;
             const rangeHalf = powWatchModelSpread72 !== null ? (powWatchModelSpread72 / 2) : 0;
             const potentialLow = Math.max(0, pow72Num - rangeHalf);
             const potentialHigh = Math.max(potentialLow, pow72Num + rangeHalf);
             const potentialRangeLabel = `${potentialLow.toFixed(1)}–${potentialHigh.toFixed(1)}"`;
-            const hasForwardSnow = pow72Num >= 0.2 || (maxSnowDay?.snow || 0) >= 0.2;
-            const hasNearTermSnow = pow24Num >= 0.2;
-            let powBrief = '';
-            if (pow72Num >= 6) {
-                powBrief = `Plow-day potential with strong snow setup.${peakTimeBrief}${windBrief}`;
-            } else if (pow72Num >= 3) {
-                powBrief = `Solid refresh setup in the next 72h.${peakTimeBrief}${windBrief}`;
-            } else if (pow72Num >= 1) {
-                powBrief = `Light refresh expected through the 72h window.${peakTimeBrief}${windBrief}`;
-            } else if (hasForwardSnow && !hasNearTermSnow) {
-                powBrief = `Not immediate, but snow signal builds later in the 72h window.${peakTimeBrief}${windBrief}`;
-            } else if (hasForwardSnow) {
-                powBrief = `Light flakes in the mix over the next 72h.${peakTimeBrief}${windBrief}`;
-            } else {
-                powBrief = `Quiet right now, but this updates as models roll.${windBrief}`;
-            }
 
 const backgroundImageByResort = {
     'camelback': 'camelback.jpg',
@@ -2632,7 +2602,6 @@ const backgroundPositionByResort = {
                       <span>48h <strong>${powWatch48}"</strong></span>
                       <span>72h <strong>${powWatch72}"</strong></span>
                     </div>
-                    <div class="pow-watch-brief">POW Brief: <strong>${powBrief}</strong></div>
                     <div class="pow-watch-potential">Storm Total Potential: <strong>${potentialRangeLabel}</strong></div>
                     <details class="pow-watch-details">
                       <summary class="pow-watch-details-toggle">
@@ -4122,6 +4091,7 @@ const backgroundPositionByResort = {
                             feelsLike,
                             feelsLikeF: feelsLike !== null ? `${feelsLike}°` : '—',
                             wind: live.weather.wind,
+                            windGust: live.weather.windGust || null,
                             condition: live.weather.condition,
                             icon: live.weather.icon
                         };
