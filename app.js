@@ -2304,6 +2304,17 @@
                     </div>`;
 
             const heroChips = [];
+            if (glades > 0) {
+                heroChips.push({
+                    cls: 'chip-glades',
+                    label: glades >= 3 ? 'Elite Glades' : (glades === 2 ? 'Excellent Glades' : 'Some Glades')
+                });
+            } else if (resort.familyOwned) {
+                heroChips.push({
+                    cls: 'chip-family',
+                    label: 'Family-Owned'
+                });
+            }
             const hasSignificantSnow = parseInt(resort.snowfall24h || '0', 10) >= 6;
             if (hasSignificantSnow) {
                 heroChips.push({
@@ -2314,28 +2325,6 @@
             const heroChipMarkup = heroChips.slice(0, 3)
                 .map((chip) => `<span class="status-chip ${chip.cls}">${chip.label}</span>`)
                 .join('');
-            const passBadgeOrder = ['ikon', 'epic', 'indy'];
-            const normalizedPasses = (Array.isArray(passes) ? passes : [])
-                .map((p) => String(p || '').toLowerCase())
-                .filter((p) => passBadgeOrder.includes(p))
-                .sort((a, b) => passBadgeOrder.indexOf(a) - passBadgeOrder.indexOf(b));
-            const passBadgeItems = normalizedPasses.map((pass) => {
-                const label = pass === 'ikon' ? 'Ikon Pass' : (pass === 'epic' ? 'Epic Pass' : 'Indy Pass');
-                return `<img class="resort-feature-badge badge-pass pass-${pass}" src="new-resort-art/icons/${pass}.png" alt="${label}" loading="lazy" decoding="async">`;
-            }).join('');
-            const ownershipBadgeMarkup = resort.familyOwned
-                ? `<img class="resort-feature-badge badge-ownership badge-family-owned" src="new-resort-art/icons/family_owned.png" alt="Family Owned" loading="lazy" decoding="async">`
-                : '';
-            const gladesBadgeFile = glades >= 3
-                ? 'glades2.png'
-                : (glades === 2 ? 'glades3.png' : (glades === 1 ? 'glades1.png' : ''));
-            const gladesBadgeAlt = glades >= 3
-                ? 'Elite Glades'
-                : (glades === 2 ? 'Excellent Glades' : (glades === 1 ? 'Glades' : ''));
-            const gladesBadgeMarkup = gladesBadgeFile
-                ? `<img class="resort-feature-badge badge-glades" src="new-resort-art/icons/${gladesBadgeFile}" alt="${gladesBadgeAlt}" loading="lazy" decoding="async">`
-                : '';
-            const dedicatedBadgeStrip = `<div class="resort-badge-strip">${passBadgeItems}${ownershipBadgeMarkup}${gladesBadgeMarkup}</div>`;
 
             let confidenceLevel = 'Basic';
             if (hasFreshPatrol) {
@@ -2594,7 +2583,6 @@ const backgroundPositionByResort = {
                 </div>
                 ${heroChipMarkup ? `<div class="status-chips status-chips-bottom">${heroChipMarkup}</div>` : ''}
               </div>
-              ${dedicatedBadgeStrip}
 
               <div class="resort-body">
                 <div class="resort-unified-panel">
