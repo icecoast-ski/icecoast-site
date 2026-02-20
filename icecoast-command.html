@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ICECOAST // COMMAND</title>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  /* ── DARK MODE (default) ── */
+  :root, html[data-theme="dark"] {
+    --bg:        #060c18;
+    --surface:   #0c1628;
+    --surface2:  #111e35;
+    --border:    rgba(80,140,255,0.15);
+    --border2:   rgba(80,140,255,0.08);
+    --blue:      #3b82f6;
+    --blue2:     #1d4ed8;
+    --cyan:      #22d3ee;
+    --yellow:    #f7c948;
+    --green:     #22c55e;
+    --red:       #ef4444;
+    --orange:    #f97316;
+    --text:      #e2e8f0;
+    --muted:     #64748b;
+    --dim:       #334155;
+    --hdr-bg:    rgba(6,12,24,0.92);
+    --afd-color: #94a3b8;
+    --scanline:  rgba(0,0,0,0.08);
+    --glow:      rgba(34,211,238,0.4);
+  }
+
+  /* ── LIGHT MODE ── */
+  html[data-theme="light"] {
+    --bg:        #f0f4f9;
+    --surface:   #ffffff;
+    --surface2:  #e8edf5;
+    --border:    rgba(30,64,175,0.15);
+    --border2:   rgba(30,64,175,0.08);
+    --blue:      #2563eb;
+    --blue2:     #1e40af;
+    --cyan:      #0369a1;
+    --yellow:    #92400e;
+    --green:     #166534;
+    --red:       #b91c1c;
+    --orange:    #c2410c;
+    --text:      #0f172a;
+    --muted:     #475569;
+    --dim:       #94a3b8;
+    --hdr-bg:    rgba(255,255,255,0.96);
+    --afd-color: #334155;
+    --scanline:  transparent;
+    --glow:      transparent;
+  }
+
+  /* ── Theme transition ── */
+  body, .hdr, .panel, .panel-head, .snow-cell,
+  .site-box, .afd-raw, .afd-translated, .selector-bar,
+  .resort-select, .override-input, .cf-input,
+  .conf-bar, .nbm-track, .src-table td, .src-table th {
+    transition: background-color 0.28s ease, border-color 0.28s ease,
+                color 0.2s ease, box-shadow 0.28s ease;
+  }
+
+  /* ── Theme toggle ── */
+  .theme-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+    padding: 0.3rem 0.65rem;
+    cursor: pointer;
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+  .theme-toggle:hover { border-color: var(--cyan); color: var(--cyan); }
+
+  .tgl-icon { font-size: 0.75rem; line-height: 1; }
+
+  .tgl-track {
+    width: 30px; height: 16px;
+    border-radius: 8px;
+    background: var(--dim);
+    position: relative;
+    flex-shrink: 0;
+    transition: background 0.28s ease;
+  }
+  html[data-theme="light"] .tgl-track { background: var(--blue); }
+
+  .tgl-thumb {
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    background: #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    transition: transform 0.28s cubic-bezier(0.22,0.61,0.36,1);
+  }
+  html[data-theme="light"] .tgl-thumb { transform: translateX(14px); }
+
+  .tgl-label-dark  { display: inline; }
+  .tgl-label-light { display: none; }
+  html[data-theme="light"] .tgl-label-dark  { display: none; }
+  html[data-theme="light"] .tgl-label-light { display: inline; }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* ── Scanline texture ── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      var(--scanline) 2px,
+      var(--scanline) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  /* ── Header ── */
+  .hdr {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border);
+    background: var(--hdr-bg);
+    backdrop-filter: blur(10px);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .hdr-left {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+  }
+
+  .logo {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    color: var(--cyan);
+    text-shadow: 0 0 20px var(--glow);
+  }
+
+  .logo span { color: var(--yellow); }
+
+  .logo-sub {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--muted);
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+  }
+
+  .hdr-status {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+  }
+
+  .pulse-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+    animation: pulse 2s ease-in-out infinite;
+  }
+
+  @keyframes pulse {
+    0%,100% { opacity:1; } 50% { opacity:0.4; }
+  }
+
+  /* ── Resort selector ── */
+  .selector-bar {
+    padding: 0.75rem 1.5rem;
+    border-bottom: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    flex-wrap: wrap;
+  }
+
+  .selector-label {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.14em;
+    color: var(--muted);
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  .resort-select {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    padding: 0.42rem 0.72rem;
+    border-radius: 6px;
+    cursor: pointer;
+    outline: none;
+    min-width: 200px;
+    transition: border-color 0.2s;
+  }
+
+  .resort-select:focus { border-color: var(--blue); }
+
+  .load-btn {
+    background: linear-gradient(135deg, var(--blue2), var(--blue));
+    color: #fff;
+    border: none;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 0.42rem 1rem;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-transform: uppercase;
+  }
+
+  .load-btn:hover { filter: brightness(1.15); transform: translateY(-1px); }
+  .load-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
+
+  .coords-display {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── Main grid ── */
+  .main {
+    padding: 1.25rem 1.5rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 1rem;
+  }
+
+  @media (max-width: 900px) {
+    .main { grid-template-columns: 1fr; }
+  }
+
+  /* ── Panel card ── */
+  .panel {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .panel::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--blue), transparent);
+    opacity: 0.5;
+  }
+
+  .panel-head {
+    padding: 0.62rem 1rem;
+    border-bottom: 1px solid var(--border2);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+  }
+
+  .panel-title {
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: var(--cyan);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .panel-title .icon { font-size: 0.75rem; }
+
+  .panel-badge {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.1em;
+    padding: 0.14rem 0.44rem;
+    border-radius: 3px;
+    text-transform: uppercase;
+  }
+
+  .badge-live  { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+  .badge-free  { background: rgba(59,130,246,0.12); color: var(--blue); border: 1px solid rgba(59,130,246,0.25); }
+  .badge-ai    { background: rgba(247,201,72,0.12); color: var(--yellow); border: 1px solid rgba(247,201,72,0.25); }
+
+  .panel-body { padding: 1rem; }
+
+  /* ── Snow totals comparison ── */
+  .snow-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+
+  .snow-cell {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 8px;
+    padding: 0.62rem;
+    text-align: center;
+  }
+
+  .snow-cell-label {
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.3rem;
+  }
+
+  .snow-cell-val {
+    font-family: var(--mono);
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+    color: var(--cyan);
+  }
+
+  .snow-cell-val.loading {
+    font-size: 0.9rem;
+    color: var(--muted);
+    animation: blink 1.2s step-end infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .snow-cell-val.warn { color: var(--orange); }
+  .snow-cell-val.hot  { color: var(--yellow); }
+
+  .snow-cell-src {
+    font-family: var(--mono);
+    font-size: 0.52rem;
+    color: var(--dim);
+    margin-top: 0.2rem;
+  }
+
+  /* ── Source comparison table ── */
+  .src-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 0.72rem;
+  }
+
+  .src-table th {
+    color: var(--muted);
+    font-size: 0.58rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    text-align: left;
+    padding: 0.3rem 0.5rem;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .src-table th:not(:first-child) { text-align: center; }
+
+  .src-table td {
+    padding: 0.42rem 0.5rem;
+    border-bottom: 1px solid var(--border2);
+  }
+
+  .src-table td:not(:first-child) { text-align: center; }
+
+  .src-table tr:last-child td { border-bottom: none; }
+
+  .src-name {
+    color: var(--text);
+    font-weight: 600;
+    font-size: 0.68rem;
+  }
+
+  .src-val { color: var(--cyan); font-weight: 600; }
+  .src-val.high { color: var(--yellow); }
+  .src-val.low  { color: var(--blue); }
+  .src-val.na   { color: var(--dim); }
+
+  .delta-pill {
+    display: inline-block;
+    padding: 0.1rem 0.34rem;
+    border-radius: 3px;
+    font-size: 0.58rem;
+    font-weight: 700;
+  }
+
+  .delta-ok   { background: rgba(34,197,94,0.12);  color: var(--green);  }
+  .delta-warn { background: rgba(249,115,22,0.15);  color: var(--orange); }
+  .delta-hot  { background: rgba(239,68,68,0.15);   color: var(--red);    }
+
+  /* ── AFD panel ── */
+  .afd-wrap {
+    grid-column: 1 / -1;
+  }
+
+  .afd-raw {
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    line-height: 1.7;
+    color: var(--afd-color);
+    max-height: 180px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+    word-break: break-word;
+    scrollbar-width: thin;
+    scrollbar-color: var(--dim) transparent;
+  }
+
+  .afd-translated {
+    margin-top: 0.75rem;
+    background: rgba(247,201,72,0.06);
+    border: 1px solid rgba(247,201,72,0.18);
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-size: 0.8rem;
+    line-height: 1.65;
+    color: var(--text);
+    min-height: 60px;
+  }
+
+  .translate-btn {
+    margin-top: 0.62rem;
+    background: rgba(247,201,72,0.1);
+    border: 1px solid rgba(247,201,72,0.3);
+    color: var(--yellow);
+    font-family: var(--mono);
+    font-size: 0.62rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.38rem 0.82rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .translate-btn:hover { background: rgba(247,201,72,0.18); }
+  .translate-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* ── Hourly chart ── */
+  .hourly-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 3px;
+    height: 80px;
+    margin-top: 0.5rem;
+  }
+
+  .h-bar-wrap {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100%;
+    justify-content: flex-end;
+    gap: 3px;
+    min-width: 0;
+  }
+
+  .h-bar {
+    width: 100%;
+    background: linear-gradient(to top, var(--blue2), var(--cyan));
+    border-radius: 2px 2px 0 0;
+    transition: height 0.6s cubic-bezier(0.22,0.61,0.36,1);
+    min-height: 1px;
+    position: relative;
+  }
+
+  .h-bar:hover::after {
+    content: attr(data-tip);
+    position: absolute;
+    bottom: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--cyan);
+    font-family: var(--mono);
+    font-size: 0.55rem;
+    padding: 0.2rem 0.36rem;
+    border-radius: 4px;
+    white-space: nowrap;
+    z-index: 10;
+  }
+
+  .h-label {
+    font-family: var(--mono);
+    font-size: 0.48rem;
+    color: var(--dim);
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  /* ── NBM percentile bar ── */
+  .nbm-range {
+    display: flex;
+    align-items: center;
+    gap: 0.62rem;
+    margin: 0.75rem 0;
+  }
+
+  .nbm-label {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    color: var(--muted);
+    width: 28px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .nbm-track {
+    flex: 1;
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 3px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .nbm-fill {
+    position: absolute;
+    top: 0; bottom: 0; left: 0;
+    background: linear-gradient(90deg, var(--blue2), var(--cyan));
+    border-radius: 3px;
+    transition: width 0.8s cubic-bezier(0.22,0.61,0.36,1);
+  }
+
+  .nbm-val {
+    font-family: var(--mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    color: var(--cyan);
+    width: 36px;
+    flex-shrink: 0;
+  }
+
+  /* ── Site comparison panel ── */
+  .site-compare {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.75rem;
+  }
+
+  .site-box {
+    background: var(--surface2);
+    border-radius: 8px;
+    border: 1px solid var(--border2);
+    padding: 0.75rem;
+  }
+
+  .site-box-label {
+    font-family: var(--mono);
+    font-size: 0.56rem;
+    letter-spacing: 0.12em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 0.4rem;
+  }
+
+  .site-box-val {
+    font-family: var(--mono);
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .site-box-sub {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    color: var(--muted);
+    margin-top: 0.2rem;
+  }
+
+  /* ── Confidence meter ── */
+  .confidence-wrap {
+    margin-top: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .conf-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    flex-shrink: 0;
+  }
+
+  .conf-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+    border: 1px solid var(--border2);
+  }
+
+  .conf-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s cubic-bezier(0.22,0.61,0.36,1), background 1s;
+  }
+
+  .conf-score {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    font-weight: 700;
+    width: 40px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  /* ── Override section ── */
+  .override-row {
+    display: flex;
+    align-items: center;
+    gap: 0.62rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--border2);
+    flex-wrap: wrap;
+  }
+
+  .override-label {
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .override-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--cyan);
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    padding: 0.3rem 0.5rem;
+    border-radius: 5px;
+    width: 70px;
+    text-align: center;
+    outline: none;
+  }
+
+  .override-input:focus { border-color: var(--cyan); }
+
+  .override-input::placeholder { color: var(--dim); }
+
+  .override-btn {
+    background: rgba(34,211,238,0.1);
+    border: 1px solid rgba(34,211,238,0.3);
+    color: var(--cyan);
+    font-family: var(--mono);
+    font-size: 0.6rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    padding: 0.32rem 0.7rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .override-btn:hover { background: rgba(34,211,238,0.18); }
+
+  /* ── Empty/error states ── */
+  .empty-state {
+    text-align: center;
+    padding: 2rem 1rem;
+    color: var(--muted);
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.06em;
+  }
+
+  .empty-state .big { font-size: 2rem; margin-bottom: 0.5rem; opacity: 0.3; }
+
+  .error-msg {
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    color: var(--red);
+    padding: 0.5rem 0.75rem;
+    background: rgba(239,68,68,0.08);
+    border: 1px solid rgba(239,68,68,0.2);
+    border-radius: 5px;
+  }
+
+  /* ── CF AI config ── */
+  .cf-config {
+    display: flex;
+    gap: 0.5rem;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-bottom: 0.75rem;
+  }
+
+  .cf-input {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.65rem;
+    padding: 0.3rem 0.5rem;
+    border-radius: 5px;
+    outline: none;
+    flex: 1;
+    min-width: 180px;
+  }
+
+  .cf-input:focus { border-color: var(--yellow); }
+  .cf-input::placeholder { color: var(--dim); }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--dim); border-radius: 2px; }
+
+  /* ── Spinner ── */
+  .spinner {
+    display: inline-block;
+    width: 10px; height: 10px;
+    border: 2px solid var(--border);
+    border-top-color: var(--cyan);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* CF AI creds note */
+  .cf-note {
+    font-family: var(--mono);
+    font-size: 0.58rem;
+    color: var(--muted);
+    margin-top: 0.3rem;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── HEADER ── -->
+<header class="hdr">
+  <div class="hdr-left">
+    <div class="logo">ICE<span>COAST</span> // COMMAND</div>
+    <div class="logo-sub">Weather Intelligence Panel</div>
+  </div>
+  <div class="hdr-status">
+    <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">
+      <span class="tgl-icon tgl-label-dark">🌙</span>
+      <span class="tgl-icon tgl-label-light">☀︎</span>
+      <div class="tgl-track"><div class="tgl-thumb"></div></div>
+      <span class="tgl-label-dark">Dark</span>
+      <span class="tgl-label-light">Light</span>
+    </button>
+    <span style="color:var(--dim)">|</span>
+    <div class="pulse-dot"></div>
+    <span id="statusText">STANDBY</span>
+    <span style="color:var(--dim)">•</span>
+    <span id="clockEl"></span>
+  </div>
+</header>
+
+<!-- ── RESORT SELECTOR ── -->
+<div class="selector-bar">
+  <span class="selector-label">▸ Target Resort</span>
+  <select class="resort-select" id="resortSelect">
+    <option value="">— Select Resort —</option>
+  </select>
+  <button class="load-btn" id="loadBtn" onclick="loadResort()">RUN ANALYSIS</button>
+  <span class="coords-display" id="coordsDisplay"></span>
+</div>
+
+<!-- ── MAIN GRID ── -->
+<div class="main" id="mainGrid">
+
+  <!-- Empty state -->
+  <div style="grid-column:1/-1">
+    <div class="empty-state" id="emptyState">
+      <div class="big">🏔️</div>
+      Select a resort and run analysis to begin
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// RESORT DATA
+// ═══════════════════════════════════════════
+const RESORTS = [
+  // Pennsylvania (Poconos)
+  { name:"Camelback",          slug:"camelback",         lat:41.0525,            lon:-75.3560 },
+  { name:"Blue Mountain",      slug:"blue-mountain",     lat:40.8101,            lon:-75.5209 },
+  { name:"Jack Frost",         slug:"jack-frost",        lat:41.0910,            lon:-75.4690 },
+  { name:"Shawnee",            slug:"shawnee",           lat:41.0380,            lon:-75.0770 },
+  { name:"Bear Creek",         slug:"bear-creek",        lat:40.7434,            lon:-76.0493 },
+  { name:"Elk Mountain",       slug:"elk",               lat:41.6523,            lon:-75.5643 },
+  { name:"Big Boulder",        slug:"big-boulder",       lat:41.1046,            lon:-75.5554 },
+  { name:"Montage Mountain",   slug:"montage",           lat:41.1812,            lon:-75.5590 },
+  // New York (Catskills)
+  { name:"Hunter Mountain",    slug:"hunter",            lat:42.2080,            lon:-74.2116 },
+  { name:"Windham Mountain",   slug:"windham",           lat:42.2985,            lon:-74.2627 },
+  { name:"Belleayre",          slug:"belleayre",         lat:42.1344,            lon:-74.5121 },
+  { name:"Plattekill",         slug:"plattekill",        lat:42.3037,            lon:-74.6538 },
+  // New York (Adirondacks)
+  { name:"Whiteface Mountain", slug:"whiteface",         lat:44.3611,            lon:-73.8865 },
+  { name:"Gore Mountain",      slug:"gore-mountain",     lat:43.67736736084665,  lon:-74.03386430042585 },
+  // Massachusetts
+  { name:"Jiminy Peak",        slug:"jiminy-peak",       lat:42.5386,            lon:-73.2928 },
+  { name:"Wachusett Mountain", slug:"wachusett",         lat:42.5153,            lon:-71.8900 },
+  { name:"Catamount",          slug:"catamount",         lat:42.1847,            lon:-73.2602 },
+  { name:"Berkshire East",     slug:"berkshire-east",    lat:42.6201,            lon:-72.8915 },
+  // Connecticut
+  { name:"Mohawk Mountain",    slug:"mohawk",            lat:41.6892,            lon:-73.3148 },
+  // Vermont (Southern)
+  { name:"Stratton Mountain",  slug:"stratton",          lat:43.1172,            lon:-72.9094 },
+  { name:"Mount Snow",         slug:"mount-snow",        lat:42.9714,            lon:-72.8963 },
+  { name:"Magic Mountain",     slug:"magic-mountain",    lat:43.2013,            lon:-72.7791 },
+  // Vermont (Central)
+  { name:"Killington",         slug:"killington",        lat:43.6172,            lon:-72.8035 },
+  { name:"Okemo Mountain",     slug:"okemo",             lat:43.4057,            lon:-72.7196 },
+  { name:"Pico Mountain",      slug:"pico",              lat:43.6597,            lon:-72.8521 },
+  { name:"Sugarbush",          slug:"sugarbush",         lat:44.1513,            lon:-72.8821 },
+  { name:"Mad River Glen",     slug:"mad-river-glen",    lat:44.2056,            lon:-72.9215 },
+  // Vermont (Northern)
+  { name:"Stowe Mountain",     slug:"stowe",             lat:44.5385,            lon:-72.7844 },
+  { name:"Smugglers' Notch",   slug:"smugglers-notch",   lat:44.5414,            lon:-72.7847 },
+  { name:"Jay Peak",           slug:"jay-peak",          lat:44.9338,            lon:-72.5049 },
+  { name:"Burke Mountain",     slug:"burke",             lat:44.5770,            lon:-71.9212 },
+  { name:"Bolton Valley",      slug:"bolton-valley",     lat:44.4216,            lon:-72.8514 },
+  // New Hampshire
+  { name:"Loon Mountain",      slug:"loon",              lat:44.0400,            lon:-71.6239 },
+  { name:"Bretton Woods",      slug:"brettonwoods",      lat:44.0798,            lon:-71.3435 },
+  { name:"Waterville Valley",  slug:"waterville",        lat:43.9686,            lon:-71.5292 },
+  { name:"Cannon Mountain",    slug:"cannon",            lat:44.1593,            lon:-71.7012 },
+  { name:"Wildcat Mountain",   slug:"wildcat",           lat:44.2665,            lon:-71.2420 },
+  { name:"Black Mountain",     slug:"black-mountain",    lat:44.1890,            lon:-71.1649 },
+  { name:"Ragged Mountain",    slug:"ragged-mountain",   lat:43.4864,            lon:-71.8420 },
+  { name:"Mount Sunapee",      slug:"sunapee",           lat:43.3270,            lon:-71.9953 },  // uses nwsLat/nwsLon
+  { name:"Pat's Peak",         slug:"pats-peak",         lat:43.1775,            lon:-71.8440 },
+  // Maine
+  { name:"Sunday River",       slug:"sunday-river",      lat:44.4768,            lon:-70.8601 },
+  { name:"Sugarloaf",          slug:"sugarloaf",         lat:45.0359,            lon:-70.3166 },
+  { name:"Saddleback",         slug:"saddleback",        lat:44.9345,            lon:-70.5130 },
+  // Canada (Quebec)
+  { name:"Mont Tremblant",     slug:"tremblant",         lat:46.2094,            lon:-74.5903 },
+  { name:"Mont-Sainte-Anne",   slug:"mont-sainte-anne",  lat:47.0711,            lon:-70.9061 },
+  { name:"Le Massif",          slug:"le-massif",         lat:47.3292,            lon:-70.6489 },
+  { name:"Mont Sutton",        slug:"mont-sutton",       lat:45.0769,            lon:-72.4561 },
+];
+
+// ═══════════════════════════════════════════
+// CLOUDFLARE AI CONFIG
+// Fill these in — your Worker endpoint + token
+// ═══════════════════════════════════════════
+let CF_ENDPOINT = localStorage.getItem('cf_endpoint') || '';
+let CF_TOKEN    = localStorage.getItem('cf_token')    || '';
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+const sel = document.getElementById('resortSelect');
+RESORTS.forEach((r,i) => {
+  const o = document.createElement('option');
+  o.value = i;
+  o.textContent = r.name;
+  sel.appendChild(o);
+});
+
+// Clock
+setInterval(() => {
+  document.getElementById('clockEl').textContent =
+    new Date().toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit',second:'2-digit'});
+}, 1000);
+
+sel.addEventListener('change', () => {
+  const r = RESORTS[sel.value];
+  if (r) document.getElementById('coordsDisplay').textContent =
+    `${r.lat.toFixed(4)}°N  ${Math.abs(r.lon).toFixed(4)}°W`;
+});
+
+// ═══════════════════════════════════════════
+// MAIN LOADER
+// ═══════════════════════════════════════════
+async function loadResort() {
+  const idx = sel.value;
+  if (idx === '') return;
+  const resort = RESORTS[idx];
+
+  document.getElementById('loadBtn').disabled = true;
+  document.getElementById('statusText').textContent = 'FETCHING...';
+  document.getElementById('emptyState')?.remove();
+
+  renderSkeleton(resort);
+
+  try {
+    const [nwsMeta, openMeteo] = await Promise.all([
+      fetchNWSMeta(resort.lat, resort.lon),
+      fetchOpenMeteo(resort.lat, resort.lon),
+    ]);
+
+    const [nwsForecast, nwsHourly, afdText] = await Promise.all([
+      fetchNWSForecast(nwsMeta.forecastUrl),
+      fetchNWSHourly(nwsMeta.forecastHourlyUrl),
+      fetchAFD(nwsMeta.forecastZone),
+    ]);
+
+    const data = {
+      resort,
+      nwsMeta,
+      nwsForecast,
+      nwsHourly,
+      openMeteo,
+      afdText,
+    };
+
+    renderDashboard(data);
+    document.getElementById('statusText').textContent = 'LIVE';
+  } catch(e) {
+    console.error(e);
+    document.getElementById('statusText').textContent = 'ERROR';
+    document.getElementById('mainGrid').innerHTML =
+      `<div style="grid-column:1/-1"><div class="error-msg">⚠ ${e.message}</div></div>`;
+  }
+
+  document.getElementById('loadBtn').disabled = false;
+}
+
+// ═══════════════════════════════════════════
+// API FETCHERS
+// ═══════════════════════════════════════════
+
+async function fetchNWSMeta(lat, lon) {
+  const r = await fetch(`https://api.weather.gov/points/${lat},${lon}`, {
+    headers: { 'User-Agent': 'icecoast.ski command panel (weather@icecoast.ski)' }
+  });
+  if (!r.ok) throw new Error(`NWS points failed: ${r.status}`);
+  const j = await r.json();
+  const p = j.properties;
+  return {
+    forecastUrl:       p.forecast,
+    forecastHourlyUrl: p.forecastHourly,
+    forecastZone:      p.forecastZone,
+    gridId:            p.gridId,
+    gridX:             p.gridX,
+    gridY:             p.gridY,
+    radarStation:      p.radarStation,
+    city:              p.relativeLocation?.properties?.city,
+    state:             p.relativeLocation?.properties?.state,
+  };
+}
+
+async function fetchNWSForecast(url) {
+  const r = await fetch(url, {
+    headers: { 'User-Agent': 'icecoast.ski command panel' }
+  });
+  if (!r.ok) throw new Error(`NWS forecast failed: ${r.status}`);
+  const j = await r.json();
+  return j.properties.periods;
+}
+
+async function fetchNWSHourly(url) {
+  const r = await fetch(url, {
+    headers: { 'User-Agent': 'icecoast.ski command panel' }
+  });
+  if (!r.ok) return [];
+  const j = await r.json();
+  return j.properties.periods.slice(0, 72);
+}
+
+async function fetchAFD(zoneUrl) {
+  // Extract zone from URL like .../zones/forecast/VTZ014
+  const match = zoneUrl?.match(/zones\/forecast\/(\w+)$/);
+  if (!match) return null;
+  const zone = match[1];
+  // Get the WFO office for this zone
+  const zr = await fetch(`https://api.weather.gov/zones/forecast/${zone}`, {
+    headers: { 'User-Agent': 'icecoast.ski command panel' }
+  });
+  if (!zr.ok) return null;
+  const zj = await zr.json();
+  const wfo = zj.properties?.forecastOffice?.split('/').pop();
+  if (!wfo) return null;
+
+  // Fetch latest AFD product from that office
+  const pr = await fetch(`https://api.weather.gov/products/types/AFD/locations/${wfo}`, {
+    headers: { 'User-Agent': 'icecoast.ski command panel' }
+  });
+  if (!pr.ok) return null;
+  const pj = await pr.json();
+  const latestId = pj['@graph']?.[0]?.id;
+  if (!latestId) return null;
+
+  const ar = await fetch(`https://api.weather.gov/products/${latestId}`, {
+    headers: { 'User-Agent': 'icecoast.ski command panel' }
+  });
+  if (!ar.ok) return null;
+  const aj = await ar.json();
+  return aj.productText || null;
+}
+
+async function fetchOpenMeteo(lat, lon) {
+  const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+    `&hourly=snowfall,snow_depth,temperature_2m,windspeed_10m,precipitation_probability` +
+    `&daily=snowfall_sum,precipitation_sum` +
+    `&forecast_days=4&timezone=America%2FNew_York`;
+  const r = await fetch(url);
+  if (!r.ok) throw new Error(`OpenMeteo failed: ${r.status}`);
+  return r.json();
+}
+
+// ═══════════════════════════════════════════
+// SNOW CALCULATORS
+// ═══════════════════════════════════════════
+
+function parseNWSSnow(periods) {
+  // Sum snow mentions from detailed forecasts for 24/48/72h
+  const now = Date.now();
+  let totals = { h24: 0, h48: 0, h72: 0 };
+  periods.forEach(p => {
+    const start = new Date(p.startTime).getTime();
+    const hrs = (start - now) / 3600000;
+    if (hrs > 72) return;
+    const snowMatch = p.detailedForecast?.match(/(\d+(?:\.\d+)?)\s*(?:to\s*(\d+(?:\.\d+)?))?\s*inch/i);
+    if (snowMatch) {
+      const lo = parseFloat(snowMatch[1]);
+      const hi = snowMatch[2] ? parseFloat(snowMatch[2]) : lo;
+      const mid = (lo + hi) / 2;
+      if (hrs <= 24) totals.h24 += mid;
+      if (hrs <= 48) totals.h48 += mid;
+      totals.h72 += mid;
+    }
+  });
+  // Make monotonic
+  totals.h48 = Math.max(totals.h24, totals.h48);
+  totals.h72 = Math.max(totals.h48, totals.h72);
+  return totals;
+}
+
+function calcOpenMeteoSnow(om) {
+  const daily = om.daily;
+  const h24 = (daily.snowfall_sum[1] || 0) / 25.4;         // mm→in
+  const h48 = h24 + (daily.snowfall_sum[2] || 0) / 25.4;
+  const h72 = h48 + (daily.snowfall_sum[3] || 0) / 25.4;
+  return {
+    h24: +h24.toFixed(1),
+    h48: +h48.toFixed(1),
+    h72: +h72.toFixed(1),
+  };
+}
+
+function calcOpenMeteoHourly(om) {
+  // First 72 hourly snowfall values in inches
+  return om.hourly.snowfall.slice(0, 72).map(v => (v || 0) / 25.4);
+}
+
+function deltaClass(diff) {
+  const d = Math.abs(diff);
+  if (d <= 1.5) return 'delta-ok';
+  if (d <= 3.5) return 'delta-warn';
+  return 'delta-hot';
+}
+
+function confColor(score) {
+  if (score >= 75) return `linear-gradient(90deg, var(--blue2), var(--green))`;
+  if (score >= 50) return `linear-gradient(90deg, var(--blue2), var(--yellow))`;
+  return `linear-gradient(90deg, var(--blue2), var(--red))`;
+}
+
+// ═══════════════════════════════════════════
+// RENDER SKELETON
+// ═══════════════════════════════════════════
+function renderSkeleton(resort) {
+  document.getElementById('mainGrid').innerHTML = `
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title"><span class="icon">❄</span> SNOWFALL COMPARISON</div>
+        <div class="panel-badge badge-live">LIVE</div>
+      </div>
+      <div class="panel-body">
+        <div class="snow-grid">
+          ${['24h','48h','72h'].map(l=>`
+          <div class="snow-cell">
+            <div class="snow-cell-label">${l}</div>
+            <div class="snow-cell-val loading">···</div>
+            <div class="snow-cell-src">loading</div>
+          </div>`).join('')}
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title"><span class="icon">📊</span> SOURCE MATRIX</div>
+        <div class="panel-badge badge-free">FREE APIs</div>
+      </div>
+      <div class="panel-body">
+        <div class="empty-state" style="padding:1.5rem"><span class="spinner"></span></div>
+      </div>
+    </div>
+    <div class="panel afd-wrap" style="grid-column:1/-1">
+      <div class="panel-head">
+        <div class="panel-title"><span class="icon">📡</span> NWS AREA FORECAST DISCUSSION (AFD)</div>
+        <div class="panel-badge badge-ai">AI TRANSLATION</div>
+      </div>
+      <div class="panel-body">
+        <div class="empty-state" style="padding:1.5rem"><span class="spinner"></span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title"><span class="icon">📈</span> HOURLY SNOWFALL — OPEN-METEO</div>
+        <div class="panel-badge badge-free">72HR</div>
+      </div>
+      <div class="panel-body">
+        <div class="empty-state" style="padding:1.5rem"><span class="spinner"></span></div>
+      </div>
+    </div>
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title"><span class="icon">🎯</span> CONFIDENCE &amp; OVERRIDE</div>
+        <div class="panel-badge badge-live">DELTA</div>
+      </div>
+      <div class="panel-body">
+        <div class="empty-state" style="padding:1.5rem"><span class="spinner"></span></div>
+      </div>
+    </div>
+  `;
+}
+
+// ═══════════════════════════════════════════
+// RENDER FULL DASHBOARD
+// ═══════════════════════════════════════════
+function renderDashboard(data) {
+  const { resort, nwsForecast, nwsHourly, openMeteo, afdText, nwsMeta } = data;
+
+  const nwsSnow = parseNWSSnow(nwsForecast);
+  const omSnow  = calcOpenMeteoSnow(openMeteo);
+  const omHrly  = calcOpenMeteoHourly(openMeteo);
+
+  // Blended consensus (equal weight NWS + OpenMeteo)
+  const consensus = {
+    h24: +((nwsSnow.h24 + omSnow.h24) / 2).toFixed(1),
+    h48: +((nwsSnow.h48 + omSnow.h48) / 2).toFixed(1),
+    h72: +((nwsSnow.h72 + omSnow.h72) / 2).toFixed(1),
+  };
+
+  // Confidence: how much do NWS and OM agree?
+  const d72 = Math.abs(nwsSnow.h72 - omSnow.h72);
+  const confScore = Math.max(0, Math.round(100 - d72 * 14));
+
+  // Peak 24h window
+  const peak24 = omHrly.reduce((sum,v) => sum + v, 0);
+  const maxHour = omHrly.indexOf(Math.max(...omHrly));
+
+  document.getElementById('mainGrid').innerHTML = `
+
+    <!-- SNOWFALL COMPARISON -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title"><span class="icon">❄</span> SNOWFALL COMPARISON</div>
+        <div class="panel-badge badge-live">LIVE</div>
+      </div>
+      <div class="panel-body">
+        <div class="snow-grid">
+          <div class="snow-cell">
+            <div class="snow-cell-label">24h Consensus</div>
+            <div class="snow-cell-val ${consensus.h24 >= 6 ? 'hot' : consensus.h24 >= 3 ? 'warn' : ''}">${consensus.h24}"</div>
+            <div class="snow-cell-src">NWS + OpenMeteo avg</div>
+          </div>
+          <div class="snow-cell">
+            <div class="snow-cell-label">48h Consensus</div>
+            <div class="snow-cell-val ${consensus.h48 >= 10 ? 'hot' : consensus.h48 >= 5 ? 'warn' : ''}">${consensus.h48}"</div>
+            <div class="snow-cell-src">NWS + OpenMeteo avg</div>
+          </div>
+          <div class="snow-cell">
+            <div class="snow-cell-label">72h Consensus</div>
+            <div class="snow-cell-val ${consensus.h72 >= 12 ? 'hot' : consensus.h72 >= 6 ? 'warn' : ''}">${consensus.h72}"</div>
+            <div class="snow-cell-src">NWS + OpenMeteo avg</div>
+          </div>
+        </div>
+
+        <table class="src-table">
+          <thead>
+            <tr>
+              <th>Source</th>
+              <th>24h</th>
+              <th>48h</th>
+              <th>72h</th>
+              <th>vs Consensus</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="src-name">NWS Forecast</span><br><span style="font-size:0.55rem;color:var(--muted)">api.weather.gov</span></td>
+              <td><span class="src-val">${nwsSnow.h24}"</span></td>
+              <td><span class="src-val">${nwsSnow.h48}"</span></td>
+              <td><span class="src-val">${nwsSnow.h72}"</span></td>
+              <td><span class="delta-pill ${deltaClass(nwsSnow.h72 - consensus.h72)}">${nwsSnow.h72 >= consensus.h72 ? '+' : ''}${(nwsSnow.h72 - consensus.h72).toFixed(1)}"</span></td>
+            </tr>
+            <tr>
+              <td><span class="src-name">Open-Meteo</span><br><span style="font-size:0.55rem;color:var(--muted)">GFS + ICON ensemble</span></td>
+              <td><span class="src-val">${omSnow.h24}"</span></td>
+              <td><span class="src-val">${omSnow.h48}"</span></td>
+              <td><span class="src-val">${omSnow.h72}"</span></td>
+              <td><span class="delta-pill ${deltaClass(omSnow.h72 - consensus.h72)}">${omSnow.h72 >= consensus.h72 ? '+' : ''}${(omSnow.h72 - consensus.h72).toFixed(1)}"</span></td>
+            </tr>
+            <tr>
+              <td><span class="src-name" style="color:var(--cyan)">Consensus</span></td>
+              <td><span class="src-val">${consensus.h24}"</span></td>
+              <td><span class="src-val">${consensus.h48}"</span></td>
+              <td><span class="src-val">${consensus.h72}"</span></td>
+              <td><span class="delta-pill delta-ok">baseline</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- SOURCE MATRIX -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title"><span class="icon">🌡</span> CONDITIONS MATRIX</div>
+        <div class="panel-badge badge-free">NWS + OM</div>
+      </div>
+      <div class="panel-body">
+        ${renderConditionsMatrix(nwsForecast, openMeteo, nwsMeta)}
+      </div>
+    </div>
+
+    <!-- AFD — full width -->
+    <div class="panel" style="grid-column:1/-1">
+      <div class="panel-head">
+        <div class="panel-title"><span class="icon">📡</span> NWS AREA FORECAST DISCUSSION (AFD)</div>
+        <div class="panel-badge badge-ai">CF AI TRANSLATION</div>
+      </div>
+      <div class="panel-body">
+        ${renderAFD(afdText)}
+      </div>
+    </div>
+
+    <!-- HOURLY CHART -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title"><span class="icon">📈</span> HOURLY SNOWFALL — OPEN-METEO</div>
+        <div class="panel-badge badge-free">72HR</div>
+      </div>
+      <div class="panel-body">
+        ${renderHourlyChart(omHrly, openMeteo.hourly.time)}
+      </div>
+    </div>
+
+    <!-- CONFIDENCE + OVERRIDE -->
+    <div class="panel">
+      <div class="panel-head">
+        <div class="panel-title"><span class="icon">🎯</span> CONFIDENCE &amp; OVERRIDE</div>
+        <div class="panel-badge badge-live">ANALYST</div>
+      </div>
+      <div class="panel-body">
+        ${renderConfidence(confScore, d72, consensus, nwsMeta)}
+      </div>
+    </div>
+  `;
+
+  // Wire up translate button
+  const tBtn = document.getElementById('translateBtn');
+  if (tBtn && afdText) {
+    tBtn.addEventListener('click', () => translateAFD(afdText, resort.name));
+  }
+
+  // Wire up CF config save
+  document.getElementById('cfEndpointInput')?.addEventListener('input', e => {
+    CF_ENDPOINT = e.target.value;
+    localStorage.setItem('cf_endpoint', CF_ENDPOINT);
+  });
+  document.getElementById('cfTokenInput')?.addEventListener('input', e => {
+    CF_TOKEN = e.target.value;
+    localStorage.setItem('cf_token', CF_TOKEN);
+  });
+}
+
+// ═══════════════════════════════════════════
+// CONDITIONS MATRIX
+// ═══════════════════════════════════════════
+function renderConditionsMatrix(periods, om, meta) {
+  const tonight = periods.find(p => !p.isDaytime) || periods[1];
+  const tomorrow = periods.find(p => p.isDaytime && p.number > 1) || periods[2];
+
+  // Current temp from OpenMeteo hourly[0]
+  const curTemp  = om.hourly.temperature_2m[0];
+  const curWind  = om.hourly.windspeed_10m[0];
+  const curSnow  = (om.hourly.snowfall[0] || 0) / 25.4;
+
+  const rows = [
+    ['Now (OM)',       `${(curTemp * 9/5 + 32).toFixed(0)}°F`, `${curWind.toFixed(0)} mph`, `${curSnow.toFixed(2)}" / hr`],
+    ['Tonight (NWS)', `${tonight?.temperature || '—'}°${tonight?.temperatureUnit || 'F'}`,
+      tonight?.windSpeed || '—',
+      tonight?.shortForecast || '—'],
+    ['Tomorrow (NWS)',`${tomorrow?.temperature || '—'}°${tomorrow?.temperatureUnit || 'F'}`,
+      tomorrow?.windSpeed || '—',
+      tomorrow?.shortForecast || '—'],
+  ];
+
+  return `
+    <table class="src-table">
+      <thead>
+        <tr><th>Period</th><th>Temp</th><th>Wind</th><th>Condition</th></tr>
+      </thead>
+      <tbody>
+        ${rows.map(r=>`<tr>${r.map((v,i)=>`<td>${i===0?`<span class="src-name">${v}</span>`:v}</td>`).join('')}</tr>`).join('')}
+      </tbody>
+    </table>
+    <div style="margin-top:0.75rem;font-family:var(--mono);font-size:0.62rem;color:var(--muted);">
+      <span style="color:var(--dim)">▸ GRID</span>
+      ${meta.gridId} ${meta.gridX},${meta.gridY} &nbsp;·&nbsp;
+      <span style="color:var(--dim)">RADAR</span> ${meta.radarStation} &nbsp;·&nbsp;
+      <span style="color:var(--dim)">NWS</span> ${meta.city||''}, ${meta.state||''}
+    </div>`;
+}
+
+// ═══════════════════════════════════════════
+// AFD RENDER
+// ═══════════════════════════════════════════
+function renderAFD(afdText) {
+  if (!afdText) return `<div class="error-msg">AFD not available for this location</div>`;
+
+  // Extract the most relevant snow section
+  const snow = extractSnowSection(afdText);
+
+  return `
+    <div class="cf-config">
+      <input class="cf-input" id="cfEndpointInput"
+        placeholder="CF Worker URL (e.g. https://your-worker.workers.dev/ai)"
+        value="${CF_ENDPOINT}">
+      <input class="cf-input" id="cfTokenInput"
+        placeholder="CF AI Token / Bearer"
+        value="${CF_TOKEN}" type="password" style="max-width:220px">
+    </div>
+    <div class="cf-note">Paste your Cloudflare AI Worker endpoint + token above. Token is saved locally in your browser only.</div>
+
+    <div style="margin-top:0.75rem;font-family:var(--mono);font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.4rem;">
+      ▸ RAW AFD — SNOW/PRECIP EXCERPT
+    </div>
+    <div class="afd-raw" id="afdRaw">${snow || afdText.slice(0, 1200)}</div>
+
+    <button class="translate-btn" id="translateBtn">
+      ⚡ Translate with Cloudflare AI
+    </button>
+
+    <div style="margin-top:0.62rem;font-family:var(--mono);font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.4rem;">
+      ▸ AI PLAIN-ENGLISH SUMMARY
+    </div>
+    <div class="afd-translated" id="afdTranslated">
+      <span style="color:var(--muted);font-size:0.72rem">Press translate to get an AI plain-English summary of the forecast discussion.</span>
+    </div>`;
+}
+
+function extractSnowSection(text) {
+  // Try to find the precipitation/snow section of the AFD
+  const markers = ['.PRECIP.', '.SNOW.', '.SNOWFALL.', 'SNOW AND ICE', 'PRECIPITATION', '.SHORT TERM.', '.NEAR TERM.'];
+  for (const m of markers) {
+    const idx = text.toUpperCase().indexOf(m);
+    if (idx !== -1) {
+      return text.slice(idx, idx + 1800).trim();
+    }
+  }
+  return null;
+}
+
+// ═══════════════════════════════════════════
+// HOURLY CHART
+// ═══════════════════════════════════════════
+function renderHourlyChart(hrly, times) {
+  const max = Math.max(...hrly, 0.01);
+  // Show every 6 hours, first 72
+  const step = 3;
+  const bars = hrly.slice(0, 72).filter((_,i) => i % step === 0);
+  const labels = times.slice(0, 72).filter((_,i) => i % step === 0);
+
+  const total72 = hrly.slice(0,72).reduce((a,b)=>a+b,0).toFixed(1);
+  const peakRate = Math.max(...hrly).toFixed(2);
+
+  return `
+    <div style="display:flex;gap:1rem;margin-bottom:0.6rem;font-family:var(--mono);font-size:0.62rem;">
+      <span style="color:var(--muted)">72h total: <span style="color:var(--cyan)">${total72}"</span></span>
+      <span style="color:var(--muted)">peak rate: <span style="color:var(--yellow)">${peakRate}" /hr</span></span>
+      <span style="color:var(--muted)">source: <span style="color:var(--dim)">open-meteo</span></span>
+    </div>
+    <div class="hourly-chart">
+      ${bars.map((v,i) => {
+        const pct = Math.max((v / max) * 100, v > 0 ? 3 : 0);
+        const hr = new Date(labels[i]);
+        const label = hr.toLocaleTimeString('en-US',{hour:'numeric',hour12:true}).replace(' ','');
+        const isNew = hr.getHours() === 0;
+        return `
+          <div class="h-bar-wrap">
+            <div class="h-bar"
+              style="height:${pct}%;${v >= max * 0.7 ? 'background:linear-gradient(to top,var(--blue2),var(--yellow))' : ''}"
+              data-tip="${v.toFixed(2)}&quot;"></div>
+            <div class="h-label" style="${isNew?'color:var(--cyan)':''}">${isNew?'12a':label}</div>
+          </div>`;
+      }).join('')}
+    </div>`;
+}
+
+// ═══════════════════════════════════════════
+// CONFIDENCE + OVERRIDE
+// ═══════════════════════════════════════════
+function renderConfidence(score, delta, consensus, meta) {
+  const confLabel = score >= 75 ? 'HIGH' : score >= 50 ? 'MEDIUM' : 'LOW';
+  const confCol   = score >= 75 ? 'var(--green)' : score >= 50 ? 'var(--yellow)' : 'var(--red)';
+
+  return `
+    <div class="site-compare">
+      <div class="site-box">
+        <div class="site-box-label">NWS Office</div>
+        <div class="site-box-val" style="color:var(--cyan);font-size:0.9rem">${meta.gridId}</div>
+        <div class="site-box-sub">Grid ${meta.gridX}, ${meta.gridY}</div>
+      </div>
+      <div class="site-box">
+        <div class="site-box-label">Source Delta (72h)</div>
+        <div class="site-box-val" style="color:${delta <= 2 ? 'var(--green)' : delta <= 4 ? 'var(--yellow)' : 'var(--red)'};font-size:1.1rem">${delta.toFixed(1)}"</div>
+        <div class="site-box-sub">NWS vs OpenMeteo spread</div>
+      </div>
+    </div>
+
+    <div class="confidence-wrap">
+      <div class="conf-label">Confidence</div>
+      <div class="conf-bar">
+        <div class="conf-fill" style="width:${score}%;background:${confColor(score)}"></div>
+      </div>
+      <div class="conf-score" style="color:${confCol}">${confLabel}</div>
+    </div>
+
+    <div style="margin-top:0.5rem;font-family:var(--mono);font-size:0.6rem;color:var(--muted);line-height:1.6">
+      ${score >= 75
+        ? '✓ Sources agree well. Trust the consensus number.'
+        : score >= 50
+        ? '⚠ Moderate spread between sources. Check AFD for forecaster rationale.'
+        : '⚡ High divergence. Manually review AFD before trusting any number.'}
+    </div>
+
+    <div class="override-row">
+      <span class="override-label">Site Override (72h)</span>
+      <input class="override-input" id="ovr24" placeholder="24h" type="number" step="0.5">
+      <input class="override-input" id="ovr48" placeholder="48h" type="number" step="0.5">
+      <input class="override-input" id="ovr72" placeholder="72h" type="number" step="0.5">
+      <button class="override-btn" onclick="pushOverride()">PUSH TO KV</button>
+    </div>`;
+}
+
+// ═══════════════════════════════════════════
+// CLOUDFLARE AI TRANSLATION
+// ═══════════════════════════════════════════
+async function translateAFD(afdText, resortName) {
+  const btn = document.getElementById('translateBtn');
+  const out = document.getElementById('afdTranslated');
+
+  if (!CF_ENDPOINT) {
+    out.innerHTML = `<span style="color:var(--red)">⚠ No Cloudflare Worker endpoint set. Paste your URL above.</span>`;
+    return;
+  }
+
+  btn.disabled = true;
+  btn.textContent = '⏳ Translating...';
+  out.innerHTML = `<span class="spinner"></span> Sending to Cloudflare AI...`;
+
+  const snow = extractSnowSection(afdText) || afdText.slice(0, 2000);
+  const prompt = `You are a ski resort snowfall analyst. A National Weather Service meteorologist wrote the following Area Forecast Discussion (AFD). 
+
+Translate this into plain English for a ski resort operator who needs to know:
+1. How many inches of snow is expected and when
+2. How confident the forecaster is (look for hedging language like "potential", "may", "could", "likely")
+3. Any key uncertainties or factors that could change the forecast
+4. A one-sentence bottom line for someone checking if powder is coming
+
+Keep it concise — 4-6 sentences max. Use inches, not cm. No jargon.
+
+Resort: ${resortName}
+
+AFD excerpt:
+${snow.slice(0, 1500)}`;
+
+  try {
+    const response = await fetch(CF_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        ...(CF_TOKEN ? { 'Authorization': `Bearer ${CF_TOKEN}` } : {}),
+      },
+      body: JSON.stringify({
+        messages: [{ role: 'user', content: prompt }]
+      }),
+    });
+
+    if (!response.ok) throw new Error(`CF AI returned ${response.status}`);
+    const data = await response.json();
+
+    // Handle common CF AI response shapes
+    const text = data?.result?.response
+      || data?.response
+      || data?.choices?.[0]?.message?.content
+      || data?.content
+      || JSON.stringify(data);
+
+    out.innerHTML = text.replace(/\n/g, '<br>');
+  } catch(e) {
+    out.innerHTML = `<span style="color:var(--red)">⚠ CF AI error: ${e.message}</span>`;
+  }
+
+  btn.disabled = false;
+  btn.textContent = '⚡ Translate with Cloudflare AI';
+}
+
+// ═══════════════════════════════════════════
+// OVERRIDE PUSH (stub — wire to your KV)
+// ═══════════════════════════════════════════
+function pushOverride() {
+  const v24 = document.getElementById('ovr24').value;
+  const v48 = document.getElementById('ovr48').value;
+  const v72 = document.getElementById('ovr72').value;
+  if (!v24 && !v48 && !v72) return;
+
+  const resort = RESORTS[document.getElementById('resortSelect').value];
+  if (!resort) return;
+
+  // TODO: POST to your Cloudflare Worker KV endpoint
+  // fetch(`${CF_ENDPOINT}/override`, {
+  //   method: 'POST',
+  //   body: JSON.stringify({ slug: resort.slug, snow24: v24, snow48: v48, snow72: v72 })
+  // });
+
+  alert(`Override ready to push for ${resort.name}:\n24h: ${v24 || 'unchanged'}"\n48h: ${v48 || 'unchanged'}"\n72h: ${v72 || 'unchanged'}"\n\nWire CF_ENDPOINT/override in pushOverride() to activate.`);
+}
+
+  // ── THEME TOGGLE ─────────────────────────────
+  const themeToggle = document.getElementById('themeToggle');
+  const savedTheme = localStorage.getItem('icecmd_theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', savedTheme);
+
+  themeToggle.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme');
+    const next = current === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', next);
+    localStorage.setItem('icecmd_theme', next);
+  });
+</script>
+</body>
+</html>
