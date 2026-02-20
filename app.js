@@ -1167,6 +1167,28 @@
         };
         const SENDIT_DEFAULT_SIGNALS = { crowd: 'normal', wind: 'breezy', slope: 'good', hazard: 'clear', difficulty: '' };
         const SENDIT_HISTORY_MIN_VOTES = 1;
+        const MEGACORP_OWNED_RESORT_IDS = new Set([
+            // Vail Resorts
+            'hunter',
+            'mount-snow',
+            'okemo',
+            'stowe',
+            'wildcat',
+            'sunapee',
+            'jack-frost',
+            'big-boulder',
+            // Alterra Mountain Company
+            'stratton',
+            'sugarbush',
+            'tremblant',
+            // Boyne Resorts
+            'loon',
+            'sunday-river',
+            'sugarloaf',
+            // Powdr
+            'killington',
+            'pico'
+        ]);
         const SENDIT_PAYOFF_PHRASES = {
             nodata: [
                 'First Chair',
@@ -2323,9 +2345,12 @@
                 const label = pass === 'ikon' ? 'Ikon Pass' : (pass === 'epic' ? 'Epic Pass' : 'Indy Pass');
                 return `<img class="resort-feature-badge badge-pass pass-${pass}" src="new-resort-art/icons/${pass}.png" alt="${label}" loading="lazy" decoding="async">`;
             }).join('');
-            const ownershipBadgeMarkup = resort.familyOwned
-                ? `<img class="resort-feature-badge badge-ownership badge-family-owned" src="new-resort-art/icons/family_owned.png" alt="Family Owned" loading="lazy" decoding="async">`
-                : `<img class="resort-feature-badge badge-ownership badge-megacorp-owned" src="new-resort-art/icons/megacorp.png" alt="Megacorp Owned" loading="lazy" decoding="async">`;
+            const isMegacorpOwned = MEGACORP_OWNED_RESORT_IDS.has(String(resort.id || '').toLowerCase());
+            const ownershipBadgeMarkup = isMegacorpOwned
+                ? `<img class="resort-feature-badge badge-ownership badge-megacorp-owned" src="new-resort-art/icons/megacorp.png" alt="Megacorp Owned" loading="lazy" decoding="async">`
+                : (resort.familyOwned
+                    ? `<img class="resort-feature-badge badge-ownership badge-family-owned" src="new-resort-art/icons/family_owned.png" alt="Family Owned" loading="lazy" decoding="async">`
+                    : '');
             const gladesBadgeFile = glades >= 3
                 ? 'glades2.png'
                 : (glades === 2 ? 'glades3.png' : (glades === 1 ? 'glades1.png' : ''));
@@ -4086,6 +4111,7 @@ const backgroundPositionByResort = {
         async function loadLiveData() {
             try {
                 const resp = await fetch(WORKER_URL, {
+                    cache: 'no-store',
                     headers: { 'Cache-Control': 'no-cache' }
                 });
 
