@@ -186,8 +186,8 @@ const RESORTS = [
         location: 'North Creek, NY',
         region: 'adirondacks',
         familyOwned: false,
-        lat: 43.6774,
-        lon: -74.0116,
+        lat: 43.67736736084665,
+        lon: -74.03386430042585,
         vertical: 2537,
         liftsTotal: 14,
         liftie: 'gore-mountain'

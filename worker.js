@@ -28,6 +28,8 @@ const SENDIT_RESORT_RADIUS_OVERRIDES = {
   sugarloaf: 2.0,
 };
 const HEALTH_SCHEMA_VERSION = 2;
+const ETA_USAGE_DAILY_PREFIX = "eta_usage_day_";
+const ETA_USAGE_MONTH_PREFIX = "eta_usage_month_";
 
 const RESORT_COORDS = {
   camelback: { lat: 41.0525, lon: -75.356 },
@@ -43,7 +45,7 @@ const RESORT_COORDS = {
   belleayre: { lat: 42.1344, lon: -74.5121 },
   plattekill: { lat: 42.3037, lon: -74.6538 },
   whiteface: { lat: 44.3611, lon: -73.8865 },
-  "gore-mountain": { lat: 43.6774, lon: -74.0116 },
+  "gore-mountain": { lat: 43.67736736084665, lon: -74.03386430042585 },
   "jiminy-peak": { lat: 42.5386, lon: -73.2928 },
   wachusett: { lat: 42.5153, lon: -71.89 },
   catamount: { lat: 42.1847, lon: -73.2602 },
@@ -347,6 +349,77 @@ function getAdminTokenFromRequest(request, url) {
   return headerToken || queryToken || "";
 }
 
+function parseBooleanEnv(value, defaultValue = false) {
+  if (typeof value !== "string") return defaultValue;
+  const v = value.trim().toLowerCase();
+  if (v === "true" || v === "1" || v === "yes" || v === "on") return true;
+  if (v === "false" || v === "0" || v === "no" || v === "off") return false;
+  return defaultValue;
+}
+
+function parsePositiveIntEnv(value, defaultValue) {
+  const n = Number(value);
+  return Number.isFinite(n) && n > 0 ? Math.floor(n) : defaultValue;
+}
+
+function getUtcDayKey(date = new Date()) {
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}-${String(date.getUTCDate()).padStart(2, "0")}`;
+}
+
+function getUtcMonthKey(date = new Date()) {
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+async function getEtaUsageCounts(env) {
+  const dayKey = `${ETA_USAGE_DAILY_PREFIX}${getUtcDayKey()}`;
+  const monthKey = `${ETA_USAGE_MONTH_PREFIX}${getUtcMonthKey()}`;
+  const [dayRaw, monthRaw] = await Promise.all([
+    env.ICECOASTDATA.get(dayKey, "text"),
+    env.ICECOASTDATA.get(monthKey, "text"),
+  ]);
+  return {
+    dayKey,
+    monthKey,
+    dayCount: Number(dayRaw || 0) || 0,
+    monthCount: Number(monthRaw || 0) || 0,
+  };
+}
+
+async function bumpEtaUsageCounts(env, usage) {
+  const nextDay = Number(usage.dayCount || 0) + 1;
+  const nextMonth = Number(usage.monthCount || 0) + 1;
+  await Promise.all([
+    env.ICECOASTDATA.put(usage.dayKey, String(nextDay), {
+      expirationTtl: 60 * 60 * 24 * 40,
+    }),
+    env.ICECOASTDATA.put(usage.monthKey, String(nextMonth), {
+      expirationTtl: 60 * 60 * 24 * 400,
+    }),
+  ]);
+}
+
+function parseRouteDurationMinutes(durationValue) {
+  const raw = String(durationValue || "").trim();
+  const match = raw.match(/^(\d+(?:\.\d+)?)s$/i);
+  if (!match) return null;
+  const seconds = Number(match[1]);
+  if (!Number.isFinite(seconds) || seconds <= 0) return null;
+  return Math.max(1, Math.round(seconds / 60));
+}
+
+function getCorsOrigin(request) {
+  const origin = (request.headers.get("Origin") || "").trim();
+  if (
+    origin === "https://icecoast.ski" ||
+    origin === "https://www.icecoast.ski" ||
+    origin.startsWith("http://localhost") ||
+    origin.startsWith("http://127.0.0.1")
+  ) {
+    return origin;
+  }
+  return "https://icecoast.ski";
+}
+
 function sanitizeIsoOrNull(value) {
   if (typeof value !== "string") return null;
   const ts = Date.parse(value);
@@ -493,12 +566,14 @@ async function getSendItVoterToken(request, deviceId) {
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
+    const allowOrigin = getCorsOrigin(request);
 
     const corsHeaders = {
-      "Access-Control-Allow-Origin": "https://icecoast.ski",
+      "Access-Control-Allow-Origin": allowOrigin,
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
       "Access-Control-Allow-Headers": "Content-Type, Cache-Control, X-Admin-Token",
       "Access-Control-Max-Age": "86400",
+      Vary: "Origin",
     };
 
     if (request.method === "OPTIONS") {
@@ -507,6 +582,158 @@ export default {
 
     if (url.pathname === "/health") {
       return jsonResponse({ status: "ok" }, corsHeaders);
+    }
+
+    if (url.pathname === "/eta" && request.method === "POST") {
+      try {
+        const etaKillSwitch = parseBooleanEnv(env.ETA_KILL_SWITCH, false);
+        if (etaKillSwitch) {
+          return jsonResponse(
+            { error: "ETA disabled", reason: "disabled" },
+            corsHeaders,
+            429,
+            { "Cache-Control": "no-store" },
+          );
+        }
+
+        const routesApiKey = (env.GOOGLE_ROUTES_API_KEY || "").trim();
+        if (!routesApiKey) {
+          return jsonResponse(
+            { error: "ETA unavailable", reason: "no_api_key" },
+            corsHeaders,
+            503,
+            { "Cache-Control": "no-store" },
+          );
+        }
+
+        const body = await request.json().catch(() => ({}));
+        const originLat = Number(body?.originLat);
+        const originLon = Number(body?.originLon);
+        const destinationLat = Number(body?.destinationLat);
+        const destinationLon = Number(body?.destinationLon);
+
+        if (
+          !Number.isFinite(originLat) ||
+          !Number.isFinite(originLon) ||
+          !Number.isFinite(destinationLat) ||
+          !Number.isFinite(destinationLon)
+        ) {
+          return jsonResponse(
+            { error: "Invalid ETA coordinates" },
+            corsHeaders,
+            400,
+            { "Cache-Control": "no-store" },
+          );
+        }
+
+        const dailyCap = parsePositiveIntEnv(env.ETA_MAX_CALLS_PER_DAY, 300);
+        const monthlyCap = parsePositiveIntEnv(env.ETA_MAX_CALLS_PER_MONTH, 8000);
+        const usage = await getEtaUsageCounts(env);
+
+        if (usage.dayCount >= dailyCap) {
+          return jsonResponse(
+            {
+              error: "ETA daily cap reached",
+              reason: "daily_cap",
+              dayCount: usage.dayCount,
+              dayCap: dailyCap,
+            },
+            corsHeaders,
+            429,
+            { "Cache-Control": "no-store" },
+          );
+        }
+        if (usage.monthCount >= monthlyCap) {
+          return jsonResponse(
+            {
+              error: "ETA monthly cap reached",
+              reason: "monthly_cap",
+              monthCount: usage.monthCount,
+              monthCap: monthlyCap,
+            },
+            corsHeaders,
+            429,
+            { "Cache-Control": "no-store" },
+          );
+        }
+
+        await bumpEtaUsageCounts(env, usage);
+
+        const googleResp = await fetch(
+          "https://routes.googleapis.com/directions/v2:computeRoutes",
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+              "X-Goog-Api-Key": routesApiKey,
+              "X-Goog-FieldMask": "routes.duration",
+            },
+            body: JSON.stringify({
+              origin: {
+                location: {
+                  latLng: { latitude: originLat, longitude: originLon },
+                },
+              },
+              destination: {
+                location: {
+                  latLng: { latitude: destinationLat, longitude: destinationLon },
+                },
+              },
+              travelMode: "DRIVE",
+              routingPreference: "TRAFFIC_AWARE",
+              units: "IMPERIAL",
+              languageCode: "en-US",
+            }),
+          },
+        );
+
+        if (!googleResp.ok) {
+          return jsonResponse(
+            { error: "ETA provider failed", status: googleResp.status },
+            corsHeaders,
+            502,
+            { "Cache-Control": "no-store" },
+          );
+        }
+
+        const googleData = await googleResp.json();
+        const duration = googleData?.routes?.[0]?.duration;
+        const etaMinutes = parseRouteDurationMinutes(duration);
+        if (!Number.isFinite(etaMinutes)) {
+          return jsonResponse(
+            { error: "ETA parse failed" },
+            corsHeaders,
+            502,
+            { "Cache-Control": "no-store" },
+          );
+        }
+
+        return jsonResponse(
+          {
+            ok: true,
+            etaMinutes,
+            usage: {
+              dayCount: usage.dayCount + 1,
+              dayCap: dailyCap,
+              monthCount: usage.monthCount + 1,
+              monthCap: monthlyCap,
+              dayUtc: getUtcDayKey(),
+              monthUtc: getUtcMonthKey(),
+            },
+          },
+          corsHeaders,
+          200,
+          { "Cache-Control": "no-store" },
+        );
+      } catch (error) {
+        console.error("ETA route failed:", error);
+        return jsonResponse(
+          { error: "Failed to calculate ETA" },
+          corsHeaders,
+          500,
+          { "Cache-Control": "no-store" },
+        );
+      }
     }
 
     if (url.pathname === "/admin/health" && request.method === "GET") {
