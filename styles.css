@@ -4200,9 +4200,10 @@
 }
 
 .pow-watch-badge.pow-watch-active {
-    background: linear-gradient(135deg, #2f73d9 0%, #1f5ec8 100%);
+    background: linear-gradient(135deg, #00b8ff 0%, #1f7bff 100%);
     color: #ffffff;
-    box-shadow: 0 2px 10px rgba(31, 94, 200, 0.26);
+    box-shadow: 0 2px 10px rgba(0, 140, 255, 0.38);
+    animation: pulse 2s ease-in-out infinite;
 }
 
 .pow-watch-badge.pow-watch-windy {
@@ -4226,11 +4227,14 @@
 }
 
 .pow-watch-alert-banner {
-    margin-top: 0.38rem;
-    padding: 0.32rem 0.46rem;
-    border-radius: 7px;
-    border: 1px solid rgba(31, 94, 200, 0.22);
-    background: rgba(232, 241, 255, 0.9);
+    margin: 0.18rem -0.75rem 0.34rem;
+    padding: 0.34rem 0.75rem;
+    border-radius: 0;
+    border-top: 1px solid rgba(31, 94, 200, 0.22);
+    border-bottom: 1px solid rgba(31, 94, 200, 0.22);
+    border-left: none;
+    border-right: none;
+    background: rgba(232, 241, 255, 0.95);
     color: #15355f;
     font-size: 0.66rem;
     font-weight: 700;

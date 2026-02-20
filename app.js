@@ -2369,9 +2369,10 @@
                 ? Number(powWatch.modelSpread72)
                 : null;
             const powWatchBandRaw = getPowWatchBandForResort(resort);
-            const powWatchStatusLabel = String(powWatch?.statusLabel || '').toUpperCase() || (powWatchBandRaw === 'POW WATCH ON'
+            const powWatchStatusLabelRaw = String(powWatch?.statusLabel || '').toUpperCase() || (powWatchBandRaw === 'POW WATCH ON'
                 ? 'ON'
                 : (powWatchBandRaw === 'POW WATCH BUILDING' ? 'BUILDING' : 'QUIET'));
+            const powWatchStatusLabel = powWatchStatusLabelRaw === 'ON' ? 'ACTIVE' : powWatchStatusLabelRaw;
             const powWatchBadgeClass = (
                 powWatchStatusLabel === 'STORM' ? 'pow-watch-storm'
                 : (powWatchStatusLabel === 'ACTIVE' ? 'pow-watch-active'
@@ -2622,12 +2623,12 @@ const backgroundPositionByResort = {
                     </div>
                   </details>
                   <div class="pow-watch-inline">
+                    ${hasPowAlert ? `<div class="pow-watch-alert-banner">${powAlertBanner}</div>` : ''}
                     <div class="pow-watch-top">
                       <div class="pow-watch-head">POW WATCH</div>
                       <div class="pow-watch-badge ${powWatchBadgeClass}">${powWatchStatusLabel}</div>
                     </div>
                     <div class="pow-watch-sub">Next 72h snow potential</div>
-                    ${hasPowAlert ? `<div class="pow-watch-alert-banner">${powAlertBanner}</div>` : ''}
                     <div class="pow-watch-metrics">
                       <span>24h <strong>${powWatch24}"</strong></span>
                       <span>48h <strong>${powWatch48}"</strong></span>
