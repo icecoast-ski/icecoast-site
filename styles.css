@@ -1146,8 +1146,8 @@
         }
 
         .favorite-bookmark-svg {
-            width: 34px;
-            height: 42px;
+            width: 30px;
+            height: 38px;
             overflow: visible;
             transform-origin: center bottom;
             filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.34)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.28));
@@ -1155,8 +1155,8 @@
 
         .favorite-bookmark-outline {
             fill: none;
-            stroke: #111111;
-            stroke-width: 4;
+            stroke: #144089;
+            stroke-width: 5;
             stroke-linecap: square;
             stroke-linejoin: miter;
         }
@@ -1208,13 +1208,108 @@
             filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.45));
         }
 
-        .resort-share-icon {
-            width: 54px;
-            height: 54px;
+        .resort-share-icon-wrap {
+            width: 30px;
+            height: 38px;
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+
+        .resort-share-svg {
+            width: 30px;
+            height: 38px;
+            overflow: visible;
             display: block;
-            object-fit: contain;
-            filter: none;
-            opacity: 1;
+            filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.32)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.24));
+        }
+
+        .resort-share-outline {
+            fill: none;
+            stroke: #144089;
+            stroke-width: 4.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            stroke-dasharray: 1000;
+            stroke-dashoffset: 1000;
+            animation: shareDrawIn 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.15s forwards;
+        }
+
+        @keyframes shareDrawIn {
+            to { stroke-dashoffset: 0; }
+        }
+
+        .resort-share-launch-wrap {
+            transform-origin: center center;
+            will-change: transform, opacity;
+        }
+
+        .resort-share-launch-wrap.launching {
+            animation: shareArrowLaunch 0.45s cubic-bezier(0.4, 0, 0.6, 1) forwards;
+        }
+
+        .resort-share-launch-wrap.returning {
+            animation: shareArrowReturn 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+        }
+
+        @keyframes shareArrowLaunch {
+            0% { transform: translateY(0); opacity: 1; }
+            15% { transform: translateY(-2px); opacity: 1; }
+            60% { transform: translateY(-24px); opacity: 0; }
+            100% { transform: translateY(-24px); opacity: 0; }
+        }
+
+        @keyframes shareArrowReturn {
+            0% { transform: translateY(-24px); opacity: 0; }
+            40% { transform: translateY(-24px); opacity: 0; }
+            70% { transform: translateY(2px); opacity: 1; }
+            85% { transform: translateY(-1px); opacity: 1; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        .resort-share-dot {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background: #144089;
+            top: 50%;
+            left: 50%;
+            margin: -2px 0 0 -2px;
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .resort-share-dot.burst-1 {
+            animation: shareDotBurst1 0.5s cubic-bezier(0.2, 0, 0.4, 1) forwards;
+        }
+
+        .resort-share-dot.burst-2 {
+            animation: shareDotBurst2 0.5s cubic-bezier(0.2, 0, 0.4, 1) forwards;
+        }
+
+        .resort-share-dot.burst-3 {
+            animation: shareDotBurst3 0.5s cubic-bezier(0.2, 0, 0.4, 1) forwards;
+        }
+
+        @keyframes shareDotBurst1 {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            20% { opacity: 1; }
+            100% { transform: translate(-12px, -10px) scale(0); opacity: 0; }
+        }
+
+        @keyframes shareDotBurst2 {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            20% { opacity: 1; }
+            100% { transform: translate(12px, -10px) scale(0); opacity: 0; }
+        }
+
+        @keyframes shareDotBurst3 {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            20% { opacity: 1; }
+            100% { transform: translate(0, -15px) scale(0); opacity: 0; }
         }
 
         .resort-card.share-focus {

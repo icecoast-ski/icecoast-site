@@ -2591,7 +2591,19 @@ const backgroundPositionByResort = {
                       </span>
                     </button>
                     <button class="resort-share-btn" data-share-resort="${resort.id}" type="button" aria-label="Share ${resort.name}">
-                      <img class="resort-share-icon" src="new-resort-art/icons/share.png" alt="" aria-hidden="true">
+                      <span class="resort-share-icon-wrap" aria-hidden="true">
+                        <svg class="resort-share-svg" viewBox="0 0 52 64" focusable="false">
+                          <g class="resort-share-launch-wrap">
+                            <path
+                              class="resort-share-outline"
+                              d="M 26 2 L 38 14 M 26 2 L 14 14 M 26 2 L 26 42 M 6 30 L 6 58 L 46 58 L 46 30"
+                            ></path>
+                          </g>
+                        </svg>
+                        <span class="resort-share-dot resort-share-dot-1"></span>
+                        <span class="resort-share-dot resort-share-dot-2"></span>
+                        <span class="resort-share-dot resort-share-dot-3"></span>
+                      </span>
                     </button>
                   </div>
                 </div>
@@ -2977,6 +2989,38 @@ const backgroundPositionByResort = {
             svg.addEventListener('animationend', () => {
                 svg.classList.remove('bounce', 'animate-save', 'animate-remove');
             }, { once: true });
+        }
+
+        function animateShareButton(shareBtnEl) {
+            if (!shareBtnEl) return;
+            if (shareBtnEl.dataset.shareAnimating === '1') return;
+            const launchWrap = shareBtnEl.querySelector('.resort-share-launch-wrap');
+            const dots = shareBtnEl.querySelectorAll('.resort-share-dot');
+            if (!launchWrap || !dots.length) return;
+
+            shareBtnEl.dataset.shareAnimating = '1';
+            launchWrap.classList.remove('launching', 'returning');
+            void launchWrap.offsetWidth;
+            launchWrap.classList.add('launching');
+
+            setTimeout(() => {
+                dots.forEach((dot, idx) => {
+                    dot.classList.remove('burst-1', 'burst-2', 'burst-3');
+                    void dot.offsetWidth;
+                    dot.classList.add(`burst-${idx + 1}`);
+                });
+            }, 210);
+
+            setTimeout(() => {
+                launchWrap.classList.remove('launching');
+                void launchWrap.offsetWidth;
+                launchWrap.classList.add('returning');
+            }, 420);
+
+            setTimeout(() => {
+                launchWrap.classList.remove('returning');
+                shareBtnEl.dataset.shareAnimating = '0';
+            }, 940);
         }
 
         function toggleFavoriteResort(resortId) {
@@ -4057,6 +4101,7 @@ const backgroundPositionByResort = {
             if (!shareTarget) return;
             const resortId = shareTarget.dataset.shareResort;
             if (!resortId) return;
+            animateShareButton(shareTarget);
             openShareModal(resortId);
         });
 
