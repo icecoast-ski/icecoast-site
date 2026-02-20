@@ -2584,8 +2584,9 @@ const backgroundPositionByResort = {
                   <div class="resort-header-actions">
                     <button class="resort-favorite-btn ${isFavorite ? 'active' : ''}" data-favorite-resort="${resort.id}" type="button" aria-label="${isFavorite ? 'Remove' : 'Add'} ${resort.name} ${isFavorite ? 'from' : 'to'} favorites" aria-pressed="${isFavorite ? 'true' : 'false'}">
                       <span class="resort-favorite-icon" aria-hidden="true">
-                        <img class="favorite-img favorite-off" src="new-resort-art/icons/favorite.png" alt="">
-                        <img class="favorite-img favorite-on" src="new-resort-art/icons/favorite1.png" alt="">
+                        <svg class="favorite-bookmark-icon" viewBox="0 0 24 24" role="presentation" focusable="false" aria-hidden="true">
+                          <path d="M7 4.5h10v14.3l-5-3.9-5 3.9z"></path>
+                        </svg>
                       </span>
                     </button>
                     <button class="resort-share-btn" data-share-resort="${resort.id}" type="button" aria-label="Share ${resort.name}">

@@ -1032,10 +1032,6 @@
             filter: drop-shadow(0 3px 8px rgba(0, 0, 0, 0.45));
         }
 
-        .resort-favorite-btn.active {
-            color: #ffffff;
-        }
-
         .resort-favorite-btn:active {
             transform: translateY(0) scale(0.96);
         }
@@ -1048,46 +1044,24 @@
             height: 54px;
             transform: translateY(-0.15px);
             pointer-events: none;
-            position: relative;
-            overflow: hidden;
         }
 
-        .favorite-img {
-            position: absolute;
-            inset: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
+        .favorite-bookmark-icon {
+            width: 46px;
+            height: 46px;
             display: block;
-            transition: opacity 180ms ease, transform 220ms cubic-bezier(0.22, 0.61, 0.36, 1), filter 180ms ease;
-            will-change: opacity, transform;
+            fill: transparent;
+            stroke: #0f172a;
+            stroke-width: 2.1;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.4)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.34));
+            transition: fill 0.18s ease, stroke 0.18s ease;
         }
 
-        .favorite-off {
-            opacity: 1;
-            transform: scale(1);
-            filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
-        }
-
-        .favorite-on {
-            opacity: 0;
-            transform: scale(0.88);
-            filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.28));
-        }
-
-        .resort-favorite-btn.active .favorite-off {
-            opacity: 0;
-            transform: scale(0.9);
-        }
-
-        .resort-favorite-btn.active .favorite-on {
-            opacity: 1;
-            transform: scale(1);
-        }
-
-        .resort-favorite-btn:active .favorite-off,
-        .resort-favorite-btn:active .favorite-on {
-            transform: scale(0.94);
+        .resort-favorite-btn.active .favorite-bookmark-icon {
+            fill: #f4c430;
+            stroke: #f4c430;
         }
 
         .resort-share-btn:hover {
