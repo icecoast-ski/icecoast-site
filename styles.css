@@ -755,7 +755,8 @@
         .search-text-clip {
             flex: 1;
             overflow: hidden;
-            height: 100%;
+            height: 1.45em;
+            min-height: 1.45em;
             position: relative;
             display: flex;
             align-items: center;
@@ -1144,22 +1145,62 @@
             pointer-events: none;
         }
 
-        .favorite-bookmark-icon {
-            width: 46px;
-            height: 46px;
-            display: block;
-            fill: transparent;
-            stroke: #0f172a;
-            stroke-width: 2.1;
-            stroke-linecap: round;
-            stroke-linejoin: round;
-            filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.4)) drop-shadow(0 2px 6px rgba(0, 0, 0, 0.34));
-            transition: fill 0.18s ease, stroke 0.18s ease;
+        .favorite-bookmark-svg {
+            width: 34px;
+            height: 42px;
+            overflow: visible;
+            transform-origin: center bottom;
+            filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.34)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.28));
         }
 
-        .resort-favorite-btn.active .favorite-bookmark-icon {
-            fill: #f4c430;
-            stroke: #f4c430;
+        .favorite-bookmark-outline {
+            fill: none;
+            stroke: #111111;
+            stroke-width: 4;
+            stroke-linecap: square;
+            stroke-linejoin: miter;
+        }
+
+        .favorite-bookmark-fill {
+            fill: #f7c948;
+            transform-box: fill-box;
+            transform-origin: center bottom;
+            transform: scaleY(0);
+            transition: transform 0.32s ease-in;
+        }
+
+        .resort-favorite-btn.active .favorite-bookmark-fill {
+            transform: scaleY(1);
+            transition: transform 0.38s cubic-bezier(0.22, 0.61, 0.36, 1);
+        }
+
+        .favorite-bookmark-svg.bounce {
+            animation: favoriteBookmarkBounce 0.34s cubic-bezier(0.24, 0.8, 0.3, 1) forwards;
+        }
+
+        @keyframes favoriteBookmarkBounce {
+            0% { transform: scaleY(1) scaleX(1); }
+            30% { transform: scaleY(0.9) scaleX(1.06); }
+            62% { transform: scaleY(1.04) scaleX(0.98); }
+            100% { transform: scaleY(1) scaleX(1); }
+        }
+
+        .favorite-bookmark-svg.animate-save .favorite-bookmark-fill {
+            animation: favoriteFillUp 0.38s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+        }
+
+        .favorite-bookmark-svg.animate-remove .favorite-bookmark-fill {
+            animation: favoriteDrainDown 0.32s ease-in forwards;
+        }
+
+        @keyframes favoriteFillUp {
+            from { transform: scaleY(0); }
+            to { transform: scaleY(1); }
+        }
+
+        @keyframes favoriteDrainDown {
+            from { transform: scaleY(1); }
+            to { transform: scaleY(0); }
         }
 
         .resort-share-btn:hover {

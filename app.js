@@ -2584,8 +2584,9 @@ const backgroundPositionByResort = {
                   <div class="resort-header-actions">
                     <button class="resort-favorite-btn ${isFavorite ? 'active' : ''}" data-favorite-resort="${resort.id}" type="button" aria-label="${isFavorite ? 'Remove' : 'Add'} ${resort.name} ${isFavorite ? 'from' : 'to'} favorites" aria-pressed="${isFavorite ? 'true' : 'false'}">
                       <span class="resort-favorite-icon" aria-hidden="true">
-                        <svg class="favorite-bookmark-icon" viewBox="0 0 24 24" role="presentation" focusable="false" aria-hidden="true">
-                          <path d="M7 4.5h10v14.3l-5-3.9-5 3.9z"></path>
+                        <svg class="favorite-bookmark-svg" viewBox="0 0 72 90" role="presentation" focusable="false" aria-hidden="true">
+                          <path class="favorite-bookmark-fill" d="M 4 2 L 68 2 L 68 88 L 36 66 L 4 88 Z"></path>
+                          <path class="favorite-bookmark-outline" d="M 4 2 L 68 2 L 68 88 L 36 66 L 4 88 Z"></path>
                         </svg>
                       </span>
                     </button>
@@ -2959,6 +2960,23 @@ const backgroundPositionByResort = {
                 favoriteResortIds.delete(id);
             }
             saveFavoriteResortIds();
+        }
+
+        function animateFavoriteBookmark(resortId, saved) {
+            const id = String(resortId || '').trim();
+            if (!id) return;
+            const selectorId = (window.CSS && typeof window.CSS.escape === 'function') ? window.CSS.escape(id) : id;
+            const btn = document.querySelector(`[data-favorite-resort="${selectorId}"]`);
+            if (!btn) return;
+            const svg = btn.querySelector('.favorite-bookmark-svg');
+            if (!svg) return;
+            svg.classList.remove('bounce', 'animate-save', 'animate-remove');
+            void svg.offsetWidth;
+            svg.classList.add(saved ? 'animate-save' : 'animate-remove');
+            svg.classList.add('bounce');
+            svg.addEventListener('animationend', () => {
+                svg.classList.remove('bounce', 'animate-save', 'animate-remove');
+            }, { once: true });
         }
 
         function toggleFavoriteResort(resortId) {
@@ -3379,6 +3397,17 @@ const backgroundPositionByResort = {
                 searchCycleTimer = setTimeout(showNextSearchPhrase, 220);
                 return;
             }
+            if (!searchActivePhraseEl) {
+                const bootPhraseEl = document.createElement('span');
+                bootPhraseEl.className = 'search-phrase active';
+                bootPhraseEl.textContent = searchPhrases[searchCurrentPhraseIndex] || searchPhrases[0];
+                searchTextClipEl.appendChild(bootPhraseEl);
+                searchActivePhraseEl = bootPhraseEl;
+                searchCurrentPhraseIndex = (searchCurrentPhraseIndex + 1) % searchPhrases.length;
+                clearSearchCycleTimer();
+                searchCycleTimer = setTimeout(showNextSearchPhrase, SEARCH_HOLD_MS);
+                return;
+            }
             spinSearchIcon();
 
             const incomingPhraseEl = document.createElement('span');
@@ -3418,8 +3447,14 @@ const backgroundPositionByResort = {
                 syncSearchInteractionState();
                 return;
             }
+            const initialPhraseEl = document.createElement('span');
+            initialPhraseEl.className = 'search-phrase active';
+            initialPhraseEl.textContent = searchPhrases[0];
+            searchTextClipEl.appendChild(initialPhraseEl);
+            searchActivePhraseEl = initialPhraseEl;
+            searchCurrentPhraseIndex = 1 % searchPhrases.length;
             clearSearchCycleTimer();
-            searchCycleTimer = setTimeout(showNextSearchPhrase, 550);
+            searchCycleTimer = setTimeout(showNextSearchPhrase, SEARCH_HOLD_MS);
         }
         function clearResortSearchField() {
             if (!resortSearchInput) return;
@@ -4015,6 +4050,7 @@ const backgroundPositionByResort = {
                 }
                 showFavoriteToast(wasAdded ? 'Saved to Favorites' : 'Removed from Favorites');
                 renderResorts();
+                animateFavoriteBookmark(resortId, wasAdded);
                 return;
             }
             const shareTarget = event.target.closest('[data-share-resort]');
