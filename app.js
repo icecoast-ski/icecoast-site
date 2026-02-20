@@ -2582,27 +2582,32 @@ const backgroundPositionByResort = {
                     <p class="resort-location">${resort.location}</p>
                   </div>
                   <div class="resort-header-actions">
-                    <button class="resort-favorite-btn ${isFavorite ? 'active' : ''}" data-favorite-resort="${resort.id}" type="button" aria-label="${isFavorite ? 'Remove' : 'Add'} ${resort.name} ${isFavorite ? 'from' : 'to'} favorites" aria-pressed="${isFavorite ? 'true' : 'false'}">
-                      <span class="resort-favorite-icon" aria-hidden="true">
-                        <svg class="favorite-bookmark-svg" viewBox="0 0 72 90" role="presentation" focusable="false" aria-hidden="true">
-                          <path class="favorite-bookmark-fill" d="M 4 2 L 68 2 L 68 88 L 36 66 L 4 88 Z"></path>
-                          <path class="favorite-bookmark-outline" d="M 4 2 L 68 2 L 68 88 L 36 66 L 4 88 Z"></path>
-                        </svg>
-                      </span>
+                    <button class="resort-btn resort-favorite-btn bm-btn ${isFavorite ? 'active' : ''}" data-favorite-resort="${resort.id}" type="button" aria-label="${isFavorite ? 'Remove' : 'Add'} ${resort.name} ${isFavorite ? 'from' : 'to'} favorites" aria-pressed="${isFavorite ? 'true' : 'false'}">
+                      <span class="bm-ripple" aria-hidden="true"></span>
+                      <svg class="bm-svg" viewBox="0 0 14 18" role="presentation" focusable="false" aria-hidden="true">
+                        <path class="bm-fill" d="M 1 1 L 13 1 L 13 17 L 7 13 L 1 17 Z"></path>
+                        <path class="bm-outline" d="M 1 1 L 13 1 L 13 17 L 7 13 L 1 17 Z"></path>
+                      </svg>
                     </button>
-                    <button class="resort-share-btn" data-share-resort="${resort.id}" type="button" aria-label="Share ${resort.name}">
-                      <span class="resort-share-icon-wrap" aria-hidden="true">
-                        <svg class="resort-share-svg" viewBox="0 0 52 64" focusable="false">
-                          <g class="resort-share-launch-wrap">
-                            <path
-                              class="resort-share-outline"
-                              d="M 26 2 L 38 14 M 26 2 L 14 14 M 26 2 L 26 42 M 6 30 L 6 58 L 46 58 L 46 30"
-                            ></path>
+                    <button class="resort-btn resort-share-btn sh-btn" data-share-resort="${resort.id}" type="button" aria-label="Share ${resort.name}">
+                      <span class="sh-wrap" aria-hidden="true">
+                        <span class="sh-mini sh-mini-1">
+                          <svg viewBox="0 0 5 6"><path d="M2.5 0 L4.5 2.5 M2.5 0 L0.5 2.5 M2.5 0 L2.5 6"></path></svg>
+                        </span>
+                        <span class="sh-mini sh-mini-2">
+                          <svg viewBox="0 0 5 6"><path d="M2.5 0 L4.5 2.5 M2.5 0 L0.5 2.5 M2.5 0 L2.5 6"></path></svg>
+                        </span>
+                        <span class="sh-mini sh-mini-3">
+                          <svg viewBox="0 0 5 6"><path d="M2.5 0 L4.5 2.5 M2.5 0 L0.5 2.5 M2.5 0 L2.5 6"></path></svg>
+                        </span>
+                        <svg class="sh-svg" viewBox="0 0 14 17" focusable="false">
+                          <g class="sh-arrow">
+                            <path class="sh-outline" d="M 7 1 L 11 5 M 7 1 L 3 5 M 7 1 L 7 11"></path>
+                          </g>
+                          <g class="sh-box">
+                            <path class="sh-outline" d="M 1 9 L 1 16 L 13 16 L 13 9"></path>
                           </g>
                         </svg>
-                        <span class="resort-share-dot resort-share-dot-1"></span>
-                        <span class="resort-share-dot resort-share-dot-2"></span>
-                        <span class="resort-share-dot resort-share-dot-3"></span>
                       </span>
                     </button>
                   </div>
@@ -2980,47 +2985,35 @@ const backgroundPositionByResort = {
             const selectorId = (window.CSS && typeof window.CSS.escape === 'function') ? window.CSS.escape(id) : id;
             const btn = document.querySelector(`[data-favorite-resort="${selectorId}"]`);
             if (!btn) return;
-            const svg = btn.querySelector('.favorite-bookmark-svg');
-            if (!svg) return;
-            svg.classList.remove('bounce', 'animate-save', 'animate-remove');
-            void svg.offsetWidth;
-            svg.classList.add(saved ? 'animate-save' : 'animate-remove');
-            svg.classList.add('bounce');
-            svg.addEventListener('animationend', () => {
-                svg.classList.remove('bounce', 'animate-save', 'animate-remove');
-            }, { once: true });
+            btn.classList.remove('saved', 'unsaving');
+            void btn.offsetWidth;
+            btn.classList.add(saved ? 'saved' : 'unsaving');
+            setTimeout(() => {
+                btn.classList.remove('saved', 'unsaving');
+            }, 520);
         }
 
         function animateShareButton(shareBtnEl) {
             if (!shareBtnEl) return;
             if (shareBtnEl.dataset.shareAnimating === '1') return;
-            const launchWrap = shareBtnEl.querySelector('.resort-share-launch-wrap');
-            const dots = shareBtnEl.querySelectorAll('.resort-share-dot');
-            if (!launchWrap || !dots.length) return;
-
             shareBtnEl.dataset.shareAnimating = '1';
-            launchWrap.classList.remove('launching', 'returning');
-            void launchWrap.offsetWidth;
-            launchWrap.classList.add('launching');
-
+            shareBtnEl.classList.remove('firing', 'raining', 'resetting');
+            void shareBtnEl.offsetWidth;
+            shareBtnEl.classList.add('firing');
             setTimeout(() => {
-                dots.forEach((dot, idx) => {
-                    dot.classList.remove('burst-1', 'burst-2', 'burst-3');
-                    void dot.offsetWidth;
-                    dot.classList.add(`burst-${idx + 1}`);
-                });
-            }, 210);
-
+                shareBtnEl.classList.remove('firing');
+                void shareBtnEl.offsetWidth;
+                shareBtnEl.classList.add('raining');
+            }, 280);
             setTimeout(() => {
-                launchWrap.classList.remove('launching');
-                void launchWrap.offsetWidth;
-                launchWrap.classList.add('returning');
-            }, 420);
-
+                shareBtnEl.classList.remove('raining');
+                void shareBtnEl.offsetWidth;
+                shareBtnEl.classList.add('resetting');
+            }, 700);
             setTimeout(() => {
-                launchWrap.classList.remove('returning');
+                shareBtnEl.classList.remove('resetting');
                 shareBtnEl.dataset.shareAnimating = '0';
-            }, 940);
+            }, 1000);
         }
 
         function toggleFavoriteResort(resortId) {

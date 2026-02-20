@@ -1106,8 +1106,7 @@
             filter: drop-shadow(0 5px 16px rgba(0, 0, 0, 0.72)) drop-shadow(0 0 16px rgba(0, 0, 0, 0.52));
         }
 
-        .resort-favorite-btn,
-        .resort-share-btn {
+        .resort-btn {
             border: 0;
             background: linear-gradient(145deg, #1f5ec8 0%, #144089 100%);
             color: #ffffff;
@@ -1118,218 +1117,246 @@
             cursor: pointer;
             border: 1px solid rgba(255, 255, 255, 0.24);
             box-shadow:
-                0 3px 8px rgba(8, 28, 62, 0.34),
-                inset 0 1px 0 rgba(255, 255, 255, 0.18);
+              0 3px 8px rgba(8, 28, 62, 0.34),
+              inset 0 1px 0 rgba(255, 255, 255, 0.18);
             transition: transform 0.18s ease, filter 0.18s ease, box-shadow 0.18s ease;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-        }
-
-        .resort-favorite-btn {
-            line-height: 1;
-        }
-
-        .resort-favorite-btn:hover {
-            transform: translateY(-1px);
-            filter: brightness(1.04);
-            box-shadow:
-                0 4px 10px rgba(8, 28, 62, 0.38),
-                inset 0 1px 0 rgba(255, 255, 255, 0.22);
-        }
-
-        .resort-favorite-btn:active {
-            transform: translateY(0) scale(0.97);
-            box-shadow:
-                0 2px 6px rgba(8, 28, 62, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.14);
-        }
-
-        .resort-favorite-icon {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 36px;
-            height: 36px;
-            transform: translateY(-0.15px);
-            pointer-events: none;
-        }
-
-        .favorite-bookmark-svg {
-            width: 16px;
-            height: 20px;
+            position: relative;
             overflow: visible;
-            transform-origin: center bottom;
-            filter: none;
         }
 
-        .favorite-bookmark-outline {
+        .resort-btn:hover {
+            transform: translateY(-1px);
+            filter: brightness(1.06);
+        }
+
+        .resort-btn:active {
+            transform: translateY(0) scale(0.96);
+        }
+
+        .bm-svg {
+            width: 14px;
+            height: 18px;
+            overflow: visible;
+            display: block;
+        }
+
+        .bm-fill {
+            fill: #f7c948;
+            transform-box: fill-box;
+            transform-origin: bottom center;
+            transform: scaleY(0);
+        }
+
+        .resort-favorite-btn.active .bm-fill {
+            transform: scaleY(1);
+        }
+
+        .bm-outline {
             fill: none;
-            stroke: #ffffff;
-            stroke-width: 4.2;
+            stroke: #fff;
+            stroke-width: 2px;
             stroke-linecap: square;
             stroke-linejoin: miter;
         }
 
-        .favorite-bookmark-fill {
-            fill: #f7c948;
-            transform-box: fill-box;
-            transform-origin: center bottom;
-            transform: scaleY(0);
-            transition: transform 0.32s ease-in;
+        .bm-ripple {
+            position: absolute;
+            width: 36px;
+            height: 36px;
+            border-radius: 11px;
+            border: 2px solid #f7c948;
+            opacity: 0;
+            pointer-events: none;
+            top: 0;
+            left: 0;
         }
 
-        .resort-favorite-btn.active .favorite-bookmark-fill {
-            transform: scaleY(1);
-            transition: transform 0.38s cubic-bezier(0.22, 0.61, 0.36, 1);
+        .bm-btn.saved .bm-fill {
+            animation: bmFillUp 0.36s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
         }
 
-        .favorite-bookmark-svg.bounce {
-            animation: favoriteBookmarkBounce 0.34s cubic-bezier(0.24, 0.8, 0.3, 1) forwards;
+        .bm-btn.unsaving .bm-fill {
+            animation: bmDrain 0.28s ease-in forwards;
         }
 
-        @keyframes favoriteBookmarkBounce {
+        @keyframes bmFillUp {
+            0% { transform: scaleY(0); }
+            100% { transform: scaleY(1); }
+        }
+
+        @keyframes bmDrain {
+            0% { transform: scaleY(1); }
+            100% { transform: scaleY(0); }
+        }
+
+        .bm-btn.saved .bm-svg {
+            animation: bmBounce 0.42s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+        }
+
+        @keyframes bmBounce {
             0% { transform: scaleY(1) scaleX(1); }
-            30% { transform: scaleY(0.9) scaleX(1.06); }
-            62% { transform: scaleY(1.04) scaleX(0.98); }
+            18% { transform: scaleY(0.72) scaleX(1.18); }
+            42% { transform: scaleY(1.14) scaleX(0.92); }
+            64% { transform: scaleY(0.96) scaleX(1.02); }
+            82% { transform: scaleY(1.02) scaleX(0.99); }
             100% { transform: scaleY(1) scaleX(1); }
         }
 
-        .favorite-bookmark-svg.animate-save .favorite-bookmark-fill {
-            animation: favoriteFillUp 0.38s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+        .bm-btn.saved .bm-ripple {
+            animation: bmRipple 0.5s ease-out 0.08s forwards;
         }
 
-        .favorite-bookmark-svg.animate-remove .favorite-bookmark-fill {
-            animation: favoriteDrainDown 0.32s ease-in forwards;
+        @keyframes bmRipple {
+            0% { opacity: 0.7; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.5); }
         }
 
-        @keyframes favoriteFillUp {
-            from { transform: scaleY(0); }
-            to { transform: scaleY(1); }
+        .bm-btn.saved {
+            animation: bmFlash 0.22s ease-out forwards;
         }
 
-        @keyframes favoriteDrainDown {
-            from { transform: scaleY(1); }
-            to { transform: scaleY(0); }
+        @keyframes bmFlash {
+            0% { filter: brightness(1); }
+            40% { filter: brightness(1.4); }
+            100% { filter: brightness(1); }
         }
 
-        .resort-share-btn:hover {
-            transform: translateY(-1px);
-            filter: brightness(1.04);
-            box-shadow:
-                0 4px 10px rgba(8, 28, 62, 0.38),
-                inset 0 1px 0 rgba(255, 255, 255, 0.22);
-        }
-
-        .resort-share-btn:active {
-            transform: translateY(0) scale(0.97);
-            box-shadow:
-                0 2px 6px rgba(8, 28, 62, 0.3),
-                inset 0 1px 0 rgba(255, 255, 255, 0.14);
-        }
-
-        .resort-share-icon-wrap {
-            width: 16px;
-            height: 20px;
+        .sh-wrap {
             position: relative;
-            display: inline-flex;
+            width: 14px;
+            height: 17px;
+            display: flex;
             align-items: center;
             justify-content: center;
-            pointer-events: none;
         }
 
-        .resort-share-svg {
-            width: 16px;
-            height: 20px;
+        .sh-svg {
+            width: 14px;
+            height: 17px;
             overflow: visible;
             display: block;
-            filter: none;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
-        .resort-share-outline {
+        .sh-outline {
             fill: none;
-            stroke: #ffffff;
-            stroke-width: 4.2;
+            stroke: #fff;
+            stroke-width: 2px;
             stroke-linecap: round;
             stroke-linejoin: round;
-            stroke-dasharray: 1000;
-            stroke-dashoffset: 1000;
-            animation: shareDrawIn 0.7s cubic-bezier(0.4, 0, 0.2, 1) 0.15s forwards;
         }
 
-        @keyframes shareDrawIn {
-            to { stroke-dashoffset: 0; }
+        .sh-arrow {
+            transform-origin: 7px 14px;
         }
 
-        .resort-share-launch-wrap {
-            transform-origin: center center;
-            will-change: transform, opacity;
+        .sh-btn.firing .sh-arrow {
+            animation: shArrowFire 0.32s cubic-bezier(0.4, 0, 0.5, 1) forwards;
         }
 
-        .resort-share-launch-wrap.launching {
-            animation: shareArrowLaunch 0.45s cubic-bezier(0.4, 0, 0.6, 1) forwards;
-        }
-
-        .resort-share-launch-wrap.returning {
-            animation: shareArrowReturn 0.55s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
-        }
-
-        @keyframes shareArrowLaunch {
+        @keyframes shArrowFire {
             0% { transform: translateY(0); opacity: 1; }
-            15% { transform: translateY(-2px); opacity: 1; }
-            60% { transform: translateY(-24px); opacity: 0; }
-            100% { transform: translateY(-24px); opacity: 0; }
+            10% { transform: translateY(2px); }
+            100% { transform: translateY(-26px); opacity: 0; }
         }
 
-        @keyframes shareArrowReturn {
-            0% { transform: translateY(-24px); opacity: 0; }
-            40% { transform: translateY(-24px); opacity: 0; }
-            70% { transform: translateY(2px); opacity: 1; }
-            85% { transform: translateY(-1px); opacity: 1; }
+        .sh-box {
+            transform-origin: 7px 16px;
+        }
+
+        .sh-btn.firing .sh-box {
+            animation: shBoxPulse 0.32s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+        }
+
+        @keyframes shBoxPulse {
+            0% { transform: scaleX(1) scaleY(1); }
+            30% { transform: scaleX(1.15) scaleY(0.88); }
+            65% { transform: scaleX(0.96) scaleY(1.04); }
+            100% { transform: scaleX(1) scaleY(1); }
+        }
+
+        .sh-mini {
+            position: absolute;
+            opacity: 0;
+            pointer-events: none;
+            width: 5px;
+            height: 6px;
+            top: 50%;
+            left: 50%;
+            margin: -3px 0 0 -2.5px;
+        }
+
+        .sh-mini svg {
+            width: 100%;
+            height: 100%;
+            overflow: visible;
+        }
+
+        .sh-mini path {
+            fill: none;
+            stroke: rgba(255, 255, 255, 0.9);
+            stroke-width: 1.8px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .sh-btn.raining .sh-mini-1 {
+            animation: shRain1 0.55s cubic-bezier(0.4, 0, 0.6, 1) 0s forwards;
+        }
+
+        @keyframes shRain1 {
+            0% { opacity: 1; transform: translate(-9px, -22px) rotate(-18deg) scale(1); }
+            70% { opacity: 1; }
+            90% { transform: translate(-5px, 6px) rotate(-5deg) scale(0.7); opacity: 0.6; }
+            100% { transform: translate(-5px, 8px) rotate(-5deg) scale(0); opacity: 0; }
+        }
+
+        .sh-btn.raining .sh-mini-2 {
+            animation: shRain2 0.55s cubic-bezier(0.4, 0, 0.6, 1) 0.06s forwards;
+        }
+
+        @keyframes shRain2 {
+            0% { opacity: 1; transform: translate(0px, -26px) rotate(0deg) scale(1.1); }
+            70% { opacity: 1; }
+            90% { transform: translate(0px, 4px) rotate(0deg) scale(0.7); opacity: 0.6; }
+            100% { transform: translate(0px, 6px) rotate(0deg) scale(0); opacity: 0; }
+        }
+
+        .sh-btn.raining .sh-mini-3 {
+            animation: shRain3 0.55s cubic-bezier(0.4, 0, 0.6, 1) 0.03s forwards;
+        }
+
+        @keyframes shRain3 {
+            0% { opacity: 1; transform: translate(9px, -22px) rotate(18deg) scale(1); }
+            70% { opacity: 1; }
+            90% { transform: translate(5px, 6px) rotate(5deg) scale(0.7); opacity: 0.6; }
+            100% { transform: translate(5px, 8px) rotate(5deg) scale(0); opacity: 0; }
+        }
+
+        .sh-btn.resetting .sh-arrow {
+            animation: shArrowReturn 0.28s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+        }
+
+        @keyframes shArrowReturn {
+            0% { transform: translateY(-26px); opacity: 0; }
+            50% { opacity: 1; }
+            75% { transform: translateY(2px); }
             100% { transform: translateY(0); opacity: 1; }
         }
 
-        .resort-share-dot {
-            position: absolute;
-            width: 3px;
-            height: 3px;
-            border-radius: 50%;
-            background: #ffffff;
-            top: 50%;
-            left: 50%;
-            margin: -1.5px 0 0 -1.5px;
-            opacity: 0;
-            pointer-events: none;
+        .sh-btn.firing {
+            animation: shFlash 0.28s ease-out forwards;
         }
 
-        .resort-share-dot.burst-1 {
-            animation: shareDotBurst1 0.5s cubic-bezier(0.2, 0, 0.4, 1) forwards;
-        }
-
-        .resort-share-dot.burst-2 {
-            animation: shareDotBurst2 0.5s cubic-bezier(0.2, 0, 0.4, 1) forwards;
-        }
-
-        .resort-share-dot.burst-3 {
-            animation: shareDotBurst3 0.5s cubic-bezier(0.2, 0, 0.4, 1) forwards;
-        }
-
-        @keyframes shareDotBurst1 {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            20% { opacity: 1; }
-            100% { transform: translate(-12px, -10px) scale(0); opacity: 0; }
-        }
-
-        @keyframes shareDotBurst2 {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            20% { opacity: 1; }
-            100% { transform: translate(12px, -10px) scale(0); opacity: 0; }
-        }
-
-        @keyframes shareDotBurst3 {
-            0% { transform: translate(0, 0) scale(1); opacity: 1; }
-            20% { opacity: 1; }
-            100% { transform: translate(0, -15px) scale(0); opacity: 0; }
+        @keyframes shFlash {
+            0% { filter: brightness(1); }
+            30% { filter: brightness(1.45); }
+            100% { filter: brightness(1); }
         }
 
         .resort-card.share-focus {
