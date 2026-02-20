@@ -988,7 +988,7 @@
             gap: 0;
             padding: 0 1.5rem 0;
             margin-top: -46px;
-            min-height: 48px;
+            min-height: 24px;
             position: relative;
             z-index: 5;
         }
@@ -6303,7 +6303,7 @@
         padding: 0 0.9rem 0;
         margin-top: -40px;
         gap: 0;
-        min-height: 44px;
+        min-height: 22px;
     }
 
     .resort-feature-badge {

@@ -2437,7 +2437,14 @@
             const metricsFeelsLike = `${metricsFeelsLikeBase}${feelsLikeWarning}`;
             const metricsWind = `${metricsWindBase}${windRiskWarning}`;
             const powBriefText = typeof powWatch?.powBrief === 'string' ? powWatch.powBrief.trim() : '';
-            const hasPowBrief = powBriefText.length > 0;
+            const nwsAlertEvent = String(powWatch?.alert?.event || '').trim();
+            const fallbackBlipParts = [];
+            if (nwsAlertEvent) fallbackBlipParts.push(`${nwsAlertEvent} active.`);
+            if (snowLevelLine) fallbackBlipParts.push(String(snowLevelLine).replace(/^Snow Level:\s*/i, ''));
+            if (windHoldRiskLevelRaw === 'HIGH') fallbackBlipParts.push('Wind hold risk is elevated this cycle.');
+            const fallbackPowBrief = fallbackBlipParts.join(' ');
+            const displayPowBrief = powBriefText || fallbackPowBrief;
+            const hasPowBrief = displayPowBrief.length > 0;
             const powDays = Array.isArray(powWatch?.days) ? powWatch.days : [];
             const snowSeries72 = Array.isArray(powWatch?.hourly?.snowSeries72)
                 ? powWatch.hourly.snowSeries72.map((v) => Number(v)).filter((v) => Number.isFinite(v))
@@ -2606,7 +2613,7 @@ const backgroundPositionByResort = {
                     <span>Feels Like <strong>${metricsFeelsLike}</strong></span>
                     <span>Wind <strong>${metricsWind}</strong></span>
                   </div>
-                  ${hasPowBrief ? `<div class="conditions-nws-brief"><strong>NWS Brief:</strong> ${powBriefText}</div>` : ''}
+                  ${hasPowBrief ? `<div class="conditions-nws-brief"><strong>NWS Brief:</strong> ${displayPowBrief}</div>` : ''}
                   <details class="forecast-inline">
                     <summary class="forecast-inline-toggle">
                       <span class="forecast-inline-left">
