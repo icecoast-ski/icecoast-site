@@ -994,8 +994,8 @@
         }
 
         .resort-feature-badge {
-            width: 88px;
-            height: 88px;
+            width: 110px;
+            height: 110px;
             object-fit: contain;
             image-rendering: auto;
             background: transparent;
@@ -1028,12 +1028,17 @@
         .resort-feature-badge.badge-ownership { --patch-rot: 2deg; --patch-z: 5; }
         .resort-feature-badge.badge-glades { --patch-rot: -1deg; --patch-z: 4; }
         .resort-feature-badge.badge-family-owned {
-            width: 110px;
-            height: 110px;
+            width: 138px;
+            height: 138px;
         }
         .resort-feature-badge.badge-pass {
-            width: 132px;
-            height: 132px;
+            width: 148px;
+            height: 165px;
+            transform: translateY(-70px) translateZ(0) rotate(var(--patch-rot, 0deg));
+        }
+
+        .resort-feature-badge.badge-pass + .resort-feature-badge {
+            margin-left: -26px;
         }
 
         .resort-favorite-btn,
@@ -6303,8 +6308,8 @@
     }
 
     .resort-feature-badge {
-        width: 76px;
-        height: 76px;
+        width: 95px;
+        height: 95px;
         margin-left: -11px;
     }
 
@@ -6313,13 +6318,18 @@
     }
 
     .resort-feature-badge.badge-family-owned {
-        width: 95px;
-        height: 95px;
+        width: 119px;
+        height: 119px;
     }
 
     .resort-feature-badge.badge-pass {
-        width: 114px;
-        height: 114px;
+        width: 128px;
+        height: 143px;
+        transform: translateY(-70px) translateZ(0) rotate(var(--patch-rot, 0deg));
+    }
+
+    .resort-feature-badge.badge-pass + .resort-feature-badge {
+        margin-left: -20px;
     }
 
     .sendit-toast {
