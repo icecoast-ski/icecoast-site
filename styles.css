@@ -720,7 +720,7 @@
             to { opacity: 1; transform: translateX(0) scale(1); }
         }
 
-        .icon-wrap {
+        .search-icon-wrap {
             flex-shrink: 0;
             width: 22px;
             height: 22px;
@@ -732,7 +732,7 @@
             transition: opacity 0.2s ease;
         }
 
-        .icon-wrap svg {
+        .search-icon-wrap svg {
             width: 22px;
             height: 22px;
             display: block;
@@ -743,7 +743,7 @@
             stroke-linejoin: round;
         }
 
-        .icon-wrap.spinning {
+        .search-icon-wrap.spinning {
             animation: fullSpin 0.62s cubic-bezier(0.4, 0, 0.2, 1) forwards;
         }
 
@@ -752,7 +752,7 @@
             to { transform: rotate(360deg); }
         }
 
-        .text-clip {
+        .search-text-clip {
             flex: 1;
             overflow: hidden;
             height: 100%;
@@ -761,7 +761,7 @@
             align-items: center;
         }
 
-        .phrase {
+        .search-phrase {
             position: absolute;
             left: 0;
             top: 50%;
@@ -775,18 +775,18 @@
             will-change: transform, opacity;
         }
 
-        .phrase.standby {
+        .search-phrase.standby {
             transform: translateY(-170%);
             opacity: 0;
         }
 
-        .phrase.active {
+        .search-phrase.active {
             transform: translateY(-50%);
             opacity: 1;
             transition: transform 0.58s cubic-bezier(0.22, 0.61, 0.36, 1), opacity 0.38s ease;
         }
 
-        .phrase.exit {
+        .search-phrase.exit {
             transform: translateY(70%);
             opacity: 0;
             transition: transform 0.44s cubic-bezier(0.55, 0, 0.75, 0.45), opacity 0.26s ease;
@@ -832,10 +832,8 @@
             box-shadow: 0 0 0 3px rgba(31, 94, 200, 0.14);
         }
 
-        .filter-search-wrap.search-has-value .text-clip,
-        .filter-search-wrap.search-focused .text-clip,
-        .filter-search-wrap.search-has-value .icon-wrap,
-        .filter-search-wrap.search-focused .icon-wrap {
+        .filter-search-wrap.search-has-value .search-text-clip,
+        .filter-search-wrap.search-has-value .search-icon-wrap {
             opacity: 0;
         }
 
@@ -976,17 +974,17 @@
                 gap: 0.62rem;
             }
 
-            .icon-wrap {
+            .search-icon-wrap {
                 width: 21px;
                 height: 21px;
             }
 
-            .icon-wrap svg {
+            .search-icon-wrap svg {
                 width: 22px;
                 height: 22px;
             }
 
-            .phrase {
+            .search-phrase {
                 font-size: 1.03rem;
             }
 

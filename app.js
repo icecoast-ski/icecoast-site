@@ -3382,7 +3382,7 @@ const backgroundPositionByResort = {
             spinSearchIcon();
 
             const incomingPhraseEl = document.createElement('span');
-            incomingPhraseEl.className = 'phrase standby';
+            incomingPhraseEl.className = 'search-phrase standby';
             incomingPhraseEl.textContent = searchPhrases[searchCurrentPhraseIndex] || searchPhrases[0];
             searchTextClipEl.appendChild(incomingPhraseEl);
 
@@ -3411,7 +3411,7 @@ const backgroundPositionByResort = {
             if (!searchWrap || !resortSearchInput || !searchTextClipEl || !searchPhrases.length) return;
             if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
                 const staticPhraseEl = document.createElement('span');
-                staticPhraseEl.className = 'phrase active';
+                staticPhraseEl.className = 'search-phrase active';
                 staticPhraseEl.textContent = searchPhrases[0];
                 searchTextClipEl.appendChild(staticPhraseEl);
                 searchActivePhraseEl = staticPhraseEl;
