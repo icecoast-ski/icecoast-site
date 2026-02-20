@@ -2351,15 +2351,27 @@
             const metricsWindBase = weather.wind ?? '—';
             const signalLead = sendItSubtitlePrimary;
             const powWatch = resort.powWatch || null;
-            const powWatch24 = Number.isFinite(Number(powWatch?.totals?.snow24))
-                ? `${Number(powWatch.totals.snow24).toFixed(1)}`
-                : '0.0';
-            const powWatch48 = Number.isFinite(Number(powWatch?.totals?.snow48))
-                ? `${Number(powWatch.totals.snow48).toFixed(1)}`
-                : '0.0';
-            const powWatch72 = Number.isFinite(Number(powWatch?.totals?.snow72))
-                ? `${Number(powWatch.totals.snow72).toFixed(1)}`
-                : '0.0';
+            const toSnowTotal = (arr) => Number((Array.isArray(arr) ? arr : []).reduce((sum, v) => sum + (Number(v) || 0), 0).toFixed(1));
+            const powWatchNwsHours = Number(powWatch?.hourlySourceMix?.nws || 0);
+            const mergedHourly24 = toSnowTotal(powWatch?.hourly?.snowSeries24);
+            const mergedHourly48 = toSnowTotal(powWatch?.hourly?.snowSeries48);
+            const mergedHourly72 = toSnowTotal(powWatch?.hourly?.snowSeries72);
+            const useMergedHourlyTotals = Boolean(powWatch?.nwsAvailable) && powWatchNwsHours >= 12 && mergedHourly72 > 0;
+            const powWatch24 = useMergedHourlyTotals
+                ? `${mergedHourly24.toFixed(1)}`
+                : (Number.isFinite(Number(powWatch?.totals?.snow24))
+                    ? `${Number(powWatch.totals.snow24).toFixed(1)}`
+                    : '0.0');
+            const powWatch48 = useMergedHourlyTotals
+                ? `${mergedHourly48.toFixed(1)}`
+                : (Number.isFinite(Number(powWatch?.totals?.snow48))
+                    ? `${Number(powWatch.totals.snow48).toFixed(1)}`
+                    : '0.0');
+            const powWatch72 = useMergedHourlyTotals
+                ? `${mergedHourly72.toFixed(1)}`
+                : (Number.isFinite(Number(powWatch?.totals?.snow72))
+                    ? `${Number(powWatch.totals.snow72).toFixed(1)}`
+                    : '0.0');
             const powWatchModelSpread72 = Number.isFinite(Number(powWatch?.modelSpread72))
                 ? Number(powWatch.modelSpread72)
                 : null;
@@ -2639,6 +2651,7 @@ const backgroundPositionByResort = {
                       <span>72h <strong>${powWatch72}"</strong></span>
                       ${powWatchManualLabel}
                     </div>
+                    ${useMergedHourlyTotals ? `<div class="pow-watch-source-note">NWS-enhanced totals (${powWatchNwsHours}/72 hrs)</div>` : ''}
                     ${snowLevelLine ? `<div class="pow-watch-snow-level">${snowLevelLine}</div>` : ''}
                     <div class="pow-watch-potential">Storm Total Potential: <strong>${potentialRangeLabel}</strong></div>
                     <details class="pow-watch-details">
