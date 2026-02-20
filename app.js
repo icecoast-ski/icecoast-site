@@ -2430,6 +2430,8 @@
                 : '';
             const metricsFeelsLike = `${metricsFeelsLikeBase}${feelsLikeWarning}`;
             const metricsWind = `${metricsWindBase}${windRiskWarning}`;
+            const powBriefText = typeof powWatch?.powBrief === 'string' ? powWatch.powBrief.trim() : '';
+            const hasPowBrief = powBriefText.length > 0;
             const powDays = Array.isArray(powWatch?.days) ? powWatch.days : [];
             const snowSeries72 = Array.isArray(powWatch?.hourly?.snowSeries72)
                 ? powWatch.hourly.snowSeries72.map((v) => Number(v)).filter((v) => Number.isFinite(v))
@@ -2598,6 +2600,7 @@ const backgroundPositionByResort = {
                     <span>Feels Like <strong>${metricsFeelsLike}</strong></span>
                     <span>Wind <strong>${metricsWind}</strong></span>
                   </div>
+                  ${hasPowBrief ? `<div class="conditions-nws-brief"><strong>NWS Brief:</strong> ${powBriefText}</div>` : ''}
                   <details class="forecast-inline">
                     <summary class="forecast-inline-toggle">
                       <span class="forecast-inline-left">
@@ -3033,6 +3036,18 @@ const backgroundPositionByResort = {
             return 'POW WATCH QUIET';
         }
 
+        function getPowWatchFilterBucketForResort(resort) {
+            const status = String(resort?.powWatch?.statusLabel || '').trim().toUpperCase();
+            if (status === 'ON' || status === 'ACTIVE' || status === 'STORM') return 'active';
+            if (status === 'BUILDING' || status === 'INCOMING') return 'building';
+            if (status === 'QUIET' || status === 'WINDY') return 'quiet';
+
+            const band = getPowWatchBandForResort(resort);
+            if (band === 'POW WATCH ON') return 'active';
+            if (band === 'POW WATCH BUILDING') return 'building';
+            return 'quiet';
+        }
+
         function applyFilters() {
             let filtered = Array.isArray(resorts) ? resorts.filter(Boolean) : [];
             const searchTerm = (filterState.search || '').trim().toLowerCase();
@@ -3073,11 +3088,11 @@ const backgroundPositionByResort = {
             }
 
             if (filterState.vibe === 'on') {
-                filtered = filtered.filter((r) => getPowWatchBandForResort(r) === 'POW WATCH ON');
+                filtered = filtered.filter((r) => getPowWatchFilterBucketForResort(r) === 'active');
             } else if (filterState.vibe === 'building') {
-                filtered = filtered.filter((r) => getPowWatchBandForResort(r) === 'POW WATCH BUILDING');
+                filtered = filtered.filter((r) => getPowWatchFilterBucketForResort(r) === 'building');
             } else if (filterState.vibe === 'quiet') {
-                filtered = filtered.filter((r) => getPowWatchBandForResort(r) === 'POW WATCH QUIET');
+                filtered = filtered.filter((r) => getPowWatchFilterBucketForResort(r) === 'quiet');
             }
 
             if (filterState.signal === 'send' || filterState.signal === 'avoid') {
@@ -4167,6 +4182,9 @@ const backgroundPositionByResort = {
                             nwsAvailable: Boolean(live.powWatch.nwsAvailable),
                             modelSpread72: toNumOrNull(live.powWatch.modelSpread72),
                             modelSources: Array.isArray(live.powWatch.modelSources) ? live.powWatch.modelSources.slice(0, 3) : [],
+                            powBrief: typeof live.powWatch.powBrief === 'string' ? live.powWatch.powBrief : null,
+                            powBriefSource: typeof live.powWatch.powBriefSource === 'string' ? live.powWatch.powBriefSource : null,
+                            powBriefUpdatedAt: typeof live.powWatch.powBriefUpdatedAt === 'string' ? live.powWatch.powBriefUpdatedAt : null,
                             hourlySourceMix: (live.powWatch.hourlySourceMix && typeof live.powWatch.hourlySourceMix === 'object')
                                 ? {
                                     nws: toNumOrNull(live.powWatch.hourlySourceMix.nws) ?? 0,

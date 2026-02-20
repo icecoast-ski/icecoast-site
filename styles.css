@@ -4056,6 +4056,19 @@
     flex-direction: row;
 }
 
+.conditions-nws-brief {
+    margin-top: 0.34rem;
+    font-size: 0.69rem;
+    line-height: 1.28;
+    color: #3a4f70;
+    font-weight: 680;
+}
+
+.conditions-nws-brief strong {
+    color: #1f3b68;
+    font-weight: 800;
+}
+
 .cold-warning-icon {
     display: inline-block;
     font-size: 1.18em;
