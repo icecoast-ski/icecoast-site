@@ -571,7 +571,7 @@ export default {
     const corsHeaders = {
       "Access-Control-Allow-Origin": allowOrigin,
       "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Cache-Control, X-Admin-Token",
+      "Access-Control-Allow-Headers": "Content-Type, Cache-Control, X-Admin-Token, X-Diag-Key",
       "Access-Control-Max-Age": "86400",
       Vary: "Origin",
     };
@@ -582,6 +582,48 @@ export default {
 
     if (url.pathname === "/health") {
       return jsonResponse({ status: "ok" }, corsHeaders);
+    }
+
+    if (url.pathname === "/api/diag" && request.method === "GET") {
+      try {
+        const requiredDiagKey = (env.DIAG_KEY || "").trim();
+        const providedDiagKey = (
+          request.headers.get("x-diag-key") ||
+          request.headers.get("X-Diag-Key") ||
+          url.searchParams.get("key") ||
+          ""
+        ).trim();
+        if (requiredDiagKey && providedDiagKey !== requiredDiagKey) {
+          return jsonResponse({ error: "Unauthorized" }, corsHeaders, 401);
+        }
+        const resort = String(url.searchParams.get("resort") || "").trim().toLowerCase();
+        if (!resort) {
+          return jsonResponse({ error: "Missing resort query param" }, corsHeaders, 400);
+        }
+        const diag = await env.ICECOASTDATA.get(`powWatch:${resort}:diagnostics`, "json");
+        if (!diag) {
+          return jsonResponse(
+            { error: "No diagnostics found", resort },
+            corsHeaders,
+            404,
+            { "Cache-Control": "no-store" },
+          );
+        }
+        return jsonResponse(
+          { ok: true, resort, diag },
+          corsHeaders,
+          200,
+          { "Cache-Control": "no-store" },
+        );
+      } catch (error) {
+        console.error("Diag route failed:", error);
+        return jsonResponse(
+          { error: "Failed to fetch diagnostics" },
+          corsHeaders,
+          500,
+          { "Cache-Control": "no-store" },
+        );
+      }
     }
 
     if (url.pathname === "/eta" && request.method === "POST") {
