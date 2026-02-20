@@ -194,6 +194,7 @@
             <th>Resort</th>
             <th>POW Updated</th>
             <th>Weather Updated</th>
+            <th>NWS</th>
             <th>VC 24 / 48 / 72</th>
             <th>Model Spread 72</th>
             <th>OWM 72</th>
@@ -205,7 +206,7 @@
           </tr>
         </thead>
         <tbody id="rows">
-          <tr><td colspan="11" class="muted">Loading…</td></tr>
+          <tr><td colspan="12" class="muted">Loading…</td></tr>
         </tbody>
       </table>
     </div>
@@ -228,6 +229,7 @@
       name: 'name',
       powAge: 'powAge',
       weatherAge: 'weatherAge',
+      nwsStatusSort: 'nwsStatusSort',
       t72: 't72',
       modelSpread72: 'modelSpread72',
       owm72: 'owm72',
@@ -304,6 +306,21 @@
       const t48 = toNum(resortLive?.powWatch?.totals?.snow48);
       const t72 = toNum(resortLive?.powWatch?.totals?.snow72);
       const modelSpread72 = toNum(resortLive?.powWatch?.modelSpread72);
+      const nwsAvailable = Boolean(resortLive?.powWatch?.nwsAvailable);
+      const hourlySourceMixRaw = (resortLive?.powWatch?.hourlySourceMix && typeof resortLive.powWatch.hourlySourceMix === 'object')
+        ? resortLive.powWatch.hourlySourceMix
+        : {};
+      const toInt = (v) => {
+        const n = Number(v);
+        return Number.isFinite(n) && n >= 0 ? Math.round(n) : 0;
+      };
+      const hourlySourceMix = {
+        nws: toInt(hourlySourceMixRaw.nws),
+        vc: toInt(hourlySourceMixRaw.vc),
+        vc_inferred: toInt(hourlySourceMixRaw.vc_inferred),
+        none: toInt(hourlySourceMixRaw.none),
+      };
+      const nwsStatusSort = nwsAvailable ? 1 : 0;
       const monotonic = (t24 != null && t48 != null && t72 != null && t24 <= t48 && t48 <= t72);
 
       const hourly = Array.isArray(resortLive?.powWatch?.hourly?.snowSeries72)
@@ -348,7 +365,24 @@
 
       score = Math.max(0, Math.min(100, Math.round(score)));
       const [confLabel, confClass] = confidenceFromScore(score);
-      return { score, confLabel, confClass, powAge, weatherAge, t24, t48, t72, modelSpread72, owm72, spread, hourlyCount, monotonic };
+      return {
+        score,
+        confLabel,
+        confClass,
+        powAge,
+        weatherAge,
+        nwsAvailable,
+        nwsStatusSort,
+        hourlySourceMix,
+        t24,
+        t48,
+        t72,
+        modelSpread72,
+        owm72,
+        spread,
+        hourlyCount,
+        monotonic
+      };
     }
 
     function renderRows() {
@@ -361,6 +395,7 @@
           thLabel('Resort', SORT_KEYS.name),
           thLabel('POW Updated', SORT_KEYS.powAge),
           thLabel('Weather Updated', SORT_KEYS.weatherAge),
+          thLabel('NWS', SORT_KEYS.nwsStatusSort),
           thLabel('VC 24 / 48 / 72', SORT_KEYS.t72),
           thLabel('Model Spread 72', SORT_KEYS.modelSpread72),
           thLabel('OWM 72', SORT_KEYS.owm72),
@@ -373,7 +408,7 @@
       }
 
       if (!metrics.length) {
-        rowsEl.innerHTML = '<tr><td colspan="11" class="muted">No resort rows returned.</td></tr>';
+        rowsEl.innerHTML = '<tr><td colspan="12" class="muted">No resort rows returned.</td></tr>';
         return;
       }
 
@@ -382,6 +417,10 @@
           <td><strong>${m.name}</strong><div class="mono">${m.id}</div></td>
           <td>${ageLabel(m.powAge)}</td>
           <td>${ageLabel(m.weatherAge)}</td>
+          <td>
+            <span class="pill ${m.nwsAvailable ? 'ok' : 'bad'}">${m.nwsAvailable ? 'ON' : 'OFF'}</span>
+            <div class="mono muted">${m.hourlySourceMix.nws}/${m.hourlySourceMix.vc}/${m.hourlySourceMix.vc_inferred}</div>
+          </td>
           <td class="mono">${m.t24?.toFixed?.(1) ?? '—'} / ${m.t48?.toFixed?.(1) ?? '—'} / ${m.t72?.toFixed?.(1) ?? '—'}</td>
           <td class="mono">${m.modelSpread72 != null ? m.modelSpread72.toFixed(1) + '"' : '—'}</td>
           <td class="mono">${m.owm72 != null ? m.owm72.toFixed(1) : '—'}</td>
@@ -428,7 +467,7 @@
         divergenceValEl.textContent = `${highSpread} resorts`;
         renderRows();
       } catch (err) {
-        rowsEl.innerHTML = `<tr><td colspan="11" class="muted">Failed to load: ${err.message}</td></tr>`;
+        rowsEl.innerHTML = `<tr><td colspan="12" class="muted">Failed to load: ${err.message}</td></tr>`;
       }
     }
 
