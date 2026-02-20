@@ -699,6 +699,28 @@
             display: block;
         }
 
+        .filter-search-wrap.typing-enabled::after {
+            content: attr(data-typing-placeholder);
+            position: absolute;
+            left: 1rem;
+            right: 3.1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(52, 67, 90, 0.72);
+            font-size: 16px;
+            font-weight: 500;
+            line-height: 1.2;
+            pointer-events: none;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            z-index: 2;
+        }
+
+        .filter-search-wrap.typing-enabled.typing-hidden::after {
+            opacity: 0;
+        }
+
         .filter-search-input {
             width: 100%;
             display: block;
@@ -725,6 +747,10 @@
         .filter-search-input::placeholder {
             color: rgba(52, 67, 90, 0.72);
             font-weight: 500;
+        }
+
+        .filter-search-wrap.typing-enabled .filter-search-input::placeholder {
+            color: transparent;
         }
 
         .filter-search-input:focus {
@@ -6153,6 +6179,7 @@
 .resort-header {
     position: relative !important;
     padding-bottom: 2.95rem !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08) !important;
 }
 
 .resort-location {

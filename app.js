@@ -3335,11 +3335,92 @@ const backgroundPositionByResort = {
 
         const resortSearchInput = document.getElementById('resortSearch');
         const clearResortSearchBtn = document.getElementById('clearResortSearch');
+        const searchWrap = resortSearchInput ? resortSearchInput.closest('.filter-search-wrap') : null;
+        const rotatingSearchPhrases = [
+            'Find your line.',
+            'Know the snow before you go.',
+            'Find your ski resort.',
+            'Track the next storm window.'
+        ];
+        let searchTypingTimer = null;
+        let searchPhraseIndex = 0;
+        let searchCharIndex = 0;
+        let searchDeleting = false;
+        let searchCursorOn = true;
+        let searchPaused = false;
+        function stopSearchTypingLoop() {
+            if (searchTypingTimer) {
+                clearTimeout(searchTypingTimer);
+                searchTypingTimer = null;
+            }
+        }
+        function syncSearchTypingVisibility() {
+            if (!searchWrap || !resortSearchInput) return;
+            const hasValue = (resortSearchInput.value || '').trim().length > 0;
+            const isFocused = document.activeElement === resortSearchInput;
+            searchWrap.classList.toggle('typing-hidden', hasValue || isFocused);
+        }
+        function scheduleSearchTyping(delayMs) {
+            stopSearchTypingLoop();
+            searchTypingTimer = setTimeout(runSearchTypingTick, delayMs);
+        }
+        function runSearchTypingTick() {
+            if (!searchWrap || !resortSearchInput || !rotatingSearchPhrases.length) return;
+            const hasValue = (resortSearchInput.value || '').trim().length > 0;
+            const isFocused = document.activeElement === resortSearchInput;
+            if (hasValue || isFocused || searchPaused) {
+                syncSearchTypingVisibility();
+                scheduleSearchTyping(180);
+                return;
+            }
+
+            const activePhrase = rotatingSearchPhrases[searchPhraseIndex] || rotatingSearchPhrases[0];
+            if (!searchDeleting) {
+                if (searchCharIndex < activePhrase.length) {
+                    searchCharIndex += 1;
+                    searchCursorOn = true;
+                    searchWrap.dataset.typingPlaceholder = `${activePhrase.slice(0, searchCharIndex)}|`;
+                    scheduleSearchTyping(45 + Math.floor(Math.random() * 55));
+                    return;
+                }
+                searchCursorOn = !searchCursorOn;
+                searchWrap.dataset.typingPlaceholder = `${activePhrase}${searchCursorOn ? '|' : ''}`;
+                if (searchCursorOn) {
+                    searchDeleting = true;
+                }
+                scheduleSearchTyping(430);
+                return;
+            }
+
+            if (searchCharIndex > 0) {
+                searchCharIndex -= 1;
+                searchCursorOn = true;
+                searchWrap.dataset.typingPlaceholder = `${activePhrase.slice(0, searchCharIndex)}|`;
+                scheduleSearchTyping(24);
+                return;
+            }
+
+            searchDeleting = false;
+            searchPhraseIndex = (searchPhraseIndex + 1) % rotatingSearchPhrases.length;
+            scheduleSearchTyping(220);
+        }
+        function initSearchTyping() {
+            if (!searchWrap || !resortSearchInput) return;
+            searchWrap.classList.add('typing-enabled');
+            searchWrap.dataset.typingPlaceholder = `${rotatingSearchPhrases[0]}|`;
+            if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+                searchWrap.dataset.typingPlaceholder = rotatingSearchPhrases[0];
+                syncSearchTypingVisibility();
+                return;
+            }
+            scheduleSearchTyping(280);
+        }
         function clearResortSearchField() {
             if (!resortSearchInput) return;
             resortSearchInput.value = '';
             filterState.search = '';
             syncSearchClearButton();
+            syncSearchTypingVisibility();
             renderResorts();
             resortSearchInput.focus();
         }
@@ -3347,12 +3428,25 @@ const backgroundPositionByResort = {
             if (!clearResortSearchBtn || !resortSearchInput) return;
             const hasValue = (resortSearchInput.value || '').trim().length > 0;
             clearResortSearchBtn.classList.toggle('visible', hasValue);
+            syncSearchTypingVisibility();
         }
         if (resortSearchInput) {
             resortSearchInput.addEventListener('input', (e) => {
                 filterState.search = e.target.value || '';
                 syncSearchClearButton();
                 renderResorts();
+            });
+            resortSearchInput.addEventListener('focus', () => {
+                syncSearchTypingVisibility();
+            });
+            resortSearchInput.addEventListener('blur', () => {
+                syncSearchTypingVisibility();
+            });
+            resortSearchInput.addEventListener('pointerdown', () => {
+                searchPaused = true;
+                setTimeout(() => {
+                    searchPaused = false;
+                }, 450);
             });
         }
         if (clearResortSearchBtn && resortSearchInput) {
@@ -3367,6 +3461,7 @@ const backgroundPositionByResort = {
             }, { passive: false });
         }
         syncSearchClearButton();
+        initSearchTyping();
         syncRegionFilterButtons();
         syncPassFilterButtons();
         favoriteResortIds = loadFavoriteResortIds();
