@@ -3337,91 +3337,95 @@ const backgroundPositionByResort = {
         const resortSearchInput = document.getElementById('resortSearch');
         const clearResortSearchBtn = document.getElementById('clearResortSearch');
         const searchWrap = resortSearchInput ? resortSearchInput.closest('.filter-search-wrap') : null;
-        const rotatingSearchPhrases = [
+        const searchIconWrapEl = document.getElementById('searchIconWrap');
+        const searchTextClipEl = document.getElementById('searchTextClip');
+        const searchPhrases = [
             'Find your line.',
             'Know the snow before you go.',
             'Find your ski resort.',
             'Track the next storm window.'
         ];
-        let searchTypingTimer = null;
-        let searchPhraseIndex = 0;
-        let searchCharIndex = 0;
-        let searchDeleting = false;
-        let searchCursorOn = true;
-        let searchPaused = false;
-        function stopSearchTypingLoop() {
-            if (searchTypingTimer) {
-                clearTimeout(searchTypingTimer);
-                searchTypingTimer = null;
+        const SEARCH_HOLD_MS = 2600;
+        const SEARCH_SPIN_MS = 620;
+        let searchCycleTimer = null;
+        let searchCurrentPhraseIndex = 0;
+        let searchActivePhraseEl = null;
+        function clearSearchCycleTimer() {
+            if (searchCycleTimer) {
+                clearTimeout(searchCycleTimer);
+                searchCycleTimer = null;
             }
         }
-        function syncSearchTypingVisibility() {
+        function syncSearchInteractionState() {
             if (!searchWrap || !resortSearchInput) return;
             const hasValue = (resortSearchInput.value || '').trim().length > 0;
             const isFocused = document.activeElement === resortSearchInput;
-            searchWrap.classList.toggle('typing-hidden', hasValue || isFocused);
+            searchWrap.classList.toggle('search-has-value', hasValue);
+            searchWrap.classList.toggle('search-focused', isFocused);
         }
-        function scheduleSearchTyping(delayMs) {
-            stopSearchTypingLoop();
-            searchTypingTimer = setTimeout(runSearchTypingTick, delayMs);
+        function spinSearchIcon() {
+            if (!searchIconWrapEl) return;
+            searchIconWrapEl.classList.remove('spinning');
+            void searchIconWrapEl.offsetWidth;
+            searchIconWrapEl.classList.add('spinning');
         }
-        function runSearchTypingTick() {
-            if (!searchWrap || !resortSearchInput || !rotatingSearchPhrases.length) return;
+        function showNextSearchPhrase() {
+            if (!searchTextClipEl || !searchPhrases.length || !resortSearchInput) return;
             const hasValue = (resortSearchInput.value || '').trim().length > 0;
             const isFocused = document.activeElement === resortSearchInput;
-            if (hasValue || isFocused || searchPaused) {
-                syncSearchTypingVisibility();
-                scheduleSearchTyping(180);
+            if (hasValue || isFocused) {
+                syncSearchInteractionState();
+                clearSearchCycleTimer();
+                searchCycleTimer = setTimeout(showNextSearchPhrase, 220);
                 return;
             }
+            spinSearchIcon();
 
-            const activePhrase = rotatingSearchPhrases[searchPhraseIndex] || rotatingSearchPhrases[0];
-            if (!searchDeleting) {
-                if (searchCharIndex < activePhrase.length) {
-                    searchCharIndex += 1;
-                    searchCursorOn = true;
-                    searchWrap.dataset.typingPlaceholder = `${activePhrase.slice(0, searchCharIndex)}|`;
-                    scheduleSearchTyping(45 + Math.floor(Math.random() * 55));
-                    return;
+            const incomingPhraseEl = document.createElement('span');
+            incomingPhraseEl.className = 'phrase standby';
+            incomingPhraseEl.textContent = searchPhrases[searchCurrentPhraseIndex] || searchPhrases[0];
+            searchTextClipEl.appendChild(incomingPhraseEl);
+
+            const enterDelayMs = Math.round(SEARCH_SPIN_MS * 0.35);
+            setTimeout(() => {
+                incomingPhraseEl.getBoundingClientRect();
+                incomingPhraseEl.classList.remove('standby');
+                incomingPhraseEl.classList.add('active');
+
+                if (searchActivePhraseEl) {
+                    const outgoingPhraseEl = searchActivePhraseEl;
+                    outgoingPhraseEl.classList.remove('active');
+                    outgoingPhraseEl.classList.add('exit');
+                    outgoingPhraseEl.addEventListener('transitionend', () => {
+                        outgoingPhraseEl.remove();
+                    }, { once: true });
                 }
-                searchCursorOn = !searchCursorOn;
-                searchWrap.dataset.typingPlaceholder = `${activePhrase}${searchCursorOn ? '|' : ''}`;
-                if (searchCursorOn) {
-                    searchDeleting = true;
-                }
-                scheduleSearchTyping(430);
-                return;
-            }
+                searchActivePhraseEl = incomingPhraseEl;
+            }, enterDelayMs);
 
-            if (searchCharIndex > 0) {
-                searchCharIndex -= 1;
-                searchCursorOn = true;
-                searchWrap.dataset.typingPlaceholder = `${activePhrase.slice(0, searchCharIndex)}|`;
-                scheduleSearchTyping(24);
-                return;
-            }
-
-            searchDeleting = false;
-            searchPhraseIndex = (searchPhraseIndex + 1) % rotatingSearchPhrases.length;
-            scheduleSearchTyping(220);
+            searchCurrentPhraseIndex = (searchCurrentPhraseIndex + 1) % searchPhrases.length;
+            clearSearchCycleTimer();
+            searchCycleTimer = setTimeout(showNextSearchPhrase, SEARCH_HOLD_MS);
         }
         function initSearchTyping() {
-            if (!searchWrap || !resortSearchInput) return;
-            searchWrap.classList.add('typing-enabled');
-            searchWrap.dataset.typingPlaceholder = `${rotatingSearchPhrases[0]}|`;
+            if (!searchWrap || !resortSearchInput || !searchTextClipEl || !searchPhrases.length) return;
             if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-                searchWrap.dataset.typingPlaceholder = rotatingSearchPhrases[0];
-                syncSearchTypingVisibility();
+                const staticPhraseEl = document.createElement('span');
+                staticPhraseEl.className = 'phrase active';
+                staticPhraseEl.textContent = searchPhrases[0];
+                searchTextClipEl.appendChild(staticPhraseEl);
+                searchActivePhraseEl = staticPhraseEl;
+                syncSearchInteractionState();
                 return;
             }
-            scheduleSearchTyping(280);
+            clearSearchCycleTimer();
+            searchCycleTimer = setTimeout(showNextSearchPhrase, 550);
         }
         function clearResortSearchField() {
             if (!resortSearchInput) return;
             resortSearchInput.value = '';
             filterState.search = '';
             syncSearchClearButton();
-            syncSearchTypingVisibility();
             renderResorts();
             resortSearchInput.focus();
         }
@@ -3429,7 +3433,7 @@ const backgroundPositionByResort = {
             if (!clearResortSearchBtn || !resortSearchInput) return;
             const hasValue = (resortSearchInput.value || '').trim().length > 0;
             clearResortSearchBtn.classList.toggle('visible', hasValue);
-            syncSearchTypingVisibility();
+            syncSearchInteractionState();
         }
         if (resortSearchInput) {
             resortSearchInput.addEventListener('input', (e) => {
@@ -3438,16 +3442,10 @@ const backgroundPositionByResort = {
                 renderResorts();
             });
             resortSearchInput.addEventListener('focus', () => {
-                syncSearchTypingVisibility();
+                syncSearchInteractionState();
             });
             resortSearchInput.addEventListener('blur', () => {
-                syncSearchTypingVisibility();
-            });
-            resortSearchInput.addEventListener('pointerdown', () => {
-                searchPaused = true;
-                setTimeout(() => {
-                    searchPaused = false;
-                }, 450);
+                syncSearchInteractionState();
             });
         }
         if (clearResortSearchBtn && resortSearchInput) {
