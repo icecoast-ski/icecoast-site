@@ -4193,12 +4193,48 @@
     animation: pulse 2s ease-in-out infinite;
 }
 
+.pow-watch-badge.pow-watch-storm {
+    background: linear-gradient(135deg, #0b3d91 0%, #1f5ec8 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 10px rgba(20, 64, 137, 0.35);
+}
+
+.pow-watch-badge.pow-watch-active {
+    background: linear-gradient(135deg, #2f73d9 0%, #1f5ec8 100%);
+    color: #ffffff;
+    box-shadow: 0 2px 10px rgba(31, 94, 200, 0.26);
+}
+
+.pow-watch-badge.pow-watch-windy {
+    background: #e8f1ff;
+    color: #1f3b68;
+    box-shadow: none;
+}
+
+.pow-watch-badge.pow-watch-incoming {
+    background: #e8f1ff;
+    color: #1f3b68;
+    box-shadow: none;
+}
+
 .pow-watch-sub {
     margin-top: 0.28rem;
     font-size: 0.64rem;
     font-weight: 650;
     color: #51627c;
     line-height: 1.2;
+}
+
+.pow-watch-alert-banner {
+    margin-top: 0.38rem;
+    padding: 0.32rem 0.46rem;
+    border-radius: 7px;
+    border: 1px solid rgba(31, 94, 200, 0.22);
+    background: rgba(232, 241, 255, 0.9);
+    color: #15355f;
+    font-size: 0.66rem;
+    font-weight: 700;
+    line-height: 1.25;
 }
 
 .pow-watch-metrics {
@@ -4213,6 +4249,13 @@
 .pow-watch-metrics strong {
     color: #162234;
     font-weight: 800;
+}
+
+.pow-watch-snow-level {
+    margin-top: 0.24rem;
+    font-size: 0.68rem;
+    color: #445a79;
+    line-height: 1.2;
 }
 
 .pow-watch-manual-label {

@@ -2369,12 +2369,38 @@
                 ? Number(powWatch.modelSpread72)
                 : null;
             const powWatchBandRaw = getPowWatchBandForResort(resort);
-            const powWatchStatusLabel = powWatchBandRaw === 'POW WATCH ON'
+            const powWatchStatusLabel = String(powWatch?.statusLabel || '').toUpperCase() || (powWatchBandRaw === 'POW WATCH ON'
                 ? 'ON'
-                : (powWatchBandRaw === 'POW WATCH BUILDING' ? 'BUILDING' : 'QUIET');
-            const powWatchBadgeClass = powWatchStatusLabel === 'ON'
-                ? 'pow-watch-on'
-                : (powWatchStatusLabel === 'BUILDING' ? 'pow-watch-building' : 'pow-watch-quiet');
+                : (powWatchBandRaw === 'POW WATCH BUILDING' ? 'BUILDING' : 'QUIET'));
+            const powWatchBadgeClass = (
+                powWatchStatusLabel === 'STORM' ? 'pow-watch-storm'
+                : (powWatchStatusLabel === 'ACTIVE' ? 'pow-watch-active'
+                : (powWatchStatusLabel === 'WINDY' ? 'pow-watch-windy'
+                : (powWatchStatusLabel === 'INCOMING' ? 'pow-watch-incoming'
+                : (powWatchStatusLabel === 'ON' ? 'pow-watch-on'
+                : (powWatchStatusLabel === 'BUILDING' ? 'pow-watch-building' : 'pow-watch-quiet')))))
+            );
+            const powAlert = powWatch?.alert || null;
+            const hasPowAlert = Boolean(powAlert?.active && powAlert?.event);
+            const alertExpiryMs = Date.parse(String(powAlert?.expires || ''));
+            const alertExpiryLabel = Number.isFinite(alertExpiryMs)
+                ? new Date(alertExpiryMs).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', minute: '2-digit', hour12: true })
+                : 'later';
+            const powAlertBanner = hasPowAlert
+                ? `❄️ ${powAlert.event} in effect through ${alertExpiryLabel}`
+                : '';
+            const snowLevelCurrent = Number.isFinite(Number(powWatch?.snowLevel?.current))
+                ? Math.round(Number(powWatch.snowLevel.current))
+                : null;
+            const snowLevelTrendRaw = String(powWatch?.snowLevel?.trend || '').toLowerCase();
+            const snowLevelTrendSymbol = snowLevelTrendRaw === 'falling'
+                ? '↓'
+                : (snowLevelTrendRaw === 'rising' ? '↑' : '→');
+            const snowLevelLine = snowLevelCurrent !== null
+                ? (powWatch?.snowLevel?.rainPossibleAtBase
+                    ? `Snow Level: ~${snowLevelCurrent.toLocaleString()} ft — rain possible at base`
+                    : `Snow Level: ~${snowLevelCurrent.toLocaleString()} ft ${snowLevelTrendSymbol} ${snowLevelTrendRaw || 'steady'}`)
+                : '';
             const isManualPowWatch = String(powWatch?.source || '').toLowerCase() === 'manual';
             const powWatchManualLabel = isManualPowWatch
                 ? `<span class="pow-watch-manual-label" title="${String(powWatch?.overrideNote || 'Human-reviewed snowfall adjustment').replace(/"/g, '&quot;')}">Manually verified</span>`
@@ -2601,12 +2627,14 @@ const backgroundPositionByResort = {
                       <div class="pow-watch-badge ${powWatchBadgeClass}">${powWatchStatusLabel}</div>
                     </div>
                     <div class="pow-watch-sub">Next 72h snow potential</div>
+                    ${hasPowAlert ? `<div class="pow-watch-alert-banner">${powAlertBanner}</div>` : ''}
                     <div class="pow-watch-metrics">
                       <span>24h <strong>${powWatch24}"</strong></span>
                       <span>48h <strong>${powWatch48}"</strong></span>
                       <span>72h <strong>${powWatch72}"</strong></span>
                       ${powWatchManualLabel}
                     </div>
+                    ${snowLevelLine ? `<div class="pow-watch-snow-level">${snowLevelLine}</div>` : ''}
                     <div class="pow-watch-potential">Storm Total Potential: <strong>${potentialRangeLabel}</strong></div>
                     <details class="pow-watch-details">
                       <summary class="pow-watch-details-toggle">
@@ -4122,6 +4150,8 @@ const backgroundPositionByResort = {
                         const totals = live.powWatch.totals || {};
                         const hourly = live.powWatch.hourly || {};
                         const windHoldRisk = live.powWatch.windHoldRisk || {};
+                        const alert = live.powWatch.alert || {};
+                        const snowLevel = live.powWatch.snowLevel || {};
                         const toNumOrNull = (v) => {
                             const n = Number(v);
                             return Number.isFinite(n) ? n : null;
@@ -4132,6 +4162,7 @@ const backgroundPositionByResort = {
                             overrideNote: typeof live.powWatch.overrideNote === 'string' ? live.powWatch.overrideNote : null,
                             updatedAt: typeof live.powWatch.updatedAt === 'string' ? live.powWatch.updatedAt : null,
                             band: typeof live.powWatch.band === 'string' ? live.powWatch.band : '',
+                            statusLabel: typeof live.powWatch.statusLabel === 'string' ? live.powWatch.statusLabel : null,
                             nwsAvailable: Boolean(live.powWatch.nwsAvailable),
                             modelSpread72: toNumOrNull(live.powWatch.modelSpread72),
                             modelSources: Array.isArray(live.powWatch.modelSources) ? live.powWatch.modelSources.slice(0, 3) : [],
@@ -4170,6 +4201,20 @@ const backgroundPositionByResort = {
                             windHoldRisk: {
                                 level: typeof windHoldRisk.level === 'string' ? windHoldRisk.level : 'LOW',
                                 maxGustMph: toNumOrNull(windHoldRisk.maxGustMph),
+                            },
+                            alert: {
+                                active: Boolean(alert.active),
+                                event: typeof alert.event === 'string' ? alert.event : null,
+                                expires: typeof alert.expires === 'string' ? alert.expires : null,
+                                headline: typeof alert.headline === 'string' ? alert.headline : null,
+                                severity: typeof alert.severity === 'string' ? alert.severity : null,
+                            },
+                            snowLevel: {
+                                current: toNumOrNull(snowLevel.current),
+                                trend: typeof snowLevel.trend === 'string' ? snowLevel.trend : null,
+                                updatedAt: typeof snowLevel.updatedAt === 'string' ? snowLevel.updatedAt : null,
+                                rainPossibleAtBase: Boolean(snowLevel.rainPossibleAtBase),
+                                baseElevationFt: toNumOrNull(snowLevel.baseElevationFt),
                             },
                         };
                     }
