@@ -2375,6 +2375,10 @@
             const powWatchBadgeClass = powWatchStatusLabel === 'ON'
                 ? 'pow-watch-on'
                 : (powWatchStatusLabel === 'BUILDING' ? 'pow-watch-building' : 'pow-watch-quiet');
+            const isManualPowWatch = String(powWatch?.source || '').toLowerCase() === 'manual';
+            const powWatchManualLabel = isManualPowWatch
+                ? `<span class="pow-watch-manual-label" title="${String(powWatch?.overrideNote || 'Human-reviewed snowfall adjustment').replace(/"/g, '&quot;')}">Manually verified</span>`
+                : '';
             const windHoldRiskLevelRaw = String(powWatch?.windHoldRisk?.level || 'LOW').toUpperCase();
             const windHoldRiskLabel = windHoldRiskLevelRaw === 'HIGH'
                 ? 'HIGH'
@@ -2601,6 +2605,7 @@ const backgroundPositionByResort = {
                       <span>24h <strong>${powWatch24}"</strong></span>
                       <span>48h <strong>${powWatch48}"</strong></span>
                       <span>72h <strong>${powWatch72}"</strong></span>
+                      ${powWatchManualLabel}
                     </div>
                     <div class="pow-watch-potential">Storm Total Potential: <strong>${potentialRangeLabel}</strong></div>
                     <details class="pow-watch-details">
@@ -4123,16 +4128,34 @@ const backgroundPositionByResort = {
                         };
                         resort.powWatch = {
                             provider: typeof live.powWatch.provider === 'string' ? live.powWatch.provider : null,
+                            source: typeof live.powWatch.source === 'string' ? live.powWatch.source : null,
+                            overrideNote: typeof live.powWatch.overrideNote === 'string' ? live.powWatch.overrideNote : null,
                             updatedAt: typeof live.powWatch.updatedAt === 'string' ? live.powWatch.updatedAt : null,
                             band: typeof live.powWatch.band === 'string' ? live.powWatch.band : '',
+                            nwsAvailable: Boolean(live.powWatch.nwsAvailable),
                             modelSpread72: toNumOrNull(live.powWatch.modelSpread72),
                             modelSources: Array.isArray(live.powWatch.modelSources) ? live.powWatch.modelSources.slice(0, 3) : [],
+                            hourlySourceMix: (live.powWatch.hourlySourceMix && typeof live.powWatch.hourlySourceMix === 'object')
+                                ? {
+                                    nws: toNumOrNull(live.powWatch.hourlySourceMix.nws) ?? 0,
+                                    vc: toNumOrNull(live.powWatch.hourlySourceMix.vc) ?? 0,
+                                    vc_inferred: toNumOrNull(live.powWatch.hourlySourceMix.vc_inferred) ?? 0,
+                                    none: toNumOrNull(live.powWatch.hourlySourceMix.none) ?? 0,
+                                }
+                                : { nws: 0, vc: 0, vc_inferred: 0, none: 0 },
                             days: Array.isArray(live.powWatch.days) ? live.powWatch.days.slice(0, 3) : [],
                             totals: {
                                 snow24: toNumOrNull(totals.snow24),
                                 snow48: toNumOrNull(totals.snow48),
                                 snow72: toNumOrNull(totals.snow72),
+                                snow24Low: toNumOrNull(totals.snow24Low),
+                                snow24High: toNumOrNull(totals.snow24High),
+                                snow48Low: toNumOrNull(totals.snow48Low),
+                                snow48High: toNumOrNull(totals.snow48High),
+                                snow72Low: toNumOrNull(totals.snow72Low),
+                                snow72High: toNumOrNull(totals.snow72High),
                                 stormTotal: toNumOrNull(totals.stormTotal),
+                                stormTotalHigh: toNumOrNull(totals.stormTotalHigh),
                             },
                             hourly: {
                                 snowSeries24: Array.isArray(hourly.snowSeries24) ? hourly.snowSeries24.slice(0, 24).map(toNumOrNull).filter((v) => v !== null) : [],

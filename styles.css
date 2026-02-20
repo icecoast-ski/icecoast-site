@@ -4215,6 +4215,20 @@
     font-weight: 800;
 }
 
+.pow-watch-manual-label {
+    display: inline-flex;
+    align-items: center;
+    margin-left: auto;
+    padding: 0.14rem 0.5rem;
+    border-radius: 6px;
+    background: #e8f1ff;
+    color: #18437b;
+    font-size: 0.62rem;
+    font-weight: 760;
+    letter-spacing: 0.02em;
+    white-space: nowrap;
+}
+
 .pow-watch-potential {
     margin-top: 0.22rem;
     font-size: 0.68rem;

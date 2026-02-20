@@ -563,6 +563,63 @@ async function getSendItVoterToken(request, deviceId) {
   return hashed.slice(0, 24);
 }
 
+function applyPowWatchOverrideToResortRow(row, override) {
+  if (!row || typeof row !== "object") return row;
+  if (!override || typeof override !== "object") return row;
+  const values =
+    override.values && typeof override.values === "object"
+      ? override.values
+      : {};
+  const next = { ...row };
+  const currentPowWatch =
+    row.powWatch && typeof row.powWatch === "object" ? row.powWatch : {};
+  const currentTotals =
+    currentPowWatch.totals && typeof currentPowWatch.totals === "object"
+      ? currentPowWatch.totals
+      : {};
+
+  next.powWatch = {
+    ...currentPowWatch,
+    totals: {
+      ...currentTotals,
+      ...(Number.isFinite(Number(values.snow24)) ? { snow24: Number(values.snow24) } : {}),
+      ...(Number.isFinite(Number(values.snow48)) ? { snow48: Number(values.snow48) } : {}),
+      ...(Number.isFinite(Number(values.snow72)) ? { snow72: Number(values.snow72) } : {}),
+      ...(Number.isFinite(Number(values.stormTotal)) ? { stormTotal: Number(values.stormTotal) } : {}),
+    },
+    source: "manual",
+    overrideNote:
+      typeof override.note === "string" && override.note.trim()
+        ? override.note.trim().slice(0, 220)
+        : null,
+  };
+  return next;
+}
+
+async function applyPowWatchOverrides(cachedData, env) {
+  if (!cachedData || typeof cachedData !== "object") return cachedData;
+  const resortIds = Object.keys(cachedData).filter(
+    (k) => k !== "_metadata" && cachedData[k] && typeof cachedData[k] === "object",
+  );
+  if (!resortIds.length) return cachedData;
+
+  const overrides = await Promise.all(
+    resortIds.map(async (resortId) => {
+      const override = await env.ICECOASTDATA.get(`powWatch:${resortId}:override`, "json");
+      return [resortId, override];
+    }),
+  );
+
+  let changed = false;
+  const nextData = { ...cachedData };
+  for (const [resortId, override] of overrides) {
+    if (!override || typeof override !== "object" || !override.active) continue;
+    nextData[resortId] = applyPowWatchOverrideToResortRow(cachedData[resortId], override);
+    changed = true;
+  }
+  return changed ? nextData : cachedData;
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -1188,10 +1245,11 @@ export default {
         );
       }
 
+      const dataWithOverrides = await applyPowWatchOverrides(cachedData, env);
       const senditSummary = await loadSendItSummary(env);
       const metadata =
-        cachedData && typeof cachedData === "object"
-          ? cachedData._metadata
+        dataWithOverrides && typeof dataWithOverrides === "object"
+          ? dataWithOverrides._metadata
           : null;
       let staleMinutes = null;
       if (metadata && metadata.lastUpdated) {
@@ -1203,7 +1261,7 @@ export default {
 
       return jsonResponse(
         {
-          data: cachedData,
+          data: dataWithOverrides,
           snapshot: {
             lastUpdated: metadata?.lastUpdated || null,
             staleMinutes,
