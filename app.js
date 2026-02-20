@@ -2670,7 +2670,6 @@ const backgroundPositionByResort = {
                       <span>72h <strong>${powWatch72}"</strong></span>
                       ${powWatchManualLabel}
                     </div>
-                    ${useMergedHourlyTotals ? `<div class="pow-watch-source-note">NWS-enhanced totals (${powWatchNwsHours}/72 hrs)</div>` : ''}
                     ${snowLevelLine ? `<div class="pow-watch-snow-level">${snowLevelLine}</div>` : ''}
                     <div class="pow-watch-potential">Storm Total Potential: <strong>${potentialRangeLabel}</strong></div>
                     <details class="pow-watch-details">
