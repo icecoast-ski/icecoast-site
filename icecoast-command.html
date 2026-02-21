@@ -905,6 +905,13 @@ const RESORTS = [
 let CF_ENDPOINT = localStorage.getItem('cf_endpoint') || '';
 let CF_TOKEN    = localStorage.getItem('cf_token')    || '';
 
+function normalizeAiEndpoint(raw) {
+  const value = String(raw || '').trim();
+  if (!value) return '';
+  if (value.endsWith('/ai')) return value;
+  return `${value.replace(/\/+$/, '')}/ai`;
+}
+
 // ═══════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════
@@ -1378,13 +1385,17 @@ function renderAFD(afdText) {
   return `
     <div class="cf-config">
       <input class="cf-input" id="cfEndpointInput"
-        placeholder="CF Worker URL (e.g. https://your-worker.workers.dev/ai)"
-        value="${CF_ENDPOINT}">
+        placeholder="CF Worker URL (e.g. https://your-worker.workers.dev)"
+        value="${CF_ENDPOINT}"
+        oninput="CF_ENDPOINT=this.value.trim();localStorage.setItem('cf_endpoint',CF_ENDPOINT)">
       <input class="cf-input" id="cfTokenInput"
-        placeholder="CF AI Token / Bearer"
-        value="${CF_TOKEN}" type="password" style="max-width:220px">
+        placeholder="Optional admin token"
+        value="${CF_TOKEN}" type="password" style="max-width:220px"
+        oninput="CF_TOKEN=this.value.trim();localStorage.setItem('cf_token',CF_TOKEN)">
+      <button class="load-btn" style="flex-shrink:0;padding:0.42rem 0.9rem;font-size:0.65rem"
+        onclick="CF_ENDPOINT=document.getElementById('cfEndpointInput').value.trim();CF_TOKEN=document.getElementById('cfTokenInput').value.trim();localStorage.setItem('cf_endpoint',CF_ENDPOINT);localStorage.setItem('cf_token',CF_TOKEN);this.textContent='✓ Saved';setTimeout(()=>this.textContent='Save',1500)">Save</button>
     </div>
-    <div class="cf-note">Paste your Cloudflare AI Worker endpoint + token above. Token is saved locally in your browser only.</div>
+    <div class="cf-note">Paste your Cloudflare Worker URL above, then click <strong>Save</strong> (or just type — values auto-save). <strong>/ai</strong> is appended automatically. Token is optional and stored locally in your browser only.</div>
 
     <div style="margin-top:0.75rem;font-family:var(--mono);font-size:0.6rem;color:var(--muted);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:0.4rem;">
       ▸ RAW AFD — SNOW/PRECIP EXCERPT
@@ -1508,6 +1519,11 @@ async function translateAFD(afdText, resortName) {
     out.innerHTML = `<span style="color:var(--red)">⚠ No Cloudflare Worker endpoint set. Paste your URL above.</span>`;
     return;
   }
+  const aiEndpoint = normalizeAiEndpoint(CF_ENDPOINT);
+  if (!aiEndpoint) {
+    out.innerHTML = `<span style="color:var(--red)">⚠ Invalid Cloudflare Worker endpoint.</span>`;
+    return;
+  }
 
   btn.disabled = true;
   btn.textContent = '⏳ Translating...';
@@ -1530,18 +1546,21 @@ AFD excerpt:
 ${snow.slice(0, 1500)}`;
 
   try {
-    const response = await fetch(CF_ENDPOINT, {
+    const response = await fetch(aiEndpoint, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        ...(CF_TOKEN ? { 'Authorization': `Bearer ${CF_TOKEN}` } : {}),
+        ...(CF_TOKEN ? { 'X-Admin-Token': CF_TOKEN } : {}),
       },
       body: JSON.stringify({
         messages: [{ role: 'user', content: prompt }]
       }),
     });
 
-    if (!response.ok) throw new Error(`CF AI returned ${response.status}`);
+    if (!response.ok) {
+      const errText = await response.text().catch(() => '');
+      throw new Error(`CF AI returned ${response.status}${errText ? `: ${errText.slice(0, 160)}` : ''}`);
+    }
     const data = await response.json();
 
     // Handle common CF AI response shapes
