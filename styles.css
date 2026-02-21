@@ -695,6 +695,42 @@ body {
 .th.right { text-align: right; }
 .th.center { text-align: center; }
 
+.th-sortbtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  border: none;
+  background: transparent;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  color: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  cursor: pointer;
+}
+.th-sortbtn.right { justify-content: flex-end; }
+
+.sort-triangle {
+  width: 0;
+  height: 0;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-top: 6px solid var(--rule-heavy);
+  opacity: 0.35;
+  transform: translateY(1px);
+  transition: opacity 0.14s, border-top-color 0.14s, transform 0.14s;
+}
+
+.th-sortbtn.active .sort-triangle {
+  border-top-color: var(--pow);
+  opacity: 1;
+}
+
+.th-sortbtn.asc .sort-triangle {
+  transform: rotate(180deg) translateY(-1px);
+}
+
 /* Resort row */
 .resort-row {
   display: grid;

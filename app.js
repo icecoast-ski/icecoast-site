@@ -27,6 +27,8 @@ const state = {
   passes: [],
   activeHints: new Set(),
   nlHints: new Set(),
+  sortKey: 'snow24',
+  sortDir: 'desc',
   currentTab: 'all',
   favorites: new Set(JSON.parse(localStorage.getItem('brief_favorites') || '[]')),
   resorts: [],
@@ -150,12 +152,16 @@ function normalizePowWatch(rawPowWatch) {
 
 function getDisplayPowTotals(resort) {
   const powWatch = resort?.powWatch || null;
+  const hasManualSnowOverride = Boolean(resort?._manualSnowOverride);
   const toSnowTotal = (arr) => Number((Array.isArray(arr) ? arr : []).reduce((sum, v) => sum + (Number(v) || 0), 0).toFixed(1));
   const powWatchNwsHours = Number(powWatch?.hourlySourceMix?.nws || 0);
   const mergedHourly24 = toSnowTotal(powWatch?.hourly?.snowSeries24);
   const mergedHourly48 = toSnowTotal(powWatch?.hourly?.snowSeries48);
   const mergedHourly72 = toSnowTotal(powWatch?.hourly?.snowSeries72);
-  const useMergedHourlyTotals = Boolean(powWatch?.nwsAvailable) && powWatchNwsHours >= 12 && mergedHourly72 > 0;
+  const useMergedHourlyTotals = !hasManualSnowOverride
+    && Boolean(powWatch?.nwsAvailable)
+    && powWatchNwsHours >= 12
+    && mergedHourly72 > 0;
 
   const snow24 = useMergedHourlyTotals
     ? mergedHourly24
@@ -367,6 +373,7 @@ function applyManualOverridesToResorts() {
     if (!ov || typeof ov !== 'object') return resort;
 
     const next = { ...resort };
+    let hasManualSnowOverride = false;
 
     if (typeof ov.conditions === 'string' && ov.conditions.trim()) {
       next.conditions = ov.conditions.trim();
@@ -377,10 +384,12 @@ function applyManualOverridesToResorts() {
     if (Number.isFinite(Number(ov.snowfall24h))) {
       next.snow24 = Number(Number(ov.snowfall24h).toFixed(1));
       if (next.powWatch?.totals) next.powWatch.totals.snow24 = next.snow24;
+      hasManualSnowOverride = true;
     }
     if (Number.isFinite(Number(ov.snowfall48h))) {
       next.snow48 = Number(Number(ov.snowfall48h).toFixed(1));
       if (next.powWatch?.totals) next.powWatch.totals.snow48 = next.snow48;
+      hasManualSnowOverride = true;
     }
     if (Number.isFinite(next.snow48) && Number.isFinite(next.snow24) && next.snow48 < next.snow24) {
       next.snow48 = next.snow24;
@@ -388,6 +397,10 @@ function applyManualOverridesToResorts() {
     if (Number.isFinite(next.snow72) && Number.isFinite(next.snow48) && next.snow72 < next.snow48) {
       next.snow72 = next.snow48;
       if (next.powWatch?.totals) next.powWatch.totals.snow72 = next.snow72;
+    }
+
+    if (hasManualSnowOverride) {
+      next._manualSnowOverride = true;
     }
 
     if (typeof ov._patrolUpdatedAt === 'string') {
@@ -518,6 +531,11 @@ function pickWithAvoid(arr, avoidValue) {
 }
 
 function getLeadLore(resort, options = {}) {
+  const sharedLexicon = (typeof window !== 'undefined' && window.ICECOAST_LEXICON) ? window.ICECOAST_LEXICON : null;
+  if (sharedLexicon && typeof sharedLexicon.getVerb === 'function') {
+    return sharedLexicon.getVerb(resort, options);
+  }
+
   const avoidVerb = typeof options.avoidVerb === 'string' ? options.avoidVerb : '';
   const lore = RESORT_LORE[resort.id];
   const totals = getDisplayPowTotals(resort);
@@ -702,13 +720,38 @@ function applyFilters() {
 
   const powRank = { on: 0, building: 1, quiet: 2 };
   list.sort((a, b) => {
-    const snowDiff = b.snow24 - a.snow24;
-    if (snowDiff !== 0) return snowDiff;
+    let primary = 0;
+    if (state.sortKey === 'name') {
+      primary = String(a.name || '').localeCompare(String(b.name || ''), 'en', { sensitivity: 'base' });
+    } else if (state.sortKey === 'conditions') {
+      primary = String(a.conditions || '').localeCompare(String(b.conditions || ''), 'en', { sensitivity: 'base' });
+    } else if (state.sortKey === 'rating') {
+      primary = (Number(a.rating) || 0) - (Number(b.rating) || 0);
+    } else {
+      primary = (Number(a.snow24) || 0) - (Number(b.snow24) || 0);
+    }
+
+    if (primary !== 0) {
+      return state.sortDir === 'asc' ? primary : -primary;
+    }
+
+    const snowTie = (Number(b.snow24) || 0) - (Number(a.snow24) || 0);
+    if (snowTie !== 0) return snowTie;
     const powDiff = (powRank[a.pow] ?? 2) - (powRank[b.pow] ?? 2);
     if (powDiff !== 0) return powDiff;
-    return b.rating - a.rating;
+    return (Number(b.rating) || 0) - (Number(a.rating) || 0);
   });
   return list;
+}
+
+function updateSortHeaderUI() {
+  document.querySelectorAll('.th-sortbtn[data-sort]').forEach((btn) => {
+    const key = btn.dataset.sort;
+    const active = key === state.sortKey;
+    btn.classList.toggle('active', active);
+    btn.classList.toggle('asc', active && state.sortDir === 'asc');
+    btn.classList.toggle('desc', active && state.sortDir === 'desc');
+  });
 }
 
 function renderTicker() {
@@ -718,6 +761,7 @@ function renderTicker() {
   if (sectionRule) sectionRule.dataset.count = `${list.length} reporting`;
 
   updateLeadStories(state.resorts.slice().sort((a, b) => getDisplayPowTotals(b).snow24 - getDisplayPowTotals(a).snow24));
+  updateSortHeaderUI();
 
   if (!list.length) {
     ticker.innerHTML = '<div style="padding:1.5rem 0;font-family:var(--mono);font-size:0.72rem;color:var(--ink-faint);font-style:italic">No resorts match. East Coast grit says lower your standards and try again.</div>';
@@ -1013,6 +1057,20 @@ function attachUi() {
       state.currentTab = btn.dataset.tab === 'favorites' ? 'favorites' : 'all';
       document.querySelectorAll('.m-tab').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
+      renderTicker();
+    });
+  });
+
+  document.querySelectorAll('.th-sortbtn[data-sort]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.sort;
+      if (!key) return;
+      if (state.sortKey === key) {
+        state.sortDir = state.sortDir === 'desc' ? 'asc' : 'desc';
+      } else {
+        state.sortKey = key;
+        state.sortDir = (key === 'name' || key === 'conditions') ? 'asc' : 'desc';
+      }
       renderTicker();
     });
   });

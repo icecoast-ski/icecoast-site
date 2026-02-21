@@ -202,11 +202,27 @@
   <div class="ticker-zone">
     <div class="ticker-header">
       <div class="th">#</div>
-      <div class="th">Resort</div>
-      <div class="th">Conditions</div>
-      <div class="th right">24h Snow</div>
+      <div class="th">
+        <button class="th-sortbtn" data-sort="name" aria-label="Sort by resort">
+          Resort <span class="sort-triangle" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="th">
+        <button class="th-sortbtn" data-sort="conditions" aria-label="Sort by conditions">
+          Conditions <span class="sort-triangle" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="th right">
+        <button class="th-sortbtn right active desc" data-sort="snow24" aria-label="Sort by 24 hour snow">
+          24h Snow <span class="sort-triangle" aria-hidden="true"></span>
+        </button>
+      </div>
       <div class="th right">Temp</div>
-      <div class="th right">Rating</div>
+      <div class="th right">
+        <button class="th-sortbtn right" data-sort="rating" aria-label="Sort by rating">
+          Rating <span class="sort-triangle" aria-hidden="true"></span>
+        </button>
+      </div>
       <div class="th right">POW</div>
     </div>
 
@@ -231,6 +247,7 @@
 
 <script src="../resorts.js"></script>
 <script src="../manual-data.js"></script>
+<script src="../lib/lexicon.js"></script>
 <script src="./app.js"></script>
 </body>
 </html>
