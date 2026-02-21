@@ -2674,48 +2674,19 @@ const backgroundPositionByResort = {
                     <div class="pow-watch-potential">Storm Total Potential: <strong>${potentialRangeLabel}</strong></div>
                     <details class="pow-watch-details">
                       <summary class="pow-watch-details-toggle">
-                        <span>72h Snow Timeline</span>
+                        <span>72h Snowfall Outlook</span>
                         <span class="pow-watch-details-chevron" aria-hidden="true">
                           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
                             <polyline points="6 9 12 15 18 9"></polyline>
                           </svg>
                         </span>
                       </summary>
-                      <div class="pow-watch-window-grid">
-                        <div class="pow-watch-window-labels">
-                          <span>Most Active Snow Time</span>
-                          <span>${peakLabel}</span>
+                      <div class="snow-chart-section">
+                        <div class="snow-chart-head">
+                          <div class="snow-chart-title">Snowfall Trend</div>
+                          <div class="snow-chart-sub">3h blocks · next 72h</div>
                         </div>
-                        <div class="pow-watch-window-labels">
-                          <span>Peak Rate</span>
-                          <span>${peakSnowPerHour}" / hr</span>
-                        </div>
-                        <div class="pow-watch-window-labels">
-                          <span>Max Gust</span>
-                          <span>${windHoldGust !== null ? `${windHoldGust} mph` : '—'}</span>
-                        </div>
-                        <div class="pow-watch-window-labels">
-                          <span>Wind Hold Risk</span>
-                          <span>${windHoldRiskLabel}</span>
-                        </div>
-                        <div class="pow-watch-chart-head">Snowfall Trend</div>
-                        <div class="pow-watch-chart-wrap">
-                          <div class="pow-watch-chart-axis">
-                            <span>${chartMaxLabel}</span>
-                            <span>${chartMidLabel}</span>
-                            <span>0.0"</span>
-                          </div>
-                          <div class="pow-watch-chart" aria-label="Hourly snow trend next 72 hours">
-                            ${chartBars}
-                          </div>
-                        </div>
-                        <div class="pow-watch-chart-scale">
-                          <span>Now</span>
-                          <span>24h</span>
-                          <span>48h</span>
-                          <span>72h</span>
-                        </div>
-                        <div class="pow-watch-chart-units">${chartLegend}</div>
+                        <div class="snow-chart-root" id="snow-chart-${resort.id}"></div>
                       </div>
                     </details>
                   </div>
@@ -3219,6 +3190,138 @@ const backgroundPositionByResort = {
             return filtered;
         }
 
+        function buildSnowChart(snowSeries72, containerId, opts = {}) {
+            const root = document.getElementById(containerId);
+            if (!root) return;
+            if (!Array.isArray(snowSeries72) || !snowSeries72.length) {
+                root.innerHTML = '<div class="snow-chart-empty">No measurable hourly snow in current model run.</div>';
+                return;
+            }
+
+            const BLOCKS = 24;
+            const BLOCK_SIZE = 3;
+            const blocks = [];
+            for (let b = 0; b < BLOCKS; b++) {
+                const slice = snowSeries72.slice(b * BLOCK_SIZE, (b + 1) * BLOCK_SIZE);
+                const total = slice.reduce((s, v) => s + Math.max(0, Number(v) || 0), 0);
+                blocks.push(Number(total.toFixed(2)));
+            }
+
+            const maxBlock = Math.max(...blocks, 0.01);
+            const total72 = blocks.reduce((s, v) => s + v, 0);
+            const peakIdx = blocks.indexOf(Math.max(...blocks));
+            const axisMax = Math.max(Math.ceil(maxBlock * 4) / 4, 0.5);
+            const axisMid = +(axisMax / 2).toFixed(2);
+            const startMs = opts.startTs || (() => {
+                const n = new Date();
+                n.setMinutes(0, 0, 0);
+                return n.getTime();
+            })();
+
+            function blockLabel(blockIdx) {
+                const ms = startMs + (blockIdx * BLOCK_SIZE * 3600000);
+                return new Date(ms).toLocaleString('en-US', { weekday: 'short', hour: 'numeric', hour12: true });
+            }
+
+            function blockEndLabel(blockIdx) {
+                const ms = startMs + ((blockIdx + 1) * BLOCK_SIZE * 3600000);
+                return new Date(ms).toLocaleString('en-US', { hour: 'numeric', hour12: true });
+            }
+
+            const dayGroups = [];
+            let lastDateStr = null;
+            let currentGroup = null;
+            for (let b = 0; b < BLOCKS; b++) {
+                const ms = startMs + (b * BLOCK_SIZE * 3600000);
+                const dateStr = new Date(ms).toDateString();
+                if (dateStr !== lastDateStr) {
+                    if (currentGroup) dayGroups.push(currentGroup);
+                    currentGroup = {
+                        shortLabel: new Date(ms).toLocaleDateString('en-US', { weekday: 'short' }),
+                        startBlock: b,
+                        count: 1,
+                    };
+                    lastDateStr = dateStr;
+                } else if (currentGroup) {
+                    currentGroup.count += 1;
+                }
+            }
+            if (currentGroup) dayGroups.push(currentGroup);
+
+            const barsHTML = blocks.map((val, b) => {
+                const pct = (val / axisMax) * 100;
+                const h = Math.max(pct, val > 0.01 ? 5 : 0);
+                const trace = val <= 0.01;
+                const peak = val >= maxBlock * 0.75 && val > 0.1;
+                const tip = val > 0.01
+                    ? `${val.toFixed(2)}" · ${blockLabel(b)}–${blockEndLabel(b)}`
+                    : `Trace · ${blockLabel(b)}`;
+                const cls = ['sc-bar', peak ? 'sc-bar-peak' : '', trace ? 'sc-bar-trace' : ''].filter(Boolean).join(' ');
+                return `<div class="${cls}" style="height:${h}%" data-b="${b}">
+                    <div class="sc-tip">${tip}</div>
+                </div>`;
+            }).join('');
+
+            const sepsHTML = dayGroups.slice(1).map((g) => {
+                const pct = (g.startBlock / BLOCKS) * 100;
+                return `<div class="sc-sep" style="left:${pct}%"></div>`;
+            }).join('');
+
+            const dayLabelsHTML = dayGroups.map((g) => `<div class="sc-day-label" style="flex:${g.count}">${g.shortLabel}</div>`).join('');
+            const peakLabel = blockLabel(Math.max(0, peakIdx));
+
+            root.innerHTML = `
+                <div class="sc-wrap">
+                    <div class="sc-axis">
+                        <span>${axisMax}"</span>
+                        <span>${axisMid}"</span>
+                        <span>0"</span>
+                    </div>
+                    <div>
+                        <div class="sc-chart">
+                            ${sepsHTML}
+                            ${barsHTML}
+                        </div>
+                        <div class="sc-days">${dayLabelsHTML}</div>
+                    </div>
+                </div>
+                <div class="sc-footer">
+                    <span class="sc-footer-total">72h total: <strong>${total72.toFixed(1)}"</strong></span>
+                    <span class="sc-footer-peak">Peak 3h: <strong>${Math.max(...blocks).toFixed(2)}"</strong> · ${peakLabel}</span>
+                </div>
+            `;
+
+            const bars = root.querySelectorAll('.sc-bar');
+            const STAGGER = 18;
+            if (typeof IntersectionObserver === 'function') {
+                const observer = new IntersectionObserver((entries) => {
+                    entries.forEach((entry) => {
+                        if (entry.isIntersecting) {
+                            bars.forEach((bar, i) => {
+                                setTimeout(() => bar.classList.add('sc-visible'), i * STAGGER);
+                            });
+                            observer.disconnect();
+                        }
+                    });
+                }, { threshold: 0.15 });
+                observer.observe(root);
+            } else {
+                bars.forEach((bar, i) => {
+                    setTimeout(() => bar.classList.add('sc-visible'), i * STAGGER);
+                });
+            }
+        }
+
+        function renderSnowCharts(resortsList) {
+            const list = Array.isArray(resortsList) ? resortsList : [];
+            list.forEach((resort) => {
+                const series = Array.isArray(resort?.powWatch?.hourly?.snowSeries72)
+                    ? resort.powWatch.hourly.snowSeries72
+                    : [];
+                buildSnowChart(series, `snow-chart-${resort.id}`, { startTs: Date.now() });
+            });
+        }
+
         function renderResorts() {
             const grid = document.getElementById('resortGrid');
             const filtered = applyFilters();
@@ -3252,6 +3355,7 @@ const backgroundPositionByResort = {
             }
 
             grid.innerHTML = filtered.map(resort => createResortCard(resort)).join('');
+            renderSnowCharts(filtered);
             focusResortFromDeepLink();
         }
 
