@@ -976,6 +976,15 @@ function attachUi() {
       expandBtn.classList.toggle('open', isOpen);
       expandBtn.setAttribute('aria-expanded', String(isOpen));
       drawer.setAttribute('aria-hidden', String(!isOpen));
+      if (isOpen) {
+        const inner = drawer.querySelector('.drawer-inner');
+        if (inner) {
+          inner.classList.remove('hint-anim');
+          void inner.offsetWidth;
+          inner.classList.add('hint-anim');
+          setTimeout(() => inner.classList.remove('hint-anim'), 900);
+        }
+      }
     });
   }
 

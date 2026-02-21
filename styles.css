@@ -310,7 +310,7 @@ body {
   flex-shrink: 0;
   margin: 0 0.85rem;
   opacity: 0;
-  transform: translateX(20px);
+  transform: translateX(56px);
 }
 
 .drawer-col {
@@ -319,7 +319,7 @@ body {
   flex-direction: column;
   gap: 0.38rem;
   opacity: 0;
-  transform: translateX(20px);
+  transform: translateX(56px);
 }
 
 .drawer-col-label {
@@ -342,35 +342,74 @@ body {
   max-width: 260px;
 }
 
-.dispatch-drawer.open .drawer-col,
-.dispatch-drawer.open .drawer-divider {
-  animation: drawerSettleIn 0.58s var(--spring) both;
+.dispatch-drawer.open .drawer-inner.hint-anim .drawer-col,
+.dispatch-drawer.open .drawer-inner.hint-anim .drawer-divider {
+  animation: drawerSettleIn 0.72s var(--spring) both;
 }
-.dispatch-drawer.open .drawer-col:nth-child(odd),
-.dispatch-drawer.open .drawer-divider:nth-child(odd) { --from-x: -22px; }
-.dispatch-drawer.open .drawer-col:nth-child(even),
-.dispatch-drawer.open .drawer-divider:nth-child(even) { --from-x: 22px; }
-.dispatch-drawer.open .drawer-inner > :nth-child(1) { animation-delay: 0.00s; }
-.dispatch-drawer.open .drawer-inner > :nth-child(2) { animation-delay: 0.04s; }
-.dispatch-drawer.open .drawer-inner > :nth-child(3) { animation-delay: 0.08s; }
-.dispatch-drawer.open .drawer-inner > :nth-child(4) { animation-delay: 0.12s; }
-.dispatch-drawer.open .drawer-inner > :nth-child(5) { animation-delay: 0.16s; }
-.dispatch-drawer.open .drawer-inner > :nth-child(6) { animation-delay: 0.20s; }
-.dispatch-drawer.open .drawer-inner > :nth-child(7) { animation-delay: 0.24s; }
-.dispatch-drawer.open .drawer-inner > :nth-child(8) { animation-delay: 0.28s; }
+.dispatch-drawer.open .drawer-inner.hint-anim .drawer-col:nth-child(odd),
+.dispatch-drawer.open .drawer-inner.hint-anim .drawer-divider:nth-child(odd) { --from-x: -22px; }
+.dispatch-drawer.open .drawer-inner.hint-anim .drawer-col:nth-child(even),
+.dispatch-drawer.open .drawer-inner.hint-anim .drawer-divider:nth-child(even) { --from-x: 22px; }
+.dispatch-drawer.open .drawer-inner.hint-anim > :nth-child(1) { animation-delay: 0.00s; }
+.dispatch-drawer.open .drawer-inner.hint-anim > :nth-child(2) { animation-delay: 0.04s; }
+.dispatch-drawer.open .drawer-inner.hint-anim > :nth-child(3) { animation-delay: 0.08s; }
+.dispatch-drawer.open .drawer-inner.hint-anim > :nth-child(4) { animation-delay: 0.12s; }
+.dispatch-drawer.open .drawer-inner.hint-anim > :nth-child(5) { animation-delay: 0.16s; }
+.dispatch-drawer.open .drawer-inner.hint-anim > :nth-child(6) { animation-delay: 0.20s; }
+.dispatch-drawer.open .drawer-inner.hint-anim > :nth-child(7) { animation-delay: 0.24s; }
+.dispatch-drawer.open .drawer-inner.hint-anim > :nth-child(8) { animation-delay: 0.28s; }
 
 @keyframes drawerSettleIn {
   0% {
     opacity: 0;
-    transform: translateX(var(--from-x, 20px));
+    transform: translateX(var(--from-x, 56px));
   }
-  68% {
+  70% {
     opacity: 1;
-    transform: translateX(calc(var(--from-x, 20px) * -0.18));
+    transform: translateX(calc(var(--from-x, 56px) * -0.22));
   }
   100% {
     opacity: 1;
     transform: translateX(0);
+  }
+}
+
+.dispatch-drawer.open .drawer-inner.hint-anim .drawer-col .d-chip {
+  animation: drawerChipSettle 0.56s var(--spring) both;
+}
+.dispatch-drawer.open .drawer-inner.hint-anim .drawer-col .d-chip:nth-child(1) { animation-delay: 0.18s; }
+.dispatch-drawer.open .drawer-inner.hint-anim .drawer-col .d-chip:nth-child(2) { animation-delay: 0.22s; }
+.dispatch-drawer.open .drawer-inner.hint-anim .drawer-col .d-chip:nth-child(3) { animation-delay: 0.26s; }
+.dispatch-drawer.open .drawer-inner.hint-anim .drawer-col .d-chip:nth-child(4) { animation-delay: 0.30s; }
+.dispatch-drawer.open .drawer-inner.hint-anim .drawer-col .d-chip:nth-child(5) { animation-delay: 0.34s; }
+.dispatch-drawer.open .drawer-inner.hint-anim .drawer-col .d-chip:nth-child(6) { animation-delay: 0.38s; }
+
+@keyframes drawerChipSettle {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.96);
+  }
+  65% {
+    opacity: 1;
+    transform: translateY(-2px) scale(1.02);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (min-width: 980px) {
+  .dispatch-clear {
+    order: 3;
+  }
+  .dispatch-hints {
+    order: 4;
+    margin-left: auto;
+  }
+  .dispatch-expand-btn {
+    order: 5;
+    margin-left: 0;
   }
 }
 
