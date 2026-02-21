@@ -633,7 +633,17 @@ export default {
       Vary: "Origin",
     };
 
+    const aiCorsHeaders = {
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "POST, OPTIONS",
+      "Access-Control-Allow-Headers": "Content-Type, X-Admin-Token",
+      "Access-Control-Max-Age": "86400",
+    };
+
     if (request.method === "OPTIONS") {
+      if (url.pathname === "/ai") {
+        return new Response(null, { headers: aiCorsHeaders });
+      }
       return new Response(null, { headers: corsHeaders });
     }
 
@@ -645,18 +655,18 @@ export default {
       try {
         const { messages } = await request.json();
         if (!env.AI || typeof env.AI.run !== "function") {
-          return jsonResponse({ error: "AI binding not configured" }, corsHeaders, 503);
+          return jsonResponse({ error: "AI binding not configured" }, aiCorsHeaders, 503);
         }
         const response = await env.AI.run("@cf/meta/llama-3.1-8b-instruct", { messages });
         return new Response(JSON.stringify(response), {
           headers: {
-            ...corsHeaders,
+            ...aiCorsHeaders,
             "Content-Type": "application/json",
           },
         });
       } catch (error) {
         console.error("AI route failed:", error);
-        return jsonResponse({ error: "AI request failed" }, corsHeaders, 500);
+        return jsonResponse({ error: "AI request failed" }, aiCorsHeaders, 500);
       }
     }
 
