@@ -443,6 +443,94 @@ function buildForecastBars(containerId, days) {
   }).join('');
 }
 
+const RESORT_LORE = {
+  'sugarloaf': {
+    name: 'The Loaf',
+    nuclear: { verbs: ['nuking', 'sending it', 'absolutely cooking', 'going full Carrabassett', 'doing Loafer things'], decks: ['The Snowfields are loaded. Brackett Basin is calling. This is what the drive is for.', 'Above-treeline skiing. The whole Carrabassett Valley is buried. You know what to do.', 'The Bigelow Boys would approve. Oh-My-Gosh Corner delivers.'] },
+    sending: { verbs: ['stacking it', 'freaking', 'delivering', 'putting down'], decks: ['The Loaf is working. Narrow Gauge, Bubblecuffer, pick your poison.', 'Sugarloafers are already in the lift line. First tracks matter here.'] },
+    building: { verbs: ['loading up', 'getting after it', 'warming up'], decks: ['Storm on the way to Carrabassett Valley. Worth watching.', "The drive pays off when The Loaf fires. It's loading."] },
+    quiet: { verbs: ['showing up', 'being the Loaf', 'holding court'], decks: ['Groomed and cold. The Superquad is spinning. That is enough.', "The Loaf doesn't need powder to be worth the drive. It just helps."] }
+  },
+  'sunday-river': {
+    name: 'Sunday River',
+    nuclear: { verbs: ['nuking', 'going off', 'delivering proper Maine pow'], decks: ['Eight peaks, all of them loaded. The Outfit gang is out.', "Sunday River when it snows is a different animal. This is that day."] },
+    sending: { verbs: ['stacking', 'putting in work', 'running'], decks: ['Jordan Bowl is going to be good. Sunday River in form.', "The snowmaking backbone plus natural snow. This is what it's built for."] },
+    building: { verbs: ['building', 'loading', 'watching the forecast'], decks: ['Storm track is favorable for the Sunday River terrain.', 'Worth the ride up 26. Give it a day.'] },
+    quiet: { verbs: ['grinding', 'staying open', 'making it work'], decks: ['Solid grooming. All eight peaks accessible. Maine does not apologize.', 'Sunday River on manufactured snow is still Sunday River.'] }
+  },
+  'jay-peak': {
+    name: 'Jay',
+    nuclear: { verbs: ['getting buried', 'catching the Jay Cloud', 'doing Jay things', 'hammering'], decks: ['Most snow east of the Rockies, today it is earning the title. The tram is running.', 'Quebec Clipper came through. Jay is doing what Jay does best.', 'The Face Chutes are loaded. The in-bounds policy is liberal. You know the reputation.'] },
+    sending: { verbs: ['stacking', 'delivering', 'running'], decks: ['Jay in form is Jay at its best. Glades, tram, repeat.', 'The Montreal Express is your friend today. Jay is benefiting.'] },
+    building: { verbs: ['loading', 'watching the border', 'building'], decks: ['Storm system tracking toward the Northeast Kingdom. Jay catches everything.', "Every clipper has to cross the border somehow. Jay's geography wins again."] },
+    quiet: { verbs: ['grinding', 'being Jay', 'holding'], decks: ['The glades hold snow longer than anywhere. Jay even on a quiet day.', 'Short lines. Good terrain. The remote location earns its keep.'] }
+  },
+  'stowe': {
+    name: 'Stowe',
+    nuclear: { verbs: ['firing', 'earning its title', 'living up to the legend', 'delivering Front Four conditions'], decks: ['Mount Mansfield in a storm. The Ski Capital of the East is in full effect.', 'The Front Four when loaded is the East Coast benchmark. This is that day.', 'Stowe has been doing this since 1937. Some things do not change.'] },
+    sending: { verbs: ['showing up', 'delivering', 'putting on a show'], decks: ['Mansfield is making a case. Liftline is going to be good.', 'The birthplace of alpine skiing in Vermont is earning its history today.'] },
+    building: { verbs: ['loading', 'watching Mansfield', 'building toward something'], decks: ["Storm window looks favorable for Vermont's highest peak.", "Stowe doesn't do anything small. This one's worth tracking."] },
+    quiet: { verbs: ['grooming', 'being Stowe', 'doing the classics'], decks: ['National. Goat. Starr. Liftline. Even groomed, these runs hold weight.', 'Corduroy on the Front Four is still the Front Four.'] }
+  },
+  'killington': {
+    name: 'Killington',
+    nuclear: { verbs: ['going berserk', 'earning Beast of the East', 'absolutely sending it'], decks: ["The Beast has 3,000 acres. When it snows, there's nowhere better.", 'Killington in a real storm is a different resort. This is that resort.'] },
+    sending: { verbs: ['delivering', 'putting in Beast hours', 'loading up'], decks: ['K1 gondola. Superstar. Cascade. Big mountain eating big snow.', 'Six peaks, fresh snow. The Beast is earning it.'] },
+    building: { verbs: ['building', 'watching the weather'], decks: ['Snowmaking backbone plus incoming natural. Killington has options.', 'First to open, last to close. The Beast is patient.'] },
+    quiet: { verbs: ['grooming', 'being the Beast', 'open late'], decks: ['150 trails, corduroy. The Beast does not need your validation.', 'Longest ski season in the East for a reason. Open and running.'] }
+  },
+  'gore-mountain': {
+    name: 'Gore',
+    nuclear: { verbs: ['going deep', 'delivering ADK pow', 'cooking in the Adirondacks'], decks: ['No condos on the summit. Just forest and Adirondack State Park as far as you can see, loaded.', "Gore in a storm is New York's best-kept secret earning its legend."] },
+    sending: { verbs: ['stacking', 'delivering', 'working the Adirondacks'], decks: ['The gondola is running. North Side is holding snow. Old school Gore.', 'No pretension here. Brown bag lunch, good snow, Adirondack forest.'] },
+    building: { verbs: ['loading', 'building'], decks: ['Gore lies in the Adirondacks. The snowfall here surprises people.', 'Worth the drive up from Albany. Storm has Gore in its path.'] },
+    quiet: { verbs: ['grooming', 'being Gore', 'holding court in North Creek'], decks: ['Down-to-earth ADK vibe. More terrain than you would expect. Quiet lifts.', "New York's largest ski resort, and barely anyone outside the state knows it."] }
+  },
+  'tremblant': {
+    name: 'Tremblant',
+    nuclear: { verbs: ['en fuego', 'going full Quebec', 'delivering north of the border'], decks: ['Quebec clipper country. Tremblant catches everything that crosses the border.', 'Le mountain est en feu. 102 trails under proper Canadian snow.'] },
+    sending: { verbs: ['delivering', 'stacking', 'putting in work'], decks: ['Tremblant in form is the East Coast argument for not going west.', '94 trails under Laurentian snow. The answer is oui.'] },
+    building: { verbs: ['loading', 'building toward something'], decks: ['Laurentian storm system is tracking. Tremblant geography wins.'] },
+    quiet: { verbs: ['grooming', 'running', 'holding court'], decks: ['Cold, groomed, open. Tremblant does not need powder to justify the drive.'] }
+  }
+};
+
+const REGION_LORE = {
+  'vermont-north': { nuclear: ['going absolutely nuclear', 'nuking', 'catching the storm'], sending: ['stacking', 'delivering'], building: ['loading up', 'building', 'watching the Vermont sky'], quiet: ['grooming', 'holding', 'running'] },
+  'vermont-central': { nuclear: ['firing', 'going deep', 'delivering Mad River Valley snow'], sending: ['stacking', 'delivering'], building: ['loading', 'building'], quiet: ['grooming', 'holding'] },
+  'maine': { nuclear: ['nuking', 'going full Maine', 'sending it'], sending: ['stacking', 'delivering'], building: ['loading', 'building'], quiet: ['grooming', 'holding'] },
+  'white-mountains': { nuclear: ['going deep', 'delivering White Mountain snow'], sending: ['stacking', 'delivering'], building: ['loading', 'building'], quiet: ['grooming', 'running'] },
+  'adirondacks': { nuclear: ['going deep', 'cooking in the ADKs'], sending: ['stacking', 'delivering'], building: ['loading', 'building'], quiet: ['grooming', 'holding'] },
+  'catskills': { nuclear: ['going full Catskills', 'delivering'], sending: ['stacking', 'delivering'], building: ['loading', 'building'], quiet: ['running the groomers', 'holding'] },
+  'poconos': { nuclear: ['going off', 'delivering Pocono snow'], sending: ['stacking', 'delivering'], building: ['loading', 'building'], quiet: ['running', 'holding'] },
+  'canada': { nuclear: ['going full Quebec', 'delivering north of the border'], sending: ['stacking', 'delivering'], building: ['loading', 'building'], quiet: ['grooming', 'running'] }
+};
+
+function pick(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function getLeadLore(resort) {
+  const lore = RESORT_LORE[resort.id];
+  const totals = getDisplayPowTotals(resort);
+  const tier = totals.snow24 >= 8
+    ? 'nuclear'
+    : (totals.snow24 >= 4 ? 'sending' : (resort.pow === 'building' ? 'building' : 'quiet'));
+
+  if (lore) {
+    const t = lore[tier] || lore.quiet;
+    return { verb: pick(t.verbs), deck: pick(t.decks), displayName: lore.name };
+  }
+
+  const regionLore = REGION_LORE[resort.region] || { nuclear: ['going deep'], sending: ['stacking'], building: ['building'], quiet: ['running'] };
+  const verbs = regionLore[tier] || regionLore.quiet;
+  return {
+    verb: pick(verbs),
+    deck: resort.nwsBrief || 'Conditions are live. Check before you go.',
+    displayName: resort.name
+  };
+}
+
 function updateLeadStories(list) {
   const topA = list[0] || FALLBACK_RESORTS[0];
   const topB = list[1] || FALLBACK_RESORTS[1] || topA;
@@ -454,12 +542,17 @@ function updateLeadStories(list) {
     const headlineEl = storyEl.querySelector('.lead-headline');
     const deckEl = storyEl.querySelector('.lead-deck');
     const statVals = storyEl.querySelectorAll('.lead-stat-val');
-
     const totals = getDisplayPowTotals(resort);
+    const lore = getLeadLore(resort);
+    const signalLabel = resort.pow === 'on'
+      ? `Powder Alert · ${totals.snow24}" / 24h`
+      : (resort.pow === 'building'
+        ? `Storm Building · ${totals.snow72.toFixed(1)}" forecast`
+        : `${modeLabel} · ${resort.conditions}`);
     signalEl.className = `lead-signal ${resort.pow === 'on' ? 'pow' : resort.pow === 'building' ? 'building' : 'groomed'}`;
-    signalEl.innerHTML = `<span class="sig-dot"></span>${modeLabel} · ${totals.snow24 > 0 ? `${totals.snow24}" / 24h` : 'Tracking'}`;
-    headlineEl.innerHTML = `${resort.name} is <em>${resort.pow === 'on' ? 'firing' : resort.pow === 'building' ? 'building' : 'steady'}</em>`;
-    deckEl.textContent = `${totals.snow72.toFixed(1)}" in the 72h window. ${resort.conditions}. East Coast legs required.`;
+    signalEl.innerHTML = `<span class="sig-dot"></span>${signalLabel}`;
+    headlineEl.innerHTML = `${lore.displayName} is <em>${lore.verb}</em>`;
+    deckEl.textContent = lore.deck;
 
     if (statVals.length >= 4) {
       statVals[0].textContent = `${totals.snow24.toFixed(1)}"`;
