@@ -2731,8 +2731,18 @@
         }
 
         .forecast-icon {
-            font-size: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             margin: 0.35rem 0;
+            min-height: 48px;
+        }
+
+        .forecast-icon-img {
+            width: 48px;
+            height: 48px;
+            display: block;
+            object-fit: contain;
         }
 
         .forecast-temp {

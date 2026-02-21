@@ -70,6 +70,46 @@
             </svg>`
         };
 
+        const FORECAST_ICON_DIR = '/weather_icons';
+        const FORECAST_ICON_FALLBACK = 'overcast.svg';
+
+        function escapeHtmlAttr(value) {
+            return String(value ?? '')
+                .replace(/&/g, '&amp;')
+                .replace(/"/g, '&quot;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;');
+        }
+
+        function pickForecastIconFile(day) {
+            const source = `${day?.icon || ''} ${day?.condition || ''} ${day?.description || ''}`.toLowerCase();
+            const isNight = source.includes('night') || source.includes('moon') || source.includes('🌙');
+            if (source.includes('thunder') || source.includes('lightning') || source.includes('⛈')) return 'thunderstorms-snow.svg';
+            if (
+                source.includes('sleet')
+                || source.includes('mix')
+                || source.includes('ice pellets')
+                || source.includes('freezing rain')
+                || source.includes('wintry')
+            ) return 'sleet.svg';
+            if (source.includes('fog') || source.includes('mist') || source.includes('haze') || source.includes('🌫')) return 'fog.svg';
+            if (source.includes('wind') || source.includes('gust') || source.includes('breezy') || source.includes('🌬')) return 'wind.svg';
+            if (source.includes('rain') || source.includes('drizzle') || source.includes('☂') || source.includes('🌧')) return 'rain.svg';
+            if (source.includes('flurr') || source.includes('light snow')) return isNight ? 'partly-cloudy-night-snow.svg' : 'partly-cloudy-day-snow.svg';
+            if (source.includes('snow') || source.includes('❄')) return isNight ? 'partly-cloudy-night-snow.svg' : 'snow.svg';
+            if (source.includes('partly') || source.includes('scattered') || source.includes('⛅')) return 'partly-cloudy-day.svg';
+            if (source.includes('overcast') || source.includes('cloud') || source.includes('☁')) return 'overcast.svg';
+            if (isNight || source.includes('clear-night')) return 'clear-night.svg';
+            if (source.includes('clear') || source.includes('sun') || source.includes('☀')) return 'clear-day.svg';
+            return FORECAST_ICON_FALLBACK;
+        }
+
+        function renderForecastIcon(day) {
+            const file = pickForecastIconFile(day);
+            const alt = escapeHtmlAttr(day?.condition || day?.description || day?.icon || 'Forecast');
+            return `<img class="forecast-icon-img" src="${FORECAST_ICON_DIR}/${file}" alt="${alt}" width="48" height="48" loading="lazy" onerror="this.onerror=null;this.src='${FORECAST_ICON_DIR}/${FORECAST_ICON_FALLBACK}';">`;
+        }
+
         function getRatingText(rating, snowfall24h, resort) {
             const snow24h = parseInt(snowfall24h) || 0;
             const temp = resort.weather?.temp || 25;
@@ -2651,7 +2691,7 @@ const backgroundPositionByResort = {
                       ${forecast.map(day => `
                         <div class="forecast-day">
                           <div class="forecast-day-name">${day.day}</div>
-                          <div class="forecast-icon">${day.icon}</div>
+                          <div class="forecast-icon">${renderForecastIcon(day)}</div>
                           <div class="forecast-temp">${day.tempF ?? (typeof day.temp === 'number' ? `${day.temp}°` : '—')}</div>
                         </div>
                       `).join('')}
