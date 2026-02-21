@@ -609,6 +609,14 @@ function getRatingBlocks(rating, pow) {
   return `<div class="rr-rating">${blocks}</div>`;
 }
 
+function getForecastIconSrc(icon) {
+  const key = String(icon || '').toLowerCase();
+  if (key === 'snow') return '../weather_icons/snow.svg';
+  if (key === 'sun') return '../weather_icons/clear-day.svg';
+  if (key === 'rain') return '../weather_icons/rain.svg';
+  return '../weather_icons/overcast.svg';
+}
+
 const CHIP_MAP = {
   pow: { type: 'vibe', label: '⚡ POW On' },
   storm: { type: 'vibe', label: '🌨 Storm Coming' },
@@ -721,7 +729,6 @@ function renderTicker() {
     const displayTotals = powCtx.totals;
     const snowCls = displayTotals.snow24 >= 4 ? ' snow' : displayTotals.snow24 === 0 ? ' ice' : '';
     const passStr = (r.passes || []).map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(' · ') || '—';
-    const iconMap = { snow: '❄', cloud: '☁', sun: '☀', rain: '🌧' };
     const forecast = Array.isArray(r.forecast) && r.forecast.length
       ? r.forecast
       : [{ day: 'Sat', icon: 'cloud', hi: Number(r.temp) || 0 }, { day: 'Sun', icon: 'cloud', hi: Number(r.temp) || 0 }, { day: 'Mon', icon: 'cloud', hi: Number(r.temp) || 0 }];
@@ -757,7 +764,7 @@ function renderTicker() {
           ${forecast.map((d) => `
             <div class="det-fc-day">
               <div class="det-fc-label">${d.day || '—'}</div>
-              <div class="det-fc-icon">${iconMap[d.icon] || '☁'}</div>
+              <div class="det-fc-icon"><img src="${getForecastIconSrc(d.icon)}" alt="${d.icon || 'cloud'}"></div>
               <div class="det-fc-hi">${(typeof d.hi === 'number' ? d.hi : Number(d.hi) || 0)}°</div>
             </div>`).join('')}
         </div>
@@ -982,6 +989,14 @@ function attachUi() {
           inner.classList.remove('hint-anim');
           void inner.offsetWidth;
           inner.classList.add('hint-anim');
+          inner.scrollLeft = 0;
+          // Strong horizontal affordance: nudge right, then settle back.
+          setTimeout(() => {
+            inner.scrollTo({ left: 34, behavior: 'smooth' });
+            setTimeout(() => {
+              inner.scrollTo({ left: 0, behavior: 'smooth' });
+            }, 320);
+          }, 90);
           setTimeout(() => inner.classList.remove('hint-anim'), 900);
         }
       }

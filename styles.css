@@ -302,6 +302,25 @@ body {
   position: relative;
 }
 .drawer-inner::-webkit-scrollbar { display: none; }
+.dispatch-drawer.open .drawer-inner::before,
+.dispatch-drawer.open .drawer-inner::after {
+  content: '';
+  position: sticky;
+  top: 0;
+  width: 16px;
+  height: 100%;
+  pointer-events: none;
+  z-index: 3;
+}
+.dispatch-drawer.open .drawer-inner::before {
+  left: 0;
+  background: linear-gradient(to right, var(--paper) 12%, rgba(245,243,239,0));
+}
+.dispatch-drawer.open .drawer-inner::after {
+  right: 0;
+  margin-left: auto;
+  background: linear-gradient(to left, var(--paper) 12%, rgba(245,243,239,0));
+}
 
 .drawer-divider {
   width: 1px;
