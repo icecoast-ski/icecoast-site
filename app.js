@@ -510,7 +510,15 @@ function pick(arr) {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function getLeadLore(resort) {
+function pickWithAvoid(arr, avoidValue) {
+  if (!Array.isArray(arr) || arr.length === 0) return '';
+  if (!avoidValue) return pick(arr);
+  const filtered = arr.filter((v) => v !== avoidValue);
+  return pick(filtered.length ? filtered : arr);
+}
+
+function getLeadLore(resort, options = {}) {
+  const avoidVerb = typeof options.avoidVerb === 'string' ? options.avoidVerb : '';
   const lore = RESORT_LORE[resort.id];
   const totals = getDisplayPowTotals(resort);
   const tier = totals.snow24 >= 8
@@ -519,13 +527,13 @@ function getLeadLore(resort) {
 
   if (lore) {
     const t = lore[tier] || lore.quiet;
-    return { verb: pick(t.verbs), deck: pick(t.decks), displayName: lore.name };
+    return { verb: pickWithAvoid(t.verbs, avoidVerb), deck: pick(t.decks), displayName: lore.name };
   }
 
   const regionLore = REGION_LORE[resort.region] || { nuclear: ['going deep'], sending: ['stacking'], building: ['building'], quiet: ['running'] };
   const verbs = regionLore[tier] || regionLore.quiet;
   return {
-    verb: pick(verbs),
+    verb: pickWithAvoid(verbs, avoidVerb),
     deck: resort.nwsBrief || 'Conditions are live. Check before you go.',
     displayName: resort.name
   };
@@ -535,15 +543,16 @@ function updateLeadStories(list) {
   const topA = list[0] || FALLBACK_RESORTS[0];
   const topB = list[1] || FALLBACK_RESORTS[1] || topA;
   const stories = document.querySelectorAll('.lead-story');
+  const loreA = getLeadLore(topA);
+  const loreB = getLeadLore(topB, { avoidVerb: loreA.verb });
 
-  function fillStory(storyEl, resort, modeLabel) {
+  function fillStory(storyEl, resort, modeLabel, lore) {
     if (!storyEl || !resort) return;
     const signalEl = storyEl.querySelector('.lead-signal');
     const headlineEl = storyEl.querySelector('.lead-headline');
     const deckEl = storyEl.querySelector('.lead-deck');
     const statVals = storyEl.querySelectorAll('.lead-stat-val');
     const totals = getDisplayPowTotals(resort);
-    const lore = getLeadLore(resort);
     const signalLabel = resort.pow === 'on'
       ? `Powder Alert · ${totals.snow24}" / 24h`
       : (resort.pow === 'building'
@@ -562,8 +571,8 @@ function updateLeadStories(list) {
     }
   }
 
-  fillStory(stories[0], topA, 'Pow Signal');
-  fillStory(stories[1], topB, 'Storm Window');
+  fillStory(stories[0], topA, 'Pow Signal', loreA);
+  fillStory(stories[1], topB, 'Storm Window', loreB);
 
   const topATotals = getDisplayPowTotals(topA);
   const topBTotals = getDisplayPowTotals(topB);
