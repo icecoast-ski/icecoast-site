@@ -226,6 +226,14 @@ body {
   font-family: var(--serif);
   font-size: 0.88rem;
 }
+.dispatch-input::-webkit-search-cancel-button,
+.dispatch-input::-webkit-search-decoration,
+.dispatch-input::-webkit-search-results-button,
+.dispatch-input::-webkit-search-results-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
+}
 
 .dispatch-hints {
   display: flex;
@@ -302,8 +310,29 @@ body {
   overflow-x: auto;
   scrollbar-width: none;
   position: relative;
+  transform: translateX(0);
+  will-change: transform, opacity;
 }
 .drawer-inner::-webkit-scrollbar { display: none; }
+
+.dispatch-drawer.open .drawer-inner {
+  animation: drawerRailIn 0.52s var(--spring) both;
+}
+
+@keyframes drawerRailIn {
+  0% {
+    opacity: 0.9;
+    transform: translateX(56px);
+  }
+  74% {
+    opacity: 1;
+    transform: translateX(-10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
 .dispatch-drawer.open .drawer-inner::before,
 .dispatch-drawer.open .drawer-inner::after {
   content: '';
