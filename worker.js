@@ -1,4 +1,6 @@
 
+import { Ai } from "@cloudflare/ai";
+
 const DEFAULT_SENDIT_RADIUS_MILES = 1.5;
 const SENDIT_MAX_ACCURACY_METERS = 200;
 const SENDIT_KEY_PREFIX = "sendit_votes_";
@@ -639,6 +641,23 @@ export default {
 
     if (url.pathname === "/health") {
       return jsonResponse({ status: "ok" }, corsHeaders);
+    }
+
+    if (request.method === "POST" && url.pathname === "/ai") {
+      try {
+        const { messages } = await request.json();
+        const ai = new Ai(env.AI);
+        const response = await ai.run("llama-3.1-8b-instruct", { messages });
+        return new Response(JSON.stringify(response), {
+          headers: {
+            ...corsHeaders,
+            "Content-Type": "application/json",
+          },
+        });
+      } catch (error) {
+        console.error("AI route failed:", error);
+        return jsonResponse({ error: "AI request failed" }, corsHeaders, 500);
+      }
     }
 
     if (url.pathname === "/api/diag" && request.method === "GET") {
