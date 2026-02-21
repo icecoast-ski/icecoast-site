@@ -1,313 +1,233 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>icecoast | Know The Snow Before You Go | East Coast Conditions</title>
-    <meta name="description" content="Snow, terrain, and resort conditions for East Coast skiers and riders. Check weather, lifts, pricing, and local slope signal before you drive.">
-    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
-    <meta name="author" content="icecoast">
-    <meta name="theme-color" content="#1f5ec8">
-    <link rel="canonical" href="https://icecoast.ski/">
-    <link rel="alternate" hreflang="en-us" href="https://icecoast.ski/">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>icecoast — your morning brief</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet">
 
-    <meta property="og:type" content="website">
-    <meta property="og:site_name" content="icecoast">
-    <meta property="og:title" content="icecoast | Know The Snow Before You Go | East Coast Conditions">
-    <meta property="og:description" content="Snow, terrain, and resort conditions for East Coast skiers and riders. Check weather, lifts, pricing, and local slope signal before you drive.">
-    <meta property="og:url" content="https://icecoast.ski/">
-    <meta property="og:image" content="https://icecoast.ski/icecoast_patrol.png">
-    <meta property="og:image:alt" content="icecoast patrol graphic">
-
-    <meta name="twitter:card" content="summary_large_image">
-    <meta name="twitter:title" content="icecoast | Know The Snow Before You Go | East Coast Conditions">
-    <meta name="twitter:description" content="Snow, terrain, and resort conditions for East Coast skiers and riders. Check weather, lifts, pricing, and local slope signal before you drive.">
-    <meta name="twitter:image" content="https://icecoast.ski/icecoast_patrol.png">
-
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@graph": [
-        {
-          "@type": "WebSite",
-          "@id": "https://icecoast.ski/#website",
-          "url": "https://icecoast.ski/",
-          "name": "icecoast",
-          "description": "Snow, terrain, and resort conditions for East Coast skiers and riders.",
-          "inLanguage": "en-US"
-        },
-        {
-          "@type": "Organization",
-          "@id": "https://icecoast.ski/#organization",
-          "name": "icecoast",
-          "url": "https://icecoast.ski/",
-          "logo": {
-            "@type": "ImageObject",
-            "url": "https://icecoast.ski/icecoast_patrol.png"
-          }
-        }
-      ]
-    }
-    </script>
-    <link rel="icon" type="image/svg+xml"
-      href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZGVmcz4KICAgIDxsaW5lYXJHcmFkaWVudCBpZD0iYmciIHgxPSIwJSIgeTE9IjAlIiB4Mj0iMCUiIHkyPSIxMDAlIj4KICAgICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3R5bGU9InN0b3AtY29sb3I6IzAwNjZGRiIvPgogICAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0eWxlPSJzdG9wLWNvbG9yOiMwMDUyQ0MiLz4KICAgIDwvbGluZWFyR3JhZGllbnQ+CiAgPC9kZWZzPgogIDwhLS0gT3V0ZXIgY2lyY2xlIHdpdGggZ3JhZGllbnQgLS0+CiAgPGNpcmNsZSBjeD0iMzIiIGN5PSIzMiIgcj0iMzAiIGZpbGw9InVybCgjYmcpIiAvPgoKICA8IS0tIExlZnQgc2tpIHdpdGggYmluZGluZyAtLT4KICA8cmVjdCB4PSIyOCIgeT0iNiIgd2lkdGg9IjQiIGhlaWdodD0iNTIiIHJ4PSIyIiByeT0iMiIgZmlsbD0iI0ZGRkZGRiIgdHJhbnNmb3JtPSJyb3RhdGUoLTI4IDMyIDMyKSIgLz4KICA8cmVjdCB4PSIyNyIgeT0iNCIgd2lkdGg9IjUiIGhlaWdodD0iMyIgcng9IjEiIGZpbGw9IiNGRjVBNUYiIHRyYW5zZm9ybT0icm90YXRlKC0yOCAzMiAzMikiIC8+CiAgPHJlY3QgeD0iMjgiIHk9IjI5IiB3aWR0aD0iNCIgaGVpZ2h0PSI2IiByeD0iMSIgZmlsbD0iIzAwQTY5OSIgdHJhbnNmb3JtPSJyb3RhdGUoLTI4IDMyIDMyKSIgLz4KCiAgPCEtLSBSaWdodCBza2kgd2l0aCBiaW5kaW5nIC0tPgogIDxyZWN0IHg9IjMyIiB5PSI2IiB3aWR0aD0iNCIgaGVpZ2h0PSI1MiIgcng9IjIiIHJ5PSIyIiBmaWxsPSIjRkZGRkZGIiB0cmFuc2Zvcm09InJvdGF0ZSgyOCAzMiAzMikiIC8+CiAgPHJlY3QgeD0iMzIiIHk9IjQiIHdpZHRoPSI1IiBoZWlnaHQ9IjMiIHJ4PSIxIiBmaWxsPSIjRkY1QTVGIiB0cmFuc2Zvcm09InJvdGF0ZSgyOCAzMiAzMikiIC8+CiAgPHJlY3QgeD0iMzIiIHk9IjI5IiB3aWR0aD0iNCIgaGVpZ2h0PSI2IiByeD0iMSIgZmlsbD0iIzAwQTY5OSIgdHJhbnNmb3JtPSJyb3RhdGUoMjggMzIgMzIpIiAvPgoKICA8IS0tIENlbnRlciBzbm93IGJ1cnN0IC0tPgogIDxjaXJjbGUgY3g9IjMyIiBjeT0iMzIiIHI9IjQiIGZpbGw9IiNGRkZGRkYiIG9wYWNpdHk9IjAuNCIvPgogIDxjaXJjbGUgY3g9IjMyIiBjeT0iMzIiIHI9IjIiIGZpbGw9IiNGRkZGRkYiLz4KPC9zdmc+">
-    <link rel="stylesheet" href="styles.css?v=20260214a3">
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-YE98TE3N2J"></script>
-    <script>
-      window.dataLayer = window.dataLayer || [];
-      function gtag(){dataLayer.push(arguments);}
-      gtag('js', new Date());
-
-      gtag('config', 'G-YE98TE3N2J');
-    </script>
+<link rel="stylesheet" href="./styles.css">
 </head>
 <body>
-    <header>
-        <div class="header-content">
-            <div class="header-top">
-                <div class="header-left">
-                    <h1 class="logo">ice<span>coast</span></h1>
-                    <p class="main-tagline">Resort conditions for East Coast skiers and riders.</p>
-                </div>
-            </div>
-        </div>
-    </header>
-    <div class="newsletter-banner" role="region" aria-label="Newsletter signup">
-        <div class="newsletter-banner-content">
-            <p class="newsletter-banner-text">
-                <span class="newsletter-banner-icon" aria-hidden="true">✉️</span>
-                <span>
-                    <span class="newsletter-banner-title">The Icecoast Patrol Newsletter — <span class="newsletter-banner-title-sub">Every Thursday AM</span></span>
-                </span>
-            </p>
-            <a href="https://icecoast.beehiiv.com/" target="_blank" rel="noopener noreferrer" class="newsletter-banner-link" aria-label="Join the Icecoast newsletter">Join →</a>
-        </div>
+
+<!-- ═══════ MASTHEAD ══════════════════════════ -->
+<header class="masthead">
+  <div class="masthead-top">
+    <div class="nameplate">
+      <div class="nameplate-rule" id="nameplateRule">EST 2026 • EAST COAST • 0 RESORTS</div>
+      <div class="nameplate-logo">ice<em>coast</em></div>
+      <div class="nameplate-sub">Know the snow before you go · Your Morning Brief</div>
     </div>
 
-    <div class="filters">
-        <div class="filter-search-wrap">
-            <div class="search-bar" aria-hidden="true">
-                <span class="search-icon-wrap" id="searchIconWrap">
-                    <svg viewBox="0 0 24 24">
-                        <circle cx="10.5" cy="10.5" r="6.5"></circle>
-                        <line x1="20" y1="20" x2="15.8" y2="15.8"></line>
-                    </svg>
-                </span>
-                <span class="search-text-clip" id="searchTextClip">
-                </span>
-            </div>
-            <input
-                type="search"
-                id="resortSearch"
-                class="filter-search-input"
-                placeholder=""
-                aria-label="Search for a resort"
-                autocomplete="off"
-            >
-            <button type="button" id="clearResortSearch" class="filter-search-clear" aria-label="Clear search">&times;</button>
-        </div>
-        <div class="feature-tabs" id="featureTabs" aria-label="Site sections">
-            <button type="button" class="feature-tab active" data-feature-tab="all">All Resorts</button>
-            <button type="button" class="feature-tab" data-feature-tab="favorites">Favorites <span class="feature-tab-count" id="favoritesTabCount">0</span></button>
-            <button type="button" class="feature-tab is-soon" data-feature-tab="trail-journal" disabled aria-disabled="true">Patrol Lab <span class="feature-tab-soon">Soon</span></button>
-        </div>
-        <div class="filter-group">
-            <span class="filter-label">Sort:</span>
-            <select class="sort-select" id="sortSelect">
-                <option value="rating-high">Best Conditions</option>
-                <option value="rating-low">Worst Conditions</option>
-                <option value="snow-24h">Most Snow (24h)</option>
-                <option value="price-low">Lowest Price</option>
-                <option value="price-high">Highest Price</option>
-            </select>
-
-            <span class="filter-label">Region:</span>
-            <button class="filter-btn active" data-region="all">All</button>
-            <button class="filter-btn" data-region="poconos">PA</button>
-            <button class="filter-btn" data-region="new-york">NY</button>
-            <button class="filter-btn" data-region="vermont-south">South VT</button>
-            <button class="filter-btn" data-region="vermont-central">Central VT</button>
-            <button class="filter-btn" data-region="vermont-north">North VT</button>
-            <button class="filter-btn" data-region="massachusetts">MA</button>
-            <button class="filter-btn" data-region="connecticut">CT</button>
-            <button class="filter-btn" data-region="white-mountains">NH</button>
-            <button class="filter-btn" data-region="maine">ME</button>
-            <button class="filter-btn" data-region="canada">Oh, Canada!</button>
-
-            <span class="filter-label" style="margin-left: 1rem;">Pass:</span>
-            <button class="filter-btn active" data-pass="all">All</button>
-            <button class="filter-btn" data-pass="ikon">Ikon</button>
-            <button class="filter-btn" data-pass="epic">Epic</button>
-            <button class="filter-btn" data-pass="indy">Indy</button>
-
-            <span class="filter-label" style="margin-left: 1rem;">POW Watch:</span>
-            <button class="filter-btn active" data-vibe="all">All</button>
-            <button class="filter-btn" data-vibe="on">Active</button>
-            <button class="filter-btn" data-vibe="building">Building</button>
-            <button class="filter-btn" data-vibe="quiet">Quiet</button>
-
-            <span class="filter-label" style="margin-left: 1rem;">Slope Signal:</span>
-            <button class="filter-btn active" data-signal="all">All</button>
-            <button class="filter-btn" data-signal="send">Send It</button>
-            <button class="filter-btn" data-signal="avoid">Avoid</button>
-        </div>
+    <div class="masthead-right">
+      <div class="masthead-date">
+        <span class="live-dot"></span>
+        <span id="liveTime">Fri, Feb 20 · 6:14 AM</span>
+      </div>
+      <div class="masthead-tabs">
+        <button class="m-tab active" data-tab="all">All</button>
+        <button class="m-tab" data-tab="favorites">Saved</button>
+        <button class="m-tab" data-tab="newsletter">Patrol →</button>
+      </div>
     </div>
+  </div>
 
-    <div class="resort-grid" id="resortGrid">
-        <div class="loading">Loading resort data...</div>
+  <!-- THE DISPATCH -->
+  <div class="dispatch-bar" id="dispatchBar">
+    <div class="dispatch-label">
+      dispatch<span class="dispatch-cursor">|</span>
     </div>
-
-    <div class="share-modal-overlay" id="shareModalOverlay" aria-hidden="true">
-        <div class="share-modal" role="dialog" aria-modal="true" aria-labelledby="shareModalTitle">
-            <div class="share-modal-head">
-                <h3 id="shareModalTitle">Share Resort Conditions</h3>
-                <button type="button" class="share-modal-close" id="shareModalClose" aria-label="Close share">×</button>
-            </div>
-            <p class="share-modal-resort" id="shareModalResort">Resort</p>
-            <div class="share-modal-actions">
-                <button type="button" class="share-action-btn" id="shareCopyBtn">Copy link</button>
-                <button type="button" class="share-action-btn" id="shareNativeBtn">Share via Text</button>
-                <button type="button" class="share-action-btn" id="shareFacebookBtn">Share on Facebook</button>
-                <button type="button" class="share-action-btn" id="shareXBtn">Share on X</button>
-                <a class="share-action-btn share-action-link is-hidden" id="shareSaveImageLink" href="#" download target="_blank" rel="noopener noreferrer">Save image now</a>
-            </div>
-            <p class="share-modal-status" id="shareModalStatus" aria-live="polite"></p>
-        </div>
+    <input
+      type="search"
+      id="resortSearch"
+      class="dispatch-input"
+      placeholder="VT powder, Stowe, bluebird, Ikon resorts…"
+      autocomplete="off"
+      spellcheck="false"
+    >
+    <div class="dispatch-hints" id="dispatchHints">
+      <button class="d-hint" data-cmd="pow">⚡ POW</button>
+      <button class="d-hint" data-cmd="storm">🌨 Storm</button>
     </div>
-
-
-    <!-- 🏔️ BACK TO TOP BUTTON -->
-    <button class="back-to-top" id="backToTop" aria-label="Back to top">
-        <span class="skier-sparkles" aria-hidden="true">
-            <span class="sparkle">✦</span>
-            <span class="sparkle">✧</span>
-            <span class="sparkle">✦</span>
-        </span>
+    <button class="dispatch-expand-btn" id="dispatchExpandBtn" aria-expanded="false" title="More filters">
+      <span class="deb-label">filters</span>
+      <span class="deb-chevron">▾</span>
     </button>
+    <button class="dispatch-clear" id="clearSearch" aria-label="Clear">✕ clear</button>
+  </div>
 
+  <!-- DISPATCH DRAWER — states, passes, more vibes -->
+  <div class="dispatch-drawer" id="dispatchDrawer" aria-hidden="true">
+    <div class="drawer-inner">
 
-                <footer class="ski-footer">
-<div class="footer-credits">
+      <div class="drawer-col">
+        <div class="drawer-col-label">State / Province</div>
+        <div class="drawer-chips">
+          <button class="d-chip" data-group="state" data-cmd="vt">VT</button>
+          <button class="d-chip" data-group="state" data-cmd="me">ME</button>
+          <button class="d-chip" data-group="state" data-cmd="nh">NH</button>
+          <button class="d-chip" data-group="state" data-cmd="ny">NY</button>
+          <button class="d-chip" data-group="state" data-cmd="pa">PA</button>
+          <button class="d-chip" data-group="state" data-cmd="ma">MA</button>
+          <button class="d-chip" data-group="state" data-cmd="ct">CT</button>
+          <button class="d-chip" data-group="state" data-cmd="nj">NJ</button>
+          <button class="d-chip" data-group="state" data-cmd="wv">WV</button>
+          <button class="d-chip" data-group="state" data-cmd="qc">QC</button>
+        </div>
+      </div>
 
-            <div class="legal-footer">
-                <div class="legal-content">
+      <div class="drawer-divider"></div>
 
-                    <!-- Accordion Toggle Button -->
-                    <div class="legal-toggle" onclick="toggleLegal()">
-                        <span class="legal-toggle-text">Legal, Terms & Privacy Policy</span>
-                        <span class="legal-toggle-icon">▼</span>
-                    </div>
-                </div>
+      <div class="drawer-col">
+        <div class="drawer-col-label">Pass</div>
+        <div class="drawer-chips">
+          <button class="d-chip chip-ikon" data-group="pass" data-cmd="ikon">Ikon</button>
+          <button class="d-chip chip-epic" data-group="pass" data-cmd="epic">Epic</button>
+          <button class="d-chip chip-indy" data-group="pass" data-cmd="indy">Indy</button>
+          <button class="d-chip chip-indie" data-group="pass" data-cmd="indie">No Pass</button>
+        </div>
+      </div>
 
+      <div class="drawer-divider"></div>
 
+      <div class="drawer-col">
+        <div class="drawer-col-label">Conditions</div>
+        <div class="drawer-chips">
+          <button class="d-chip chip-pow" data-group="vibe" data-cmd="pow">⚡ POW On</button>
+          <button class="d-chip chip-storm" data-group="vibe" data-cmd="storm">🌨 Storm Coming</button>
+          <button class="d-chip chip-avoid" data-group="vibe" data-cmd="ice">🧊 Avoid (Ice)</button>
+          <button class="d-chip" data-group="vibe" data-cmd="cold">🥶 Cold (&lt; 20°)</button>
+        </div>
+      </div>
 
-                <div class="footer-credits">
+      <div class="drawer-divider"></div>
 
-                    <!-- Collapsible Legal Sections -->
-                    <div class="legal-accordion" id="legalAccordion">
+      <div class="drawer-col">
+        <div class="drawer-col-label">Region</div>
+        <div class="drawer-chips">
+          <button class="d-chip" data-group="region" data-cmd="northern-vt">N. Vermont</button>
+          <button class="d-chip" data-group="region" data-cmd="central-vt">C. Vermont</button>
+          <button class="d-chip" data-group="region" data-cmd="white-mtns">White Mtns</button>
+          <button class="d-chip" data-group="region" data-cmd="catskills">Catskills</button>
+          <button class="d-chip" data-group="region" data-cmd="adirondacks">Adirondacks</button>
+          <button class="d-chip" data-group="region" data-cmd="maine">Maine</button>
+          <button class="d-chip" data-group="region" data-cmd="poconos">Poconos</button>
+          <button class="d-chip" data-group="region" data-cmd="canada">Canada</button>
+        </div>
+      </div>
 
-                        <!-- Copyright Notice -->
-                        <div class="legal-section">
-                            <h3>Copyright & Intellectual Property</h3>
-                            <p>© 2026 icecoast.ski. All rights reserved. The design, code, layout, and compilation of this website, including but not limited to text, graphics, interfaces, and the selection and arrangement thereof, are protected by copyright, trademark, and other intellectual property laws. Unauthorized reproduction, modification, distribution, or commercial use of any materials from this site is strictly prohibited without prior written permission.</p>
-                        </div>
+    </div>
+  </div>
+</header>
 
-                        <!-- Data Accuracy Disclaimer -->
-                        <div class="legal-section">
-                            <h3>Data Accuracy & Reliability Disclaimer</h3>
-                            <p><strong>USE AT YOUR OWN RISK.</strong> All ski resort conditions, weather data, lift status, snowfall reports, and other information ("Data") displayed on this website are provided for informational purposes only and should be considered <strong>estimates and approximations</strong>. Data is aggregated from third-party sources and may be delayed, inaccurate, incomplete, or outdated by up to 15-30 minutes or more.</p>
+<!-- ═══════ THE BRIEF ═════════════════════════ -->
+<main class="brief">
 
-                            <p><strong>We make no representations, warranties, or guarantees</strong> regarding the accuracy, completeness, timeliness, or reliability of any Data presented. Actual resort conditions may differ significantly from those displayed. Users are strongly advised to <strong>verify all information directly with the resort</strong> before making travel or skiing decisions.</p>
+  <!-- LEAD STORIES — top 2 when there's signal -->
+  <hr class="section-rule" data-label="Today's Lead" data-count="Top stories">
+  <div class="lead-zone" id="leadZone">
 
-                            <p>Ski resort conditions can change rapidly due to weather, temperature, and operational factors. This website is not affiliated with, endorsed by, or operated by any ski resort, and resorts are not responsible for information displayed here.</p>
-                        </div>
+    <!-- Lead 1 — POW ALERT -->
+    <article class="lead-story">
+      <div class="lead-signal pow">
+        <span class="sig-dot"></span>
+        Powder Alert · 8" / 24h
+      </div>
+      <h2 class="lead-headline">Sugarloaf is <em>nuking</em></h2>
+      <p class="lead-deck">15.2" forecast over 72 hours. Storm still building. The Maine contingent is already in the lift line.</p>
+      <div class="lead-stats">
+        <div class="lead-stat">
+          <div class="lead-stat-val big">8"</div>
+          <div class="lead-stat-lbl">Fresh 24h</div>
+        </div>
+        <div class="lead-stat">
+          <div class="lead-stat-val">15.2"</div>
+          <div class="lead-stat-lbl">72h Total</div>
+        </div>
+        <div class="lead-stat">
+          <div class="lead-stat-val">16°F</div>
+          <div class="lead-stat-lbl">Summit</div>
+        </div>
+        <div class="lead-stat">
+          <div class="lead-stat-val">6 mph</div>
+          <div class="lead-stat-lbl">Wind</div>
+        </div>
+      </div>
+      <div class="forecast-row" id="lead1Forecast">
+        <!-- Injected by JS -->
+      </div>
+    </article>
 
-                        <!-- Limitation of Liability -->
-                        <div class="legal-section">
-                            <h3>Limitation of Liability</h3>
-                            <p>TO THE FULLEST EXTENT PERMITTED BY LAW, icecoast.ski, its operators, contributors, and data providers SHALL NOT BE LIABLE for any direct, indirect, incidental, consequential, special, or punitive damages, including but not limited to:</p>
-                            <ul>
-                                <li>Lost time, money, or resources spent traveling to resorts based on Data displayed</li>
-                                <li>Personal injury, property damage, or accidents resulting from reliance on displayed conditions</li>
-                                <li>Inaccurate, outdated, or missing information about lift status, terrain openings, or weather</li>
-                                <li>Service interruptions, data errors, or website downtime</li>
-                                <li>Decisions made based on pricing, pass information, or resort ratings displayed</li>
-                            </ul>
-                            <p>By using this website, you acknowledge and agree that <strong>you assume all risks</strong> associated with skiing, snowboarding, and outdoor winter activities. You are solely responsible for assessing conditions, making safe decisions, and following all resort safety guidelines.</p>
-                        </div>
+    <!-- Lead 2 — Storm building -->
+    <article class="lead-story">
+      <div class="lead-signal building">
+        <span class="sig-dot"></span>
+        Storm Building · Track This
+      </div>
+      <h2 class="lead-headline">Stowe: <em>12" incoming</em></h2>
+      <p class="lead-deck">NWS calling for 9–15" over the next 72 hours. Current conditions already solid. Could be a moment.</p>
+      <div class="lead-stats">
+        <div class="lead-stat">
+          <div class="lead-stat-val big">6"</div>
+          <div class="lead-stat-lbl">Fresh 24h</div>
+        </div>
+        <div class="lead-stat">
+          <div class="lead-stat-val">12.1"</div>
+          <div class="lead-stat-lbl">72h Forecast</div>
+        </div>
+        <div class="lead-stat">
+          <div class="lead-stat-val">22°F</div>
+          <div class="lead-stat-lbl">Summit</div>
+        </div>
+        <div class="lead-stat">
+          <div class="lead-stat-val">8 mph</div>
+          <div class="lead-stat-lbl">Wind</div>
+        </div>
+      </div>
+      <div class="forecast-row" id="lead2Forecast"></div>
+    </article>
 
-                        <!-- No Warranty -->
-                        <div class="legal-section">
-                            <h3>No Warranty</h3>
-                            <p>THIS WEBSITE AND ALL DATA ARE PROVIDED "AS IS" AND "AS AVAILABLE" WITHOUT ANY WARRANTY OF ANY KIND, either express or implied, including but not limited to warranties of merchantability, fitness for a particular purpose, accuracy, or non-infringement. We do not warrant that the website will be uninterrupted, error-free, or free from viruses or other harmful components.</p>
-                        </div>
+  </div><!-- /lead-zone -->
 
-                        <!-- Third-Party Data Sources -->
-                        <div class="legal-section">
-                            <h3>Third-Party Data & Links</h3>
-                            <p>Data is sourced from third-party APIs including OpenWeather, Liftie, and other public data sources. We are not responsible for the accuracy or availability of third-party data. Links to external websites (ski resorts, pass providers, etc.) are provided for convenience only. We do not endorse or control the content of external sites and are not responsible for their practices or policies.</p>
-                        </div>
+  <!-- ACTIVE DISPATCH TAGS -->
+  <div class="active-dispatch" id="activeDispatch"></div>
 
-                        <!-- Code & Design Protection -->
-                        <div class="legal-section">
-                            <h3>Code Protection & Terms of Use</h3>
-                            <p>The source code, algorithms, API integrations, design elements, and technical implementation of this website are proprietary and protected intellectual property. <strong>Scraping, copying, reverse-engineering, or unauthorized use of this website's code or data is prohibited.</strong></p>
+  <!-- TICKER — all 49 resorts, ranked -->
+  <hr class="section-rule" data-label="All Resorts" data-count="49 reporting" style="margin-top:0.8rem">
 
-                            <p>Automated access (bots, scrapers, crawlers) that exceeds reasonable personal use is forbidden. Standard search-engine indexing (for example Googlebot/Bingbot) is permitted. Commercial use, redistribution, or republication of Data without written permission is strictly prohibited. Violators may be subject to legal action under copyright and computer fraud laws.</p>
-                        </div>
+  <div class="ticker-zone">
+    <div class="ticker-header">
+      <div class="th">#</div>
+      <div class="th">Resort</div>
+      <div class="th">Conditions</div>
+      <div class="th right">24h Snow</div>
+      <div class="th right">Temp</div>
+      <div class="th right">Rating</div>
+      <div class="th right">POW</div>
+    </div>
 
-                        <!-- Privacy & Data Collection -->
-                        <div class="legal-section">
-                            <h3>Privacy Policy</h3>
-                            <p><strong>No Personal Data Collection:</strong> This website does not collect, store, or process personal information. We do not use cookies, tracking pixels, or analytics that identify individual users. Your browsing of this site is anonymous.</p>
+    <div id="resortTicker">
+      <!-- Injected by JS -->
+    </div>
+  </div>
 
-                            <p><strong>Third-Party Services:</strong> This website uses Cloudflare for hosting and security. Cloudflare may collect technical information (IP addresses, browser type) for security and performance purposes. Refer to <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare's Privacy Policy</a> for details.</p>
+</main>
 
-                            <p>External links to ski resort websites, donation platforms, or third-party services are governed by their respective privacy policies.</p>
-                        </div>
+<footer class="brief-footer">
+  <div class="footer-copy">
+    <span class="live-dot"></span>
+    Live · Data from OpenWeather + Liftie · Updated every 15 min · Built for East Coasters by an East Coaster
+  </div>
+  <div class="footer-links">
+    <a href="https://icecoast.beehiiv.com/" class="footer-link" target="_blank">Newsletter</a>
+    <a href="#" class="footer-link">Legal</a>
+    <a href="#" class="footer-link">Keep your tips up ↑</a>
+  </div>
+</footer>
 
-                        <!-- Changes to Terms -->
-                        <div class="legal-section">
-                            <h3>Changes & Updates</h3>
-                            <p>We reserve the right to modify these terms, disclaimers, or website features at any time without notice. Continued use of the website constitutes acceptance of any changes. If you do not agree with these terms, discontinue use immediately.</p>
-                        </div>
-
-                        <!-- Contact & Enforcement -->
-                        <div class="legal-section">
-                            <h3>Governing Law & Contact</h3>
-                            <p>These terms are governed by the laws of the State of New Jersey, USA, without regard to conflict of law principles. Any disputes shall be resolved in courts located in New Jersey.</p>
-
-                            <p>For questions, permissions, or legal concerns, contact: <strong><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="681b0d060c011c28010b0d0b07091b1c461b0301">[email&#160;protected]</a></strong></p>
-                        </div>
-                    </div>
-                    <!-- End Accordion -->
-                    <!-- Attribution (Always Visible) -->
-                    <div class="legal-attribution">
-                        <p><small>Data sources: OpenWeather API, Liftie API. Resort logos and trademarks are property of their respective owners. This site is not affiliated with Ikon Pass, Epic Pass, or any ski resort.</small></p>
-                    </div>
-
-                    <!-- Simple Footer (Always Visible) -->
-                    <div class="legal-simple">
-                        <p>Made with 🧊 for east coast skiers & boarders | <a href="#top" id="keepTipsUpLink">keep your tips up</a></p>
-                        <p><strong>Last Updated:</strong> February 2026</p>
-                    </div>
-                </div>
-            </div>
-            </footer>
-    <script src="resorts.js?v=20260214d1"></script>
-    <script src="manual-data.js?v=20260212a1"></script>
-    <script>
-      window.ICECOAST_ETA_CONFIG = {
-        enabled: true,
-        killSwitch: false,
-        maxCallsPerDay: 300,
-        maxCallsPerMonth: 8000,
-        cacheMinutes: 10,
-        timeoutMs: 9000
-      };
-    </script>
-    <script src="app.js?v=20260221b1"></script>
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+<script src="../resorts.js"></script>
+<script src="../manual-data.js"></script>
+<script src="./app.js"></script>
 </body>
 </html>
