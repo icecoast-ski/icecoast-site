@@ -1092,7 +1092,21 @@ body {
   text-transform: uppercase;
   color: var(--ink-faint);
 }
-.det-fc-icon { font-size: 1.2rem; line-height: 1; }
+.det-fc-icon {
+  width: 22px;
+  height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+}
+.det-fc-icon img {
+  width: 20px;
+  height: 20px;
+  object-fit: contain;
+  display: block;
+  filter: saturate(0.95) contrast(1.05);
+}
 .det-fc-hi {
   font-family: var(--mono);
   font-size: 0.8rem;
