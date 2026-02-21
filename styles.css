@@ -263,6 +263,7 @@ body {
   cursor: pointer;
   transition: all 0.15s;
   flex-shrink: 0;
+  margin-left: auto;
   user-select: none;
 }
 .dispatch-expand-btn:hover { background: var(--ink); color: var(--paper); }
@@ -291,6 +292,7 @@ body {
   align-items: flex-start;
   overflow-x: auto;
   scrollbar-width: none;
+  position: relative;
 }
 .drawer-inner::-webkit-scrollbar { display: none; }
 
@@ -300,6 +302,8 @@ body {
   align-self: stretch;
   flex-shrink: 0;
   margin: 0 0.85rem;
+  opacity: 0;
+  transform: translateX(20px);
 }
 
 .drawer-col {
@@ -307,6 +311,8 @@ body {
   display: flex;
   flex-direction: column;
   gap: 0.38rem;
+  opacity: 0;
+  transform: translateX(20px);
 }
 
 .drawer-col-label {
@@ -327,6 +333,38 @@ body {
   flex-wrap: wrap;
   gap: 4px;
   max-width: 260px;
+}
+
+.dispatch-drawer.open .drawer-col,
+.dispatch-drawer.open .drawer-divider {
+  animation: drawerSettleIn 0.58s var(--spring) both;
+}
+.dispatch-drawer.open .drawer-col:nth-child(odd),
+.dispatch-drawer.open .drawer-divider:nth-child(odd) { --from-x: -22px; }
+.dispatch-drawer.open .drawer-col:nth-child(even),
+.dispatch-drawer.open .drawer-divider:nth-child(even) { --from-x: 22px; }
+.dispatch-drawer.open .drawer-inner > :nth-child(1) { animation-delay: 0.00s; }
+.dispatch-drawer.open .drawer-inner > :nth-child(2) { animation-delay: 0.04s; }
+.dispatch-drawer.open .drawer-inner > :nth-child(3) { animation-delay: 0.08s; }
+.dispatch-drawer.open .drawer-inner > :nth-child(4) { animation-delay: 0.12s; }
+.dispatch-drawer.open .drawer-inner > :nth-child(5) { animation-delay: 0.16s; }
+.dispatch-drawer.open .drawer-inner > :nth-child(6) { animation-delay: 0.20s; }
+.dispatch-drawer.open .drawer-inner > :nth-child(7) { animation-delay: 0.24s; }
+.dispatch-drawer.open .drawer-inner > :nth-child(8) { animation-delay: 0.28s; }
+
+@keyframes drawerSettleIn {
+  0% {
+    opacity: 0;
+    transform: translateX(var(--from-x, 20px));
+  }
+  68% {
+    opacity: 1;
+    transform: translateX(calc(var(--from-x, 20px) * -0.18));
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 /* The chips */
