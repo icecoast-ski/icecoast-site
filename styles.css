@@ -210,6 +210,8 @@ body {
   caret-color: var(--pow);
   padding: 0;
   min-width: 0;
+  -webkit-mask-image: linear-gradient(to right, #000 0%, #000 82%, transparent 100%);
+  mask-image: linear-gradient(to right, #000 0%, #000 82%, transparent 100%);
 }
 
 /* Prevent iOS Safari auto-zoom on focus */

@@ -989,14 +989,6 @@ function attachUi() {
           inner.classList.remove('hint-anim');
           void inner.offsetWidth;
           inner.classList.add('hint-anim');
-          inner.scrollLeft = 0;
-          // Strong horizontal affordance: nudge right, then settle back.
-          setTimeout(() => {
-            inner.scrollTo({ left: 34, behavior: 'smooth' });
-            setTimeout(() => {
-              inner.scrollTo({ left: 0, behavior: 'smooth' });
-            }, 320);
-          }, 90);
           setTimeout(() => inner.classList.remove('hint-anim'), 900);
         }
       }
