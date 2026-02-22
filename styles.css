@@ -42,6 +42,30 @@ body {
     url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E");
 }
 
+body.storm-mode {
+  --paper: #0d1323;
+  --paper-warm: #111a2f;
+  --ink: #f3f6ff;
+  --ink-soft: #cad3eb;
+  --ink-faint: #9da9c8;
+  --rule: rgba(230, 236, 255, 0.16);
+  --rule-heavy: rgba(230, 236, 255, 0.3);
+  --pow-pale: rgba(26, 94, 245, 0.25);
+}
+
+body.storm-mode .masthead,
+body.storm-mode .dispatch-expand-btn,
+body.storm-mode .d-hint,
+body.storm-mode .dispatch-clear {
+  color: var(--ink-faint);
+}
+
+body.storm-mode .m-tab.active,
+body.storm-mode .m-tab:hover {
+  background: var(--pow);
+  color: #fff;
+}
+
 /* ═══════════════════════════════════════
    MASTHEAD — newspaper front page energy
 ═══════════════════════════════════════ */
@@ -478,6 +502,266 @@ body {
   padding: 0 1.5rem 4rem;
 }
 
+.local-cta {
+  margin: 0.9rem 0 0.8rem;
+  padding: 0.75rem 0 0.7rem;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.65rem 1rem;
+  align-items: center;
+}
+
+.local-cta-title {
+  font-family: var(--serif);
+  font-size: 1.2rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+  line-height: 1.05;
+}
+
+.local-cta-sub {
+  margin-top: 0.22rem;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.local-cta-actions {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+}
+
+.local-cta-btn {
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #fff;
+  background: var(--pow);
+  border: 1px solid var(--pow);
+  padding: 0.36rem 0.62rem;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+}
+
+.local-cta-btn:hover {
+  background: #0d4be0;
+  border-color: #0d4be0;
+}
+
+.saved-brief {
+  margin: 0.75rem 0 0.9rem;
+  border-top: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
+  padding: 0.72rem 0 0.66rem;
+}
+
+.saved-brief-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 0.8rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.45rem;
+}
+
+.saved-brief-title {
+  font-family: var(--serif);
+  font-size: 1.12rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.saved-brief-alerts { display: flex; align-items: center; gap: 0.5rem; }
+
+.saved-alert-btn,
+.saved-alert-link {
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.saved-alert-btn {
+  border: 1px solid var(--rule-heavy);
+  background: transparent;
+  color: var(--ink-faint);
+  padding: 0.28rem 0.48rem;
+  cursor: pointer;
+}
+
+.saved-alert-btn.on {
+  background: var(--pow);
+  border-color: var(--pow);
+  color: #fff;
+}
+
+.saved-alert-link {
+  color: var(--ink-faint);
+  text-decoration: none;
+  border-bottom: 1px solid var(--rule);
+}
+
+.detail-pass-price {
+  margin-left: auto;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.detail-pass {
+  font-family: var(--mono);
+  font-size: 0.48rem;
+  color: var(--ink-faint);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.detail-price {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.saved-brief-list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.saved-item {
+  border: 1px solid var(--rule);
+  padding: 0.45rem 0.5rem;
+  background: rgba(26,94,245,0.02);
+}
+
+.saved-item-name {
+  font-family: var(--serif);
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: var(--ink);
+  margin-bottom: 0.2rem;
+}
+
+.saved-item-verdict {
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-bottom: 0.18rem;
+}
+
+.saved-item-note {
+  font-family: var(--sans);
+  font-size: 0.76rem;
+  line-height: 1.35;
+  color: var(--ink-soft);
+}
+
+.saved-brief-compare {
+  margin-top: 0.48rem;
+  font-family: var(--mono);
+  font-size: 0.53rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.local-cta-status {
+  grid-column: 1 / -1;
+  min-height: 1.1em;
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  color: var(--ink-soft);
+  letter-spacing: 0.05em;
+}
+
+.storm-hero {
+  margin: 0.85rem 0 0.95rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--rule-heavy);
+  background:
+    radial-gradient(120% 110% at 100% 0%, rgba(26,94,245,0.22) 0%, rgba(26,94,245,0) 45%),
+    linear-gradient(145deg, rgba(17,26,47,0.95), rgba(13,19,35,0.95));
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,0.04);
+}
+
+.storm-hero-kicker {
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: #9fc0ff;
+  margin-bottom: 0.35rem;
+}
+
+.storm-hero-title {
+  font-family: var(--serif);
+  font-size: 2rem;
+  font-weight: 900;
+  line-height: 1.02;
+  letter-spacing: -0.02em;
+  color: #f3f6ff;
+  margin-bottom: 0.35rem;
+}
+
+.storm-hero-deck {
+  font-family: var(--sans);
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.5;
+  color: #d7dff2;
+  max-width: 72ch;
+}
+
+.storm-hero-meta {
+  margin-top: 0.52rem;
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #b8c7e9;
+}
+
+.storm-group-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.7rem;
+  padding: 0.58rem 0 0.42rem;
+  border-bottom: 1px solid var(--rule-heavy);
+}
+
+.storm-group-state {
+  font-family: var(--mono);
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.storm-group-meta {
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
 /* ── SECTION RULE ── */
 .section-rule {
   border: none;
@@ -581,15 +865,19 @@ body {
 .lead-headline em {
   font-style: italic;
   color: var(--pow);
+  font-weight: 700;
 }
 
 .lead-deck {
   font-family: var(--serif);
   font-style: italic;
-  font-size: 0.88rem;
+  font-size: 0.96rem;
+  font-weight: 400;
   color: var(--ink-soft);
   line-height: 1.5;
-  margin-bottom: 0.6rem;
+  letter-spacing: 0;
+  margin-bottom: 0.68rem;
+  max-width: 56ch;
 }
 
 /* Lead stats — inline, tight */
@@ -790,8 +1078,11 @@ body {
 
 /* Condition pill */
 .rr-cond {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
   font-family: var(--mono);
-  font-size: 0.6rem;
+  font-size: 0.58rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--ink-soft);
@@ -800,6 +1091,21 @@ body {
   text-overflow: ellipsis;
   align-self: center;
 }
+
+.wind-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 11px;
+  height: 11px;
+  border-radius: 50%;
+  font-size: 0.42rem;
+  font-weight: 700;
+  line-height: 1;
+}
+.wind-badge.high { background: rgba(220,38,38,0.18); color: #b91c1c; }
+.wind-badge.med  { background: rgba(217,119,6,0.18); color: #a16207; }
+.wind-badge.low  { background: rgba(21,128,61,0.18); color: #166534; }
 
 /* Stats cols */
 .rr-stat {
@@ -1017,6 +1323,16 @@ body {
   line-height: 1.45;
 }
 .det-nws-brief strong { color: var(--ink); }
+
+.det-terrain-note {
+  font-family: var(--sans);
+  font-size: 0.68rem;
+  line-height: 1.45;
+  color: var(--ink-soft);
+  margin-top: 0.36rem;
+  border-left: 2px solid var(--ink-faint);
+  padding-left: 0.48rem;
+}
 .det-confidence {
   font-family: var(--mono);
   font-size: 0.5rem;
@@ -1393,6 +1709,12 @@ body {
   .lead-headline { font-size: 1.45rem; }
   .lead-stats { gap: 0.75rem; }
   .dispatch-hints { display: none; } /* hide top hints on very small — use drawer */
+  .local-cta {
+    grid-template-columns: 1fr;
+    gap: 0.55rem;
+  }
+  .local-cta-title { font-size: 1.05rem; }
+  .saved-brief-list { grid-template-columns: 1fr; }
 }
 
 /* Print-like weight rhythm */

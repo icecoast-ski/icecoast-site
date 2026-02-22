@@ -2,6 +2,20 @@ const DEFAULT_ENDPOINT = 'https://cloudflare-worker.rickt123-0f8.workers.dev/';
 const ENDPOINT_PARAM = new URLSearchParams(window.location.search).get('endpoint');
 const WORKER_ENDPOINT = (ENDPOINT_PARAM || localStorage.getItem('ICECOAST_BRIEF_ENDPOINT') || DEFAULT_ENDPOINT).trim();
 if (ENDPOINT_PARAM) localStorage.setItem('ICECOAST_BRIEF_ENDPOINT', WORKER_ENDPOINT);
+const LOCAL_PROFILE_KEY = 'brief_local_profile';
+const ALERT_INTENT_KEY = 'brief_alert_intent_4in';
+const HISTORY_KEY = 'brief_daily_history';
+const LOCAL_RADIUS_MI = 150;
+const STORM_MODE_CONFIG = {
+  minResortsAt4in: 5,
+  minTop10SnowSum: 40,
+  minStatesAt6in: 3
+};
+const DRIVE_MODEL = {
+  roadFactor: 1.22,
+  avgMph: 55,
+  fallbackPeakOffsetHr: 4
+};
 
 const RESORT_PASS_MEMBERSHIP = {
   'jack-frost': ['epic'], 'big-boulder': ['epic'], 'hunter': ['epic'], 'mount-snow': ['epic'],
@@ -30,14 +44,94 @@ const state = {
   sortKey: 'snow24',
   sortDir: 'desc',
   currentTab: 'all',
-  favorites: new Set(JSON.parse(localStorage.getItem('brief_favorites') || '[]')),
+  localMode: false,
+  userLocation: null,
+  locationLabel: '',
+  alertIntent4in: localStorage.getItem(ALERT_INTENT_KEY) === '1',
   resorts: [],
   loadedAt: null,
   source: 'fallback'
 };
 
-function saveFavorites() {
-  localStorage.setItem('brief_favorites', JSON.stringify(Array.from(state.favorites)));
+function saveLocalProfile() {
+  if (!state.localMode || !state.userLocation) {
+    localStorage.removeItem(LOCAL_PROFILE_KEY);
+    return;
+  }
+  localStorage.setItem(LOCAL_PROFILE_KEY, JSON.stringify({
+    localMode: true,
+    userLocation: state.userLocation,
+    locationLabel: state.locationLabel || ''
+  }));
+}
+
+function loadLocalProfile() {
+  try {
+    const raw = localStorage.getItem(LOCAL_PROFILE_KEY);
+    if (!raw) return;
+    const parsed = JSON.parse(raw);
+    if (!parsed || parsed.localMode !== true || !parsed.userLocation) return;
+    const lat = Number(parsed.userLocation.lat);
+    const lon = Number(parsed.userLocation.lon);
+    if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+    state.localMode = true;
+    state.userLocation = { lat, lon };
+    state.locationLabel = typeof parsed.locationLabel === 'string' ? parsed.locationLabel : '';
+  } catch (_err) {
+    // Ignore corrupted local profile.
+  }
+}
+
+function saveAlertIntent(on) {
+  state.alertIntent4in = Boolean(on);
+  localStorage.setItem(ALERT_INTENT_KEY, state.alertIntent4in ? '1' : '0');
+}
+
+function updateDailyHistorySnapshots() {
+  if (!Array.isArray(state.resorts) || !state.resorts.length) return;
+  const today = new Date().toISOString().slice(0, 10);
+  let history = [];
+  try {
+    history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  } catch (_err) {
+    history = [];
+  }
+  if (!Array.isArray(history)) history = [];
+  history = history.filter((x) => x && typeof x.date === 'string' && typeof x.rows === 'object').slice(-44);
+  const existingIdx = history.findIndex((h) => h.date === today);
+  const rows = {};
+  state.resorts.forEach((r) => {
+    rows[r.id] = Number(getDisplayPowTotals(r).snow24.toFixed(1));
+  });
+  const entry = { date: today, rows };
+  if (existingIdx >= 0) history[existingIdx] = entry;
+  else history.push(entry);
+  localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(-45)));
+}
+
+function getBestInDaysLabel(resort) {
+  let history = [];
+  try {
+    history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  } catch (_err) {
+    history = [];
+  }
+  if (!Array.isArray(history) || history.length < 2) return '';
+  const current = getDisplayPowTotals(resort).snow24;
+  if (!Number.isFinite(current) || current <= 0) return '';
+  const sorted = history
+    .filter((h) => h && typeof h.date === 'string' && h.rows && Number.isFinite(Number(h.rows[resort.id])))
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  if (sorted.length < 2) return '';
+  const today = sorted[sorted.length - 1];
+  const prev = sorted.slice(0, -1);
+  let days = 1;
+  for (let i = prev.length - 1; i >= 0; i -= 1) {
+    const v = Number(prev[i].rows[resort.id] || 0);
+    if (v >= current) break;
+    days += 1;
+  }
+  return days >= 4 ? `Best in ${days} days` : '';
 }
 
 function num(value, fallback = 0) {
@@ -73,6 +167,17 @@ function getLocCode(location) {
 function toNumOrNull(value) {
   const n = Number(value);
   return Number.isFinite(n) ? n : null;
+}
+
+function haversineMiles(lat1, lon1, lat2, lon2) {
+  const toRad = (d) => (d * Math.PI) / 180;
+  const R = 3958.8;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const a = Math.sin(dLat / 2) ** 2
+    + Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+  return R * c;
 }
 
 function normalizePowWatch(rawPowWatch) {
@@ -307,6 +412,8 @@ function mapLiveToBrief(id, live, catalogMap) {
     id,
     name: meta.name || slugToName(id),
     loc: getLocCode(meta.location || meta.loc || ''),
+    lat: toNumOrNull(meta.lat),
+    lon: toNumOrNull(meta.lon),
     region: meta.region || '',
     conditions: live?.conditions || live?.weather?.condition || 'Unknown',
     rating,
@@ -334,7 +441,8 @@ function mapLiveToBrief(id, live, catalogMap) {
       : [],
     passes,
     trails,
-    price
+    price,
+    terrainNote: typeof live?.terrainNote === 'string' ? live.terrainNote.trim() : ''
   };
 }
 
@@ -377,6 +485,11 @@ function applyManualOverridesToResorts() {
 
     if (typeof ov.conditions === 'string' && ov.conditions.trim()) {
       next.conditions = ov.conditions.trim();
+    }
+    if (typeof ov.terrainNote === 'string') {
+      next.terrainNote = ov.terrainNote.trim();
+    } else if (typeof ov.patrolNote === 'string') {
+      next.terrainNote = ov.patrolNote.trim();
     }
     if (Number.isFinite(Number(ov.icecoastRating))) {
       next.rating = Math.max(1, Math.min(5, Math.round(Number(ov.icecoastRating))));
@@ -530,31 +643,201 @@ function pickWithAvoid(arr, avoidValue) {
   return pick(filtered.length ? filtered : arr);
 }
 
+const WEAK_HEADLINE_VERBS = new Set([
+  'running',
+  'showing up',
+  'holding',
+  'making it work',
+  'working'
+]);
+
+const NEVER_HEADLINE_VERBS = new Set([
+  'being the loaf',
+  'being jay',
+  'being stowe',
+  'being gore',
+  'being the beast',
+  'holding court',
+  'doing the classics',
+  'open late',
+  'en fuego'
+]);
+
+const STRONG_VERBS_BY_TIER = {
+  nuclear: ['getting nuked', 'firing hard', 'going off', 'stacking deep'],
+  sending: ['firing', 'delivering', 'stacking up', 'skiing soft'],
+  building: ['loading up', 'lining up', 'on deck', 'trending up'],
+  quiet: ['skiing fast', 'holding good snow', 'riding clean', 'worth laps']
+};
+
+const REGION_VOICE = {
+  'vermont-north': ['Green Mountain weather doing Green Mountain weather things.'],
+  'vermont-central': ['Mad River Valley energy is fully online.'],
+  'maine': ['Maine legs required.'],
+  'white-mountains': ['Granite State turns are in play.'],
+  'adirondacks': ['ADK laps are worth the drive right now.'],
+  'catskills': ['Catskills are punching above their weight today.'],
+  'poconos': ['Pocono grinders can make this work.'],
+  'canada': ['Québec cold keeps this snow honest.']
+};
+
+function getLoreTier(resort, totals) {
+  if (totals.snow24 >= 8) return 'nuclear';
+  if (totals.snow24 >= 4) return 'sending';
+  if (resort.pow === 'building') return 'building';
+  return 'quiet';
+}
+
+function normalizeVerb(v) {
+  return String(v || '').trim().toLowerCase();
+}
+
+function chooseHeadlineVerb({ tier, totals, avoidVerb, seedVerb, candidateVerbs = [] }) {
+  const avoid = normalizeVerb(avoidVerb);
+  const seeded = normalizeVerb(seedVerb);
+  const needsHighEnergy = totals.snow24 >= 4 || totals.snow72 >= 8;
+  const desired = Array.isArray(candidateVerbs) ? candidateVerbs.slice() : [];
+  if (seeded) desired.unshift(seedVerb);
+  let filtered = desired.filter((v) => {
+    const nv = normalizeVerb(v);
+    return nv !== avoid && !NEVER_HEADLINE_VERBS.has(nv);
+  });
+
+  if (needsHighEnergy) {
+    filtered = filtered.filter((v) => !WEAK_HEADLINE_VERBS.has(normalizeVerb(v)));
+  }
+
+  if (!filtered.length) {
+    filtered = (STRONG_VERBS_BY_TIER[tier] || STRONG_VERBS_BY_TIER.sending)
+      .filter((v) => normalizeVerb(v) !== avoid && !NEVER_HEADLINE_VERBS.has(normalizeVerb(v)));
+  }
+
+  return pick(filtered.length ? filtered : STRONG_VERBS_BY_TIER.sending);
+}
+
+function buildDelightDeck(resort, tier) {
+  const cultureLine = pick(REGION_VOICE[resort.region] || ['East Coast legs required.']);
+  const powCtx = getPowDisplayContext(resort);
+  const windRisk = String(resort?.powWatch?.windHoldRisk?.level || '').toUpperCase();
+  const hasAlert = Boolean(resort?.powWatch?.alert?.active && resort?.powWatch?.alert?.event);
+  const snowQuality = String(resort.conditions || '').trim();
+
+  if (tier === 'nuclear') {
+    if (hasAlert) return `${snowQuality}, and the latest ${resort.powWatch.alert.event.toLowerCase()} keeps this in send mode. ${cultureLine}`;
+    return `${snowQuality} and legitimately deep right now. ${cultureLine}`;
+  }
+
+  if (tier === 'sending') {
+    if (windRisk === 'HIGH') return `${snowQuality}; expect occasional wind holds, but the skiing is still there. ${cultureLine}`;
+    return `${snowQuality} with fresh legs all over this mountain today. ${cultureLine}`;
+  }
+
+  if (tier === 'building') {
+    if (powCtx.displayPowBrief) return `${powCtx.displayPowBrief} ${cultureLine}`;
+    return `Forecast is lining up and this place is a smart watchlist move. ${cultureLine}`;
+  }
+
+  if (windRisk === 'HIGH') return `${snowQuality} with quick, edgey turns; keep an eye on lift ops in gusts. ${cultureLine}`;
+  return `${snowQuality} and clean carving if you pick your terrain right. ${cultureLine}`;
+}
+
 function getLeadLore(resort, options = {}) {
   const sharedLexicon = (typeof window !== 'undefined' && window.ICECOAST_LEXICON) ? window.ICECOAST_LEXICON : null;
-  if (sharedLexicon && typeof sharedLexicon.getVerb === 'function') {
-    return sharedLexicon.getVerb(resort, options);
-  }
-
   const avoidVerb = typeof options.avoidVerb === 'string' ? options.avoidVerb : '';
-  const lore = RESORT_LORE[resort.id];
   const totals = getDisplayPowTotals(resort);
-  const tier = totals.snow24 >= 8
-    ? 'nuclear'
-    : (totals.snow24 >= 4 ? 'sending' : (resort.pow === 'building' ? 'building' : 'quiet'));
+  const tier = getLoreTier(resort, totals);
+  const lore = RESORT_LORE[resort.id];
+  let base = null;
 
-  if (lore) {
-    const t = lore[tier] || lore.quiet;
-    return { verb: pickWithAvoid(t.verbs, avoidVerb), deck: pick(t.decks), displayName: lore.name };
+  if (sharedLexicon && typeof sharedLexicon.getVerb === 'function') {
+    base = sharedLexicon.getVerb(resort, options);
   }
 
-  const regionLore = REGION_LORE[resort.region] || { nuclear: ['going deep'], sending: ['stacking'], building: ['building'], quiet: ['running'] };
-  const verbs = regionLore[tier] || regionLore.quiet;
+  if (!base && lore) {
+    const t = lore[tier] || lore.quiet;
+    base = { verb: pickWithAvoid(t.verbs, avoidVerb), deck: pick(t.decks), displayName: lore.name };
+  }
+
+  const regionLore = REGION_LORE[resort.region] || {
+    nuclear: ['going deep'],
+    sending: ['stacking'],
+    building: ['building'],
+    quiet: ['running']
+  };
+  const tierLore = lore ? (lore[tier] || lore.quiet) : null;
+  const candidateVerbs = [
+    ...(tierLore?.verbs || []),
+    ...((regionLore[tier] || regionLore.quiet) || [])
+  ];
+  const selectedVerb = chooseHeadlineVerb({
+    tier,
+    totals,
+    avoidVerb,
+    seedVerb: base?.verb,
+    candidateVerbs
+  });
+
   return {
-    verb: pickWithAvoid(verbs, avoidVerb),
-    deck: resort.nwsBrief || 'Conditions are live. Check before you go.',
+    verb: selectedVerb,
+    deck: buildDelightDeck(resort, tier),
     displayName: resort.name
   };
+}
+
+function getLocalLeadList() {
+  if (!state.localMode || !state.userLocation) return null;
+  const withDistance = state.resorts
+    .filter((r) => Number.isFinite(r.lat) && Number.isFinite(r.lon))
+    .map((r) => {
+      const miles = haversineMiles(state.userLocation.lat, state.userLocation.lon, r.lat, r.lon);
+      return { ...r, _distanceMiles: miles };
+    });
+
+  if (!withDistance.length) return null;
+
+  const inRadius = withDistance.filter((r) => r._distanceMiles <= LOCAL_RADIUS_MI);
+  const pool = inRadius.length >= 2
+    ? inRadius
+    : withDistance.sort((a, b) => a._distanceMiles - b._distanceMiles).slice(0, 10);
+
+  const powRankMap = { on: 0, building: 1, quiet: 2 };
+  return pool.sort((a, b) => {
+    const snowDiff = getDisplayPowTotals(b).snow24 - getDisplayPowTotals(a).snow24;
+    if (snowDiff !== 0) return snowDiff;
+    const powDiff = (powRankMap[a.pow] ?? 2) - (powRankMap[b.pow] ?? 2);
+    if (powDiff !== 0) return powDiff;
+    const distDiff = (a._distanceMiles ?? 9999) - (b._distanceMiles ?? 9999);
+    if (distDiff !== 0) return distDiff;
+    return b.rating - a.rating;
+  });
+}
+
+function updateLocalStatus() {
+  const statusEl = document.getElementById('localStatus');
+  if (!statusEl) return;
+  if (!state.localMode || !state.userLocation) {
+    statusEl.textContent = '';
+    return;
+  }
+  const localList = getLocalLeadList();
+  if (!localList || !localList.length) {
+    statusEl.textContent = 'Local mode on. Could not score nearby resorts yet.';
+    return;
+  }
+  const top = localList[0];
+  const totals = getDisplayPowTotals(top);
+  const dist = Number.isFinite(top._distanceMiles) ? `${Math.round(top._distanceMiles)} mi` : '';
+  const place = state.locationLabel ? `near ${state.locationLabel}` : 'near you';
+  statusEl.textContent = `Local mode ${place}: ${top.name} leads (${totals.snow24.toFixed(1)}" / 24h${dist ? ` · ${dist}` : ''}).`;
+}
+
+function setLocalLocation(lat, lon, label = '') {
+  if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
+  state.localMode = true;
+  state.userLocation = { lat, lon };
+  state.locationLabel = label;
+  saveLocalProfile();
+  renderTicker();
 }
 
 function updateLeadStories(list) {
@@ -754,13 +1037,311 @@ function updateSortHeaderUI() {
   });
 }
 
+function getWindHoldStatus(resort) {
+  const level = String(resort?.powWatch?.windHoldRisk?.level || '').toUpperCase();
+  const gust = Number(resort?.powWatch?.windHoldRisk?.maxGustMph || 0);
+  if (level === 'HIGH' || gust >= 40) {
+    return {
+      level: 'high',
+      short: 'Upper hold risk',
+      detail: `Upper mountain: likely hold · Mid-mountain: likely running${gust ? ` · Gusts ${Math.round(gust)} mph` : ''}`
+    };
+  }
+  if (level === 'MEDIUM' || gust >= 28) {
+    return {
+      level: 'med',
+      short: 'Lift watch',
+      detail: `Upper mountain: possible hold · Mid-mountain: likely running${gust ? ` · Gusts ${Math.round(gust)} mph` : ''}`
+    };
+  }
+  return {
+    level: 'low',
+    short: 'Lifts likely running',
+    detail: `Upper mountain: likely running · Mid-mountain: running${gust ? ` · Gusts ${Math.round(gust)} mph` : ''}`
+  };
+}
+
+function getDriveOrigin() {
+  if (state.userLocation && Number.isFinite(state.userLocation.lat) && Number.isFinite(state.userLocation.lon)) {
+    return { label: 'your location', lat: state.userLocation.lat, lon: state.userLocation.lon };
+  }
+  return { label: 'North Jersey', lat: 40.73, lon: -74.17 };
+}
+
+function getDriveHours(origin, resort) {
+  if (!Number.isFinite(origin?.lat) || !Number.isFinite(origin?.lon) || !Number.isFinite(resort?.lat) || !Number.isFinite(resort?.lon)) {
+    return null;
+  }
+  const miles = haversineMiles(origin.lat, origin.lon, resort.lat, resort.lon);
+  return Math.max(0.5, (miles * DRIVE_MODEL.roadFactor) / DRIVE_MODEL.avgMph);
+}
+
+function getPeakSnowHourOffset(resort) {
+  const arr = Array.isArray(resort?.powWatch?.hourly?.snowSeries24) ? resort.powWatch.hourly.snowSeries24 : [];
+  if (!arr.length) return null;
+  let bestIdx = 0;
+  let bestVal = -1;
+  arr.forEach((v, idx) => {
+    const n = Number(v) || 0;
+    if (n > bestVal) {
+      bestVal = n;
+      bestIdx = idx;
+    }
+  });
+  return bestVal > 0 ? bestIdx : null;
+}
+
+function fmtClock(d) {
+  return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+}
+
+function getDriveWindow(resort) {
+  const origin = getDriveOrigin();
+  const hrs = getDriveHours(origin, resort);
+  if (!hrs) return '';
+  const now = new Date();
+  const peakOffset = getPeakSnowHourOffset(resort);
+  const target = new Date(now.getTime() + ((peakOffset ?? DRIVE_MODEL.fallbackPeakOffsetHr) * 60 * 60 * 1000));
+  const leave = new Date(target.getTime() - (hrs * 60 * 60 * 1000));
+  const arrive = new Date(leave.getTime() + (hrs * 60 * 60 * 1000));
+  return `Drive Window (Beta): Leave by ${fmtClock(leave)} from ${origin.label} → arrive ${fmtClock(arrive)} for the reload window.`;
+}
+
+function getComparablePair(list) {
+  if (!Array.isArray(list) || list.length < 2) return null;
+  return [list[0], list[1]];
+}
+
+function getWorthExtraHourLine(a, b) {
+  if (!a || !b) return '';
+  const origin = getDriveOrigin();
+  const ah = getDriveHours(origin, a);
+  const bh = getDriveHours(origin, b);
+  if (!ah || !bh) return '';
+  const deltaH = Math.abs(ah - bh);
+  const snowDelta = getDisplayPowTotals(a).snow24 - getDisplayPowTotals(b).snow24;
+  const aWind = getWindHoldStatus(a);
+  const bWind = getWindHoldStatus(b);
+  const windPenalty = (aWind.level === 'high' ? 1 : 0) - (bWind.level === 'high' ? 1 : 0);
+  const worth = (snowDelta >= 3 && windPenalty <= 0) || (snowDelta >= 2 && deltaH <= 0.75 && windPenalty <= 0);
+  const nameFarther = ah > bh ? a.name : b.name;
+  const nameCloser = ah > bh ? b.name : a.name;
+  const extra = Math.round(deltaH * 60);
+  return worth
+    ? `Compare (Beta): Worth the extra ${extra} min to ${nameFarther}: more snow without a wind penalty.`
+    : `Compare (Beta): Not worth the extra ${extra} min to ${nameFarther}; ${nameCloser} is the smarter move this morning.`;
+}
+
+const LOC_LABELS = {
+  VT: 'Vermont',
+  ME: 'Maine',
+  NH: 'New Hampshire',
+  NY: 'New York',
+  PA: 'Pennsylvania',
+  MA: 'Massachusetts',
+  CT: 'Connecticut',
+  NJ: 'New Jersey',
+  WV: 'West Virginia',
+  QC: 'Québec'
+};
+
+function getStormModeSnapshot(resorts) {
+  const withSnow = (resorts || []).map((r) => ({
+    resort: r,
+    snow24: getDisplayPowTotals(r).snow24
+  }));
+  const snow4 = withSnow.filter((x) => x.snow24 >= 4);
+  const snow6 = withSnow.filter((x) => x.snow24 >= 6);
+  const top10 = withSnow.slice().sort((a, b) => b.snow24 - a.snow24).slice(0, 10);
+  const top10Sum = top10.reduce((sum, x) => sum + x.snow24, 0);
+
+  const states4 = new Set(snow4.map((x) => String(x.resort.loc || '').toUpperCase()).filter(Boolean));
+  const states6 = new Set(snow6.map((x) => String(x.resort.loc || '').toUpperCase()).filter(Boolean));
+
+  const minSnow = snow4.length ? Math.floor(Math.min(...snow4.map((x) => x.snow24))) : 0;
+  const maxSnow = snow4.length ? Math.ceil(Math.max(...snow4.map((x) => x.snow24))) : 0;
+  const trigger =
+    snow4.length >= STORM_MODE_CONFIG.minResortsAt4in
+    || top10Sum >= STORM_MODE_CONFIG.minTop10SnowSum
+    || states6.size >= STORM_MODE_CONFIG.minStatesAt6in;
+
+  return {
+    isStormMode: trigger,
+    count4: snow4.length,
+    count6: snow6.length,
+    states4: Array.from(states4),
+    states6: Array.from(states6),
+    minSnow,
+    maxSnow
+  };
+}
+
+function applyStormModeUI(storm) {
+  const body = document.body;
+  const hero = document.getElementById('stormModeHero');
+  const title = document.getElementById('stormHeroTitle');
+  const deck = document.getElementById('stormHeroDeck');
+  const meta = document.getElementById('stormHeroMeta');
+  const leadRule = document.getElementById('leadRule');
+  const tickerRule = document.getElementById('tickerRule');
+
+  if (!body || !hero || !title || !deck || !meta || !leadRule || !tickerRule) return;
+
+  body.classList.toggle('storm-mode', storm.isStormMode);
+  hero.hidden = !storm.isStormMode;
+
+  if (!storm.isStormMode) {
+    leadRule.dataset.label = "Today's Lead";
+    leadRule.dataset.count = 'Top stories';
+    tickerRule.dataset.label = 'All Resorts';
+    return;
+  }
+
+  const stateText = storm.states4.map((s) => LOC_LABELS[s] || s).join(', ');
+  title.textContent = 'The East Coast is going off.';
+  deck.textContent = `${storm.minSnow}–${storm.maxSnow}" fell overnight across ${stateText}. If you can drive today, this is the day.`;
+  meta.textContent = `${storm.count4} resorts reporting 4"+ in 24h · ${storm.count6} resorts at 6"+`;
+  leadRule.dataset.label = 'Top Hits';
+  leadRule.dataset.count = 'Storm support';
+  tickerRule.dataset.label = 'Storm Map';
+}
+
+function buildResortMarkup(r, rank) {
+  const powCtx = getPowDisplayContext(r);
+  const displayTotals = powCtx.totals;
+  const wind = getWindHoldStatus(r);
+  const bestBadge = getBestInDaysLabel(r);
+  const driveWindow = getDriveWindow(r);
+  const snowCls = displayTotals.snow24 >= 4 ? ' snow' : displayTotals.snow24 === 0 ? ' ice' : '';
+  const passStr = (r.passes || []).map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(' · ') || '—';
+  const forecast = Array.isArray(r.forecast) && r.forecast.length
+    ? r.forecast
+    : [{ day: 'Sat', icon: 'cloud', hi: Number(r.temp) || 0 }, { day: 'Sun', icon: 'cloud', hi: Number(r.temp) || 0 }, { day: 'Mon', icon: 'cloud', hi: Number(r.temp) || 0 }];
+  const warningHtml = powCtx.hasPowAlert ? `
+    <div class="det-warning ${String(powCtx.powAlert.event).toLowerCase().includes('warning') ? 'storm' : 'watch'}">
+      <span class="det-warn-icon">${String(powCtx.powAlert.event).toLowerCase().includes('warning') ? '⚠' : '👁'}</span>
+      ${powCtx.powAlert.event} in effect through ${powCtx.alertExpiryLabel}
+    </div>` : '';
+  const conf = getConfidenceFromPatrol(r);
+  const confCls = conf === 'High' ? 'conf-high' : conf === 'Low' ? 'conf-low' : 'conf-med';
+  const verdict = r.verdict || (r.rating >= 4 ? 'Shredable!' : r.rating <= 2 ? 'Manage Expectations' : 'Solid Day');
+  const verdictCls = ['Shredable!', 'Worth It'].includes(verdict)
+    ? 'verdict-go'
+    : (verdict === 'Go Tomorrow' ? 'verdict-wait' : 'verdict-meh');
+  const powWatchHtml = `
+    <div class="det-section">
+      <div class="det-section-head">
+        <span class="det-section-label">POW WATCH</span>
+        <span class="det-storm-badge ${r.pow === 'on' ? 'badge-pow' : r.pow === 'building' ? 'badge-storm' : 'badge-quiet'}">${r.pow === 'on' ? 'POW' : r.pow === 'building' ? 'STORM' : 'QUIET'}</span>
+      </div>
+      <div class="det-pow-row">
+        <div class="det-pow-stat"><span class="dpv">${displayTotals.snow24.toFixed(1)}"</span><span class="dpl">24h</span></div>
+        <div class="det-pow-stat"><span class="dpv big">${displayTotals.snow48.toFixed(1)}"</span><span class="dpl">48h</span></div>
+        <div class="det-pow-stat"><span class="dpv big">${displayTotals.snow72.toFixed(1)}"</span><span class="dpl">72h</span></div>
+      </div>
+      <div class="det-pow-meta">${powCtx.snowLevelLine || 'Snow Level: —'} &nbsp;·&nbsp; Storm Total: <strong>${powCtx.potentialLow.toFixed(1)}–${powCtx.potentialHigh.toFixed(1)}"</strong></div>
+    </div>`;
+  const forecastHtml = `
+    <div class="det-section">
+      <div class="det-section-label">3-Day Forecast</div>
+      <div class="det-forecast">
+        ${forecast.map((d) => `
+          <div class="det-fc-day">
+            <div class="det-fc-label">${d.day || '—'}</div>
+            <div class="det-fc-icon"><img src="${getForecastIconSrc(d.icon)}" alt="${d.icon || 'cloud'}"></div>
+            <div class="det-fc-hi">${(typeof d.hi === 'number' ? d.hi : Number(d.hi) || 0)}°</div>
+          </div>`).join('')}
+      </div>
+    </div>`;
+  const sparkHtml = `
+    <div class="det-section">
+      <div class="det-section-head">
+        <span class="det-section-label">72h Snowfall Outlook</span>
+        <span class="det-spark-range">3h blocks · next 72h</span>
+      </div>
+      <div class="det-sparkline">${powCtx.chartBars}</div>
+      <div class="det-spark-footer">
+        <span>72h total: <strong>${displayTotals.snow72.toFixed(1)}"</strong></span>
+        ${powCtx.maxSeriesVal > 0.1 ? `<span>Peak: <strong>${powCtx.maxSeriesVal.toFixed(1)}"</strong></span>` : ''}
+      </div>
+    </div>`;
+  const passPriceHtml = `
+    <div class="detail-pass-price">
+      <span class="detail-pass">${passStr !== '—' ? `${passStr} Pass` : 'No Pass Required'}</span>
+      <span class="detail-price">${r.price}</span>
+    </div>`;
+  return `
+    <div class="resort-row" data-resort="${r.id}" tabindex="0">
+      <div class="rr-rank">${rank}</div>
+      <div class="rr-name-col">
+        <div class="rr-name">${r.name}</div>
+        <div class="rr-meta">${r.loc} · ${passStr}${bestBadge ? ` · ${bestBadge}` : ''}</div>
+      </div>
+      <div class="rr-cond"><span>${r.conditions}</span><span class="wind-badge ${wind.level}" title="${wind.short}">W</span></div>
+      <div class="rr-stat${snowCls}">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '—'}</div>
+      <div class="rr-stat">${r.temp}°</div>
+      ${getRatingBlocks(r.rating, r.pow)}
+      <div class="rr-pow">${getPowPip(r.pow)}</div>
+    </div>
+    <div class="resort-detail" id="detail-${r.id}">
+      <div class="det-header">
+        <div class="det-header-left">
+          <div class="det-conditions-label">Current Conditions</div>
+          <div class="det-conditions-main">${r.conditions}</div>
+          <div class="det-quick-stats">
+            <span>24h Snow <strong>${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '0"'}</strong></span>
+            <span>48h Snow <strong>${displayTotals.snow48 > 0 ? `${displayTotals.snow48}"` : '0"'}</strong></span>
+            <span>Temp <strong>${r.temp}°</strong></span>
+            <span>Feels Like <strong>${Number(r.feelsLike ?? r.temp)}°</strong></span>
+            <span>Wind <strong>${r.wind} mph</strong></span>
+          </div>
+          ${powCtx.displayPowBrief ? `<div class="det-nws-brief"><strong>NWS Brief:</strong> ${powCtx.displayPowBrief}</div>` : ''}
+          <div class="det-nws-brief"><strong>Lift Ops:</strong> ${wind.detail}</div>
+          ${driveWindow ? `<div class="det-nws-brief"><strong>Drive Window:</strong> ${driveWindow}</div>` : ''}
+          ${r.terrainNote ? `<div class="det-terrain-note"><strong>Terrain note:</strong> ${r.terrainNote}</div>` : ''}
+        </div>
+        <div class="det-header-right">
+          <span class="det-confidence ${confCls}">Confidence: ${conf}</span>
+        </div>
+      </div>
+      ${warningHtml}
+      <div class="det-body">
+        <div class="det-col">${forecastHtml}</div>
+        <div class="det-col">${powWatchHtml}</div>
+        <div class="det-col">${sparkHtml}</div>
+      </div>
+      <div class="det-footer">
+        <div class="det-rating-zone">
+          <div class="det-rating-label">ICECOAST RATING</div>
+          <div class="det-stars">${[1, 2, 3, 4, 5].map((n) => `<div class="det-star${n <= r.rating ? (r.pow === 'on' ? ' on pow-on' : ' on') : ''}"></div>`).join('')}</div>
+        </div>
+        <div class="det-verdict ${verdictCls}">${verdict}</div>
+      </div>
+      <div class="detail-actions">
+        <button class="d-btn primary" data-drive="${r.id}">Drive there →</button>
+        <button class="d-btn" data-share="${r.id}">Share conditions</button>
+        <button class="d-btn save-btn" data-resort-id="${r.id}" data-resort-name="${r.name}">Save resort</button>
+        ${passPriceHtml}
+      </div>
+    </div>`;
+}
+
 function renderTicker() {
   const list = applyFilters();
   const ticker = document.getElementById('resortTicker');
-  const sectionRule = document.querySelector('.section-rule[data-label="All Resorts"]');
+  const sectionRule = document.getElementById('tickerRule');
   if (sectionRule) sectionRule.dataset.count = `${list.length} reporting`;
 
-  updateLeadStories(state.resorts.slice().sort((a, b) => getDisplayPowTotals(b).snow24 - getDisplayPowTotals(a).snow24));
+  const storm = getStormModeSnapshot(state.resorts);
+  applyStormModeUI(storm);
+
+  const localLeadList = getLocalLeadList();
+  const leadSource = (localLeadList && localLeadList.length >= 2)
+    ? localLeadList
+    : state.resorts.slice().sort((a, b) => getDisplayPowTotals(b).snow24 - getDisplayPowTotals(a).snow24);
+  updateLeadStories(leadSource);
+  updateLocalStatus();
+  renderSavedMorningBrief();
   updateSortHeaderUI();
 
   if (!list.length) {
@@ -768,118 +1349,43 @@ function renderTicker() {
     return;
   }
 
-  ticker.innerHTML = list.map((r, i) => {
-    const powCtx = getPowDisplayContext(r);
-    const displayTotals = powCtx.totals;
-    const snowCls = displayTotals.snow24 >= 4 ? ' snow' : displayTotals.snow24 === 0 ? ' ice' : '';
-    const passStr = (r.passes || []).map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(' · ') || '—';
-    const forecast = Array.isArray(r.forecast) && r.forecast.length
-      ? r.forecast
-      : [{ day: 'Sat', icon: 'cloud', hi: Number(r.temp) || 0 }, { day: 'Sun', icon: 'cloud', hi: Number(r.temp) || 0 }, { day: 'Mon', icon: 'cloud', hi: Number(r.temp) || 0 }];
-    const powWatch = r.powWatch || null;
-    const warningHtml = powCtx.hasPowAlert ? `
-      <div class="det-warning ${String(powCtx.powAlert.event).toLowerCase().includes('warning') ? 'storm' : 'watch'}">
-        <span class="det-warn-icon">${String(powCtx.powAlert.event).toLowerCase().includes('warning') ? '⚠' : '👁'}</span>
-        ${powCtx.powAlert.event} in effect through ${powCtx.alertExpiryLabel}
-      </div>` : '';
-    const conf = getConfidenceFromPatrol(r);
-    const confCls = conf === 'High' ? 'conf-high' : conf === 'Low' ? 'conf-low' : 'conf-med';
-    const verdict = r.verdict || (r.rating >= 4 ? 'Shredable!' : r.rating <= 2 ? 'Manage Expectations' : 'Solid Day');
-    const verdictCls = ['Shredable!', 'Worth It'].includes(verdict)
-      ? 'verdict-go'
-      : (verdict === 'Go Tomorrow' ? 'verdict-wait' : 'verdict-meh');
-    const powWatchHtml = `
-      <div class="det-section">
-        <div class="det-section-head">
-          <span class="det-section-label">POW WATCH</span>
-          <span class="det-storm-badge ${r.pow === 'on' ? 'badge-pow' : r.pow === 'building' ? 'badge-storm' : 'badge-quiet'}">${r.pow === 'on' ? 'POW' : r.pow === 'building' ? 'STORM' : 'QUIET'}</span>
-        </div>
-        <div class="det-pow-row">
-          <div class="det-pow-stat"><span class="dpv">${displayTotals.snow24.toFixed(1)}"</span><span class="dpl">24h</span></div>
-          <div class="det-pow-stat"><span class="dpv big">${displayTotals.snow48.toFixed(1)}"</span><span class="dpl">48h</span></div>
-          <div class="det-pow-stat"><span class="dpv big">${displayTotals.snow72.toFixed(1)}"</span><span class="dpl">72h</span></div>
-        </div>
-        <div class="det-pow-meta">${powCtx.snowLevelLine || 'Snow Level: —'} &nbsp;·&nbsp; Storm Total: <strong>${powCtx.potentialLow.toFixed(1)}–${powCtx.potentialHigh.toFixed(1)}"</strong></div>
-      </div>`;
-    const forecastHtml = `
-      <div class="det-section">
-        <div class="det-section-label">3-Day Forecast</div>
-        <div class="det-forecast">
-          ${forecast.map((d) => `
-            <div class="det-fc-day">
-              <div class="det-fc-label">${d.day || '—'}</div>
-              <div class="det-fc-icon"><img src="${getForecastIconSrc(d.icon)}" alt="${d.icon || 'cloud'}"></div>
-              <div class="det-fc-hi">${(typeof d.hi === 'number' ? d.hi : Number(d.hi) || 0)}°</div>
-            </div>`).join('')}
-        </div>
-      </div>`;
-    const sparkHtml = `
-      <div class="det-section">
-        <div class="det-section-head">
-          <span class="det-section-label">72h Snowfall Outlook</span>
-          <span class="det-spark-range">3h blocks · next 72h</span>
-        </div>
-        <div class="det-sparkline">${powCtx.chartBars}</div>
-        <div class="det-spark-footer">
-          <span>72h total: <strong>${displayTotals.snow72.toFixed(1)}"</strong></span>
-          ${powCtx.maxSeriesVal > 0.1 ? `<span>Peak: <strong>${powCtx.maxSeriesVal.toFixed(1)}"</strong></span>` : ''}
-        </div>
-      </div>`;
-    return `
-      <div class="resort-row" data-resort="${r.id}" tabindex="0">
-        <div class="rr-rank">${i + 1}</div>
-        <div class="rr-name-col">
-          <div class="rr-name">${r.name}</div>
-          <div class="rr-meta">${r.loc} · ${passStr}</div>
-        </div>
-        <div class="rr-cond">${r.conditions}</div>
-        <div class="rr-stat${snowCls}">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '—'}</div>
-        <div class="rr-stat">${r.temp}°</div>
-        ${getRatingBlocks(r.rating, r.pow)}
-        <div class="rr-pow">${getPowPip(r.pow)}</div>
-      </div>
-      <div class="resort-detail" id="detail-${r.id}">
-        <div class="det-header">
-          <div class="det-header-left">
-            <div class="det-conditions-label">Current Conditions</div>
-            <div class="det-conditions-main">${r.conditions}</div>
-            <div class="det-quick-stats">
-              <span>24h Snow <strong>${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '0"'}</strong></span>
-              <span>48h Snow <strong>${displayTotals.snow48 > 0 ? `${displayTotals.snow48}"` : '0"'}</strong></span>
-              <span>Temp <strong>${r.temp}°</strong></span>
-              <span>Feels Like <strong>${Number(r.feelsLike ?? r.temp)}°</strong></span>
-              <span>Wind <strong>${r.wind} mph</strong></span>
-            </div>
-            ${powCtx.displayPowBrief ? `<div class="det-nws-brief"><strong>NWS Brief:</strong> ${powCtx.displayPowBrief}</div>` : ''}
-          </div>
-          <div class="det-header-right">
-            <span class="det-confidence ${confCls}">Confidence: ${conf}</span>
-          </div>
-        </div>
-        ${warningHtml}
-        <div class="det-body">
-          <div class="det-col">${forecastHtml}</div>
-          <div class="det-col">${powWatchHtml}</div>
-          <div class="det-col">${sparkHtml}</div>
-        </div>
-        <div class="det-footer">
-          <div class="det-rating-zone">
-            <div class="det-rating-label">ICECOAST RATING</div>
-            <div class="det-stars">${[1, 2, 3, 4, 5].map((n) => `<div class="det-star${n <= r.rating ? (r.pow === 'on' ? ' on pow-on' : ' on') : ''}"></div>`).join('')}</div>
-          </div>
-          <div class="det-verdict ${verdictCls}">${verdict}</div>
-        </div>
-        <div class="detail-actions">
-          <button class="d-btn primary" data-drive="${r.id}">Drive there →</button>
-          <button class="d-btn" data-share="${r.id}">Share conditions</button>
-          <button class="d-btn save-btn" data-resort-id="${r.id}" data-resort-name="${r.name}">Save resort</button>
-          <div style="margin-left:auto;display:flex;gap:6px;align-items:center">
-            <span style="font-family:var(--mono);font-size:0.48rem;color:var(--ink-faint);letter-spacing:0.06em;text-transform:uppercase">${passStr !== '—' ? `${passStr} Pass` : 'No Pass Required'}</span>
-            <span style="font-family:var(--mono);font-size:0.65rem;font-weight:600;color:var(--ink)">${r.price}</span>
-          </div>
-        </div>
-      </div>`;
-  }).join('');
+  const stormMapMode = storm.isStormMode
+    && state.currentTab === 'all'
+    && !state.search.trim()
+    && getAllActive().size === 0;
+
+  if (!stormMapMode) {
+    if (sectionRule) sectionRule.dataset.count = `${list.length} reporting`;
+    ticker.innerHTML = list.map((r, i) => buildResortMarkup(r, i + 1)).join('');
+  } else {
+    const ranked = state.resorts
+      .slice()
+      .sort((a, b) => getDisplayPowTotals(b).snow24 - getDisplayPowTotals(a).snow24);
+    const groupsByLoc = new Map();
+    ranked.forEach((r) => {
+      const loc = String(r.loc || 'EC').toUpperCase();
+      if (!groupsByLoc.has(loc)) groupsByLoc.set(loc, []);
+      groupsByLoc.get(loc).push(r);
+    });
+    const orderedGroups = Array.from(groupsByLoc.entries()).sort((a, b) => {
+      const maxA = Math.max(...a[1].map((r) => getDisplayPowTotals(r).snow24));
+      const maxB = Math.max(...b[1].map((r) => getDisplayPowTotals(r).snow24));
+      return maxB - maxA;
+    });
+
+    let rank = 1;
+    const rows = [];
+    orderedGroups.forEach(([loc, resorts]) => {
+      const maxSnow = Math.max(...resorts.map((r) => getDisplayPowTotals(r).snow24));
+      rows.push(`<div class="storm-group-head"><span class="storm-group-state">${loc}</span><span class="storm-group-meta">${resorts.length} resorts · up to ${maxSnow.toFixed(1)}"</span></div>`);
+      resorts.forEach((r) => {
+        rows.push(buildResortMarkup(r, rank));
+        rank += 1;
+      });
+    });
+    if (sectionRule) sectionRule.dataset.count = `${storm.count4} resorts at 4"+`;
+    ticker.innerHTML = rows.join('');
+  }
 
   ticker.querySelectorAll('.resort-row').forEach((row) => {
     row.addEventListener('click', () => {
@@ -980,11 +1486,70 @@ function clearAllDispatch() {
   syncDispatchTags();
 }
 
+function getResortVerdictLine(r) {
+  const snow24 = getDisplayPowTotals(r).snow24;
+  const wind = getWindHoldStatus(r);
+  if (snow24 >= 6 && wind.level !== 'high') return 'Go now';
+  if (snow24 >= 3 && wind.level !== 'high') return 'Go early';
+  if (wind.level === 'high') return 'Go lower mountain';
+  return 'Fine if local';
+}
+
+function renderSavedMorningBrief() {
+  const wrap = document.getElementById('savedMorningBrief');
+  const listEl = document.getElementById('savedBriefList');
+  const compareEl = document.getElementById('savedCompare');
+  const alertBtn = document.getElementById('savedAlertBtn');
+  const alertLink = document.getElementById('savedAlertLink');
+  if (!wrap || !listEl || !compareEl || !alertBtn || !alertLink) return;
+
+  const saved = state.resorts
+    .filter((r) => savedResorts.has(r.id))
+    .sort((a, b) => getDisplayPowTotals(b).snow24 - getDisplayPowTotals(a).snow24);
+
+  if (!saved.length) {
+    wrap.hidden = true;
+    return;
+  }
+
+  wrap.hidden = false;
+  alertBtn.classList.toggle('on', state.alertIntent4in);
+  alertBtn.textContent = state.alertIntent4in ? '4"+ alert: on' : 'Alert me at 4"+';
+  const top = saved.slice(0, 5);
+  const savedIds = top.map((r) => r.id).join(',');
+  alertLink.href = `https://icecoast.beehiiv.com/?utm_source=app&utm_medium=saved-brief&utm_campaign=pow-alerts&saved=${encodeURIComponent(savedIds)}&rule=${state.alertIntent4in ? '4in-on' : '4in-off'}`;
+  listEl.innerHTML = top.map((r) => {
+    const verdict = getResortVerdictLine(r);
+    const wind = getWindHoldStatus(r);
+    const best = getBestInDaysLabel(r);
+    const note = r.terrainNote || wind.short;
+    return `<article class="saved-item">
+      <div class="saved-item-name">${r.name}</div>
+      <div class="saved-item-verdict">${verdict}${best ? ` · ${best}` : ''}</div>
+      <div class="saved-item-note">${note}</div>
+    </article>`;
+  }).join('');
+
+  const pair = getComparablePair(top);
+  const compare = pair ? getWorthExtraHourLine(pair[0], pair[1]) : '';
+  const hit4 = top.filter((r) => getDisplayPowTotals(r).snow24 >= 4).length;
+  const alertNote = state.alertIntent4in
+    ? (hit4 > 0
+      ? `Alert check: ${hit4} saved mountain${hit4 > 1 ? 's' : ''} hit 4"+.`
+      : 'Alert check: no saved mountains at 4"+ yet.')
+    : '';
+  compareEl.textContent = [compare, alertNote].filter(Boolean).join(' · ');
+}
+
 function attachUi() {
   const input = document.getElementById('resortSearch');
   const clearBtn = document.getElementById('clearSearch');
   const expandBtn = document.getElementById('dispatchExpandBtn');
   const drawer = document.getElementById('dispatchDrawer');
+  const useLocationBtn = document.getElementById('useLocationBtn');
+  const localStatus = document.getElementById('localStatus');
+  const alertBtn = document.getElementById('savedAlertBtn');
+  const alertLink = document.getElementById('savedAlertLink');
 
   const NL_COMMANDS = [
     { match: /\b(pow|powder|fresh|nuking)\b/i, cmd: 'pow' },
@@ -1061,6 +1626,16 @@ function attachUi() {
     });
   });
 
+  if (alertBtn) {
+    alertBtn.addEventListener('click', () => {
+      saveAlertIntent(!state.alertIntent4in);
+      renderSavedMorningBrief();
+      if (state.alertIntent4in && alertLink) {
+        window.open(alertLink.href, '_blank', 'noopener,noreferrer');
+      }
+    });
+  }
+
   document.querySelectorAll('.th-sortbtn[data-sort]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.sort;
@@ -1075,7 +1650,29 @@ function attachUi() {
     });
   });
 
+  if (useLocationBtn) {
+    useLocationBtn.addEventListener('click', () => {
+      if (!navigator.geolocation) {
+        if (localStatus) localStatus.textContent = 'Geolocation unavailable on this browser.';
+        return;
+      }
+      if (localStatus) localStatus.textContent = 'Finding your location...';
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          const lat = Number(pos.coords.latitude);
+          const lon = Number(pos.coords.longitude);
+          setLocalLocation(lat, lon, 'you');
+        },
+        () => {
+          if (localStatus) localStatus.textContent = 'Could not access location.';
+        },
+        { enableHighAccuracy: false, maximumAge: 300000, timeout: 8000 }
+      );
+    });
+  }
+
   updateExpandBtnBadge();
+  updateLocalStatus();
 }
 
 const savedResorts = new Set(JSON.parse(localStorage.getItem('brief_saved_resorts') || '[]'));
@@ -1173,12 +1770,20 @@ function updateSavedTab() {
 }
 
 (async function boot() {
+  loadLocalProfile();
   await loadResorts();
   applyManualOverridesToResorts();
+  updateDailyHistorySnapshots();
   updateNameplateRule();
   tickClock();
   setInterval(tickClock, 30000);
   attachUi();
+  if (savedResorts.size >= 3) {
+    state.currentTab = 'favorites';
+    const favTab = document.querySelector('.m-tab[data-tab="favorites"]');
+    document.querySelectorAll('.m-tab[data-tab]').forEach((b) => b.classList.remove('active'));
+    if (favTab) favTab.classList.add('active');
+  }
   updateSavedTab();
   renderTicker();
   syncDispatchTags();
