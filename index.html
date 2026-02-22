@@ -4,6 +4,15 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>icecoast | Know The Snow Before You Go | East Coast Conditions</title>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-YE98TE3N2J"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-YE98TE3N2J');
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&family=IBM+Plex+Mono:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800;1,9..40,400&display=swap" rel="stylesheet">
 
@@ -36,28 +45,46 @@
     </div>
   </div>
 
-  <!-- THE DISPATCH -->
+  <!-- THE DISPATCH — search, filter, and ask in one bar -->
   <div class="dispatch-bar" id="dispatchBar">
     <div class="dispatch-label">
-      dispatch<span class="dispatch-cursor">|</span>
+      dispatch
     </div>
-    <input
-      type="search"
-      id="resortSearch"
-      class="dispatch-input"
-      placeholder="powder, storm, VT, Stowe, Ikon, Epic, Indy, cold…"
-      autocomplete="off"
-      spellcheck="false"
-    >
-    <div class="dispatch-hints" id="dispatchHints">
-      <button class="d-hint" data-cmd="pow">⚡ POW</button>
-      <button class="d-hint" data-cmd="storm">🌨 Storm</button>
+    <div class="dispatch-input-wrap" id="dispatchInputWrap">
+      <input
+        type="text"
+        id="resortSearch"
+        class="dispatch-input"
+        placeholder="Search resorts and filters. Press Enter to ask."
+        autocomplete="off"
+        spellcheck="false"
+      >
+      <span class="dispatch-faux-caret" id="dispatchFauxCaret" aria-hidden="true"></span>
+      <span class="dispatch-measure" id="dispatchMeasure" aria-hidden="true"></span>
     </div>
+    <span class="dispatch-ask-pill" id="dispatchAskPill" hidden>Enter to ask ↵</span>
     <button class="dispatch-clear" id="clearSearch" aria-label="Clear">✕ clear</button>
     <button class="dispatch-expand-btn" id="dispatchExpandBtn" aria-expanded="false" title="More filters">
       <span class="deb-label">filters</span>
       <span class="deb-chevron">▾</span>
     </button>
+  </div>
+
+  <!-- QUICK HINTS — tappable shortcuts under the bar -->
+  <div class="dispatch-quick-hints" id="dispatchQuickHints">
+    <button class="d-hint" data-cmd="pow">⚡ POW</button>
+    <button class="d-hint" data-cmd="storm">🌨 Storm</button>
+    <button class="d-hint-sep"></button>
+    <button class="d-qhint" data-q="ikon VT low wind">ikon VT low wind</button>
+    <button class="d-qhint" data-q="jay vs killington">jay vs kill</button>
+    <button class="d-qhint" data-q="where's the snow?">where's the snow</button>
+    <button class="d-qhint" data-q="best within 3hr">best within 3hr</button>
+  </div>
+
+  <!-- DISPATCH ANSWER — inline answer panel -->
+  <div class="dispatch-answer" id="dispatchAnswer" hidden>
+    <div class="dispatch-answer-inner" id="dispatchAnswerInner"></div>
+    <button class="dispatch-answer-dismiss" id="dispatchAnswerDismiss">✕</button>
   </div>
 
   <!-- DISPATCH DRAWER — states, passes, more vibes -->
@@ -124,23 +151,16 @@
   </div>
 </header>
 
+
+<!-- ═══ PWA NUDGE — home screen install, 2nd visit ═══ -->
+<div class="pwa-nudge" id="pwaNudge" hidden>
+  <span class="pwa-nudge-text">Add to home screen for the morning brief</span>
+  <button class="pwa-nudge-btn" id="pwaNudgeInstall">Add ↑</button>
+  <button class="pwa-nudge-dismiss" id="pwaNudgeDismiss" aria-label="Dismiss">✕</button>
+</div>
+
 <!-- ═══════ THE BRIEF ═════════════════════════ -->
 <main class="brief">
-
-  <section class="storm-hero" id="stormModeHero" hidden>
-    <div class="storm-hero-kicker">Storm Mode</div>
-    <h2 class="storm-hero-title" id="stormHeroTitle">The East Coast is going off.</h2>
-    <p class="storm-hero-deck" id="stormHeroDeck">A major overnight hit landed across key zones. If you can drive, today is the day.</p>
-    <div class="storm-hero-meta" id="stormHeroMeta"></div>
-  </section>
-
-  <section class="saved-brief" id="savedMorningBrief" hidden>
-    <div class="saved-brief-head">
-      <h2 class="saved-brief-title">Your Mountains Today</h2>
-    </div>
-    <div class="saved-brief-list" id="savedBriefList"></div>
-    <div class="saved-brief-compare" id="savedCompare"></div>
-  </section>
 
   <section class="local-cta" id="localCta">
     <div class="local-cta-copy">
@@ -153,11 +173,27 @@
     <p class="local-cta-status" id="localStatus" aria-live="polite"></p>
   </section>
 
+  <section class="storm-hero" id="stormModeHero" hidden>
+    <div class="storm-hero-kicker">Storm Mode</div>
+    <h2 class="storm-hero-title" id="stormHeroTitle">The East Coast is going off.</h2>
+    <p class="storm-hero-deck" id="stormHeroDeck">A major overnight hit landed across key zones. If you can drive, today is the day.</p>
+    <div class="storm-hero-meta" id="stormHeroMeta"></div>
+  </section>
+
+  <!-- YOUR MOUNTAINS TODAY — personalized saved brief -->
+  <section class="saved-brief" id="savedMorningBrief" hidden>
+    <div class="saved-brief-head">
+      <h2 class="saved-brief-title">Your Mountains Today</h2>
+    </div>
+    <div class="saved-brief-list" id="savedBriefList"></div>
+    <div class="saved-brief-compare" id="savedCompare"></div>
+  </section>
+
   <!-- LEAD STORIES — top 2 when there's signal -->
   <hr class="section-rule" id="leadRule" data-label="Today's Lead" data-count="Top stories">
   <div class="lead-zone" id="leadZone">
 
-    <!-- Lead 1 — POW ALERT -->
+    <!-- Lead 1 -->
     <article class="lead-story">
       <div class="lead-signal pow">
         <span class="sig-dot"></span>
@@ -183,12 +219,10 @@
           <div class="lead-stat-lbl">Wind</div>
         </div>
       </div>
-      <div class="forecast-row" id="lead1Forecast">
-        <!-- Injected by JS -->
-      </div>
+      <div class="forecast-row" id="lead1Forecast"></div>
     </article>
 
-    <!-- Lead 2 — Storm building -->
+    <!-- Lead 2 -->
     <article class="lead-story">
       <div class="lead-signal building">
         <span class="sig-dot"></span>
@@ -272,7 +306,7 @@
 </footer>
 
 <script src="../resorts.js"></script>
-<script src="../manual-data.js"></script>
+<script src="./manual-data.js"></script>
 <script src="../lib/lexicon.js"></script>
 <script src="./app.js"></script>
 </body>

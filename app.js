@@ -28,11 +28,7 @@ const RESORT_PASS_MEMBERSHIP = {
   waterville: ['indy'], saddleback: ['indy'], 'mont-sutton': ['indy'], 'pats-peak': ['indy']
 };
 
-const FALLBACK_RESORTS = [
-  { id:'sugarloaf', name:'Sugarloaf', loc:'ME', region:'maine', conditions:'Powder', rating:5, snow24:8, temp:16, wind:6, pow:'on', passes:['ikon'], trails:'144/162', price:'$129', snow48:14, snow72:16 },
-  { id:'stowe', name:'Stowe Mountain', loc:'VT', region:'vermont-north', conditions:'Powder', rating:5, snow24:6, temp:22, wind:8, pow:'on', passes:['epic'], trails:'116/116', price:'$219', snow48:10, snow72:12 },
-  { id:'jay-peak', name:'Jay Peak', loc:'VT', region:'vermont-north', conditions:'Packed Powder', rating:4, snow24:1, temp:18, wind:20, pow:'building', passes:['indy'], trails:'78/78', price:'$89', snow48:4, snow72:6 }
-];
+const FALLBACK_RESORTS = [];
 
 const state = {
   search: '',
@@ -46,10 +42,17 @@ const state = {
   localMode: false,
   userLocation: null,
   locationLabel: '',
+  answerFocusIds: [],
+  answerQueryText: '',
+  favorites: new Set(JSON.parse(localStorage.getItem('brief_favorites') || '[]')),
   resorts: [],
   loadedAt: null,
   source: 'fallback'
 };
+
+function saveFavorites() {
+  localStorage.setItem('brief_favorites', JSON.stringify(Array.from(state.favorites)));
+}
 
 function saveLocalProfile() {
   if (!state.localMode || !state.userLocation) {
@@ -457,10 +460,10 @@ async function loadResorts() {
     state.loadedAt = json?.snapshot?.lastUpdated || raw?._metadata?.lastUpdated || new Date().toISOString();
     state.source = 'live';
   } catch (err) {
-    console.warn('Brief V2 lab fallback mode:', err.message);
+    console.warn('Brief V2 live load failed:', err.message);
     state.resorts = FALLBACK_RESORTS.slice();
     state.loadedAt = new Date().toISOString();
-    state.source = 'fallback';
+    state.source = 'error';
   }
 }
 
@@ -554,6 +557,10 @@ function updateNameplateRule() {
 function buildForecastBars(containerId, days) {
   const el = document.getElementById(containerId);
   if (!el) return;
+  if (!Array.isArray(days) || !days.length) {
+    el.innerHTML = '';
+    return;
+  }
   const max = Math.max(...days.map((d) => d.snow), 0.1);
   el.innerHTML = days.map((d) => {
     const h = Math.max((d.snow / max) * 28, d.snow > 0 ? 3 : 0);
@@ -562,55 +569,81 @@ function buildForecastBars(containerId, days) {
   }).join('');
 }
 
+function getLeadDeckLine(resort) {
+  const wind = getWindHoldStatus(resort);
+  const drive = getDriveWindow(resort);
+  const terrain = typeof resort?.terrainNote === 'string' ? resort.terrainNote.trim() : '';
+  if (terrain) return terrain;
+  if (drive) return drive;
+  return `Lift ops: ${wind.detail}`;
+}
+
+function getDailySnowFrom72h(resort) {
+  const hourly = Array.isArray(resort?.powWatch?.hourly?.snowSeries72)
+    ? resort.powWatch.hourly.snowSeries72.map((v) => Number(v)).filter((v) => Number.isFinite(v))
+    : [];
+  if (hourly.length < 24) return [];
+  const days = Array.isArray(resort?.forecast) && resort.forecast.length
+    ? resort.forecast.map((d) => d.day || '').filter(Boolean)
+    : ['D1', 'D2', 'D3'];
+  const out = [];
+  for (let i = 0; i < 3; i += 1) {
+    const slice = hourly.slice(i * 24, (i + 1) * 24);
+    const total = slice.reduce((sum, v) => sum + (Number(v) || 0), 0);
+    out.push({ day: days[i] || `D${i + 1}`, snow: Number(total.toFixed(1)) });
+  }
+  return out;
+}
+
 const RESORT_LORE = {
   'sugarloaf': {
     name: 'The Loaf',
-    nuclear: { verbs: ['nuking', 'sending it', 'absolutely cooking', 'going full Carrabassett', 'doing Loafer things'], decks: ['The Snowfields are loaded. Brackett Basin is calling. This is what the drive is for.', 'Above-treeline skiing. The whole Carrabassett Valley is buried. You know what to do.', 'The Bigelow Boys would approve. Oh-My-Gosh Corner delivers.'] },
-    sending: { verbs: ['stacking it', 'freaking', 'delivering', 'putting down'], decks: ['The Loaf is working. Narrow Gauge, Bubblecuffer, pick your poison.', 'Sugarloafers are already in the lift line. First tracks matter here.'] },
-    building: { verbs: ['loading up', 'getting after it', 'warming up'], decks: ['Storm on the way to Carrabassett Valley. Worth watching.', "The drive pays off when The Loaf fires. It's loading."] },
-    quiet: { verbs: ['showing up', 'being the Loaf', 'holding court'], decks: ['Groomed and cold. The Superquad is spinning. That is enough.', "The Loaf doesn't need powder to be worth the drive. It just helps."] }
+    nuclear: { verbs: ['nuking', 'stacking deep', 'going off'] },
+    sending: { verbs: ['delivering', 'putting down', 'stacking'] },
+    building: { verbs: ['loading up', 'building'] },
+    quiet: { verbs: ['grooming well', 'holding'] }
   },
   'sunday-river': {
     name: 'Sunday River',
-    nuclear: { verbs: ['nuking', 'going off', 'delivering proper Maine pow'], decks: ['Eight peaks, all of them loaded. The Outfit gang is out.', "Sunday River when it snows is a different animal. This is that day."] },
-    sending: { verbs: ['stacking', 'putting in work', 'running'], decks: ['Jordan Bowl is going to be good. Sunday River in form.', "The snowmaking backbone plus natural snow. This is what it's built for."] },
-    building: { verbs: ['building', 'loading', 'watching the forecast'], decks: ['Storm track is favorable for the Sunday River terrain.', 'Worth the ride up 26. Give it a day.'] },
-    quiet: { verbs: ['grinding', 'staying open', 'making it work'], decks: ['Solid grooming. All eight peaks accessible. Maine does not apologize.', 'Sunday River on manufactured snow is still Sunday River.'] }
+    nuclear: { verbs: ['nuking', 'going off', 'firing'] },
+    sending: { verbs: ['stacking', 'delivering', 'running well'] },
+    building: { verbs: ['building', 'loading'] },
+    quiet: { verbs: ['grooming', 'running'] }
   },
   'jay-peak': {
     name: 'Jay',
-    nuclear: { verbs: ['getting buried', 'catching the Jay Cloud', 'doing Jay things', 'hammering'], decks: ['Most snow east of the Rockies, today it is earning the title. The tram is running.', 'Quebec Clipper came through. Jay is doing what Jay does best.', 'The Face Chutes are loaded. The in-bounds policy is liberal. You know the reputation.'] },
-    sending: { verbs: ['stacking', 'delivering', 'running'], decks: ['Jay in form is Jay at its best. Glades, tram, repeat.', 'The Montreal Express is your friend today. Jay is benefiting.'] },
-    building: { verbs: ['loading', 'watching the border', 'building'], decks: ['Storm system tracking toward the Northeast Kingdom. Jay catches everything.', "Every clipper has to cross the border somehow. Jay's geography wins again."] },
-    quiet: { verbs: ['grinding', 'being Jay', 'holding'], decks: ['The glades hold snow longer than anywhere. Jay even on a quiet day.', 'Short lines. Good terrain. The remote location earns its keep.'] }
+    nuclear: { verbs: ['getting buried', 'catching the Jay Cloud', 'hammering'] },
+    sending: { verbs: ['stacking', 'delivering', 'running'] },
+    building: { verbs: ['loading', 'building'] },
+    quiet: { verbs: ['holding snow', 'running'] }
   },
   'stowe': {
     name: 'Stowe',
-    nuclear: { verbs: ['firing', 'earning its title', 'living up to the legend', 'delivering Front Four conditions'], decks: ['Mount Mansfield in a storm. The Ski Capital of the East is in full effect.', 'The Front Four when loaded is the East Coast benchmark. This is that day.', 'Stowe has been doing this since 1937. Some things do not change.'] },
-    sending: { verbs: ['showing up', 'delivering', 'putting on a show'], decks: ['Mansfield is making a case. Liftline is going to be good.', 'The birthplace of alpine skiing in Vermont is earning its history today.'] },
-    building: { verbs: ['loading', 'watching Mansfield', 'building toward something'], decks: ["Storm window looks favorable for Vermont's highest peak.", "Stowe doesn't do anything small. This one's worth tracking."] },
-    quiet: { verbs: ['grooming', 'being Stowe', 'doing the classics'], decks: ['National. Goat. Starr. Liftline. Even groomed, these runs hold weight.', 'Corduroy on the Front Four is still the Front Four.'] }
+    nuclear: { verbs: ['firing', 'going off', 'stacking deep'] },
+    sending: { verbs: ['delivering', 'skiing well'] },
+    building: { verbs: ['loading', 'building'] },
+    quiet: { verbs: ['grooming', 'running'] }
   },
   'killington': {
-    name: 'Killington',
-    nuclear: { verbs: ['going berserk', 'earning Beast of the East', 'absolutely sending it'], decks: ["The Beast has 3,000 acres. When it snows, there's nowhere better.", 'Killington in a real storm is a different resort. This is that resort.'] },
-    sending: { verbs: ['delivering', 'putting in Beast hours', 'loading up'], decks: ['K1 gondola. Superstar. Cascade. Big mountain eating big snow.', 'Six peaks, fresh snow. The Beast is earning it.'] },
-    building: { verbs: ['building', 'watching the weather'], decks: ['Snowmaking backbone plus incoming natural. Killington has options.', 'First to open, last to close. The Beast is patient.'] },
-    quiet: { verbs: ['grooming', 'being the Beast', 'open late'], decks: ['150 trails, corduroy. The Beast does not need your validation.', 'Longest ski season in the East for a reason. Open and running.'] }
+    name: 'The Beast',
+    nuclear: { verbs: ['going off', 'earning Beast mode', 'stacking deep'] },
+    sending: { verbs: ['delivering', 'loading up'] },
+    building: { verbs: ['building', 'loading'] },
+    quiet: { verbs: ['grooming', 'open and running'] }
   },
   'gore-mountain': {
     name: 'Gore',
-    nuclear: { verbs: ['going deep', 'delivering ADK pow', 'cooking in the Adirondacks'], decks: ['No condos on the summit. Just forest and Adirondack State Park as far as you can see, loaded.', "Gore in a storm is New York's best-kept secret earning its legend."] },
-    sending: { verbs: ['stacking', 'delivering', 'working the Adirondacks'], decks: ['The gondola is running. North Side is holding snow. Old school Gore.', 'No pretension here. Brown bag lunch, good snow, Adirondack forest.'] },
-    building: { verbs: ['loading', 'building'], decks: ['Gore lies in the Adirondacks. The snowfall here surprises people.', 'Worth the drive up from Albany. Storm has Gore in its path.'] },
-    quiet: { verbs: ['grooming', 'being Gore', 'holding court in North Creek'], decks: ['Down-to-earth ADK vibe. More terrain than you would expect. Quiet lifts.', "New York's largest ski resort, and barely anyone outside the state knows it."] }
+    nuclear: { verbs: ['going deep', 'firing'] },
+    sending: { verbs: ['stacking', 'delivering'] },
+    building: { verbs: ['loading', 'building'] },
+    quiet: { verbs: ['grooming', 'holding'] }
   },
   'tremblant': {
     name: 'Tremblant',
-    nuclear: { verbs: ['en fuego', 'going full Quebec', 'delivering north of the border'], decks: ['Quebec clipper country. Tremblant catches everything that crosses the border.', 'Le mountain est en feu. 102 trails under proper Canadian snow.'] },
-    sending: { verbs: ['delivering', 'stacking', 'putting in work'], decks: ['Tremblant in form is the East Coast argument for not going west.', '94 trails under Laurentian snow. The answer is oui.'] },
-    building: { verbs: ['loading', 'building toward something'], decks: ['Laurentian storm system is tracking. Tremblant geography wins.'] },
-    quiet: { verbs: ['grooming', 'running', 'holding court'], decks: ['Cold, groomed, open. Tremblant does not need powder to justify the drive.'] }
+    nuclear: { verbs: ['going off', 'delivering'] },
+    sending: { verbs: ['delivering', 'stacking'] },
+    building: { verbs: ['loading', 'building'] },
+    quiet: { verbs: ['grooming', 'running'] }
   }
 };
 
@@ -709,28 +742,15 @@ function chooseHeadlineVerb({ tier, totals, avoidVerb, seedVerb, candidateVerbs 
 }
 
 function buildDelightDeck(resort, tier) {
-  const cultureLine = pick(REGION_VOICE[resort.region] || ['East Coast legs required.']);
-  const powCtx = getPowDisplayContext(resort);
   const windRisk = String(resort?.powWatch?.windHoldRisk?.level || '').toUpperCase();
-  const hasAlert = Boolean(resort?.powWatch?.alert?.active && resort?.powWatch?.alert?.event);
-
-  if (tier === 'nuclear') {
-    if (hasAlert) return `Deep turns are live and patrol is flagging active weather. Hit sheltered terrain early, then chase reloads. ${cultureLine}`;
-    return `This is an all-timer window. Prioritize first-chair laps and protected lines before it gets tracked. ${cultureLine}`;
-  }
-
-  if (tier === 'sending') {
-    if (windRisk === 'HIGH') return `Snow is on and ski quality is there, but wind could clip upper lifts. Build your day around mid-mountain flow. ${cultureLine}`;
-    return `Coverage is strong and turns are soft in the right zones. Plan first laps where the mountain loads quickest. ${cultureLine}`;
-  }
-
-  if (tier === 'building') {
-    if (powCtx.displayPowBrief) return `Window is still building. ${powCtx.displayPowBrief} Time the drive for the reload push, not just opening bell. ${cultureLine}`;
-    return `Window is still building. This one is a strong second-wave play once the next band moves through. ${cultureLine}`;
-  }
-
-  if (windRisk === 'HIGH') return `Fast snow with mixed grip; treat upper lifts as a maybe and stack efficient mid-mountain laps. ${cultureLine}`;
-  return `Not a hero day, but absolutely skiable if you stay disciplined on aspect and timing. ${cultureLine}`;
+  if (tier === 'nuclear') return 'Get there early and ski protected zones first.';
+  if (tier === 'sending') return windRisk === 'HIGH'
+    ? 'Snow quality is there, but build your plan around mid-mountain laps.'
+    : 'Best window is early while soft snow is still untouched.';
+  if (tier === 'building') return 'Storm is still building. Timing matters more than first chair.';
+  return windRisk === 'HIGH'
+    ? 'Not a hero day. Expect efficient laps and selective terrain.'
+    : 'Solid turns if you pick terrain and timing carefully.';
 }
 
 function getLeadLore(resort, options = {}) {
@@ -747,7 +767,7 @@ function getLeadLore(resort, options = {}) {
 
   if (!base && lore) {
     const t = lore[tier] || lore.quiet;
-    base = { verb: pickWithAvoid(t.verbs, avoidVerb), deck: pick(t.decks), displayName: lore.name };
+    base = { verb: pickWithAvoid(t.verbs, avoidVerb), displayName: lore.name };
   }
 
   const regionLore = REGION_LORE[resort.region] || {
@@ -838,9 +858,24 @@ function setLocalLocation(lat, lon, label = '') {
 }
 
 function updateLeadStories(list) {
-  const topA = list[0] || FALLBACK_RESORTS[0];
-  const topB = list[1] || FALLBACK_RESORTS[1] || topA;
+  const topA = list[0] || null;
+  const topB = list[1] || topA;
   const stories = document.querySelectorAll('.lead-story');
+  if (!topA || !stories.length) {
+    stories.forEach((storyEl, idx) => {
+      const signalEl = storyEl.querySelector('.lead-signal');
+      const headlineEl = storyEl.querySelector('.lead-headline');
+      const deckEl = storyEl.querySelector('.lead-deck');
+      const statVals = storyEl.querySelectorAll('.lead-stat-val');
+      if (signalEl) signalEl.innerHTML = '<span class="sig-dot"></span>Live Brief';
+      if (headlineEl) headlineEl.innerHTML = `Waiting on <em>live data</em>`;
+      if (deckEl) deckEl.textContent = 'Unable to load live resort feed right now.';
+      statVals.forEach((el) => { el.textContent = '—'; });
+      const forecastEl = document.getElementById(idx === 0 ? 'lead1Forecast' : 'lead2Forecast');
+      if (forecastEl) forecastEl.innerHTML = '';
+    });
+    return;
+  }
   const loreA = getLeadLore(topA);
   const loreB = getLeadLore(topB, { avoidVerb: loreA.verb });
 
@@ -858,8 +893,22 @@ function updateLeadStories(list) {
         : `${modeLabel} · ${resort.conditions}`);
     signalEl.className = `lead-signal ${resort.pow === 'on' ? 'pow' : resort.pow === 'building' ? 'building' : 'groomed'}`;
     signalEl.innerHTML = `<span class="sig-dot"></span>${signalLabel}`;
-    headlineEl.innerHTML = `${lore.displayName}: <em>${lore.verb}</em>`;
-    deckEl.textContent = lore.deck;
+    headlineEl.innerHTML = `${lore.displayName} is <em>${lore.verb}</em>`;
+    deckEl.textContent = getLeadDeckLine(resort);
+    storyEl.dataset.resortId = resort.id;
+    if (!storyEl.dataset.boundLeadClick) {
+      storyEl.dataset.boundLeadClick = '1';
+      storyEl.style.cursor = 'pointer';
+      storyEl.addEventListener('click', () => {
+        const id = storyEl.dataset.resortId;
+        if (!id) return;
+        const row = document.querySelector(`.resort-row[data-resort="${id}"]`);
+        if (!row) return;
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        document.querySelectorAll('#resortTicker .resort-row').forEach((r) => r.classList.remove('expanded'));
+        row.classList.add('expanded');
+      });
+    }
 
     if (statVals.length >= 4) {
       statVals[0].textContent = `${totals.snow24.toFixed(1)}"`;
@@ -872,24 +921,8 @@ function updateLeadStories(list) {
   fillStory(stories[0], topA, 'Pow Signal', loreA);
   fillStory(stories[1], topB, 'Storm Window', loreB);
 
-  const topATotals = getDisplayPowTotals(topA);
-  const topBTotals = getDisplayPowTotals(topB);
-
-  buildForecastBars('lead1Forecast', [
-    { day: 'Thu', snow: Number((topATotals.snow24 * 0.35).toFixed(1)) },
-    { day: 'Fri', snow: Number(topATotals.snow24.toFixed(1)) },
-    { day: 'Sat', snow: Number((Math.max(0, topATotals.snow48 - topATotals.snow24)).toFixed(1)) },
-    { day: 'Sun', snow: Number((Math.max(0, topATotals.snow72 - topATotals.snow48)).toFixed(1)) },
-    { day: 'Mon', snow: 0 }
-  ]);
-
-  buildForecastBars('lead2Forecast', [
-    { day: 'Thu', snow: Number((topBTotals.snow24 * 0.35).toFixed(1)) },
-    { day: 'Fri', snow: Number(topBTotals.snow24.toFixed(1)) },
-    { day: 'Sat', snow: Number((Math.max(0, topBTotals.snow48 - topBTotals.snow24)).toFixed(1)) },
-    { day: 'Sun', snow: Number((Math.max(0, topBTotals.snow72 - topBTotals.snow48)).toFixed(1)) },
-    { day: 'Mon', snow: 0 }
-  ]);
+  buildForecastBars('lead1Forecast', getDailySnowFrom72h(topA));
+  buildForecastBars('lead2Forecast', getDailySnowFrom72h(topB));
 }
 
 function getSnowSignalPill(pow) {
@@ -958,6 +991,55 @@ function updateExpandBtnBadge() {
   if (drawerActive > 0 && lbl) {
     lbl.insertAdjacentHTML('afterend', `<span class="deb-count">${drawerActive}</span>`);
   }
+}
+
+function setAskModeUI(isAsk) {
+  const input = document.getElementById('resortSearch');
+  const pill = document.getElementById('dispatchAskPill');
+  if (input) input.classList.toggle('ask-mode', isAsk);
+  if (pill) pill.hidden = !isAsk;
+}
+
+function setAnswerActiveUI(isActive) {
+  const hints = document.getElementById('dispatchQuickHints');
+  if (hints) hints.classList.toggle('is-hidden', isActive);
+}
+
+function updateDispatchQuickHints() {
+  const hintsWrap = document.getElementById('dispatchQuickHints');
+  if (!hintsWrap) return;
+  const quick = Array.from(hintsWrap.querySelectorAll('.d-qhint'));
+  if (!quick.length) return;
+  const storm = getStormModeSnapshot(state.resorts);
+  const windyCount = state.resorts.filter((r) => getWindHoldStatus(r).level === 'high').length;
+  const heavyCount = state.resorts.filter((r) => getDisplayPowTotals(r).snow24 >= 6).length;
+
+  const hintSets = (storm.isStormMode || heavyCount >= 5)
+    ? [
+      { q: "where's the pow?", t: "where's the pow" },
+      { q: 'best within 3hr', t: 'best within 3hr' },
+      { q: 'jay vs killington', t: 'jay vs kill' },
+      { q: 'ikon VT low wind', t: 'ikon VT low wind' }
+    ]
+    : (windyCount >= 6
+      ? [
+        { q: 'low wind risk', t: 'low wind risk' },
+        { q: 'which lifts are running', t: 'which lifts are running' },
+        { q: 'best within 3hr', t: 'best within 3hr' },
+        { q: 'jay vs killington', t: 'jay vs kill' }
+      ]
+      : [
+        { q: "when's the next storm", t: "when's next storm" },
+        { q: 'best grooming', t: 'best grooming' },
+        { q: 'best within 3hr', t: 'best within 3hr' },
+        { q: "where's the snow?", t: "where's the snow" }
+      ]);
+
+  quick.forEach((btn, idx) => {
+    const h = hintSets[idx] || hintSets[hintSets.length - 1];
+    btn.dataset.q = h.q;
+    btn.textContent = h.t;
+  });
 }
 
 function applyFilters() {
@@ -1225,12 +1307,46 @@ function applyStormModeUI(storm) {
   tickerRule.dataset.label = 'Storm Map';
 }
 
+function getTrailPct(resort) {
+  const parsed = parseTrailsString(resort.trails);
+  if (parsed.open !== null && parsed.total !== null && parsed.total > 0) {
+    return { open: parsed.open, total: parsed.total, pct: Math.round((parsed.open / parsed.total) * 100) };
+  }
+  return null;
+}
+
+function getPatrolTimestamp(resort) {
+  const ts = Date.parse(String(resort?.patrolUpdatedAt || ''));
+  if (!Number.isFinite(ts)) return null;
+  const d = new Date(ts);
+  const now = Date.now();
+  const hoursAgo = (now - ts) / (60 * 60 * 1000);
+  const timeStr = d.toLocaleString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+  if (hoursAgo <= 24) {
+    const dayLabel = d.toDateString() === new Date().toDateString() ? 'today' : 'yesterday';
+    return `${timeStr} ${dayLabel}`;
+  }
+  return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + timeStr;
+}
+
+function getRainAtBaseWarning(resort) {
+  if (resort?.powWatch?.snowLevel?.rainPossibleAtBase) {
+    const level = resort.powWatch.snowLevel.current;
+    const ft = Number.isFinite(Number(level)) ? Math.round(Number(level)).toLocaleString() : null;
+    return ft ? `Rain possible at base — snow level ~${ft} ft` : 'Rain possible at base elevations';
+  }
+  return null;
+}
+
 function buildResortMarkup(r, rank, options = {}) {
   const powCtx = getPowDisplayContext(r);
   const displayTotals = powCtx.totals;
   const wind = getWindHoldStatus(r);
   const bestBadge = getBestInDaysLabel(r);
   const driveWindow = getDriveWindow(r);
+  const trailInfo = getTrailPct(r);
+  const patrolTs = getPatrolTimestamp(r);
+  const rainWarn = getRainAtBaseWarning(r);
   const snowCls = displayTotals.snow24 >= 4 ? ' snow' : displayTotals.snow24 === 0 ? ' ice' : '';
   const passStr = (r.passes || []).map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(' · ') || '—';
   const inline72h = buildInline72hChart(r, displayTotals);
@@ -1244,26 +1360,45 @@ function buildResortMarkup(r, rank, options = {}) {
       <span class="det-warn-icon">${String(powCtx.powAlert.event).toLowerCase().includes('warning') ? '⚠' : '👁'}</span>
       ${powCtx.powAlert.event} in effect through ${powCtx.alertExpiryLabel}
     </div>` : '';
-  const conf = getConfidenceFromPatrol(r);
-  const confCls = conf === 'High' ? 'conf-high' : conf === 'Low' ? 'conf-low' : 'conf-med';
   const windLabel = wind.level === 'high' ? 'High' : wind.level === 'med' ? 'Moderate' : 'Low';
   const verdict = r.verdict || (r.rating >= 4 ? 'Shredable!' : r.rating <= 2 ? 'Manage Expectations' : 'Solid Day');
   const verdictCls = ['Shredable!', 'Worth It'].includes(verdict)
     ? 'verdict-go'
     : (verdict === 'Go Tomorrow' ? 'verdict-wait' : 'verdict-meh');
-  const powWatchHtml = `
-    <div class="det-section">
-      <div class="det-section-head">
-        <span class="det-section-label">POW WATCH</span>
-        <span class="det-storm-badge ${r.pow === 'on' ? 'badge-pow' : r.pow === 'building' ? 'badge-storm' : 'badge-quiet'}">${r.pow === 'on' ? 'POW' : r.pow === 'building' ? 'STORM' : 'QUIET'}</span>
+  const trailPctStr = trailInfo ? `${trailInfo.pct}% open (${trailInfo.open}/${trailInfo.total})` : '';
+
+  // Rating tooltip
+  const ratingTitle = 'Based on 24h snow, wind, temp, conditions, and trail count';
+
+  // DETAIL PANEL — restructured: critical info first, secondary below
+  const criticalHtml = `
+    <div class="det-critical">
+      <div class="det-critical-col">
+        <div class="det-conditions-main">${r.conditions}</div>
+        <div class="det-quick-stats">
+          <span>24h <strong>${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '0"'}</strong></span>
+          <span>48h <strong>${displayTotals.snow48 > 0 ? `${displayTotals.snow48}"` : '0"'}</strong></span>
+          <span>72h <strong>${displayTotals.snow72 > 0 ? `${displayTotals.snow72.toFixed(1)}"` : '0"'}</strong></span>
+          <span>Temp <strong>${r.temp}°</strong></span>
+          <span>Feels <strong>${Number(r.feelsLike ?? r.temp)}°</strong></span>
+          <span>Wind <strong>${r.wind} mph</strong></span>
+          ${trailPctStr ? `<span>Trails <strong>${trailPctStr}</strong></span>` : ''}
+        </div>
       </div>
-      <div class="det-pow-row">
-        <div class="det-pow-stat"><span class="dpv">${displayTotals.snow24.toFixed(1)}"</span><span class="dpl">24h</span></div>
-        <div class="det-pow-stat"><span class="dpv big">${displayTotals.snow48.toFixed(1)}"</span><span class="dpl">48h</span></div>
-        <div class="det-pow-stat"><span class="dpv big">${displayTotals.snow72.toFixed(1)}"</span><span class="dpl">72h</span></div>
+      <div class="det-critical-col det-lift-col">
+        <div class="det-lift-label">LIFT OPS</div>
+        <div class="det-lift-status det-lift-${wind.level}">${wind.detail}</div>
       </div>
-      <div class="det-pow-meta">${powCtx.snowLevelLine || 'Snow Level: —'} &nbsp;·&nbsp; Storm Total: <strong>${powCtx.potentialLow.toFixed(1)}–${powCtx.potentialHigh.toFixed(1)}"</strong></div>
     </div>`;
+
+  const alertsHtml = [
+    rainWarn ? `<div class="det-rain-warning">⚠ ${rainWarn}</div>` : '',
+    warningHtml,
+    powCtx.displayPowBrief ? `<div class="det-nws-brief"><strong>NWS:</strong> ${powCtx.displayPowBrief}</div>` : '',
+    r.terrainNote ? `<div class="det-terrain-note"><strong>Terrain:</strong> ${r.terrainNote}</div>` : '',
+    driveWindow ? `<div class="det-nws-brief">${driveWindow}</div>` : ''
+  ].filter(Boolean).join('');
+
   const forecastHtml = `
     <div class="det-section">
       <div class="det-section-label">3-Day Forecast</div>
@@ -1279,12 +1414,12 @@ function buildResortMarkup(r, rank, options = {}) {
   const sparkHtml = `
     <div class="det-section">
       <div class="det-section-head">
-        <span class="det-section-label">72h Snowfall Outlook</span>
-        <span class="det-spark-range">3h blocks · next 72h</span>
+        <span class="det-section-label">72h Snowfall</span>
+        <span class="det-spark-range">3h blocks</span>
       </div>
       <div class="det-sparkline">${powCtx.chartBars}</div>
       <div class="det-spark-footer">
-        <span>72h total: <strong>${displayTotals.snow72.toFixed(1)}"</strong></span>
+        <span>Total: <strong>${displayTotals.snow72.toFixed(1)}"</strong></span>
         ${powCtx.maxSeriesVal > 0.1 ? `<span>Peak: <strong>${powCtx.maxSeriesVal.toFixed(1)}"</strong></span>` : ''}
       </div>
     </div>`;
@@ -1298,7 +1433,7 @@ function buildResortMarkup(r, rank, options = {}) {
       <div class="rr-rank">${rank}</div>
       <div class="rr-name-col">
         <div class="rr-name">${r.name}</div>
-        <div class="rr-meta">${r.loc} · ${passStr}${bestBadge ? ` · ${bestBadge}` : ''}</div>
+        <div class="rr-meta">${r.loc} · ${passStr}${trailPctStr ? ` · ${trailPctStr}` : ''}${bestBadge ? ` · ${bestBadge}` : ''}</div>
         ${inline72hHtml}
       </div>
       <div class="rr-cond">
@@ -1311,38 +1446,20 @@ function buildResortMarkup(r, rank, options = {}) {
       <div class="rr-pow">${getSnowSignalPill(r.pow)}</div>
     </div>
     <div class="resort-detail" id="${detailId}">
-      <div class="det-header">
-        <div class="det-header-left">
-          <div class="det-conditions-label">Current Conditions</div>
-          <div class="det-conditions-main">${r.conditions}</div>
-          <div class="det-quick-stats">
-            <span>24h Snow <strong>${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '0"'}</strong></span>
-            <span>48h Snow <strong>${displayTotals.snow48 > 0 ? `${displayTotals.snow48}"` : '0"'}</strong></span>
-            <span>Temp <strong>${r.temp}°</strong></span>
-            <span>Feels Like <strong>${Number(r.feelsLike ?? r.temp)}°</strong></span>
-            <span>Wind <strong>${r.wind} mph</strong></span>
-          </div>
-          ${powCtx.displayPowBrief ? `<div class="det-nws-brief"><strong>NWS Brief:</strong> ${powCtx.displayPowBrief}</div>` : ''}
-          <div class="det-nws-brief"><strong>Lift Ops:</strong> ${wind.detail}</div>
-          ${driveWindow ? `<div class="det-nws-brief"><strong>Drive Window:</strong> ${driveWindow}</div>` : ''}
-          ${r.terrainNote ? `<div class="det-terrain-note"><strong>Terrain note:</strong> ${r.terrainNote}</div>` : ''}
-        </div>
-        <div class="det-header-right">
-          <span class="det-confidence ${confCls}">Confidence: ${conf}</span>
-        </div>
-      </div>
-      ${warningHtml}
+      ${criticalHtml}
+      ${alertsHtml}
       <div class="det-body">
         <div class="det-col">${forecastHtml}</div>
-        <div class="det-col">${powWatchHtml}</div>
         <div class="det-col">${sparkHtml}</div>
       </div>
       <div class="det-footer">
-        <div class="det-rating-zone">
-          <div class="det-rating-label">ICECOAST RATING</div>
+        <div class="det-rating-zone" title="${ratingTitle}">
+          <div class="det-rating-label">ICECOAST RATING <span class="det-rating-hint">(?)</span></div>
           <div class="det-stars">${[1, 2, 3, 4, 5].map((n) => `<div class="det-star${n <= r.rating ? (r.pow === 'on' ? ' on pow-on' : ' on') : ''}"></div>`).join('')}</div>
+          <div class="det-rating-basis">Based on snow, wind, temp, conditions</div>
         </div>
         <div class="det-verdict ${verdictCls}">${verdict}</div>
+        ${patrolTs ? `<div class="det-patrol-ts">Last patrol report: ${patrolTs}</div>` : ''}
       </div>
       <div class="detail-actions">
         <button class="d-btn primary" data-drive="${r.id}">Drive there →</button>
@@ -1425,7 +1542,11 @@ function renderTicker() {
   updateSortHeaderUI();
 
   if (!list.length) {
-    ticker.innerHTML = '<div style="padding:1.5rem 0;font-family:var(--mono);font-size:0.72rem;color:var(--ink-faint);font-style:italic">No resorts match. East Coast grit says lower your standards and try again.</div>';
+    if (state.source === 'error' && !state.search.trim() && !getAllActive().size) {
+      ticker.innerHTML = '<div style="padding:1.5rem 0;font-family:var(--mono);font-size:0.72rem;color:var(--ink-faint);font-style:italic">Live resort feed unavailable right now. Check worker/admin inputs and refresh.</div>';
+    } else {
+      ticker.innerHTML = '<div style="padding:1.5rem 0;font-family:var(--mono);font-size:0.72rem;color:var(--ink-faint);font-style:italic">No resorts match. East Coast grit says lower your standards and try again.</div>';
+    }
     return;
   }
 
@@ -1468,6 +1589,22 @@ function renderTicker() {
   }
   const defaultExpandCount = window.matchMedia('(max-width: 720px)').matches ? 0 : 1;
   bindResortInteractions(ticker, defaultExpandCount);
+
+  updateDispatchQuickHints();
+
+  if (state.answerFocusIds && state.answerFocusIds.length) {
+    const focus = new Set(state.answerFocusIds);
+    ticker.querySelectorAll('.resort-row').forEach((row) => {
+      const id = row.dataset.resort || '';
+      const isFocus = focus.has(id);
+      row.classList.toggle('answer-focus', isFocus);
+      row.classList.toggle('answer-dim', !isFocus);
+    });
+  } else {
+    ticker.querySelectorAll('.resort-row').forEach((row) => {
+      row.classList.remove('answer-focus', 'answer-dim');
+    });
+  }
 }
 
 function syncDispatchTags() {
@@ -1478,9 +1615,8 @@ function syncDispatchTags() {
     const meta = CHIP_MAP[cmd];
     if (meta) tags.push({ label: meta.label, cmd });
   });
-  const hasText = state.search.trim().length > 0;
-  zone.classList.toggle('on', tags.length > 0 || hasText);
-  if (!tags.length && !hasText) {
+  zone.classList.toggle('on', tags.length > 0);
+  if (!tags.length) {
     zone.innerHTML = '';
     return;
   }
@@ -1494,8 +1630,7 @@ function syncDispatchTags() {
   };
 
   zone.innerHTML =
-    (hasText ? `<span style="color:var(--ink-faint);font-family:var(--mono);font-size:0.52rem">"${state.search}"</span>` : '')
-    + tags.map((t) => `<span class="d-tag ${tagCls(t.cmd)}" data-cmd="${t.cmd}">${t.label} <span class="d-tag-x">✕</span></span>`).join('')
+    tags.map((t) => `<span class="d-tag ${tagCls(t.cmd)}" data-cmd="${t.cmd}">${t.label} <span class="d-tag-x">✕</span></span>`).join('')
     + '<button onclick="clearAllDispatch()" style="font-family:var(--mono);font-size:0.52rem;letter-spacing:0.06em;text-transform:uppercase;background:none;border:none;color:var(--ink-faint);cursor:pointer;margin-left:auto;">clear all</button>';
 
   zone.querySelectorAll('.d-tag').forEach((tag) => {
@@ -1563,11 +1698,15 @@ function renderSavedMorningBrief() {
 
 function attachUi() {
   const input = document.getElementById('resortSearch');
+  const inputWrap = document.getElementById('dispatchInputWrap');
+  const fauxCaret = document.getElementById('dispatchFauxCaret');
+  const measure = document.getElementById('dispatchMeasure');
   const clearBtn = document.getElementById('clearSearch');
   const expandBtn = document.getElementById('dispatchExpandBtn');
   const drawer = document.getElementById('dispatchDrawer');
   const useLocationBtn = document.getElementById('useLocationBtn');
   const localStatus = document.getElementById('localStatus');
+  const mobileMq = window.matchMedia('(max-width: 640px)');
 
   const NL_COMMANDS = [
     { match: /\b(pow|powder|fresh|nuking)\b/i, cmd: 'pow' },
@@ -1584,23 +1723,103 @@ function attachUi() {
     { match: /\bcold\b/i, cmd: 'cold' }
   ];
 
+  function syncDispatchCaret() {
+    if (!input || !inputWrap || !fauxCaret || !measure) return;
+    const cs = window.getComputedStyle(input);
+    measure.style.font = cs.font;
+    measure.style.fontSize = cs.fontSize;
+    measure.style.fontWeight = cs.fontWeight;
+    measure.style.fontFamily = cs.fontFamily;
+    measure.style.letterSpacing = cs.letterSpacing;
+    measure.style.textTransform = cs.textTransform;
+    const paddingLeft = parseFloat(window.getComputedStyle(input).paddingLeft || '0') || 0;
+    const monoProbe = '0000000000';
+    measure.textContent = monoProbe;
+    const charWidth = Math.max(1, measure.offsetWidth / monoProbe.length);
+    if (document.activeElement !== input) {
+      inputWrap.classList.remove('focused');
+      fauxCaret.style.left = `${paddingLeft}px`;
+      return;
+    }
+    inputWrap.classList.add('focused');
+    const pos = Number.isFinite(input.selectionStart) ? input.selectionStart : String(input.value || '').length;
+    const caretGap = 2;
+    const x = Math.max(0, paddingLeft + (pos * charWidth) + caretGap - input.scrollLeft);
+    fauxCaret.style.left = `${x}px`;
+  }
+
+  function syncDispatchCaretRaf() {
+    window.requestAnimationFrame(syncDispatchCaret);
+  }
+
+  function updateDispatchPlaceholder() {
+    if (!input) return;
+    input.placeholder = mobileMq.matches
+      ? 'Search resorts. Enter to ask.'
+      : 'Search resorts and filters. Press Enter to ask.';
+  }
+
+  input.addEventListener('focus', syncDispatchCaretRaf);
+  input.addEventListener('blur', syncDispatchCaret);
+  input.addEventListener('click', syncDispatchCaretRaf);
+  input.addEventListener('keyup', syncDispatchCaretRaf);
+  input.addEventListener('scroll', syncDispatchCaretRaf);
+  document.addEventListener('selectionchange', () => {
+    if (document.activeElement === input) syncDispatchCaretRaf();
+  });
+  mobileMq.addEventListener('change', updateDispatchPlaceholder);
+  updateDispatchPlaceholder();
+  setAskModeUI(false);
+
   input.addEventListener('input', (e) => {
     const val = e.target.value || '';
     state.search = val;
     state.nlHints = new Set();
     NL_COMMANDS.forEach((cmd) => { if (cmd.match.test(val)) state.nlHints.add(cmd.cmd); });
     clearBtn.classList.toggle('on', val.trim().length > 0 || state.activeHints.size > 0);
+    const askMode = isAskQuery(val);
+    setAskModeUI(askMode);
+    const changedFromAnswer = state.answerQueryText
+      && val.trim().toLowerCase() !== state.answerQueryText.trim().toLowerCase();
+    if (changedFromAnswer || (!askMode && state.answerQueryText)) {
+      state.answerFocusIds = [];
+      state.answerQueryText = '';
+      setAnswerActiveUI(false);
+      const answerBox = document.getElementById('dispatchAnswer');
+      if (answerBox) answerBox.hidden = true;
+    }
     renderTicker();
     syncDispatchTags();
+    syncDispatchCaretRaf();
+  });
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const val = input.value.trim();
+      const shouldAsk = isAskQuery(val);
+      if (shouldAsk) {
+        runDispatchAnswer(val);
+      } else if (val) {
+        dismissDispatchAnswer();
+        syncDispatchTags();
+      } else {
+        dismissDispatchAnswer();
+      }
+    }
   });
 
   clearBtn.addEventListener('click', () => {
     input.value = '';
     state.search = '';
     state.nlHints = new Set();
+    state.answerFocusIds = [];
+    state.answerQueryText = '';
+    setAskModeUI(false);
     clearBtn.classList.toggle('on', state.activeHints.size > 0);
-    renderTicker();
+    dismissDispatchAnswer();
     syncDispatchTags();
+    syncDispatchCaretRaf();
     input.focus();
   });
 
@@ -1805,4 +2024,450 @@ function updateSavedTab() {
   updateSavedTab();
   renderTicker();
   syncDispatchTags();
+  initPwaNudge();
+  initShareCard();
+  initAskTheBrief();
 })();
+
+/* ═══════════════════════════════════════════════
+   THE ANSWER ENGINE
+   One opinionated line. The reason to come back.
+═══════════════════════════════════════════════ */
+function buildAnswer(resorts) {
+  if (!resorts || !resorts.length) return null;
+
+  const storm        = getStormModeSnapshot(resorts);
+  const sorted       = resorts.slice().sort((a, b) => getDisplayPowTotals(b).snow24 - getDisplayPowTotals(a).snow24);
+  const top          = sorted[0];
+  const topTotals    = getDisplayPowTotals(top);
+  const powOnCount   = resorts.filter(r => r.pow === 'on').length;
+  const buildCount   = resorts.filter(r => r.pow === 'building').length;
+  const STATE_NAMES  = { VT:'Vermont', ME:'Maine', NY:'New York', NH:'New Hampshire', PA:'Pennsylvania', MA:'Massachusetts', QC:'Québec', CT:'Connecticut', NJ:'New Jersey', WV:'West Virginia' };
+
+  if (storm.isStormMode) {
+    const states = storm.states4.slice(0, 3).map(s => STATE_NAMES[s] || s).join(', ');
+    return {
+      verdict: 'Yes. Go.',
+      cls: 'go',
+      text: `${storm.count4} resorts hit with ${storm.minSnow}–${storm.maxSnow}" across ${states}. This is the day.`
+    };
+  }
+
+  if (top.pow === 'on' && topTotals.snow24 >= 6) {
+    const lore  = getLeadLore(top);
+    const extra = powOnCount > 1 ? `${powOnCount} resorts with active pow.` : 'Drive now.';
+    return { verdict: 'Go.', cls: 'go', text: `${top.name} ${lore.verb} — ${topTotals.snow24}" in 24h. ${extra}` };
+  }
+
+  if (top.pow === 'on' && topTotals.snow24 >= 2) {
+    return { verdict: 'Go.', cls: 'go', text: `${top.name}: ${topTotals.snow24}" fresh, ${top.conditions}, ${top.temp}°F. Worth it.` };
+  }
+
+  if (buildCount >= 3 || (top.pow === 'building' && topTotals.snow72 >= 8)) {
+    const fcst = topTotals.snow72 > 0 ? `${top.name} could see ${topTotals.snow72.toFixed(0)}" in 72h.` : 'Check back tomorrow.';
+    return { verdict: 'Wait.', cls: 'wait', text: `Storm building. ${buildCount} resorts loading. ${fcst}` };
+  }
+
+  if (top.rating >= 4) {
+    return { verdict: 'Go.', cls: 'go', text: `${top.name}: ${top.conditions}, ${top.temp}°F. No pow but a solid groomed day.` };
+  }
+
+  return {
+    verdict: 'Meh.',
+    cls: 'meh',
+    text: `Flat conditions coast-wide. ${top.name} leads with ${top.conditions.toLowerCase()}. Check back after the next storm.`
+  };
+}
+
+function updateAnswerBar() {
+  const bar       = document.getElementById('answerBar');
+  const verdictEl = document.getElementById('answerVerdict');
+  const textEl    = document.getElementById('answerText');
+  const shareBtn  = document.getElementById('answerShareBtn');
+  if (!bar || !verdictEl || !textEl) return;
+
+  const answer = buildAnswer(state.resorts);
+  if (!answer) { bar.hidden = true; return; }
+
+  verdictEl.textContent = answer.verdict;
+  verdictEl.className   = `answer-verdict ${answer.cls}`;
+  textEl.textContent    = answer.text;
+  bar.hidden = false;
+
+  if (shareBtn) {
+    shareBtn.onclick = async () => {
+      const shareText = `${answer.verdict} ${answer.text} — icecoast.ski`;
+      try {
+        if (navigator.share) {
+          await navigator.share({ title: 'icecoast morning brief', text: shareText, url: 'https://icecoast.ski' });
+        } else {
+          await navigator.clipboard.writeText(shareText);
+          shareBtn.classList.add('copied');
+          shareBtn.innerHTML = '✓';
+          setTimeout(() => {
+            shareBtn.classList.remove('copied');
+            shareBtn.innerHTML = `<svg viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><polyline points="16 6 12 2 8 6"/><line x1="12" y1="2" x2="12" y2="15"/></svg>`;
+          }, 1800);
+        }
+      } catch(_) {}
+    };
+  }
+}
+
+/* ═══════════════════════════════════════════════
+   SHARE CARD — resort detail overlay
+═══════════════════════════════════════════════ */
+function showShareCard(resort) {
+  const totals   = getDisplayPowTotals(resort);
+  const wind     = getWindHoldStatus(resort);
+  const condLabel = resort.conditions + (resort.pow === 'on' ? ' — Pow Active' : resort.pow === 'building' ? ' — Storm Building' : '');
+  const dateStr  = new Date().toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+
+  const overlay = document.createElement('div');
+  overlay.className = 'share-overlay';
+  overlay.innerHTML = `
+    <div class="share-card">
+      <div class="sc-logo">ice<em>coast</em></div>
+      <div class="sc-name">${resort.name}</div>
+      <div class="sc-cond">${condLabel}</div>
+      <div class="sc-stats">
+        <div class="sc-stat">
+          <div class="sc-stat-val${totals.snow24 >= 4 ? ' pow' : ''}">${totals.snow24 > 0 ? totals.snow24 + '"' : '—'}</div>
+          <div class="sc-stat-lbl">Fresh 24h</div>
+        </div>
+        <div class="sc-stat">
+          <div class="sc-stat-val">${resort.temp}°F</div>
+          <div class="sc-stat-lbl">Summit</div>
+        </div>
+        <div class="sc-stat">
+          <div class="sc-stat-val">${resort.wind} mph</div>
+          <div class="sc-stat-lbl">Wind</div>
+        </div>
+        <div class="sc-stat">
+          <div class="sc-stat-val">${wind.short}</div>
+          <div class="sc-stat-lbl">Lift Ops</div>
+        </div>
+      </div>
+      <div class="sc-url">icecoast.ski · ${dateStr}</div>
+      <div class="sc-actions">
+        <button class="sc-btn" id="scCancel">Cancel</button>
+        <button class="sc-btn primary" id="scShare">Share →</button>
+      </div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+  overlay.querySelector('#scCancel').onclick = () => overlay.remove();
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+
+  overlay.querySelector('#scShare').onclick = async () => {
+    const text = `${resort.name}: ${totals.snow24 > 0 ? totals.snow24 + '" fresh, ' : ''}${resort.conditions}, ${resort.temp}°F. ${wind.short}. via icecoast.ski`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: `icecoast — ${resort.name}`, text, url: 'https://icecoast.ski' });
+      } else {
+        await navigator.clipboard.writeText(text);
+        const btn = overlay.querySelector('#scShare');
+        btn.textContent = 'Copied ✓';
+        setTimeout(() => overlay.remove(), 900);
+        return;
+      }
+    } catch(_) {}
+    overlay.remove();
+  };
+}
+
+function initShareCard() {
+  document.addEventListener('click', e => {
+    const btn = e.target.closest('[data-share]');
+    if (!btn) return;
+    e.stopImmediatePropagation();
+    const id = btn.getAttribute('data-share');
+    const resort = state.resorts.find(r => r.id === id);
+    if (resort) showShareCard(resort);
+  }, true);
+}
+
+/* ═══════════════════════════════════════════════
+   PWA INSTALL NUDGE
+═══════════════════════════════════════════════ */
+function initPwaNudge() {
+  const nudge      = document.getElementById('pwaNudge');
+  const installBtn = document.getElementById('pwaNudgeInstall');
+  const dismissBtn = document.getElementById('pwaNudgeDismiss');
+  if (!nudge) return;
+
+  const visits    = Number(localStorage.getItem('ic_visits') || '0') + 1;
+  localStorage.setItem('ic_visits', String(visits));
+  const dismissed = localStorage.getItem('ic_pwa_dismissed') === '1';
+  const installed = localStorage.getItem('ic_pwa_installed') === '1';
+
+  let deferredPrompt = null;
+
+  window.addEventListener('beforeinstallprompt', e => {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (visits >= 2 && !dismissed && !installed) {
+      setTimeout(() => { nudge.hidden = false; }, 4000);
+    }
+  });
+
+  const isIos = /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+  const isInStandaloneMode = window.matchMedia('(display-mode: standalone)').matches;
+  if (isIos && !isInStandaloneMode && visits >= 2 && !dismissed && !installed) {
+    if (installBtn) installBtn.textContent = 'Got it';
+    setTimeout(() => { nudge.hidden = false; }, 4000);
+  }
+
+  installBtn && installBtn.addEventListener('click', async () => {
+    if (deferredPrompt) {
+      deferredPrompt.prompt();
+      const { outcome } = await deferredPrompt.userChoice;
+      if (outcome === 'accepted') localStorage.setItem('ic_pwa_installed', '1');
+      deferredPrompt = null;
+    }
+    nudge.classList.add('sliding-out');
+    setTimeout(() => { nudge.hidden = true; nudge.classList.remove('sliding-out'); }, 300);
+  });
+
+  dismissBtn && dismissBtn.addEventListener('click', () => {
+    localStorage.setItem('ic_pwa_dismissed', '1');
+    nudge.classList.add('sliding-out');
+    setTimeout(() => { nudge.hidden = true; nudge.classList.remove('sliding-out'); }, 300);
+  });
+}
+
+/* ═══════════════════════════════════════════════
+   ASK THE BRIEF — agentic conversational layer
+   Natural language queries against live resort data.
+   Not a chatbot. A ski conditions oracle.
+═══════════════════════════════════════════════ */
+function initAskTheBrief() {
+  const input     = document.getElementById('resortSearch');
+  const answerBox = document.getElementById('dispatchAnswer');
+  const inner     = document.getElementById('dispatchAnswerInner');
+  const dismiss   = document.getElementById('dispatchAnswerDismiss');
+  if (!input || !answerBox || !inner || !dismiss) return;
+
+  dismiss.addEventListener('click', () => {
+    dismissDispatchAnswer();
+    input.focus();
+  });
+
+  // Bind quick-ask hint buttons
+  document.querySelectorAll('.d-qhint').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const q = btn.dataset.q;
+      input.value = q;
+      input.dispatchEvent(new Event('input'));
+      setAskModeUI(isAskQuery(q));
+      runDispatchAnswer(q);
+    });
+  });
+}
+
+function isAskQuery(text) {
+  const t = String(text || '').trim().toLowerCase();
+  if (!t) return false;
+  const tokenCount = t.split(/\s+/).filter(Boolean).length;
+
+  let score = 0;
+  if (/^(where|what|which|who|how|should|can|is|are)\b/i.test(t)) score += 2;
+  if (/\?$/i.test(t)) score += 2;
+  if (/\b(vs\.?|versus|compare)\b/i.test(t)) score += 2;
+  if (/\b(best|top|worth|should i|go now|where's|where is)\b/i.test(t)) score += 1;
+  if (/\b(within|hour|hr|drive|from|near|closest)\b/i.test(t)) score += 1;
+  if (/\b(low wind|wind hold|lift hold|which lifts)\b/i.test(t)) score += 1;
+  if (tokenCount >= 3 && /\b(best|top|where|compare|vs|within|hour|hr|drive|wind|lift|worth|storm)\b/i.test(t)) score += 1;
+
+  return score >= 2;
+}
+
+function runDispatchAnswer(query) {
+  const answerBox = document.getElementById('dispatchAnswer');
+  const inner     = document.getElementById('dispatchAnswerInner');
+  if (!answerBox || !inner) return;
+
+  const result = answerQuery(query, state.resorts);
+  inner.innerHTML = result.html;
+  state.answerFocusIds = Array.isArray(result.focusIds) ? result.focusIds.slice(0, 3) : [];
+  state.answerQueryText = String(query || '');
+  setAnswerActiveUI(true);
+  answerBox.hidden = false;
+  renderTicker();
+}
+
+function dismissDispatchAnswer() {
+  const answerBox = document.getElementById('dispatchAnswer');
+  if (answerBox) answerBox.hidden = true;
+  state.answerFocusIds = [];
+  state.answerQueryText = '';
+  setAnswerActiveUI(false);
+  renderTicker();
+}
+
+function answerQuery(query, resorts) {
+  if (!resorts || !resorts.length) {
+    return { html: '<p class="ask-p">No resort data loaded yet. Refresh and try again.</p>', focusIds: [] };
+  }
+
+  const q = query.toLowerCase();
+  let pool = resorts.slice();
+
+  // Pass filtering
+  const passMatch = q.match(/\b(ikon|epic|indy)\b/i);
+  const passFilter = passMatch ? passMatch[1].toLowerCase() : null;
+  if (passFilter) pool = pool.filter(r => (r.passes || []).includes(passFilter));
+
+  // State filtering
+  const stateMap = { vt: 'VT', vermont: 'VT', me: 'ME', maine: 'ME', nh: 'NH', 'new hampshire': 'NH', ny: 'NY', 'new york': 'NY', pa: 'PA', pennsylvania: 'PA', ma: 'MA', ct: 'CT', nj: 'NJ', wv: 'WV', qc: 'QC', quebec: 'QC' };
+  let stateFilter = null;
+  Object.keys(stateMap).forEach((k) => {
+    const escaped = k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const re = new RegExp(`\\b${escaped}\\b`, 'i');
+    if (re.test(q)) stateFilter = stateMap[k];
+  });
+  if (stateFilter) pool = pool.filter(r => r.loc === stateFilter);
+
+  // Drive time filtering
+  const hourMatch = q.match(/(\d+)\s*(?:hour|hr|hours)/i);
+  const maxDriveHrs = hourMatch ? Number(hourMatch[1]) : null;
+  if (maxDriveHrs) {
+    const origin = getDriveOrigin();
+    pool = pool.filter(r => {
+      const hrs = getDriveHours(origin, r);
+      return hrs !== null && hrs <= maxDriveHrs;
+    });
+  }
+
+  // Wind filtering
+  if (q.includes('wind') || q.includes('lift') || q.includes('hold')) {
+    pool = pool.filter(r => getWindHoldStatus(r).level !== 'high');
+  }
+
+  // Powder filtering
+  if (q.includes('pow') || q.includes('fresh') || q.includes('deep')) {
+    pool = pool.filter(r => r.pow === 'on' || getDisplayPowTotals(r).snow24 >= 2);
+  }
+
+  // Compare mode — "X vs Y"
+  const vsMatch = q.match(/(\w[\w\s-]*?)\s+(?:vs\.?|versus|or)\s+(\w[\w\s-]*?)(?:\s+today|\s+this|\?|$)/i);
+  if (vsMatch) {
+    const nameA = vsMatch[1].trim().toLowerCase();
+    const nameB = vsMatch[2].trim().toLowerCase();
+    const findResort = (name) => {
+      const cleaned = name.replace(/[^a-z0-9\s-]/g, '').trim();
+      if (!cleaned) return null;
+      const normalized = cleaned.replace(/\s+/g, '-');
+      const exact = resorts.find((r) => r.id === normalized || r.name.toLowerCase() === cleaned);
+      if (exact) return exact;
+      const starts = resorts.find((r) => r.name.toLowerCase().startsWith(cleaned) || r.id.startsWith(normalized));
+      if (starts) return starts;
+      const includes = resorts.filter((r) => r.name.toLowerCase().includes(cleaned) || r.id.includes(normalized));
+      return includes.length === 1 ? includes[0] : null;
+    };
+    const a = findResort(nameA);
+    const b = findResort(nameB);
+    if (!a || !b) {
+      const missing = [!a ? `"${nameA}"` : '', !b ? `"${nameB}"` : ''].filter(Boolean).join(' and ');
+      return {
+        html: `<p class="ask-p">Couldn’t find ${missing}. Try full resort names (example: "Jay Peak vs Killington").</p>`,
+        focusIds: []
+      };
+    }
+    return buildCompareAnswer(a, b);
+  }
+
+  // Sort by snow
+  pool.sort((a, b) => getDisplayPowTotals(b).snow24 - getDisplayPowTotals(a).snow24);
+
+  if (!pool.length) {
+    return {
+      html: '<p class="ask-p">No resorts match those criteria right now. Try widening your search — drop the pass filter or add an hour to your drive.</p>',
+      focusIds: []
+    };
+  }
+
+  const top = pool[0];
+  const topTotals = getDisplayPowTotals(top);
+  const wind = getWindHoldStatus(top);
+  const drive = getDriveWindow(top);
+  const bestBadge = getBestInDaysLabel(top);
+  const origin = getDriveOrigin();
+  const driveHrs = getDriveHours(origin, top);
+  const driveLabel = driveHrs ? `~${Math.round(driveHrs * 60)} min from ${origin.label}` : '';
+
+  let verdict = '';
+  if (topTotals.snow24 >= 6 && wind.level !== 'high') verdict = '<span class="ask-verdict go">Go now.</span>';
+  else if (topTotals.snow24 >= 3) verdict = '<span class="ask-verdict go">Worth the drive.</span>';
+  else if (top.pow === 'building') verdict = '<span class="ask-verdict wait">Wait — storm building.</span>';
+  else verdict = '<span class="ask-verdict meh">Manageable.</span>';
+
+  let html = `<div class="ask-answer">`;
+  html += `<div class="ask-answer-head">${verdict} <strong>${top.name}</strong></div>`;
+  html += `<div class="ask-answer-stats">`;
+  html += `<span>${topTotals.snow24}" fresh</span>`;
+  html += `<span>${top.conditions}</span>`;
+  html += `<span>${top.temp}°F</span>`;
+  html += `<span>${wind.short}</span>`;
+  if (driveLabel) html += `<span>${driveLabel}</span>`;
+  html += `</div>`;
+  if (bestBadge) html += `<div class="ask-badge">${bestBadge}</div>`;
+  if (top.terrainNote) html += `<div class="ask-terrain">${top.terrainNote}</div>`;
+  if (drive) html += `<div class="ask-drive">${drive}</div>`;
+
+  // Runner up
+  if (pool.length >= 2) {
+    const runner = pool[1];
+    const rTotals = getDisplayPowTotals(runner);
+    const rWind = getWindHoldStatus(runner);
+    const rDrive = getDriveHours(origin, runner);
+    const rLabel = rDrive ? `~${Math.round(rDrive * 60)} min` : '';
+    html += `<div class="ask-runner">Runner-up: <strong>${runner.name}</strong> — ${rTotals.snow24}" fresh, ${runner.conditions}, ${rWind.short}${rLabel ? ` · ${rLabel}` : ''}</div>`;
+  }
+
+  html += `</div>`;
+  const focusIds = [top.id];
+  if (pool[1]?.id) focusIds.push(pool[1].id);
+  return { html, focusIds };
+}
+
+function buildCompareAnswer(a, b) {
+  const aT = getDisplayPowTotals(a);
+  const bT = getDisplayPowTotals(b);
+  const aW = getWindHoldStatus(a);
+  const bW = getWindHoldStatus(b);
+  const origin = getDriveOrigin();
+  const aH = getDriveHours(origin, a);
+  const bH = getDriveHours(origin, b);
+  const compare = getWorthExtraHourLine(a, b);
+
+  let winner = a;
+  let loser = b;
+  let reason = '';
+  const snowDiff = aT.snow24 - bT.snow24;
+  if (snowDiff > 2 && aW.level !== 'high') { winner = a; loser = b; reason = `${Math.abs(snowDiff).toFixed(0)}" more snow and ${aW.level === 'low' ? 'no wind issues' : 'manageable wind'}`; }
+  else if (snowDiff < -2 && bW.level !== 'high') { winner = b; loser = a; reason = `${Math.abs(snowDiff).toFixed(0)}" more snow and ${bW.level === 'low' ? 'no wind issues' : 'manageable wind'}`; }
+  else if (aW.level === 'high' && bW.level !== 'high') { winner = b; loser = a; reason = 'similar snow but lower wind hold risk'; }
+  else if (bW.level === 'high' && aW.level !== 'high') { winner = a; loser = b; reason = 'similar snow but lower wind hold risk'; }
+  else { reason = 'coin flip — similar conditions'; }
+
+  const wT = getDisplayPowTotals(winner);
+  const wW = getWindHoldStatus(winner);
+  const wH = getDriveHours(origin, winner);
+
+  let html = `<div class="ask-answer">`;
+  html += `<div class="ask-answer-head"><span class="ask-verdict go">${winner.name}.</span> ${reason}.</div>`;
+  html += `<div class="ask-compare-grid">`;
+  html += `<div class="ask-cmp-col${winner === a ? ' winner' : ''}"><div class="ask-cmp-name">${a.name}</div>`;
+  html += `<div class="ask-cmp-row">${aT.snow24}" fresh · ${a.conditions} · ${a.temp}°F</div>`;
+  html += `<div class="ask-cmp-row">${aW.detail}</div>`;
+  html += `${aH ? `<div class="ask-cmp-row">~${Math.round(aH * 60)} min drive</div>` : ''}</div>`;
+  html += `<div class="ask-cmp-col${winner === b ? ' winner' : ''}"><div class="ask-cmp-name">${b.name}</div>`;
+  html += `<div class="ask-cmp-row">${bT.snow24}" fresh · ${b.conditions} · ${b.temp}°F</div>`;
+  html += `<div class="ask-cmp-row">${bW.detail}</div>`;
+  html += `${bH ? `<div class="ask-cmp-row">~${Math.round(bH * 60)} min drive</div>` : ''}</div>`;
+  html += `</div>`;
+  if (compare) html += `<div class="ask-drive">${compare}</div>`;
+  html += `</div>`;
+  return { html, focusIds: [a.id, b.id] };
+}
