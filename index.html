@@ -62,8 +62,8 @@
       <span class="dispatch-faux-caret" id="dispatchFauxCaret" aria-hidden="true"></span>
       <span class="dispatch-measure" id="dispatchMeasure" aria-hidden="true"></span>
     </div>
-    <span class="dispatch-ask-pill" id="dispatchAskPill" hidden>Enter to ask ↵</span>
-    <button class="dispatch-clear" id="clearSearch" aria-label="Clear">✕ clear</button>
+    <button class="dispatch-ask-btn" id="dispatchAskBtn" aria-label="Ask dispatch">ASK ↵</button>
+    <button class="dispatch-clear" id="clearSearch" aria-label="Clear">✕</button>
     <button class="dispatch-expand-btn" id="dispatchExpandBtn" aria-expanded="false" title="More filters">
       <span class="deb-label">filters</span>
       <span class="deb-chevron">▾</span>
@@ -72,9 +72,6 @@
 
   <!-- QUICK HINTS — tappable shortcuts under the bar -->
   <div class="dispatch-quick-hints" id="dispatchQuickHints">
-    <button class="d-hint" data-cmd="pow">⚡ POW</button>
-    <button class="d-hint" data-cmd="storm">🌨 Storm</button>
-    <button class="d-hint-sep"></button>
     <button class="d-qhint" data-q="ikon VT low wind">ikon VT low wind</button>
     <button class="d-qhint" data-q="jay vs killington">jay vs kill</button>
     <button class="d-qhint" data-q="where's the snow?">where's the snow</button>
@@ -221,6 +218,7 @@
       </div>
       <div class="th right">Signal</div>
     </div>
+    <div class="signal-legend">Signal: Active = snow now · Building = improving later · Quiet = lower snowfall signal</div>
 
     <div id="resortTicker">
       <!-- Injected by JS -->

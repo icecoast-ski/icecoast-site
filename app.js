@@ -996,8 +996,10 @@ function updateExpandBtnBadge() {
 }
 
 function setAskModeUI(isAsk) {
-  const pill = document.getElementById('dispatchAskPill');
-  if (pill) pill.hidden = !isAsk;
+  const askBtn = document.getElementById('dispatchAskBtn');
+  if (!askBtn) return;
+  askBtn.classList.toggle('on', Boolean(isAsk));
+  askBtn.disabled = !isAsk;
 }
 
 function setAnswerActiveUI(isActive) {
@@ -1122,21 +1124,21 @@ function getWindHoldStatus(resort) {
   if (level === 'HIGH' || gust >= 40) {
     return {
       level: 'high',
-      short: 'Upper hold risk',
-      detail: `Upper mountain: likely hold · Mid-mountain: likely running${gust ? ` · Gusts ${Math.round(gust)} mph` : ''}`
+      short: 'Elevated hold risk',
+      detail: `Wind hold risk: Elevated hold risk${gust ? ` · Gusts ${Math.round(gust)} mph` : ''}`
     };
   }
   if (level === 'MEDIUM' || gust >= 28) {
     return {
       level: 'med',
-      short: 'Lift watch',
-      detail: `Upper mountain: possible hold · Mid-mountain: likely running${gust ? ` · Gusts ${Math.round(gust)} mph` : ''}`
+      short: 'Potential hold',
+      detail: `Wind hold risk: Potential hold${gust ? ` · Gusts ${Math.round(gust)} mph` : ''}`
     };
   }
   return {
     level: 'low',
-    short: 'Lifts likely running',
-    detail: `Upper mountain: likely running · Mid-mountain: running${gust ? ` · Gusts ${Math.round(gust)} mph` : ''}`
+    short: 'Low hold risk',
+    detail: `Wind hold risk: Low hold risk${gust ? ` · Gusts ${Math.round(gust)} mph` : ''}`
   };
 }
 
@@ -1369,6 +1371,7 @@ function buildResortMarkup(r, rank, options = {}) {
     : (verdict === 'Go Tomorrow' ? 'verdict-wait' : 'verdict-meh');
   const trailPctStr = trailInfo ? `${trailInfo.pct}% open (${trailInfo.open}/${trailInfo.total})` : '';
   const windClass = wind.level === 'high' ? 'wind-high' : wind.level === 'med' ? 'wind-med' : 'wind-low';
+  const isSaved = savedResorts.has(r.id);
 
   // Rating tooltip
   const ratingTitle = 'Based on 24h snow, wind, temp, conditions, and trail count';
@@ -1438,6 +1441,11 @@ function buildResortMarkup(r, rank, options = {}) {
       <div class="rr-name-col">
         <div class="rr-name">${r.name}</div>
         <div class="rr-meta">${r.loc} · ${passStr}${bestBadge ? ` · ${bestBadge}` : ''}</div>
+        <div class="rr-mini-actions" role="group" aria-label="Quick actions for ${r.name}">
+          <button class="rra-btn" data-drive="${r.id}" title="Drive to ${r.name}" aria-label="Drive to ${r.name}">↗</button>
+          <button class="rra-btn" data-share="${r.id}" title="Share ${r.name}" aria-label="Share ${r.name}">⤴</button>
+          <button class="rra-btn mini-save-btn${isSaved ? ' saved' : ''}" data-mini-save="${r.id}" data-resort-name="${r.name}" title="${isSaved ? 'Saved' : 'Save'} ${r.name}" aria-label="${isSaved ? 'Saved' : 'Save'} ${r.name}">${isSaved ? '✓' : '☆'}</button>
+        </div>
         <div class="rr-mobile-scan">
           <span class="rrm-snow">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '—'}</span>
           <span class="rrm-sep">·</span>
@@ -1504,6 +1512,19 @@ function bindResortInteractions(root, defaultExpandCount = 0) {
     btn.addEventListener('click', (event) => {
       event.stopPropagation();
       triggerSave(btn);
+    });
+  });
+
+  root.querySelectorAll('.mini-save-btn').forEach((btn) => {
+    const id = btn.dataset.miniSave;
+    const saved = savedResorts.has(id);
+    btn.classList.toggle('saved', saved);
+    btn.textContent = saved ? '✓' : '☆';
+    btn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const resortId = btn.dataset.miniSave;
+      const resortName = btn.dataset.resortName || 'Resort';
+      toggleMiniSave(btn, resortId, resortName);
     });
   });
 
@@ -1774,6 +1795,7 @@ function attachUi() {
   const fauxCaret = document.getElementById('dispatchFauxCaret');
   const measure = document.getElementById('dispatchMeasure');
   const clearBtn = document.getElementById('clearSearch');
+  const askBtn = document.getElementById('dispatchAskBtn');
   const expandBtn = document.getElementById('dispatchExpandBtn');
   const drawer = document.getElementById('dispatchDrawer');
   const useLocationBtn = document.getElementById('useLocationBtn');
@@ -1831,7 +1853,18 @@ function attachUi() {
       : 'Search resorts and filters. Press Enter to ask.';
   }
 
-  input.addEventListener('focus', syncDispatchCaretRaf);
+  function preventMobileFocusJump() {
+    if (!mobileMq.matches) return;
+    const currentY = window.scrollY;
+    if (currentY < 120) return;
+    window.requestAnimationFrame(() => window.scrollTo(0, currentY));
+    setTimeout(() => window.scrollTo(0, currentY), 0);
+  }
+
+  input.addEventListener('focus', () => {
+    preventMobileFocusJump();
+    syncDispatchCaretRaf();
+  });
   input.addEventListener('blur', syncDispatchCaret);
   input.addEventListener('click', syncDispatchCaretRaf);
   input.addEventListener('keyup', syncDispatchCaretRaf);
@@ -1842,6 +1875,14 @@ function attachUi() {
   mobileMq.addEventListener('change', updateDispatchPlaceholder);
   updateDispatchPlaceholder();
   setAskModeUI(false);
+
+  if (askBtn) {
+    askBtn.addEventListener('click', () => {
+      const val = input.value.trim();
+      if (!val) return;
+      runDispatchAnswer(val);
+    });
+  }
 
   input.addEventListener('input', (e) => {
     const val = e.target.value || '';
@@ -1888,7 +1929,6 @@ function attachUi() {
     dismissDispatchAnswer();
     syncDispatchTags();
     syncDispatchCaretRaf();
-    input.focus();
   });
 
   if (expandBtn && drawer) {
@@ -1928,6 +1968,14 @@ function attachUi() {
       document.querySelectorAll('.m-tab').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
       renderTicker();
+      if (state.currentTab === 'favorites') {
+        const savedBlock = document.getElementById('savedMorningBrief');
+        if (savedBlock && !savedBlock.hidden) {
+          window.requestAnimationFrame(() => {
+            savedBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          });
+        }
+      }
     });
   });
 
@@ -1994,6 +2042,49 @@ function setSavedState(btn, saved) {
   }
 }
 
+function setMiniSavedState(btn, saved) {
+  if (!btn) return;
+  btn.classList.toggle('saved', saved);
+  btn.textContent = saved ? '✓' : '☆';
+}
+
+function syncMiniSaveButtons(id, saved) {
+  document.querySelectorAll(`.mini-save-btn[data-mini-save="${id}"]`).forEach((btn) => {
+    setMiniSavedState(btn, saved);
+  });
+}
+
+function toggleMiniSave(btn, id, name) {
+  if (!id) return;
+  if (savedResorts.has(id)) {
+    savedResorts.delete(id);
+    persistSavedResorts();
+    setMiniSavedState(btn, false);
+    syncMiniSaveButtons(id, false);
+    document.querySelectorAll(`.save-btn[data-resort-id="${id}"]`).forEach((saveBtn) => setSavedState(saveBtn, false));
+    updateSavedTab();
+    renderSavedMorningBrief();
+    if (state.currentTab === 'favorites') renderTicker();
+    return;
+  }
+
+  savedResorts.add(id);
+  persistSavedResorts();
+  setMiniSavedState(btn, true);
+  syncMiniSaveButtons(id, true);
+  btn.classList.add('pulse');
+  setTimeout(() => btn.classList.remove('pulse'), 260);
+  document.querySelectorAll(`.save-btn[data-resort-id="${id}"]`).forEach((saveBtn) => setSavedState(saveBtn, true));
+  updateSavedTab();
+  renderSavedMorningBrief();
+
+  const row = document.querySelector(`.resort-row[data-resort="${id}"]`);
+  if (row) {
+    row.classList.add('just-saved');
+    setTimeout(() => row.classList.remove('just-saved'), 700);
+  }
+}
+
 function triggerSave(btn) {
   const id = btn.dataset.resortId;
   const name = btn.dataset.resortName;
@@ -2003,6 +2094,7 @@ function triggerSave(btn) {
     savedResorts.delete(id);
     persistSavedResorts();
     setSavedState(btn, false);
+    syncMiniSaveButtons(id, false);
     updateSavedTab();
     renderSavedMorningBrief();
     if (state.currentTab === 'favorites') renderTicker();
@@ -2011,6 +2103,7 @@ function triggerSave(btn) {
 
   savedResorts.add(id);
   persistSavedResorts();
+  syncMiniSaveButtons(id, true);
   btn.classList.add('flooding');
   setTimeout(() => {
     btn.classList.remove('flooding');
@@ -2318,7 +2411,6 @@ function initAskTheBrief() {
 
   dismiss.addEventListener('click', () => {
     dismissDispatchAnswer();
-    input.focus();
   });
 
   // Bind quick-ask hint buttons
@@ -2361,7 +2453,41 @@ function runDispatchAnswer(query) {
   state.answerQueryText = String(query || '');
   setAnswerActiveUI(true);
   answerBox.hidden = false;
+  inner.querySelectorAll('.ask-jump-btn[data-resort-id]').forEach((btn) => {
+    btn.addEventListener('click', (event) => {
+      event.preventDefault();
+      const resortId = btn.getAttribute('data-resort-id');
+      if (!resortId) return;
+      jumpToResortCard(resortId);
+    });
+  });
   renderTicker();
+}
+
+function jumpToResortCard(resortId) {
+  if (!resortId) return;
+  if (state.currentTab !== 'all') {
+    state.currentTab = 'all';
+    document.querySelectorAll('.m-tab').forEach((b) => b.classList.remove('active'));
+    const allTab = document.querySelector('.m-tab[data-tab="all"]');
+    if (allTab) allTab.classList.add('active');
+    renderTicker();
+  }
+
+  const focus = () => {
+    const ticker = document.getElementById('resortTicker');
+    if (!ticker) return;
+    const row = ticker.querySelector(`.resort-row[data-resort="${resortId}"]`);
+    if (!row) return;
+    ticker.querySelectorAll('.resort-row.expanded').forEach((r) => r.classList.remove('expanded'));
+    row.classList.add('expanded');
+    row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  };
+
+  window.requestAnimationFrame(() => {
+    focus();
+    setTimeout(focus, 120);
+  });
 }
 
 function dismissDispatchAnswer() {
@@ -2479,6 +2605,7 @@ function answerQuery(query, resorts) {
   html += `<span>${wind.short}</span>`;
   if (driveLabel) html += `<span>${driveLabel}</span>`;
   html += `</div>`;
+  html += `<button class="ask-jump-btn" data-resort-id="${top.id}" aria-label="Jump to ${top.name}">Jump to resort ↓</button>`;
   if (bestBadge) html += `<div class="ask-badge">${bestBadge}</div>`;
   if (top.terrainNote) html += `<div class="ask-terrain">${top.terrainNote}</div>`;
   if (drive) html += `<div class="ask-drive">${drive}</div>`;
@@ -2525,6 +2652,7 @@ function buildCompareAnswer(a, b) {
 
   let html = `<div class="ask-answer">`;
   html += `<div class="ask-answer-head"><span class="ask-verdict go">${winner.name}.</span> ${reason}.</div>`;
+  html += `<button class="ask-jump-btn" data-resort-id="${winner.id}" aria-label="Jump to ${winner.name}">Jump to resort ↓</button>`;
   html += `<div class="ask-compare-grid">`;
   html += `<div class="ask-cmp-col${winner === a ? ' winner' : ''}"><div class="ask-cmp-name">${a.name}</div>`;
   html += `<div class="ask-cmp-row">${aT.snow24}" fresh · ${a.conditions} · ${a.temp}°F</div>`;
