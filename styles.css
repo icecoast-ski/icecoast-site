@@ -581,37 +581,6 @@ body.storm-mode .m-tab:hover {
   color: var(--ink);
 }
 
-.saved-brief-alerts { display: flex; align-items: center; gap: 0.5rem; }
-
-.saved-alert-btn,
-.saved-alert-link {
-  font-family: var(--mono);
-  font-size: 0.5rem;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  font-weight: 700;
-}
-
-.saved-alert-btn {
-  border: 1px solid var(--rule-heavy);
-  background: transparent;
-  color: var(--ink-faint);
-  padding: 0.28rem 0.48rem;
-  cursor: pointer;
-}
-
-.saved-alert-btn.on {
-  background: var(--pow);
-  border-color: var(--pow);
-  color: #fff;
-}
-
-.saved-alert-link {
-  color: var(--ink-faint);
-  text-decoration: none;
-  border-bottom: 1px solid var(--rule);
-}
-
 .detail-pass-price {
   margin-left: auto;
   display: flex;
@@ -635,39 +604,11 @@ body.storm-mode .m-tab:hover {
 }
 
 .saved-brief-list {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.5rem;
+  display: block;
 }
 
-.saved-item {
-  border: 1px solid var(--rule);
-  padding: 0.45rem 0.5rem;
-  background: rgba(26,94,245,0.02);
-}
-
-.saved-item-name {
-  font-family: var(--serif);
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: var(--ink);
-  margin-bottom: 0.2rem;
-}
-
-.saved-item-verdict {
-  font-family: var(--mono);
-  font-size: 0.5rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
-  margin-bottom: 0.18rem;
-}
-
-.saved-item-note {
-  font-family: var(--sans);
-  font-size: 0.76rem;
-  line-height: 1.35;
-  color: var(--ink-soft);
+.saved-brief-list .resort-row:first-child {
+  border-top: 1px solid var(--rule);
 }
 
 .saved-brief-compare {
@@ -1755,7 +1696,6 @@ body.storm-mode .m-tab:hover {
     gap: 0.55rem;
   }
   .local-cta-title { font-size: 1.05rem; }
-  .saved-brief-list { grid-template-columns: 1fr; }
 }
 
 /* Print-like weight rhythm */

@@ -3,7 +3,6 @@ const ENDPOINT_PARAM = new URLSearchParams(window.location.search).get('endpoint
 const WORKER_ENDPOINT = (ENDPOINT_PARAM || localStorage.getItem('ICECOAST_BRIEF_ENDPOINT') || DEFAULT_ENDPOINT).trim();
 if (ENDPOINT_PARAM) localStorage.setItem('ICECOAST_BRIEF_ENDPOINT', WORKER_ENDPOINT);
 const LOCAL_PROFILE_KEY = 'brief_local_profile';
-const ALERT_INTENT_KEY = 'brief_alert_intent_4in';
 const HISTORY_KEY = 'brief_daily_history';
 const LOCAL_RADIUS_MI = 150;
 const STORM_MODE_CONFIG = {
@@ -47,7 +46,6 @@ const state = {
   localMode: false,
   userLocation: null,
   locationLabel: '',
-  alertIntent4in: localStorage.getItem(ALERT_INTENT_KEY) === '1',
   resorts: [],
   loadedAt: null,
   source: 'fallback'
@@ -80,11 +78,6 @@ function loadLocalProfile() {
   } catch (_err) {
     // Ignore corrupted local profile.
   }
-}
-
-function saveAlertIntent(on) {
-  state.alertIntent4in = Boolean(on);
-  localStorage.setItem(ALERT_INTENT_KEY, state.alertIntent4in ? '1' : '0');
 }
 
 function updateDailyHistorySnapshots() {
@@ -1232,7 +1225,7 @@ function applyStormModeUI(storm) {
   tickerRule.dataset.label = 'Storm Map';
 }
 
-function buildResortMarkup(r, rank) {
+function buildResortMarkup(r, rank, options = {}) {
   const powCtx = getPowDisplayContext(r);
   const displayTotals = powCtx.totals;
   const wind = getWindHoldStatus(r);
@@ -1242,6 +1235,7 @@ function buildResortMarkup(r, rank) {
   const passStr = (r.passes || []).map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(' · ') || '—';
   const inline72h = buildInline72hChart(r, displayTotals);
   const inline72hHtml = rank <= 10 ? inline72h : '';
+  const detailId = `${options.detailPrefix || 'detail'}-${r.id}`;
   const forecast = Array.isArray(r.forecast) && r.forecast.length
     ? r.forecast
     : [{ day: 'Sat', icon: 'cloud', hi: Number(r.temp) || 0 }, { day: 'Sun', icon: 'cloud', hi: Number(r.temp) || 0 }, { day: 'Mon', icon: 'cloud', hi: Number(r.temp) || 0 }];
@@ -1312,7 +1306,7 @@ function buildResortMarkup(r, rank) {
       ${getRatingBlocks(r.rating, r.pow)}
       <div class="rr-pow">${getPowPip(r.pow)}</div>
     </div>
-    <div class="resort-detail" id="detail-${r.id}">
+    <div class="resort-detail" id="${detailId}">
       <div class="det-header">
         <div class="det-header-left">
           <div class="det-conditions-label">Current Conditions</div>
@@ -1355,6 +1349,59 @@ function buildResortMarkup(r, rank) {
     </div>`;
 }
 
+function bindResortInteractions(root, defaultExpandCount = 0) {
+  if (!root) return;
+  root.querySelectorAll('.resort-row').forEach((row) => {
+    row.addEventListener('click', () => {
+      const wasExpanded = row.classList.contains('expanded');
+      root.querySelectorAll('.resort-row').forEach((r) => r.classList.remove('expanded'));
+      if (!wasExpanded) row.classList.add('expanded');
+    });
+  });
+
+  const rows = root.querySelectorAll('.resort-row');
+  if (rows.length && defaultExpandCount > 0) {
+    rows.forEach((row, idx) => {
+      row.classList.toggle('expanded', idx < defaultExpandCount);
+    });
+  }
+
+  root.querySelectorAll('.save-btn').forEach((btn) => {
+    const id = btn.dataset.resortId;
+    if (savedResorts.has(id)) setSavedState(btn, true);
+    btn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      triggerSave(btn);
+    });
+  });
+
+  root.querySelectorAll('[data-drive]').forEach((btn) => {
+    btn.addEventListener('click', (event) => {
+      event.stopPropagation();
+      const id = btn.getAttribute('data-drive');
+      const resort = state.resorts.find((r) => r.id === id);
+      if (!resort) return;
+      const q = encodeURIComponent(`${resort.name} ski resort`);
+      window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank', 'noopener,noreferrer');
+    });
+  });
+
+  root.querySelectorAll('[data-share]').forEach((btn) => {
+    btn.addEventListener('click', async (event) => {
+      event.stopPropagation();
+      const id = btn.getAttribute('data-share');
+      const resort = state.resorts.find((r) => r.id === id);
+      if (!resort) return;
+      const totals = getDisplayPowTotals(resort);
+      const text = `${resort.name}: ${totals.snow24}" in 24h, ${resort.conditions}, ${resort.temp}°F.`;
+      try {
+        if (navigator.share) await navigator.share({ title: `icecoast brief — ${resort.name}`, text });
+        else await navigator.clipboard.writeText(text);
+      } catch (_) {}
+    });
+  });
+}
+
 function renderTicker() {
   const list = applyFilters();
   const ticker = document.getElementById('resortTicker');
@@ -1385,7 +1432,7 @@ function renderTicker() {
 
   if (!stormMapMode) {
     if (sectionRule) sectionRule.dataset.count = `${list.length} reporting`;
-    ticker.innerHTML = list.map((r, i) => buildResortMarkup(r, i + 1)).join('');
+    ticker.innerHTML = list.map((r, i) => buildResortMarkup(r, i + 1, { detailPrefix: 'ticker' })).join('');
   } else {
     const ranked = state.resorts
       .slice()
@@ -1408,64 +1455,15 @@ function renderTicker() {
       const maxSnow = Math.max(...resorts.map((r) => getDisplayPowTotals(r).snow24));
       rows.push(`<div class="storm-group-head"><span class="storm-group-state">${loc}</span><span class="storm-group-meta">${resorts.length} resorts · up to ${maxSnow.toFixed(1)}"</span></div>`);
       resorts.forEach((r) => {
-        rows.push(buildResortMarkup(r, rank));
+        rows.push(buildResortMarkup(r, rank, { detailPrefix: 'ticker' }));
         rank += 1;
       });
     });
     if (sectionRule) sectionRule.dataset.count = `${storm.count4} resorts at 4"+`;
     ticker.innerHTML = rows.join('');
   }
-
-  ticker.querySelectorAll('.resort-row').forEach((row) => {
-    row.addEventListener('click', () => {
-      const wasExpanded = row.classList.contains('expanded');
-      ticker.querySelectorAll('.resort-row').forEach((r) => r.classList.remove('expanded'));
-      if (!wasExpanded) row.classList.add('expanded');
-    });
-  });
-
-  const rows = ticker.querySelectorAll('.resort-row');
-  if (rows.length) {
-    const defaultExpandCount = window.matchMedia('(max-width: 720px)').matches ? 0 : 1;
-    rows.forEach((row, idx) => {
-      row.classList.toggle('expanded', idx < defaultExpandCount);
-    });
-  }
-
-  ticker.querySelectorAll('.save-btn').forEach((btn) => {
-    const id = btn.dataset.resortId;
-    if (savedResorts.has(id)) setSavedState(btn, true);
-    btn.addEventListener('click', (event) => {
-      event.stopPropagation();
-      triggerSave(btn);
-    });
-  });
-
-  ticker.querySelectorAll('[data-drive]').forEach((btn) => {
-    btn.addEventListener('click', (event) => {
-      event.stopPropagation();
-      const id = btn.getAttribute('data-drive');
-      const resort = state.resorts.find((r) => r.id === id);
-      if (!resort) return;
-      const q = encodeURIComponent(`${resort.name} ski resort`);
-      window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank', 'noopener,noreferrer');
-    });
-  });
-
-  ticker.querySelectorAll('[data-share]').forEach((btn) => {
-    btn.addEventListener('click', async (event) => {
-      event.stopPropagation();
-      const id = btn.getAttribute('data-share');
-      const resort = state.resorts.find((r) => r.id === id);
-      if (!resort) return;
-      const totals = getDisplayPowTotals(resort);
-      const text = `${resort.name}: ${totals.snow24}" in 24h, ${resort.conditions}, ${resort.temp}°F.`;
-      try {
-        if (navigator.share) await navigator.share({ title: `icecoast brief — ${resort.name}`, text });
-        else await navigator.clipboard.writeText(text);
-      } catch (_) {}
-    });
-  });
+  const defaultExpandCount = window.matchMedia('(max-width: 720px)').matches ? 0 : 1;
+  bindResortInteractions(ticker, defaultExpandCount);
 }
 
 function syncDispatchTags() {
@@ -1536,9 +1534,7 @@ function renderSavedMorningBrief() {
   const wrap = document.getElementById('savedMorningBrief');
   const listEl = document.getElementById('savedBriefList');
   const compareEl = document.getElementById('savedCompare');
-  const alertBtn = document.getElementById('savedAlertBtn');
-  const alertLink = document.getElementById('savedAlertLink');
-  if (!wrap || !listEl || !compareEl || !alertBtn || !alertLink) return;
+  if (!wrap || !listEl || !compareEl) return;
 
   const saved = state.resorts
     .filter((r) => savedResorts.has(r.id))
@@ -1546,36 +1542,19 @@ function renderSavedMorningBrief() {
 
   if (!saved.length) {
     wrap.hidden = true;
+    listEl.innerHTML = '';
+    compareEl.textContent = '';
     return;
   }
 
   wrap.hidden = false;
-  alertBtn.classList.toggle('on', state.alertIntent4in);
-  alertBtn.textContent = state.alertIntent4in ? '4"+ alert: on' : 'Alert me at 4"+';
-  const top = saved.slice(0, 5);
-  const savedIds = top.map((r) => r.id).join(',');
-  alertLink.href = `https://icecoast.beehiiv.com/?utm_source=app&utm_medium=saved-brief&utm_campaign=pow-alerts&saved=${encodeURIComponent(savedIds)}&rule=${state.alertIntent4in ? '4in-on' : '4in-off'}`;
-  listEl.innerHTML = top.map((r) => {
-    const verdict = getResortVerdictLine(r);
-    const wind = getWindHoldStatus(r);
-    const best = getBestInDaysLabel(r);
-    const note = r.terrainNote || wind.short;
-    return `<article class="saved-item">
-      <div class="saved-item-name">${r.name}</div>
-      <div class="saved-item-verdict">${verdict}${best ? ` · ${best}` : ''}</div>
-      <div class="saved-item-note">${note}</div>
-    </article>`;
-  }).join('');
+  const top = saved.slice(0, 6);
+  listEl.innerHTML = top.map((r, i) => buildResortMarkup(r, i + 1, { detailPrefix: 'saved' })).join('');
+  bindResortInteractions(listEl, 0);
 
   const pair = getComparablePair(top);
   const compare = pair ? getWorthExtraHourLine(pair[0], pair[1]) : '';
-  const hit4 = top.filter((r) => getDisplayPowTotals(r).snow24 >= 4).length;
-  const alertNote = state.alertIntent4in
-    ? (hit4 > 0
-      ? `Alert check: ${hit4} saved mountain${hit4 > 1 ? 's' : ''} hit 4"+.`
-      : 'Alert check: no saved mountains at 4"+ yet.')
-    : '';
-  compareEl.textContent = [compare, alertNote].filter(Boolean).join(' · ');
+  compareEl.textContent = compare;
 }
 
 function attachUi() {
@@ -1585,8 +1564,6 @@ function attachUi() {
   const drawer = document.getElementById('dispatchDrawer');
   const useLocationBtn = document.getElementById('useLocationBtn');
   const localStatus = document.getElementById('localStatus');
-  const alertBtn = document.getElementById('savedAlertBtn');
-  const alertLink = document.getElementById('savedAlertLink');
 
   const NL_COMMANDS = [
     { match: /\b(pow|powder|fresh|nuking)\b/i, cmd: 'pow' },
@@ -1663,16 +1640,6 @@ function attachUi() {
     });
   });
 
-  if (alertBtn) {
-    alertBtn.addEventListener('click', () => {
-      saveAlertIntent(!state.alertIntent4in);
-      renderSavedMorningBrief();
-      if (state.alertIntent4in && alertLink) {
-        window.open(alertLink.href, '_blank', 'noopener,noreferrer');
-      }
-    });
-  }
-
   document.querySelectorAll('.th-sortbtn[data-sort]').forEach((btn) => {
     btn.addEventListener('click', () => {
       const key = btn.dataset.sort;
@@ -1746,6 +1713,7 @@ function triggerSave(btn) {
     persistSavedResorts();
     setSavedState(btn, false);
     updateSavedTab();
+    renderSavedMorningBrief();
     if (state.currentTab === 'favorites') renderTicker();
     return;
   }
@@ -1792,6 +1760,7 @@ function triggerSave(btn) {
   }
 
   updateSavedTab();
+  renderSavedMorningBrief();
 }
 
 function updateSavedTab() {
