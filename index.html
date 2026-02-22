@@ -40,7 +40,7 @@
       <div class="masthead-tabs">
         <button class="m-tab active" data-tab="all">All</button>
         <button class="m-tab" data-tab="favorites">Saved</button>
-        <button class="m-tab" data-tab="newsletter">Patrol</button>
+        <button class="m-tab" data-tab="newsletter" aria-label="Subscribe to the morning brief">Subscribe</button>
       </div>
     </div>
   </div>
@@ -188,70 +188,6 @@
     <div class="saved-brief-list" id="savedBriefList"></div>
     <div class="saved-brief-compare" id="savedCompare"></div>
   </section>
-
-  <!-- LEAD STORIES — top 2 when there's signal -->
-  <hr class="section-rule" id="leadRule" data-label="Today's Lead" data-count="Top stories">
-  <div class="lead-zone" id="leadZone">
-
-    <!-- Lead 1 -->
-    <article class="lead-story">
-      <div class="lead-signal pow">
-        <span class="sig-dot"></span>
-        Live Brief
-      </div>
-      <h2 class="lead-headline">Loading <em>today's lead</em></h2>
-      <p class="lead-deck">Pulling live mountain data…</p>
-      <div class="lead-stats">
-        <div class="lead-stat">
-          <div class="lead-stat-val big">—</div>
-          <div class="lead-stat-lbl">Fresh 24h</div>
-        </div>
-        <div class="lead-stat">
-          <div class="lead-stat-val">—</div>
-          <div class="lead-stat-lbl">72h Total</div>
-        </div>
-        <div class="lead-stat">
-          <div class="lead-stat-val">—</div>
-          <div class="lead-stat-lbl">Summit</div>
-        </div>
-        <div class="lead-stat">
-          <div class="lead-stat-val">—</div>
-          <div class="lead-stat-lbl">Wind</div>
-        </div>
-      </div>
-      <div class="forecast-row" id="lead1Forecast"></div>
-    </article>
-
-    <!-- Lead 2 -->
-    <article class="lead-story">
-      <div class="lead-signal building">
-        <span class="sig-dot"></span>
-        Live Brief
-      </div>
-      <h2 class="lead-headline">Loading <em>secondary lead</em></h2>
-      <p class="lead-deck">Pulling live mountain data…</p>
-      <div class="lead-stats">
-        <div class="lead-stat">
-          <div class="lead-stat-val big">—</div>
-          <div class="lead-stat-lbl">Fresh 24h</div>
-        </div>
-        <div class="lead-stat">
-          <div class="lead-stat-val">—</div>
-          <div class="lead-stat-lbl">72h Forecast</div>
-        </div>
-        <div class="lead-stat">
-          <div class="lead-stat-val">—</div>
-          <div class="lead-stat-lbl">Summit</div>
-        </div>
-        <div class="lead-stat">
-          <div class="lead-stat-val">—</div>
-          <div class="lead-stat-lbl">Wind</div>
-        </div>
-      </div>
-      <div class="forecast-row" id="lead2Forecast"></div>
-    </article>
-
-  </div><!-- /lead-zone -->
 
   <!-- ACTIVE DISPATCH TAGS -->
   <div class="active-dispatch" id="activeDispatch"></div>

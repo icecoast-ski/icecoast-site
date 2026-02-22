@@ -844,8 +844,8 @@ function updateLocalStatus() {
   const top = localList[0];
   const totals = getDisplayPowTotals(top);
   const dist = Number.isFinite(top._distanceMiles) ? `${Math.round(top._distanceMiles)} mi` : '';
-  const place = state.locationLabel ? `near ${state.locationLabel}` : 'near you';
-  statusEl.textContent = `Local mode ${place}: ${top.name} leads (${totals.snow24.toFixed(1)}" / 24h${dist ? ` · ${dist}` : ''}).`;
+  const place = state.locationLabel || 'your area';
+  statusEl.textContent = `Location verified: ${place}. Top local pick right now is ${top.name} (${totals.snow24.toFixed(1)}" / 24h${dist ? ` · ${dist}` : ''}).`;
 }
 
 function setLocalLocation(lat, lon, label = '') {
@@ -1671,21 +1671,29 @@ function renderSavedMorningBrief() {
   const wrap = document.getElementById('savedMorningBrief');
   const listEl = document.getElementById('savedBriefList');
   const compareEl = document.getElementById('savedCompare');
+  const titleEl = document.querySelector('.saved-brief-title');
   if (!wrap || !listEl || !compareEl) return;
 
-  const saved = state.resorts
+  const localRanked = state.localMode
+    ? (getLocalLeadList() || []).slice().sort((a, b) => getDisplayPowTotals(b).snow24 - getDisplayPowTotals(a).snow24)
+    : [];
+  const savedRanked = state.resorts
     .filter((r) => savedResorts.has(r.id))
     .sort((a, b) => getDisplayPowTotals(b).snow24 - getDisplayPowTotals(a).snow24);
+  const useLocal = state.localMode && localRanked.length > 0;
+  const source = useLocal ? localRanked : savedRanked;
 
-  if (!saved.length) {
+  if (!source.length) {
     wrap.hidden = true;
     listEl.innerHTML = '';
     compareEl.textContent = '';
+    if (titleEl) titleEl.textContent = 'Your Mountains Today';
     return;
   }
 
   wrap.hidden = false;
-  const top = saved.slice(0, 6);
+  if (titleEl) titleEl.textContent = useLocal ? 'Your Mountains Today · Local Top 6' : 'Your Mountains Today';
+  const top = source.slice(0, 6);
   listEl.innerHTML = top.map((r, i) => buildResortMarkup(r, i + 1, { detailPrefix: 'saved' })).join('');
   bindResortInteractions(listEl, 0);
 
