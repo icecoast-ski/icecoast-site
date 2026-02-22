@@ -720,25 +720,24 @@ function buildDelightDeck(resort, tier) {
   const powCtx = getPowDisplayContext(resort);
   const windRisk = String(resort?.powWatch?.windHoldRisk?.level || '').toUpperCase();
   const hasAlert = Boolean(resort?.powWatch?.alert?.active && resort?.powWatch?.alert?.event);
-  const snowQuality = String(resort.conditions || '').trim();
 
   if (tier === 'nuclear') {
-    if (hasAlert) return `${snowQuality}, and the latest ${resort.powWatch.alert.event.toLowerCase()} keeps this in send mode. ${cultureLine}`;
-    return `${snowQuality} and legitimately deep right now. ${cultureLine}`;
+    if (hasAlert) return `Deep turns are live and patrol is flagging active weather. Hit sheltered terrain early, then chase reloads. ${cultureLine}`;
+    return `This is an all-timer window. Prioritize first-chair laps and protected lines before it gets tracked. ${cultureLine}`;
   }
 
   if (tier === 'sending') {
-    if (windRisk === 'HIGH') return `${snowQuality}; expect occasional wind holds, but the skiing is still there. ${cultureLine}`;
-    return `${snowQuality} with fresh legs all over this mountain today. ${cultureLine}`;
+    if (windRisk === 'HIGH') return `Snow is on and ski quality is there, but wind could clip upper lifts. Build your day around mid-mountain flow. ${cultureLine}`;
+    return `Coverage is strong and turns are soft in the right zones. Plan first laps where the mountain loads quickest. ${cultureLine}`;
   }
 
   if (tier === 'building') {
-    if (powCtx.displayPowBrief) return `${powCtx.displayPowBrief} ${cultureLine}`;
-    return `Forecast is lining up and this place is a smart watchlist move. ${cultureLine}`;
+    if (powCtx.displayPowBrief) return `Window is still building. ${powCtx.displayPowBrief} Time the drive for the reload push, not just opening bell. ${cultureLine}`;
+    return `Window is still building. This one is a strong second-wave play once the next band moves through. ${cultureLine}`;
   }
 
-  if (windRisk === 'HIGH') return `${snowQuality} with quick, edgey turns; keep an eye on lift ops in gusts. ${cultureLine}`;
-  return `${snowQuality} and clean carving if you pick your terrain right. ${cultureLine}`;
+  if (windRisk === 'HIGH') return `Fast snow with mixed grip; treat upper lifts as a maybe and stack efficient mid-mountain laps. ${cultureLine}`;
+  return `Not a hero day, but absolutely skiable if you stay disciplined on aspect and timing. ${cultureLine}`;
 }
 
 function getLeadLore(resort, options = {}) {
@@ -861,7 +860,7 @@ function updateLeadStories(list) {
         : `${modeLabel} · ${resort.conditions}`);
     signalEl.className = `lead-signal ${resort.pow === 'on' ? 'pow' : resort.pow === 'building' ? 'building' : 'groomed'}`;
     signalEl.innerHTML = `<span class="sig-dot"></span>${signalLabel}`;
-    headlineEl.innerHTML = `${lore.displayName} is <em>${lore.verb}</em>`;
+    headlineEl.innerHTML = `${lore.displayName}: <em>${lore.verb}</em>`;
     deckEl.textContent = lore.deck;
 
     if (statVals.length >= 4) {
@@ -1107,6 +1106,39 @@ function getDriveWindow(resort) {
   return `Drive Window (Beta): Leave by ${fmtClock(leave)} from ${origin.label} → arrive ${fmtClock(arrive)} for the reload window.`;
 }
 
+function getDriveWindowSummary(resort) {
+  const origin = getDriveOrigin();
+  const hrs = getDriveHours(origin, resort);
+  if (!hrs) return '';
+  const now = new Date();
+  const peakOffset = getPeakSnowHourOffset(resort);
+  const target = new Date(now.getTime() + ((peakOffset ?? DRIVE_MODEL.fallbackPeakOffsetHr) * 60 * 60 * 1000));
+  const leave = new Date(target.getTime() - (hrs * 60 * 60 * 1000));
+  return `Leave by ${fmtClock(leave)}`;
+}
+
+function buildInline72hChart(resort, totals) {
+  const series = Array.isArray(resort?.powWatch?.hourly?.snowSeries72)
+    ? resort.powWatch.hourly.snowSeries72.map((v) => Number(v) || 0).slice(0, 72)
+    : [];
+  const bins = [];
+  if (series.length >= 24) {
+    for (let i = 0; i < 72; i += 3) {
+      const block = series.slice(i, i + 3);
+      bins.push(block.reduce((sum, v) => sum + (Number(v) || 0), 0));
+    }
+  } else {
+    const chunk = Math.max((Number(totals.snow72) || 0) / 8, 0);
+    for (let i = 0; i < 24; i += 1) bins.push(i < 8 ? chunk : 0);
+  }
+  const maxBin = Math.max(...bins, 0.1);
+  const bars = bins.map((v) => {
+    const h = Math.max(2, Math.round((v / maxBin) * 16));
+    return `<span class="rr72-bar${v <= 0.05 ? ' trace' : ''}" style="height:${h}px"></span>`;
+  }).join('');
+  return `<div class="rr-72h" aria-label="72 hour snowfall trend"><div class="rr72-bars">${bars}</div><div class="rr72-total">${totals.snow72.toFixed(1)}" / 72h</div></div>`;
+}
+
 function getComparablePair(list) {
   if (!Array.isArray(list) || list.length < 2) return null;
   return [list[0], list[1]];
@@ -1212,8 +1244,15 @@ function buildResortMarkup(r, rank) {
   const wind = getWindHoldStatus(r);
   const bestBadge = getBestInDaysLabel(r);
   const driveWindow = getDriveWindow(r);
+  const driveSummary = getDriveWindowSummary(r);
   const snowCls = displayTotals.snow24 >= 4 ? ' snow' : displayTotals.snow24 === 0 ? ' ice' : '';
   const passStr = (r.passes || []).map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(' · ') || '—';
+  const terrainSnippet = r.terrainNote ? r.terrainNote : '';
+  const insightParts = [wind.short];
+  if (driveSummary) insightParts.push(driveSummary);
+  if (terrainSnippet) insightParts.push(terrainSnippet);
+  const rowInsight = insightParts.join(' · ');
+  const inline72h = buildInline72hChart(r, displayTotals);
   const forecast = Array.isArray(r.forecast) && r.forecast.length
     ? r.forecast
     : [{ day: 'Sat', icon: 'cloud', hi: Number(r.temp) || 0 }, { day: 'Sun', icon: 'cloud', hi: Number(r.temp) || 0 }, { day: 'Mon', icon: 'cloud', hi: Number(r.temp) || 0 }];
@@ -1276,6 +1315,8 @@ function buildResortMarkup(r, rank) {
       <div class="rr-name-col">
         <div class="rr-name">${r.name}</div>
         <div class="rr-meta">${r.loc} · ${passStr}${bestBadge ? ` · ${bestBadge}` : ''}</div>
+        <div class="rr-insight">${rowInsight}</div>
+        ${inline72h}
       </div>
       <div class="rr-cond"><span>${r.conditions}</span><span class="wind-badge ${wind.level}" title="${wind.short}">W</span></div>
       <div class="rr-stat${snowCls}">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '—'}</div>
@@ -1394,6 +1435,14 @@ function renderTicker() {
       if (!wasExpanded) row.classList.add('expanded');
     });
   });
+
+  const rows = ticker.querySelectorAll('.resort-row');
+  if (rows.length) {
+    const defaultExpandCount = window.matchMedia('(max-width: 720px)').matches ? 1 : 3;
+    rows.forEach((row, idx) => {
+      row.classList.toggle('expanded', idx < defaultExpandCount);
+    });
+  }
 
   ticker.querySelectorAll('.save-btn').forEach((btn) => {
     const id = btn.dataset.resortId;
