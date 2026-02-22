@@ -643,10 +643,14 @@ body.storm-mode .m-tab:hover {
 .saved-brief-compare {
   margin-top: 0.48rem;
   font-family: var(--mono);
-  font-size: 0.53rem;
+  font-size: 0.62rem;
   letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--ink-faint);
+  text-transform: none;
+  color: var(--ink-soft);
+  line-height: 1.45;
+  border-left: 2px solid var(--pow);
+  padding-left: 0.5rem;
+  background: rgba(26,94,245,0.04);
 }
 
 .local-cta-status {
@@ -940,6 +944,10 @@ body.storm-mode .m-tab:hover {
   gap: 0 0.75rem;
   padding: 0.35rem 0 0.35rem;
   border-bottom: 1px solid var(--rule-heavy);
+  position: sticky;
+  top: 92px;
+  z-index: 20;
+  background: var(--paper);
 }
 
 .th {
@@ -995,7 +1003,7 @@ body.storm-mode .m-tab:hover {
   display: grid;
   grid-template-columns: 2rem 1fr 90px 72px 72px 72px 60px;
   gap: 0 0.75rem;
-  padding: 0.6rem 0;
+  padding: 0.68rem 0;
   border-bottom: 1px solid var(--rule);
   cursor: pointer;
   transition: background 0.12s;
@@ -1027,8 +1035,8 @@ body.storm-mode .m-tab:hover {
 
 .rr-name {
   font-family: var(--serif);
-  font-size: 0.95rem;
-  font-weight: 700;
+  font-size: 1.03rem;
+  font-weight: 800;
   letter-spacing: -0.015em;
   color: var(--ink);
   white-space: nowrap;
@@ -1038,14 +1046,28 @@ body.storm-mode .m-tab:hover {
 
 .rr-meta {
   font-family: var(--mono);
-  font-size: 0.48rem;
+  font-size: 0.5rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  color: var(--ink-faint);
+  color: #3b4250;
   display: flex;
   align-items: center;
   gap: 0.4rem;
 }
+
+.rr-mobile-scan {
+  display: none;
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  letter-spacing: 0.04em;
+  color: var(--ink-soft);
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+.rrm-snow { color: var(--pow); font-weight: 700; }
+.rrm-temp { color: var(--ink); font-weight: 600; }
+.rrm-wind { color: var(--ink-faint); }
+.rrm-sep { opacity: 0.45; }
 
 .rr-72h {
   display: flex;
@@ -1113,29 +1135,32 @@ body.storm-mode .m-tab:hover {
 }
 
 .rr-cond-main {
-  font-size: 0.58rem;
+  font-size: 0.62rem;
   font-weight: 700;
 }
 
 .rr-cond-sub {
-  font-size: 0.48rem;
+  font-size: 0.46rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--ink-faint);
   white-space: nowrap;
 }
+.rr-cond-sub.wind-high { color: var(--red); }
+.rr-cond-sub.wind-med { color: var(--amber); }
+.rr-cond-sub.wind-low { color: var(--send); }
 
 /* Stats cols */
 .rr-stat {
   font-family: var(--mono);
-  font-size: 0.7rem;
-  font-weight: 600;
+  font-size: 0.76rem;
+  font-weight: 700;
   color: var(--ink-soft);
   text-align: right;
   align-self: center;
   white-space: nowrap;
 }
-.rr-stat.snow { color: var(--pow); }
+.rr-stat.snow { color: var(--pow); font-size: 0.86rem; }
 .rr-stat.ice  { color: var(--red); }
 .rr-stat.warm { color: var(--amber); }
 
@@ -1813,6 +1838,7 @@ body.storm-mode .m-tab:hover {
   .rr-rank { grid-row: 1 / 3; align-self: center; font-size: 0.58rem; }
   .rr-name-col { grid-column: 2; }
   .rr-cond { grid-column: 2; font-size: 0.55rem; }
+  .rr-mobile-scan { display: inline-flex; align-items: center; gap: 0.28rem; }
   .rr72-bars { max-width: none; height: 15px; }
   .rr72-total { font-size: 0.46rem; }
   .rr-stat { display: none; }
@@ -2190,7 +2216,7 @@ body.storm-mode .share-card {
 
 .dispatch-ask-pill {
   font-family: var(--mono);
-  font-size: 0.48rem;
+  font-size: 0.5rem;
   font-weight: 700;
   letter-spacing: 0.06em;
   text-transform: uppercase;

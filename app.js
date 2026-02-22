@@ -1368,6 +1368,7 @@ function buildResortMarkup(r, rank, options = {}) {
     ? 'verdict-go'
     : (verdict === 'Go Tomorrow' ? 'verdict-wait' : 'verdict-meh');
   const trailPctStr = trailInfo ? `${trailInfo.pct}% open (${trailInfo.open}/${trailInfo.total})` : '';
+  const windClass = wind.level === 'high' ? 'wind-high' : wind.level === 'med' ? 'wind-med' : 'wind-low';
 
   // Rating tooltip
   const ratingTitle = 'Based on 24h snow, wind, temp, conditions, and trail count';
@@ -1436,12 +1437,19 @@ function buildResortMarkup(r, rank, options = {}) {
       <div class="rr-rank">${rank}</div>
       <div class="rr-name-col">
         <div class="rr-name">${r.name}</div>
-        <div class="rr-meta">${r.loc} · ${passStr}${trailPctStr ? ` · ${trailPctStr}` : ''}${bestBadge ? ` · ${bestBadge}` : ''}</div>
+        <div class="rr-meta">${r.loc} · ${passStr}${bestBadge ? ` · ${bestBadge}` : ''}</div>
+        <div class="rr-mobile-scan">
+          <span class="rrm-snow">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '—'}</span>
+          <span class="rrm-sep">·</span>
+          <span class="rrm-temp">${r.temp}°</span>
+          <span class="rrm-sep">·</span>
+          <span class="rrm-wind">${windLabel} wind</span>
+        </div>
         ${inline72hHtml}
       </div>
       <div class="rr-cond">
         <span class="rr-cond-main">${r.conditions}</span>
-        <span class="rr-cond-sub">Wind hold: ${windLabel}</span>
+        <span class="rr-cond-sub ${windClass}">Wind hold: ${windLabel}</span>
       </div>
       <div class="rr-stat${snowCls}">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '—'}</div>
       <div class="rr-stat">${r.temp}°</div>
@@ -1641,7 +1649,7 @@ function renderTicker() {
     if (sectionRule) sectionRule.dataset.count = `${storm.count4} resorts at 4"+`;
     ticker.innerHTML = rows.join('');
   }
-  const defaultExpandCount = window.matchMedia('(max-width: 720px)').matches ? 0 : 1;
+  const defaultExpandCount = 0;
   bindResortInteractions(ticker, defaultExpandCount);
 
   updateDispatchQuickHints();
