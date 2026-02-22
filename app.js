@@ -1382,13 +1382,19 @@ function buildResortMarkup(r, rank, options = {}) {
       <div class="det-critical-col">
         <div class="det-conditions-main">${r.conditions}</div>
         <div class="det-quick-stats">
-          <span>24h <strong>${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '0"'}</strong></span>
-          <span>48h <strong>${displayTotals.snow48 > 0 ? `${displayTotals.snow48}"` : '0"'}</strong></span>
-          <span>72h <strong>${displayTotals.snow72 > 0 ? `${displayTotals.snow72.toFixed(1)}"` : '0"'}</strong></span>
-          <span>Temp <strong>${r.temp}°</strong></span>
-          <span>Feels <strong>${Number(r.feelsLike ?? r.temp)}°</strong></span>
-          <span>Wind <strong>${r.wind} mph</strong></span>
-          ${trailPctStr ? `<span>Trails <strong>${trailPctStr}</strong></span>` : ''}
+          <div class="det-stat-group">
+            <span class="det-stat-group-label">Snow</span>
+            <span>24h <strong>${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '0"'}</strong></span>
+            <span>48h <strong>${displayTotals.snow48 > 0 ? `${displayTotals.snow48}"` : '0"'}</strong></span>
+            <span>72h <strong>${displayTotals.snow72 > 0 ? `${displayTotals.snow72.toFixed(1)}"` : '0"'}</strong></span>
+          </div>
+          <div class="det-stat-group">
+            <span class="det-stat-group-label">Weather</span>
+            <span>Temp <strong>${r.temp}°</strong></span>
+            <span>Feels <strong>${Number(r.feelsLike ?? r.temp)}°</strong></span>
+            <span>Wind <strong>${r.wind} mph</strong></span>
+          </div>
+          ${trailPctStr ? `<div class="det-stat-group"><span class="det-stat-group-label">Terrain</span><span>Trails <strong>${trailPctStr}</strong></span></div>` : ''}
         </div>
       </div>
       <div class="det-critical-col det-lift-col">
@@ -1457,7 +1463,7 @@ function buildResortMarkup(r, rank, options = {}) {
       </div>
       <div class="rr-cond">
         <span class="rr-cond-main">${r.conditions}</span>
-        <span class="rr-cond-sub ${windClass}">Wind hold risk: ${windLabel}</span>
+        <span class="rr-cond-sub ${windClass}">Wind: ${windLabel}</span>
       </div>
       <div class="rr-stat${snowCls}">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '—'}</div>
       <div class="rr-stat">${r.temp}°</div>

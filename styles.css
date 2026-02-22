@@ -983,10 +983,10 @@ body.storm-mode .m-tab:hover {
 
 .signal-legend {
   font-family: var(--mono);
-  font-size: 0.46rem;
-  letter-spacing: 0.05em;
+  font-size: 0.5rem;
+  letter-spacing: 0.04em;
   color: var(--ink-faint);
-  padding: 0.26rem 0 0.36rem;
+  padding: 0.3rem 0 0.4rem;
   border-bottom: 1px solid var(--rule);
 }
 
@@ -1043,7 +1043,7 @@ body.storm-mode .m-tab:hover {
   display: grid;
   grid-template-columns: 2rem 1fr 90px 72px 72px 72px 60px;
   gap: 0 0.75rem;
-  padding: 0.68rem 0;
+  padding: 0.72rem 0;
   border-bottom: 1px solid var(--rule);
   cursor: pointer;
   transition: background 0.12s;
@@ -1086,8 +1086,8 @@ body.storm-mode .m-tab:hover {
 
 .rr-meta {
   font-family: var(--mono);
-  font-size: 0.5rem;
-  letter-spacing: 0.06em;
+  font-size: 0.54rem;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
   color: #3b4250;
   display: flex;
@@ -1114,6 +1114,14 @@ body.storm-mode .m-tab:hover {
   align-items: center;
   gap: 3px;
   margin-top: 4px;
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+.resort-row:hover + .resort-detail .rr-mini-actions,
+.resort-row:hover .rr-mini-actions,
+.resort-row.expanded .rr-mini-actions,
+.resort-row:focus-within .rr-mini-actions {
+  opacity: 1;
 }
 
 .rra-btn {
@@ -1187,8 +1195,8 @@ body.storm-mode .m-tab:hover {
 
 .rr72-readout {
   font-family: var(--mono);
-  font-size: 0.46rem;
-  letter-spacing: 0.05em;
+  font-size: 0.5rem;
+  letter-spacing: 0.04em;
   color: var(--ink-faint);
   margin-top: 2px;
 }
@@ -1211,16 +1219,17 @@ body.storm-mode .m-tab:hover {
 }
 
 .rr-cond-main {
-  font-size: 0.62rem;
+  font-size: 0.66rem;
   font-weight: 700;
 }
 
 .rr-cond-sub {
-  font-size: 0.46rem;
+  font-size: 0.5rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--ink-faint);
   white-space: nowrap;
+  font-weight: 700;
 }
 .rr-cond-sub.wind-high { color: var(--red); }
 .rr-cond-sub.wind-med { color: var(--amber); }
@@ -1486,13 +1495,27 @@ body.storm-mode .m-tab:hover {
 .det-quick-stats {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.35rem 0.9rem;
+  gap: 0.5rem 1.4rem;
   font-family: var(--mono);
-  font-size: 0.6rem;
+  font-size: 0.62rem;
   color: var(--ink-soft);
   margin-bottom: 0.15rem;
 }
 .det-quick-stats strong { color: var(--ink); font-weight: 600; }
+
+.det-stat-group {
+  display: flex;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+.det-stat-group-label {
+  font-size: 0.44rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-right: 0.15rem;
+}
 .det-nws-brief {
   font-family: var(--mono);
   font-size: 0.56rem;
@@ -1750,7 +1773,7 @@ body.storm-mode .m-tab:hover {
 .det-spark-readout,
 .lead-forecast-readout {
   font-family: var(--mono);
-  font-size: 0.48rem;
+  font-size: 0.52rem;
   letter-spacing: 0.04em;
   color: var(--ink-faint);
   margin-top: 0.25rem;
@@ -1914,7 +1937,7 @@ body.storm-mode .m-tab:hover {
 
   .rr-rank { grid-row: 1 / 3; align-self: center; font-size: 0.58rem; }
   .rr-name-col { grid-column: 2; }
-  .rr-mini-actions { margin-top: 3px; }
+  .rr-mini-actions { margin-top: 3px; opacity: 1; }
   .rr-cond { grid-column: 2; font-size: 0.55rem; }
   .rr-mobile-scan { display: inline-flex; align-items: center; gap: 0.28rem; }
   .rr72-bars { max-width: none; height: 15px; }
@@ -2291,10 +2314,10 @@ body.storm-mode .share-card {
 
 .d-qhint {
   font-family: var(--mono);
-  font-size: 0.48rem;
+  font-size: 0.5rem;
   font-weight: 500;
   letter-spacing: 0.04em;
-  padding: 2px 7px;
+  padding: 3px 8px;
   border: 1px solid var(--rule);
   background: transparent;
   color: var(--ink-faint);
