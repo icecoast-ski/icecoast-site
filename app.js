@@ -928,9 +928,9 @@ function updateLeadStories(list) {
 }
 
 function getSnowSignalPill(pow) {
-  if (pow === 'on') return '<span class="rr-signal rr-signal-on">Active</span>';
-  if (pow === 'building') return '<span class="rr-signal rr-signal-building">Building</span>';
-  return '<span class="rr-signal rr-signal-quiet">Quiet</span>';
+  if (pow === 'on') return '<span class="rr-signal rr-signal-on" title="Active: fresh snow is currently in play">Active</span>';
+  if (pow === 'building') return '<span class="rr-signal rr-signal-building" title="Building: storm is trending in, better later window">Building</span>';
+  return '<span class="rr-signal rr-signal-quiet" title="Quiet: lower snowfall signal right now">Quiet</span>';
 }
 
 function getRatingBlocks(rating, pow) {
@@ -1449,7 +1449,7 @@ function buildResortMarkup(r, rank, options = {}) {
       </div>
       <div class="rr-cond">
         <span class="rr-cond-main">${r.conditions}</span>
-        <span class="rr-cond-sub ${windClass}">Wind hold: ${windLabel}</span>
+        <span class="rr-cond-sub ${windClass}">Wind hold risk: ${windLabel}</span>
       </div>
       <div class="rr-stat${snowCls}">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '—'}</div>
       <div class="rr-stat">${r.temp}°</div>
