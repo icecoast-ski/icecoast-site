@@ -892,10 +892,10 @@ function updateLeadStories(list) {
   ]);
 }
 
-function getPowPip(pow) {
-  if (pow === 'on') return '<div class="pow-pip on"></div>';
-  if (pow === 'building') return '<div class="pow-pip building"></div>';
-  return '<div class="pow-pip"></div>';
+function getSnowSignalPill(pow) {
+  if (pow === 'on') return '<span class="rr-signal rr-signal-on">Active</span>';
+  if (pow === 'building') return '<span class="rr-signal rr-signal-building">Building</span>';
+  return '<span class="rr-signal rr-signal-quiet">Quiet</span>';
 }
 
 function getRatingBlocks(rating, pow) {
@@ -1246,6 +1246,7 @@ function buildResortMarkup(r, rank, options = {}) {
     </div>` : '';
   const conf = getConfidenceFromPatrol(r);
   const confCls = conf === 'High' ? 'conf-high' : conf === 'Low' ? 'conf-low' : 'conf-med';
+  const windLabel = wind.level === 'high' ? 'High' : wind.level === 'med' ? 'Moderate' : 'Low';
   const verdict = r.verdict || (r.rating >= 4 ? 'Shredable!' : r.rating <= 2 ? 'Manage Expectations' : 'Solid Day');
   const verdictCls = ['Shredable!', 'Worth It'].includes(verdict)
     ? 'verdict-go'
@@ -1300,11 +1301,14 @@ function buildResortMarkup(r, rank, options = {}) {
         <div class="rr-meta">${r.loc} · ${passStr}${bestBadge ? ` · ${bestBadge}` : ''}</div>
         ${inline72hHtml}
       </div>
-      <div class="rr-cond"><span>${r.conditions}</span><span class="wind-badge ${wind.level}" title="${wind.short}">W</span></div>
+      <div class="rr-cond">
+        <span class="rr-cond-main">${r.conditions}</span>
+        <span class="rr-cond-sub">Wind hold: ${windLabel}</span>
+      </div>
       <div class="rr-stat${snowCls}">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '—'}</div>
       <div class="rr-stat">${r.temp}°</div>
       ${getRatingBlocks(r.rating, r.pow)}
-      <div class="rr-pow">${getPowPip(r.pow)}</div>
+      <div class="rr-pow">${getSnowSignalPill(r.pow)}</div>
     </div>
     <div class="resort-detail" id="${detailId}">
       <div class="det-header">

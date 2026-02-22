@@ -1058,34 +1058,33 @@ body.storm-mode .m-tab:hover {
 
 /* Condition pill */
 .rr-cond {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
   font-family: var(--mono);
   font-size: 0.58rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   color: var(--ink-soft);
-  white-space: nowrap;
+  white-space: normal;
   overflow: hidden;
   text-overflow: ellipsis;
   align-self: center;
 }
 
-.wind-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-width: 11px;
-  height: 11px;
-  border-radius: 50%;
-  font-size: 0.42rem;
+.rr-cond-main {
+  font-size: 0.58rem;
   font-weight: 700;
-  line-height: 1;
 }
-.wind-badge.high { background: rgba(220,38,38,0.18); color: #b91c1c; }
-.wind-badge.med  { background: rgba(217,119,6,0.18); color: #a16207; }
-.wind-badge.low  { background: rgba(21,128,61,0.18); color: #166534; }
+
+.rr-cond-sub {
+  font-size: 0.48rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  white-space: nowrap;
+}
 
 /* Stats cols */
 .rr-stat {
@@ -1109,18 +1108,36 @@ body.storm-mode .m-tab:hover {
   align-self: center;
 }
 
-.pow-pip {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--rule-heavy);
-  transition: all 0.2s;
+.rr-signal {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 56px;
+  padding: 2px 6px;
+  border: 1px solid var(--rule-heavy);
+  font-family: var(--mono);
+  font-size: 0.46rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  background: transparent;
 }
-.pow-pip.on {
-  background: var(--pow);
-  box-shadow: 0 0 0 3px var(--pow-pale);
-  animation: dotPulse 2s ease-in-out infinite;
+.rr-signal-on {
+  color: var(--pow);
+  border-color: rgba(26, 94, 245, 0.45);
+  background: rgba(26, 94, 245, 0.08);
 }
-.pow-pip.building { background: var(--building); }
+.rr-signal-building {
+  color: var(--ink-soft);
+  border-color: var(--rule-heavy);
+  background: rgba(15, 17, 23, 0.04);
+}
+.rr-signal-quiet {
+  color: var(--ink-faint);
+  border-color: var(--rule);
+  background: transparent;
+}
 
 /* Rating squares — 5 tiny blocks instead of stars */
 .rr-rating {
@@ -1389,11 +1406,13 @@ body.storm-mode .m-tab:hover {
   font-weight: 700;
   letter-spacing: 0.1em;
   padding: 2px 7px;
-  color: white;
+  color: var(--ink-faint);
+  border: 1px solid var(--rule-heavy);
+  background: transparent;
 }
-.badge-pow   { background: var(--pow); }
-.badge-storm { background: var(--building); }
-.badge-quiet { background: var(--ink-faint); }
+.badge-pow   { color: var(--pow); border-color: rgba(26,94,245,0.45); background: rgba(26,94,245,0.08); }
+.badge-storm { color: var(--ink-soft); border-color: var(--rule-heavy); background: rgba(15,17,23,0.04); }
+.badge-quiet { color: var(--ink-faint); border-color: var(--rule); background: transparent; }
 
 /* 3-day forecast */
 .det-forecast {
