@@ -1447,17 +1447,12 @@ function buildResortMarkup(r, rank, options = {}) {
       <div class="rr-name-col">
         <div class="rr-name">${r.name}</div>
         <div class="rr-meta">${r.loc} · ${passStr}${bestBadge ? ` · ${bestBadge}` : ''}</div>
-        <div class="rr-mini-actions" role="group" aria-label="Quick actions for ${r.name}">
-          <button class="rra-btn" data-drive="${r.id}" title="Drive to ${r.name}" aria-label="Drive to ${r.name}">↗</button>
-          <button class="rra-btn" data-share="${r.id}" title="Share ${r.name}" aria-label="Share ${r.name}">⤴</button>
-          <button class="rra-btn mini-save-btn${isSaved ? ' saved' : ''}" data-mini-save="${r.id}" data-resort-name="${r.name}" title="${isSaved ? 'Saved' : 'Save'} ${r.name}" aria-label="${isSaved ? 'Saved' : 'Save'} ${r.name}">${isSaved ? '✓' : '☆'}</button>
-        </div>
         <div class="rr-mobile-scan">
           <span class="rrm-snow">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '—'}</span>
           <span class="rrm-sep">·</span>
           <span class="rrm-temp">${r.temp}°</span>
           <span class="rrm-sep">·</span>
-          <span class="rrm-wind">${windLabel} wind</span>
+          <span class="rrm-wind ${windClass}">${windLabel} wind</span>
         </div>
         ${inline72hHtml}
       </div>
@@ -1469,6 +1464,11 @@ function buildResortMarkup(r, rank, options = {}) {
       <div class="rr-stat">${r.temp}°</div>
       ${getRatingBlocks(r.rating, r.pow)}
       <div class="rr-pow">${getSnowSignalPill(r.pow)}</div>
+      <div class="rr-actions" role="group" aria-label="Actions for ${r.name}">
+        <button class="rr-act-btn rr-act-share" data-share="${r.id}" title="Share ${r.name}">Share</button>
+        <button class="rr-act-btn rr-act-save mini-save-btn${isSaved ? ' saved' : ''}" data-mini-save="${r.id}" data-resort-name="${r.name}" title="${isSaved ? 'Saved' : 'Save'} ${r.name}">${isSaved ? 'Saved' : 'Save'}</button>
+        <button class="rr-act-btn rr-act-go" data-drive="${r.id}" title="Drive to ${r.name}">Go</button>
+      </div>
     </div>
     <div class="resort-detail" id="${detailId}">
       ${criticalHtml}
@@ -1551,12 +1551,7 @@ function bindResortInteractions(root, defaultExpandCount = 0) {
       const id = btn.getAttribute('data-share');
       const resort = state.resorts.find((r) => r.id === id);
       if (!resort) return;
-      const totals = getDisplayPowTotals(resort);
-      const text = `${resort.name}: ${totals.snow24}" in 24h, ${resort.conditions}, ${resort.temp}°F.`;
-      try {
-        if (navigator.share) await navigator.share({ title: `icecoast brief — ${resort.name}`, text });
-        else await navigator.clipboard.writeText(text);
-      } catch (_) {}
+      showShareCard(resort);
     });
   });
 }
@@ -2051,7 +2046,7 @@ function setSavedState(btn, saved) {
 function setMiniSavedState(btn, saved) {
   if (!btn) return;
   btn.classList.toggle('saved', saved);
-  btn.textContent = saved ? '✓' : '☆';
+  btn.textContent = saved ? 'Saved' : 'Save';
 }
 
 function syncMiniSaveButtons(id, saved) {
@@ -2327,10 +2322,13 @@ function showShareCard(resort) {
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 
   overlay.querySelector('#scShare').onclick = async () => {
-    const text = `${resort.name}: ${totals.snow24 > 0 ? totals.snow24 + '" fresh, ' : ''}${resort.conditions}, ${resort.temp}°F. ${wind.short}. via icecoast.ski`;
+    const verdict = resort.rating >= 4 ? '🟢 Go.' : resort.rating <= 2 ? '🔴 Skip.' : '🟡 Solid.';
+    const trailInfo = getTrailPct(resort);
+    const trailLine = trailInfo ? ` ${trailInfo.pct}% trails open.` : '';
+    const text = `${verdict} ${resort.name}\n${totals.snow24 > 0 ? totals.snow24 + '" fresh · ' : ''}${resort.conditions} · ${resort.temp}°F · Wind ${resort.wind} mph\n${wind.short}${trailLine}\n\nicecoast.ski — live East Coast conditions`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: `icecoast — ${resort.name}`, text, url: 'https://icecoast.ski' });
+        await navigator.share({ title: `${resort.name} — icecoast conditions`, text, url: 'https://icecoast.ski' });
       } else {
         await navigator.clipboard.writeText(text);
         const btn = overlay.querySelector('#scShare');
