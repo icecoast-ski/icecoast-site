@@ -994,9 +994,7 @@ function updateExpandBtnBadge() {
 }
 
 function setAskModeUI(isAsk) {
-  const input = document.getElementById('resortSearch');
   const pill = document.getElementById('dispatchAskPill');
-  if (input) input.classList.toggle('ask-mode', isAsk);
   if (pill) pill.hidden = !isAsk;
 }
 
@@ -1777,11 +1775,11 @@ function attachUi() {
     state.nlHints = new Set();
     NL_COMMANDS.forEach((cmd) => { if (cmd.match.test(val)) state.nlHints.add(cmd.cmd); });
     clearBtn.classList.toggle('on', val.trim().length > 0 || state.activeHints.size > 0);
-    const askMode = isAskQuery(val);
-    setAskModeUI(askMode);
+    const hasText = val.trim().length > 0;
+    setAskModeUI(hasText);
     const changedFromAnswer = state.answerQueryText
       && val.trim().toLowerCase() !== state.answerQueryText.trim().toLowerCase();
-    if (changedFromAnswer || (!askMode && state.answerQueryText)) {
+    if (changedFromAnswer || (!hasText && state.answerQueryText)) {
       state.answerFocusIds = [];
       state.answerQueryText = '';
       setAnswerActiveUI(false);
@@ -1797,12 +1795,8 @@ function attachUi() {
     if (e.key === 'Enter') {
       e.preventDefault();
       const val = input.value.trim();
-      const shouldAsk = isAskQuery(val);
-      if (shouldAsk) {
+      if (val) {
         runDispatchAnswer(val);
-      } else if (val) {
-        dismissDispatchAnswer();
-        syncDispatchTags();
       } else {
         dismissDispatchAnswer();
       }
@@ -2259,7 +2253,7 @@ function initAskTheBrief() {
       const q = btn.dataset.q;
       input.value = q;
       input.dispatchEvent(new Event('input'));
-      setAskModeUI(isAskQuery(q));
+      setAskModeUI(true);
       runDispatchAnswer(q);
     });
   });

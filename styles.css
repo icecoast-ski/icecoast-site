@@ -2163,11 +2163,6 @@ body.storm-mode .share-card {
   border-color: var(--ink);
 }
 
-/* Ask-mode indicator on the input */
-.dispatch-input.ask-mode {
-  color: var(--pow);
-}
-
 .dispatch-ask-pill {
   font-family: var(--mono);
   font-size: 0.48rem;
