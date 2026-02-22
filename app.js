@@ -329,9 +329,11 @@ function getPowDisplayContext(resort) {
   const chartSource = compactSeries.length ? compactSeries : fallbackSegments;
   const maxSeriesVal = chartSource.length ? Math.max(...chartSource, 0.1) : 0.1;
   const chartBars = chartSource.length
-    ? chartSource.map((v) => {
+    ? chartSource.map((v, idx) => {
       const h = Math.max(6, Math.round((Math.max(0, v) / maxSeriesVal) * 34));
-      return `<div class="sp-bar${v <= 0 ? ' sp-trace' : ''}" style="height:${h}px"></div>`;
+      const start = idx * 3;
+      const end = start + 3;
+      return `<div class="sp-bar${v <= 0 ? ' sp-trace' : ''}" style="height:${h}px" data-bar-val="${Number(v || 0).toFixed(2)}" data-bar-label="${start}h-${end}h" title="${start}h-${end}h: ${Number(v || 0).toFixed(2)}&quot;" tabindex="0" role="button"></div>`;
     }).join('')
     : '<div class="sp-bar sp-trace" style="height:2px"></div>';
 
@@ -565,7 +567,7 @@ function buildForecastBars(containerId, days) {
   el.innerHTML = days.map((d) => {
     const h = Math.max((d.snow / max) * 28, d.snow > 0 ? 3 : 0);
     const trace = d.snow <= 0.1;
-    return `<div class="forecast-day"><div class="forecast-bar-wrap"><div class="forecast-bar${trace ? ' trace' : ''}" style="height:${h}px"></div></div><div class="forecast-day-lbl">${d.day}</div><div class="forecast-day-amt">${d.snow > 0 ? `${d.snow}"` : '—'}</div></div>`;
+    return `<div class="forecast-day"><div class="forecast-bar-wrap"><div class="forecast-bar${trace ? ' trace' : ''}" style="height:${h}px" data-bar-val="${Number(d.snow || 0).toFixed(1)}" data-bar-label="${d.day}" title="${d.day}: ${Number(d.snow || 0).toFixed(1)}&quot;" tabindex="0" role="button"></div></div><div class="forecast-day-lbl">${d.day}</div><div class="forecast-day-amt">${d.snow > 0 ? `${d.snow}"` : '—'}</div></div>`;
   }).join('');
 }
 
@@ -1199,11 +1201,13 @@ function buildInline72hChart(resort, totals) {
     for (let i = 0; i < 24; i += 1) bins.push(i < 8 ? chunk : 0);
   }
   const maxBin = Math.max(...bins, 0.1);
-  const bars = bins.map((v) => {
+  const bars = bins.map((v, idx) => {
     const h = Math.max(2, Math.round((v / maxBin) * 16));
-    return `<span class="rr72-bar${v <= 0.05 ? ' trace' : ''}" style="height:${h}px"></span>`;
+    const start = idx * 3;
+    const end = start + 3;
+    return `<span class="rr72-bar${v <= 0.05 ? ' trace' : ''}" style="height:${h}px" data-bar-val="${Number(v || 0).toFixed(2)}" data-bar-label="${start}h-${end}h" title="${start}h-${end}h: ${Number(v || 0).toFixed(2)}&quot;" tabindex="0" role="button"></span>`;
   }).join('');
-  return `<div class="rr-72h" aria-label="72 hour snowfall trend"><div class="rr72-bars">${bars}</div><div class="rr72-total">${totals.snow72.toFixed(1)}" / 72h</div></div>`;
+  return `<div class="rr-72h" aria-label="72 hour snowfall trend"><div class="rr72-bars">${bars}</div><div class="rr72-total">${totals.snow72.toFixed(1)}" / 72h</div><div class="rr72-readout" aria-live="polite">Hover or tap bars for snowfall.</div></div>`;
 }
 
 function getComparablePair(list) {
@@ -1416,6 +1420,7 @@ function buildResortMarkup(r, rank, options = {}) {
         <span class="det-spark-range">3h blocks</span>
       </div>
       <div class="det-sparkline">${powCtx.chartBars}</div>
+      <div class="det-spark-readout" aria-live="polite">Hover or tap bars for snowfall.</div>
       <div class="det-spark-footer">
         <span>Total: <strong>${displayTotals.snow72.toFixed(1)}"</strong></span>
         ${powCtx.maxSeriesVal > 0.1 ? `<span>Peak: <strong>${powCtx.maxSeriesVal.toFixed(1)}"</strong></span>` : ''}
@@ -1521,6 +1526,56 @@ function bindResortInteractions(root, defaultExpandCount = 0) {
   });
 }
 
+function bindSnowBarInteractions(root = document) {
+  if (!root) return;
+  const bars = root.querySelectorAll('.sp-bar[data-bar-val], .rr72-bar[data-bar-val], .forecast-bar[data-bar-val]');
+  bars.forEach((bar) => {
+    if (bar.dataset.barBound === '1') return;
+    bar.dataset.barBound = '1';
+    const updateReadout = (sticky = false) => {
+      const val = bar.dataset.barVal || '0.00';
+      const label = bar.dataset.barLabel || 'Block';
+      const msg = `${label}: ${val}"`;
+      const sparkSection = bar.closest('.det-section');
+      const row72 = bar.closest('.rr-72h');
+      const leadStory = bar.closest('.lead-story');
+
+      if (sparkSection) {
+        const readout = sparkSection.querySelector('.det-spark-readout');
+        if (readout) readout.textContent = msg;
+      } else if (row72) {
+        const readout = row72.querySelector('.rr72-readout');
+        if (readout) readout.textContent = msg;
+      } else if (leadStory) {
+        let readout = leadStory.querySelector('.lead-forecast-readout');
+        if (!readout) {
+          readout = document.createElement('div');
+          readout.className = 'lead-forecast-readout';
+          readout.textContent = 'Hover or tap bars for snowfall.';
+          const row = leadStory.querySelector('.forecast-row');
+          if (row) row.insertAdjacentElement('afterend', readout);
+        }
+        readout.textContent = msg;
+      }
+
+      if (sticky) {
+        const group = bar.closest('.det-sparkline, .rr72-bars, .forecast-row');
+        if (group) group.querySelectorAll('.is-active-bar').forEach((b) => b.classList.remove('is-active-bar'));
+        bar.classList.add('is-active-bar');
+      }
+    };
+    bar.addEventListener('mouseenter', () => updateReadout(false));
+    bar.addEventListener('focus', () => updateReadout(false));
+    bar.addEventListener('click', () => updateReadout(true));
+    bar.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        updateReadout(true);
+      }
+    });
+  });
+}
+
 function renderTicker() {
   const list = applyFilters();
   const ticker = document.getElementById('resortTicker');
@@ -1545,6 +1600,7 @@ function renderTicker() {
     } else {
       ticker.innerHTML = '<div style="padding:1.5rem 0;font-family:var(--mono);font-size:0.72rem;color:var(--ink-faint);font-style:italic">No resorts match. East Coast grit says lower your standards and try again.</div>';
     }
+    bindSnowBarInteractions(document);
     return;
   }
 
@@ -1603,6 +1659,7 @@ function renderTicker() {
       row.classList.remove('answer-focus', 'answer-dim');
     });
   }
+  bindSnowBarInteractions(document);
 }
 
 function syncDispatchTags() {
@@ -1696,6 +1753,7 @@ function renderSavedMorningBrief() {
   const top = source.slice(0, 6);
   listEl.innerHTML = top.map((r, i) => buildResortMarkup(r, i + 1, { detailPrefix: 'saved' })).join('');
   bindResortInteractions(listEl, 0);
+  bindSnowBarInteractions(listEl);
 
   const pair = getComparablePair(top);
   const compare = pair ? getWorthExtraHourLine(pair[0], pair[1]) : '';
