@@ -1076,21 +1076,11 @@ body.storm-mode .m-tab:hover {
   gap: 0.4rem;
 }
 
-.rr-insight {
-  font-family: var(--sans);
-  font-size: 0.64rem;
-  line-height: 1.35;
-  color: var(--ink-soft);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
 .rr-72h {
   display: flex;
   align-items: flex-end;
-  gap: 0.42rem;
-  margin-top: 2px;
+  gap: 0.36rem;
+  margin-top: 3px;
 }
 
 .rr72-bars {
@@ -1728,7 +1718,6 @@ body.storm-mode .m-tab:hover {
   .rr-rank { grid-row: 1 / 3; align-self: center; font-size: 0.58rem; }
   .rr-name-col { grid-column: 2; }
   .rr-cond { grid-column: 2; font-size: 0.55rem; }
-  .rr-insight { font-size: 0.6rem; }
   .rr72-bars { max-width: none; height: 15px; }
   .rr72-total { font-size: 0.46rem; }
   .rr-stat { display: none; }

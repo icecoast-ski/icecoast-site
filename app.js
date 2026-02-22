@@ -818,6 +818,11 @@ function updateLocalStatus() {
     statusEl.textContent = '';
     return;
   }
+  const geocodedCount = state.resorts.filter((r) => Number.isFinite(r.lat) && Number.isFinite(r.lon)).length;
+  if (geocodedCount === 0) {
+    statusEl.textContent = 'Location saved, but resort coordinates are missing from this data feed.';
+    return;
+  }
   const localList = getLocalLeadList();
   if (!localList || !localList.length) {
     statusEl.textContent = 'Local mode on. Could not score nearby resorts yet.';
@@ -1106,17 +1111,6 @@ function getDriveWindow(resort) {
   return `Drive Window (Beta): Leave by ${fmtClock(leave)} from ${origin.label} → arrive ${fmtClock(arrive)} for the reload window.`;
 }
 
-function getDriveWindowSummary(resort) {
-  const origin = getDriveOrigin();
-  const hrs = getDriveHours(origin, resort);
-  if (!hrs) return '';
-  const now = new Date();
-  const peakOffset = getPeakSnowHourOffset(resort);
-  const target = new Date(now.getTime() + ((peakOffset ?? DRIVE_MODEL.fallbackPeakOffsetHr) * 60 * 60 * 1000));
-  const leave = new Date(target.getTime() - (hrs * 60 * 60 * 1000));
-  return `Leave by ${fmtClock(leave)}`;
-}
-
 function buildInline72hChart(resort, totals) {
   const series = Array.isArray(resort?.powWatch?.hourly?.snowSeries72)
     ? resort.powWatch.hourly.snowSeries72.map((v) => Number(v) || 0).slice(0, 72)
@@ -1244,15 +1238,10 @@ function buildResortMarkup(r, rank) {
   const wind = getWindHoldStatus(r);
   const bestBadge = getBestInDaysLabel(r);
   const driveWindow = getDriveWindow(r);
-  const driveSummary = getDriveWindowSummary(r);
   const snowCls = displayTotals.snow24 >= 4 ? ' snow' : displayTotals.snow24 === 0 ? ' ice' : '';
   const passStr = (r.passes || []).map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(' · ') || '—';
-  const terrainSnippet = r.terrainNote ? r.terrainNote : '';
-  const insightParts = [wind.short];
-  if (driveSummary) insightParts.push(driveSummary);
-  if (terrainSnippet) insightParts.push(terrainSnippet);
-  const rowInsight = insightParts.join(' · ');
   const inline72h = buildInline72hChart(r, displayTotals);
+  const inline72hHtml = rank <= 10 ? inline72h : '';
   const forecast = Array.isArray(r.forecast) && r.forecast.length
     ? r.forecast
     : [{ day: 'Sat', icon: 'cloud', hi: Number(r.temp) || 0 }, { day: 'Sun', icon: 'cloud', hi: Number(r.temp) || 0 }, { day: 'Mon', icon: 'cloud', hi: Number(r.temp) || 0 }];
@@ -1315,8 +1304,7 @@ function buildResortMarkup(r, rank) {
       <div class="rr-name-col">
         <div class="rr-name">${r.name}</div>
         <div class="rr-meta">${r.loc} · ${passStr}${bestBadge ? ` · ${bestBadge}` : ''}</div>
-        <div class="rr-insight">${rowInsight}</div>
-        ${inline72h}
+        ${inline72hHtml}
       </div>
       <div class="rr-cond"><span>${r.conditions}</span><span class="wind-badge ${wind.level}" title="${wind.short}">W</span></div>
       <div class="rr-stat${snowCls}">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '—'}</div>
@@ -1438,7 +1426,7 @@ function renderTicker() {
 
   const rows = ticker.querySelectorAll('.resort-row');
   if (rows.length) {
-    const defaultExpandCount = window.matchMedia('(max-width: 720px)').matches ? 1 : 3;
+    const defaultExpandCount = window.matchMedia('(max-width: 720px)').matches ? 0 : 1;
     rows.forEach((row, idx) => {
       row.classList.toggle('expanded', idx < defaultExpandCount);
     });
@@ -1701,6 +1689,10 @@ function attachUi() {
 
   if (useLocationBtn) {
     useLocationBtn.addEventListener('click', () => {
+      if (!window.isSecureContext) {
+        if (localStatus) localStatus.textContent = 'Location needs HTTPS (or localhost).';
+        return;
+      }
       if (!navigator.geolocation) {
         if (localStatus) localStatus.textContent = 'Geolocation unavailable on this browser.';
         return;
@@ -1712,8 +1704,12 @@ function attachUi() {
           const lon = Number(pos.coords.longitude);
           setLocalLocation(lat, lon, 'you');
         },
-        () => {
-          if (localStatus) localStatus.textContent = 'Could not access location.';
+        (err) => {
+          if (!localStatus) return;
+          if (err?.code === 1) localStatus.textContent = 'Location blocked. Allow location access in browser settings.';
+          else if (err?.code === 2) localStatus.textContent = 'Location unavailable right now. Try again in a moment.';
+          else if (err?.code === 3) localStatus.textContent = 'Location request timed out. Try again.';
+          else localStatus.textContent = 'Could not access location.';
         },
         { enableHighAccuracy: false, maximumAge: 300000, timeout: 8000 }
       );
