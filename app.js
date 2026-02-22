@@ -38,6 +38,8 @@ const state = {
   nlHints: new Set(),
   sortKey: 'snow24',
   sortDir: 'desc',
+  savedSortKey: 'snow24',
+  savedSortDir: 'desc',
   currentTab: 'all',
   localMode: false,
   userLocation: null,
@@ -1487,9 +1489,9 @@ function buildResortMarkup(r, rank, options = {}) {
         ${patrolTs ? `<div class="det-patrol-ts">Last patrol report: ${patrolTs}</div>` : ''}
       </div>
       <div class="detail-actions">
-        <button class="d-btn primary" data-drive="${r.id}">Drive there →</button>
-        <button class="d-btn" data-share="${r.id}">Share conditions</button>
-        <button class="d-btn save-btn" data-resort-id="${r.id}" data-resort-name="${r.name}">Save resort</button>
+        <button class="d-btn d-btn-go primary" data-drive="${r.id}"><span class="d-btn-text">Go →</span></button>
+        <button class="d-btn d-btn-share" data-share="${r.id}"><span class="d-btn-text">Share</span></button>
+        <button class="d-btn d-btn-save save-btn" data-resort-id="${r.id}" data-resort-name="${r.name}"><span class="d-btn-text">Save</span></button>
         ${passPriceHtml}
       </div>
     </div>`;
@@ -1525,7 +1527,7 @@ function bindResortInteractions(root, defaultExpandCount = 0) {
     const id = btn.dataset.miniSave;
     const saved = savedResorts.has(id);
     btn.classList.toggle('saved', saved);
-    btn.textContent = saved ? '✓' : '☆';
+    btn.textContent = saved ? 'Saved' : 'Save';
     btn.addEventListener('click', (event) => {
       event.stopPropagation();
       const resortId = btn.dataset.miniSave;
@@ -1540,8 +1542,14 @@ function bindResortInteractions(root, defaultExpandCount = 0) {
       const id = btn.getAttribute('data-drive');
       const resort = state.resorts.find((r) => r.id === id);
       if (!resort) return;
-      const q = encodeURIComponent(`${resort.name} ski resort`);
-      window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank', 'noopener,noreferrer');
+      // Launch animation
+      btn.classList.add('launching');
+      setTimeout(() => btn.classList.remove('launching'), 500);
+      // Open maps after a brief beat
+      setTimeout(() => {
+        const q = encodeURIComponent(`${resort.name} ski resort`);
+        window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank', 'noopener,noreferrer');
+      }, 150);
     });
   });
 
@@ -1551,7 +1559,11 @@ function bindResortInteractions(root, defaultExpandCount = 0) {
       const id = btn.getAttribute('data-share');
       const resort = state.resorts.find((r) => r.id === id);
       if (!resort) return;
-      showShareCard(resort);
+      // Sweep animation
+      btn.classList.add('sharing');
+      setTimeout(() => btn.classList.remove('sharing'), 450);
+      // Show share card after animation beat
+      setTimeout(() => showShareCard(resort), 200);
     });
   });
 }
@@ -1778,12 +1790,76 @@ function renderSavedMorningBrief() {
     return;
   }
 
+  // Apply saved section sort
+  const sk = state.savedSortKey || 'snow24';
+  const sd = state.savedSortDir || 'desc';
+  source.sort((a, b) => {
+    let va, vb;
+    if (sk === 'name') { va = a.name.toLowerCase(); vb = b.name.toLowerCase(); return sd === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va); }
+    if (sk === 'conditions') { va = a.conditions || ''; vb = b.conditions || ''; return sd === 'asc' ? va.localeCompare(vb) : vb.localeCompare(va); }
+    if (sk === 'rating') { va = a.rating || 0; vb = b.rating || 0; }
+    else { va = getDisplayPowTotals(a).snow24; vb = getDisplayPowTotals(b).snow24; }
+    return sd === 'asc' ? va - vb : vb - va;
+  });
+
   wrap.hidden = false;
   if (titleEl) titleEl.textContent = useLocal ? 'Your Mountains Today · Local Top 6' : 'Your Mountains Today';
+
+  // Build sorting header for saved brief (mirrors main ticker header)
+  const savedHeaderHtml = `
+    <div class="ticker-header saved-header" id="savedSortHeader">
+      <div class="th">#</div>
+      <div class="th">
+        <button class="th-sortbtn saved-sort" data-sort="name" aria-label="Sort by resort">
+          Resort <span class="sort-triangle" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="th">
+        <button class="th-sortbtn saved-sort" data-sort="conditions" aria-label="Sort by conditions">
+          Conditions <span class="sort-triangle" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="th right">
+        <button class="th-sortbtn right saved-sort active desc" data-sort="snow24" aria-label="Sort by 24 hour snow">
+          24h Snow <span class="sort-triangle" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="th right">Temp</div>
+      <div class="th right">
+        <button class="th-sortbtn right saved-sort" data-sort="rating" aria-label="Sort by rating">
+          Rating <span class="sort-triangle" aria-hidden="true"></span>
+        </button>
+      </div>
+      <div class="th right">Signal</div>
+    </div>`;
+
   const top = source.slice(0, 6);
-  listEl.innerHTML = top.map((r, i) => buildResortMarkup(r, i + 1, { detailPrefix: 'saved' })).join('');
+  listEl.innerHTML = savedHeaderHtml + top.map((r, i) => buildResortMarkup(r, i + 1, { detailPrefix: 'saved' })).join('');
   bindResortInteractions(listEl, 0);
   bindSnowBarInteractions(listEl);
+
+  // Bind saved-brief sort buttons
+  listEl.querySelectorAll('.saved-sort[data-sort]').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const key = btn.dataset.sort;
+      if (!key) return;
+      if (state.savedSortKey === key) {
+        state.savedSortDir = state.savedSortDir === 'desc' ? 'asc' : 'desc';
+      } else {
+        state.savedSortKey = key;
+        state.savedSortDir = (key === 'name' || key === 'conditions') ? 'asc' : 'desc';
+      }
+      renderSavedMorningBrief();
+    });
+  });
+  // Sync sort header UI for saved section
+  listEl.querySelectorAll('.saved-sort[data-sort]').forEach((btn) => {
+    const key = btn.dataset.sort;
+    const active = key === (state.savedSortKey || 'snow24');
+    btn.classList.toggle('active', active);
+    btn.classList.toggle('asc', active && state.savedSortDir === 'asc');
+    btn.classList.toggle('desc', active && state.savedSortDir === 'desc');
+  });
 
   const pair = getComparablePair(top);
   const compare = pair ? getWorthExtraHourLine(pair[0], pair[1]) : '';
@@ -1970,12 +2046,17 @@ function attachUi() {
       btn.classList.add('active');
       renderTicker();
       if (state.currentTab === 'favorites') {
-        const savedBlock = document.getElementById('savedMorningBrief');
-        if (savedBlock && !savedBlock.hidden) {
-          window.requestAnimationFrame(() => {
+        renderSavedMorningBrief();
+        window.requestAnimationFrame(() => {
+          const savedBlock = document.getElementById('savedMorningBrief');
+          if (savedBlock && !savedBlock.hidden) {
             savedBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
-          });
-        }
+          } else {
+            // If no saved resorts, scroll to the ticker which shows favorites-filtered view
+            const ticker = document.getElementById('resortTicker');
+            if (ticker) ticker.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          }
+        });
       }
     });
   });
@@ -2036,10 +2117,14 @@ function persistSavedResorts() {
 function setSavedState(btn, saved) {
   if (saved) {
     btn.classList.add('saved');
-    btn.textContent = '✓ Saved';
+    const txt = btn.querySelector('.d-btn-text');
+    if (txt) txt.textContent = '✓ Saved';
+    else btn.textContent = '✓ Saved';
   } else {
     btn.classList.remove('saved');
-    btn.textContent = 'Save resort';
+    const txt = btn.querySelector('.d-btn-text');
+    if (txt) txt.textContent = 'Save';
+    else btn.textContent = 'Save';
   }
 }
 
@@ -2058,9 +2143,14 @@ function syncMiniSaveButtons(id, saved) {
 function toggleMiniSave(btn, id, name) {
   if (!id) return;
   if (savedResorts.has(id)) {
+    // Unsave — shake + remove
     savedResorts.delete(id);
     persistSavedResorts();
-    setMiniSavedState(btn, false);
+    btn.classList.add('unsaving');
+    setTimeout(() => {
+      btn.classList.remove('unsaving');
+      setMiniSavedState(btn, false);
+    }, 260);
     syncMiniSaveButtons(id, false);
     document.querySelectorAll(`.save-btn[data-resort-id="${id}"]`).forEach((saveBtn) => setSavedState(saveBtn, false));
     updateSavedTab();
@@ -2071,10 +2161,44 @@ function toggleMiniSave(btn, id, name) {
 
   savedResorts.add(id);
   persistSavedResorts();
-  setMiniSavedState(btn, true);
+
+  // Flood animation on the button
+  btn.classList.add('flooding');
+  setTimeout(() => {
+    btn.classList.remove('flooding');
+    setMiniSavedState(btn, true);
+  }, 240);
+
   syncMiniSaveButtons(id, true);
-  btn.classList.add('pulse');
-  setTimeout(() => btn.classList.remove('pulse'), 260);
+
+  // Particles burst from the button
+  const rect = btn.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  [0, 60, 120, 180, 240, 300].forEach((angle) => {
+    const rad = (angle * Math.PI) / 180;
+    const dist = 20 + Math.random() * 14;
+    const p = document.createElement('div');
+    p.className = 'save-particle';
+    p.style.cssText = `
+      left: ${cx - 2.5}px;
+      top: ${cy - 2.5}px;
+      --tx: ${Math.cos(rad) * dist}px;
+      --ty: ${Math.sin(rad) * dist}px;
+      animation-delay: ${Math.random() * 0.05}s;
+    `;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 600);
+  });
+
+  // Float toast
+  const toast = document.createElement('div');
+  toast.className = 'save-toast';
+  toast.textContent = `+ ${name}`;
+  toast.style.cssText = `left: ${cx - 36}px; top: ${cy - 8}px;`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 700);
+
   document.querySelectorAll(`.save-btn[data-resort-id="${id}"]`).forEach((saveBtn) => setSavedState(saveBtn, true));
   updateSavedTab();
   renderSavedMorningBrief();
