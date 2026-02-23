@@ -200,6 +200,17 @@ function normalizePowWatch(rawPowWatch) {
     powBrief: typeof livePowWatch.powBrief === 'string' ? livePowWatch.powBrief : null,
     powBriefSource: typeof livePowWatch.powBriefSource === 'string' ? livePowWatch.powBriefSource : null,
     powBriefUpdatedAt: typeof livePowWatch.powBriefUpdatedAt === 'string' ? livePowWatch.powBriefUpdatedAt : null,
+    afdBrief: typeof livePowWatch.afdBrief === 'string'
+      ? livePowWatch.afdBrief
+      : (typeof livePowWatch.afdBlip === 'string'
+        ? livePowWatch.afdBlip
+        : (typeof livePowWatch.afdSummary === 'string' ? livePowWatch.afdSummary : null)),
+    afdBriefSource: typeof livePowWatch.afdBriefSource === 'string'
+      ? livePowWatch.afdBriefSource
+      : (typeof livePowWatch.afdSource === 'string' ? livePowWatch.afdSource : null),
+    afdBriefUpdatedAt: typeof livePowWatch.afdBriefUpdatedAt === 'string'
+      ? livePowWatch.afdBriefUpdatedAt
+      : (typeof livePowWatch.afdUpdatedAt === 'string' ? livePowWatch.afdUpdatedAt : null),
     hourlySourceMix: (livePowWatch.hourlySourceMix && typeof livePowWatch.hourlySourceMix === 'object')
       ? {
         nws: toNumOrNull(livePowWatch.hourlySourceMix.nws) ?? 0,
@@ -307,13 +318,15 @@ function getPowDisplayContext(resort) {
 
   const nwsAlertEvent = String(powWatch?.alert?.event || '').trim();
   const windHoldRiskLevelRaw = String(powWatch?.windHoldRisk?.level || 'LOW').toUpperCase();
+  const afdBriefText = typeof powWatch?.afdBrief === 'string' ? powWatch.afdBrief.trim() : '';
   const powBriefText = typeof powWatch?.powBrief === 'string' ? powWatch.powBrief.trim() : '';
   const fallbackBlipParts = [];
   if (nwsAlertEvent) fallbackBlipParts.push(`${nwsAlertEvent} active.`);
   if (snowLevelLine) fallbackBlipParts.push(String(snowLevelLine).replace(/^Snow Level:\s*/i, ''));
   if (windHoldRiskLevelRaw === 'HIGH') fallbackBlipParts.push('Wind hold risk is elevated this cycle.');
   const fallbackPowBrief = fallbackBlipParts.join(' ');
-  const displayPowBrief = powBriefText || fallbackPowBrief;
+  const displayPowBrief = afdBriefText || powBriefText || fallbackPowBrief;
+  const displayPowBriefLabel = 'NWS Summary';
 
   const snowSeries72 = Array.isArray(powWatch?.hourly?.snowSeries72)
     ? powWatch.hourly.snowSeries72.map((v) => Number(v)).filter((v) => Number.isFinite(v))
@@ -350,6 +363,7 @@ function getPowDisplayContext(resort) {
     alertExpiryLabel,
     snowLevelLine,
     displayPowBrief,
+    displayPowBriefLabel,
     chartBars,
     maxSeriesVal,
     potentialLow,
@@ -849,7 +863,8 @@ function updateLocalStatus() {
   const totals = getDisplayPowTotals(top);
   const dist = Number.isFinite(top._distanceMiles) ? `${Math.round(top._distanceMiles)} mi` : '';
   const place = state.locationLabel || 'your area';
-  statusEl.textContent = `Location verified: ${place}. Top local pick right now is ${top.name} (${totals.snow24.toFixed(1)}" / 24h${dist ? ` · ${dist}` : ''}).`;
+  const placeDisplay = String(place).toLowerCase() === 'you' ? 'your home base' : place;
+  statusEl.textContent = `Location verified: ${placeDisplay}. Top local pick right now is ${top.name} (${totals.snow24.toFixed(1)}" / 24h${dist ? ` · ${dist}` : ''}). Saved view is ranked by your location.`;
 }
 
 function setLocalLocation(lat, lon, label = '') {
@@ -966,7 +981,8 @@ const CHIP_MAP = {
   pow: { type: 'vibe', label: '⚡ POW On' },
   storm: { type: 'vibe', label: '🌨 Storm Coming' },
   ice: { type: 'vibe', label: '🧊 Avoid Ice' },
-  cold: { type: 'vibe', label: '🥶 Cold' },
+  powder: { type: 'vibe', label: '❄ Powder' },
+  cold: { type: 'vibe', label: '❄ Powder' },
   ikon: { type: 'pass', label: 'Ikon' },
   epic: { type: 'pass', label: 'Epic' },
   indy: { type: 'pass', label: 'Indy' },
@@ -1078,7 +1094,12 @@ function applyFilters() {
   if (active.has('pow')) list = list.filter((r) => r.pow === 'on');
   if (active.has('storm')) list = list.filter((r) => r.pow === 'on' || r.pow === 'building');
   if (active.has('ice')) list = list.filter((r) => r.conditions.toLowerCase().includes('ice'));
-  if (active.has('cold')) list = list.filter((r) => r.temp < 20);
+  if (active.has('powder') || active.has('cold')) {
+    list = list.filter((r) => {
+      const c = String(r.conditions || '').toLowerCase();
+      return (Number(getDisplayPowTotals(r).snow24) >= 2) || c.includes('powder');
+    });
+  }
 
   if (active.has('ikon')) list = list.filter((r) => (r.passes || []).includes('ikon'));
   if (active.has('epic')) list = list.filter((r) => (r.passes || []).includes('epic'));
@@ -1184,6 +1205,26 @@ function getPeakSnowHourOffset(resort) {
   return bestVal > 0 ? bestIdx : null;
 }
 
+function getBestSnowArrivalOffsetHours(resort, minArrivalOffsetHours = 0) {
+  const series72 = Array.isArray(resort?.powWatch?.hourly?.snowSeries72)
+    ? resort.powWatch.hourly.snowSeries72.map((v) => Number(v) || 0).slice(0, 72)
+    : [];
+  const minIdx = Math.max(0, Math.ceil(minArrivalOffsetHours));
+  if (series72.length > minIdx) {
+    let bestIdx = minIdx;
+    let bestVal = -1;
+    for (let i = minIdx; i < series72.length; i += 1) {
+      const val = Number(series72[i]) || 0;
+      if (val > bestVal) {
+        bestVal = val;
+        bestIdx = i;
+      }
+    }
+    if (bestVal > 0) return bestIdx;
+  }
+  return Math.max(DRIVE_MODEL.fallbackPeakOffsetHr, minArrivalOffsetHours + 1);
+}
+
 function fmtClock(d) {
   return d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
 }
@@ -1193,11 +1234,16 @@ function getDriveWindow(resort) {
   const hrs = getDriveHours(origin, resort);
   if (!hrs) return '';
   const now = new Date();
+  const minArrivalOffset = Math.max(0.5, hrs + 0.5);
   const peakOffset = getPeakSnowHourOffset(resort);
-  const target = new Date(now.getTime() + ((peakOffset ?? DRIVE_MODEL.fallbackPeakOffsetHr) * 60 * 60 * 1000));
+  const targetOffset = (peakOffset !== null && peakOffset >= minArrivalOffset)
+    ? peakOffset
+    : getBestSnowArrivalOffsetHours(resort, minArrivalOffset);
+  const target = new Date(now.getTime() + (targetOffset * 60 * 60 * 1000));
   const leave = new Date(target.getTime() - (hrs * 60 * 60 * 1000));
-  const arrive = new Date(leave.getTime() + (hrs * 60 * 60 * 1000));
-  return `Drive Window (Beta): Leave by ${fmtClock(leave)} from ${origin.label} → arrive ${fmtClock(arrive)} for the reload window.`;
+  const safeLeave = leave > now ? leave : new Date(now.getTime() + (15 * 60 * 1000));
+  const arrive = new Date(safeLeave.getTime() + (hrs * 60 * 60 * 1000));
+  return `Drive Window (Beta): Leave by ${fmtClock(safeLeave)} from ${origin.label} → arrive ${fmtClock(arrive)} for the best snowfall window.`;
 }
 
 function buildInline72hChart(resort, totals) {
@@ -1440,7 +1486,7 @@ function buildResortMarkup(r, rank, options = {}) {
   const alertsHtml = [
     rainWarn ? `<div class="det-rain-warning">⚠ ${rainWarn}</div>` : '',
     warningHtml,
-    powCtx.displayPowBrief ? `<div class="det-nws-brief"><strong>NWS:</strong> ${powCtx.displayPowBrief}</div>` : '',
+    powCtx.displayPowBrief ? `<div class="det-nws-brief"><strong>${powCtx.displayPowBriefLabel || 'NWS Summary'}:</strong> ${powCtx.displayPowBrief}</div>` : '',
     r.terrainNote ? `<div class="det-terrain-note"><strong>Terrain:</strong> ${r.terrainNote}</div>` : '',
     driveWindow ? `<div class="det-nws-brief">${driveWindow}</div>` : ''
   ].filter(Boolean).join('');
@@ -1613,6 +1659,49 @@ function bindResortInteractions(root, defaultExpandCount = 0) {
   });
 }
 
+let snowBarPillEl = null;
+let snowBarPillTimer = null;
+
+function ensureSnowBarPill() {
+  if (snowBarPillEl) return snowBarPillEl;
+  const el = document.createElement('div');
+  el.className = 'snow-bar-pill';
+  el.setAttribute('aria-hidden', 'true');
+  document.body.appendChild(el);
+  snowBarPillEl = el;
+  return snowBarPillEl;
+}
+
+function showSnowBarPill(anchor, text) {
+  if (!anchor || !text) return;
+  const el = ensureSnowBarPill();
+  if (snowBarPillTimer) {
+    clearTimeout(snowBarPillTimer);
+    snowBarPillTimer = null;
+  }
+  el.textContent = text;
+  el.classList.add('on');
+  const rect = anchor.getBoundingClientRect();
+  const x = rect.left + (rect.width / 2);
+  const y = rect.top - 8;
+  el.style.left = `${Math.round(x)}px`;
+  el.style.top = `${Math.round(y)}px`;
+}
+
+function hideSnowBarPill(delay = 0) {
+  const el = snowBarPillEl;
+  if (!el) return;
+  if (snowBarPillTimer) clearTimeout(snowBarPillTimer);
+  if (delay > 0) {
+    snowBarPillTimer = setTimeout(() => {
+      el.classList.remove('on');
+      snowBarPillTimer = null;
+    }, delay);
+    return;
+  }
+  el.classList.remove('on');
+}
+
 function bindSnowBarInteractions(root = document) {
   if (!root) return;
   const bars = root.querySelectorAll('.sp-bar[data-bar-val], .rr72-bar[data-bar-val], .forecast-bar[data-bar-val]');
@@ -1650,17 +1739,34 @@ function bindSnowBarInteractions(root = document) {
         if (group) group.querySelectorAll('.is-active-bar').forEach((b) => b.classList.remove('is-active-bar'));
         bar.classList.add('is-active-bar');
       }
+      showSnowBarPill(bar, msg);
     };
     bar.addEventListener('mouseenter', () => updateReadout(false));
     bar.addEventListener('focus', () => updateReadout(false));
-    bar.addEventListener('click', () => updateReadout(true));
+    bar.addEventListener('click', () => {
+      updateReadout(true);
+      const isTouchLike = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+      if (!isTouchLike) hideSnowBarPill(1400);
+    });
+    bar.addEventListener('mouseleave', () => hideSnowBarPill(120));
+    bar.addEventListener('blur', () => hideSnowBarPill(120));
     bar.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         updateReadout(true);
+        const isTouchLike = window.matchMedia('(hover: none), (pointer: coarse)').matches;
+        if (!isTouchLike) hideSnowBarPill(1400);
       }
     });
   });
+}
+
+function scrollToSectionWithHeaderOffset(el) {
+  if (!el) return;
+  const masthead = document.querySelector('.masthead');
+  const headerH = masthead ? masthead.getBoundingClientRect().height : 0;
+  const top = window.scrollY + el.getBoundingClientRect().top - headerH - 8;
+  window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
 }
 
 function renderTicker() {
@@ -1966,6 +2072,7 @@ function attachUi() {
     { match: /\bikon\b/i, cmd: 'ikon' },
     { match: /\bepic\b/i, cmd: 'epic' },
     { match: /\bindy\b/i, cmd: 'indy' },
+    { match: /\b(powder)\b/i, cmd: 'powder' },
     { match: /\bcold\b/i, cmd: 'cold' }
   ];
 
@@ -2071,8 +2178,10 @@ function attachUi() {
     state.nlHints = new Set();
     NL_COMMANDS.forEach((cmd) => { if (cmd.match.test(val)) state.nlHints.add(cmd.cmd); });
     clearBtn.classList.toggle('on', val.trim().length > 0 || state.activeHints.size > 0);
-    const hasText = val.trim().length > 0;
-    setAskModeUI(hasText);
+    const trimmed = val.trim();
+    const hasText = trimmed.length > 0;
+    const tokenCount = hasText ? trimmed.split(/\s+/).filter(Boolean).length : 0;
+    setAskModeUI(hasText && tokenCount >= 2);
     if (hasText) stopPlaceholderCycle();
     const changedFromAnswer = state.answerQueryText
       && val.trim().toLowerCase() !== state.answerQueryText.trim().toLowerCase();
@@ -2153,16 +2262,18 @@ function attachUi() {
       renderTicker();
       if (state.currentTab === 'favorites') {
         renderSavedMorningBrief();
-        window.requestAnimationFrame(() => {
+        const scrollTarget = () => {
           const savedBlock = document.getElementById('savedMorningBrief');
           if (savedBlock && !savedBlock.hidden) {
-            savedBlock.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            scrollToSectionWithHeaderOffset(savedBlock);
           } else {
             // If no saved resorts, scroll to the ticker which shows favorites-filtered view
             const ticker = document.getElementById('resortTicker');
-            if (ticker) ticker.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            if (ticker) scrollToSectionWithHeaderOffset(ticker);
           }
-        });
+        };
+        window.requestAnimationFrame(scrollTarget);
+        setTimeout(scrollTarget, 120);
       }
     });
   });

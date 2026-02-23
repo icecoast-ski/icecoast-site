@@ -236,7 +236,7 @@ body.building-mode .brief {
   color: var(--ink);
   outline: none;
   caret-color: transparent;
-  padding: 0 0 0 1.05ch;
+  padding: 0 0 0 1.55ch;
   min-width: 0;
   -webkit-mask-image: linear-gradient(to right, #000 0%, #000 82%, transparent 100%);
   mask-image: linear-gradient(to right, #000 0%, #000 82%, transparent 100%);
@@ -1892,6 +1892,31 @@ body.building-mode .brief {
   opacity: 1 !important;
 }
 
+.snow-bar-pill {
+  position: fixed;
+  left: 0;
+  top: 0;
+  transform: translate(-50%, -100%);
+  font-family: var(--mono);
+  font-size: 0.56rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--paper);
+  background: var(--ink);
+  border: 1px solid var(--rule-heavy);
+  border-radius: 999px;
+  padding: 4px 9px;
+  white-space: nowrap;
+  z-index: 5000;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.14);
+}
+.snow-bar-pill.on {
+  opacity: 1;
+}
+
 /* Footer: IceCoast rating + verdict */
 .det-footer {
   display: flex;
@@ -2143,7 +2168,8 @@ body.building-mode .brief {
 }
 
 @media (max-width: 540px) {
-  .masthead { padding: 0.75rem 1rem 0.7rem; }
+  .masthead { padding: 0.58rem 1rem 0.52rem; }
+  .masthead-top { margin-bottom: 0.35rem; }
   .nameplate-logo { font-size: 1.75rem; }
   .nameplate-rule {
     white-space: nowrap;
@@ -2161,7 +2187,7 @@ body.building-mode .brief {
   .lead-headline { font-size: 1.45rem; }
   .lead-stats { gap: 0.75rem; }
   .dispatch-hints { display: none; } /* hide top hints on very small — use drawer */
-  .dispatch-bar { gap: 0.35rem; }
+  .dispatch-bar { gap: 0.3rem; padding-top: 0.42rem; }
   .dispatch-label {
     font-size: 0.53rem;
     letter-spacing: 0.1em;
@@ -2177,11 +2203,21 @@ body.building-mode .brief {
     font-size: 0.7rem;
     padding: 2px 2px;
   }
+  .dispatch-quick-hints {
+    margin-top: 0.28rem;
+    padding-top: 0.22rem;
+  }
   .local-cta {
     grid-template-columns: 1fr;
     gap: 0.55rem;
+    margin: 0.55rem 0 0.55rem;
+    padding: 0.55rem 0 0.5rem;
   }
   .local-cta-title { font-size: 1.05rem; }
+  .saved-brief {
+    margin: 0.52rem 0 0.65rem;
+    padding: 0.52rem 0 0.5rem;
+  }
 }
 
 /* Print-like weight rhythm */
