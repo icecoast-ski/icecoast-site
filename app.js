@@ -1695,46 +1695,49 @@ function hideSnowBarPill(delay = 0) {
 
 function bindSnowBarInteractions(root = document) {
   if (!root) return;
+  const barSelector = '.sp-bar[data-bar-val], .rr72-bar[data-bar-val], .forecast-bar[data-bar-val]';
+  const applyBarReadout = (bar, sticky = false) => {
+    if (!bar) return;
+    const val = bar.dataset.barVal || '0.00';
+    const msg = `${val}"`;
+    const sparkSection = bar.closest('.det-section');
+    const row72 = bar.closest('.rr-72h');
+    const leadStory = bar.closest('.lead-story');
+
+    if (sparkSection) {
+      const readout = sparkSection.querySelector('.det-spark-readout');
+      if (readout) readout.textContent = msg;
+    } else if (row72) {
+      const readout = row72.querySelector('.rr72-readout');
+      if (readout) readout.textContent = msg;
+    } else if (leadStory) {
+      let readout = leadStory.querySelector('.lead-forecast-readout');
+      if (!readout) {
+        readout = document.createElement('div');
+        readout.className = 'lead-forecast-readout';
+        readout.textContent = 'Hover or tap a bar to inspect snowfall.';
+        const row = leadStory.querySelector('.forecast-row');
+        if (row) row.insertAdjacentElement('afterend', readout);
+      }
+      readout.textContent = msg;
+    }
+
+    if (sticky) {
+      const group = bar.closest('.det-sparkline, .rr72-bars, .forecast-row');
+      if (group) group.querySelectorAll('.is-active-bar').forEach((b) => b.classList.remove('is-active-bar'));
+      bar.classList.add('is-active-bar');
+    }
+    showSnowBarPill(bar, msg);
+  };
+
   const bars = root.querySelectorAll('.sp-bar[data-bar-val], .rr72-bar[data-bar-val], .forecast-bar[data-bar-val]');
   bars.forEach((bar) => {
     if (bar.dataset.barBound === '1') return;
     bar.dataset.barBound = '1';
-    const updateReadout = (sticky = false) => {
-      const val = bar.dataset.barVal || '0.00';
-      const msg = `${val}"`;
-      const sparkSection = bar.closest('.det-section');
-      const row72 = bar.closest('.rr-72h');
-      const leadStory = bar.closest('.lead-story');
-
-      if (sparkSection) {
-        const readout = sparkSection.querySelector('.det-spark-readout');
-        if (readout) readout.textContent = msg;
-      } else if (row72) {
-        const readout = row72.querySelector('.rr72-readout');
-        if (readout) readout.textContent = msg;
-      } else if (leadStory) {
-        let readout = leadStory.querySelector('.lead-forecast-readout');
-        if (!readout) {
-          readout = document.createElement('div');
-          readout.className = 'lead-forecast-readout';
-          readout.textContent = 'Hover or tap a bar to inspect snowfall.';
-          const row = leadStory.querySelector('.forecast-row');
-          if (row) row.insertAdjacentElement('afterend', readout);
-        }
-        readout.textContent = msg;
-      }
-
-      if (sticky) {
-        const group = bar.closest('.det-sparkline, .rr72-bars, .forecast-row');
-        if (group) group.querySelectorAll('.is-active-bar').forEach((b) => b.classList.remove('is-active-bar'));
-        bar.classList.add('is-active-bar');
-      }
-      showSnowBarPill(bar, msg);
-    };
-    bar.addEventListener('mouseenter', () => updateReadout(false));
-    bar.addEventListener('focus', () => updateReadout(false));
+    bar.addEventListener('mouseenter', () => applyBarReadout(bar, false));
+    bar.addEventListener('focus', () => applyBarReadout(bar, false));
     bar.addEventListener('click', () => {
-      updateReadout(true);
+      applyBarReadout(bar, true);
       const isTouchLike = window.matchMedia('(hover: none), (pointer: coarse)').matches;
       if (!isTouchLike) hideSnowBarPill(1400);
     });
@@ -1743,11 +1746,52 @@ function bindSnowBarInteractions(root = document) {
     bar.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        updateReadout(true);
+        applyBarReadout(bar, true);
         const isTouchLike = window.matchMedia('(hover: none), (pointer: coarse)').matches;
         if (!isTouchLike) hideSnowBarPill(1400);
       }
     });
+  });
+
+  // Touch scrub: drag across bars to inspect values smoothly.
+  const groups = root.querySelectorAll('.det-sparkline, .rr72-bars, .forecast-row');
+  groups.forEach((group) => {
+    if (group.dataset.scrubBound === '1') return;
+    group.dataset.scrubBound = '1';
+
+    const getBarFromPoint = (x, y) => {
+      const el = document.elementFromPoint(x, y);
+      if (!el) return null;
+      const bar = el.closest(barSelector);
+      return bar && group.contains(bar) ? bar : null;
+    };
+
+    let scrubbing = false;
+    const start = (ev) => {
+      scrubbing = true;
+      const p = ev.touches && ev.touches[0] ? ev.touches[0] : ev;
+      const bar = getBarFromPoint(p.clientX, p.clientY);
+      if (bar) applyBarReadout(bar, true);
+    };
+    const move = (ev) => {
+      if (!scrubbing) return;
+      const p = ev.touches && ev.touches[0] ? ev.touches[0] : ev;
+      const bar = getBarFromPoint(p.clientX, p.clientY);
+      if (bar) applyBarReadout(bar, true);
+    };
+    const end = () => {
+      scrubbing = false;
+      hideSnowBarPill(260);
+    };
+
+    group.addEventListener('touchstart', start, { passive: true });
+    group.addEventListener('touchmove', move, { passive: true });
+    group.addEventListener('touchend', end, { passive: true });
+    group.addEventListener('touchcancel', end, { passive: true });
+    group.addEventListener('pointerdown', start);
+    group.addEventListener('pointermove', move);
+    group.addEventListener('pointerup', end);
+    group.addEventListener('pointercancel', end);
   });
 }
 
@@ -1774,6 +1818,7 @@ function renderTicker() {
     : state.resorts.slice().sort((a, b) => getDisplayPowTotals(b).snow24 - getDisplayPowTotals(a).snow24);
   updateLeadStories(leadSource);
   updateLocalStatus();
+  updateSaveNudge();
   renderSavedMorningBrief();
   updateSortHeaderUI();
 
@@ -1843,6 +1888,17 @@ function renderTicker() {
     });
   }
   bindSnowBarInteractions(document);
+}
+
+function updateSaveNudge() {
+  const nudge = document.getElementById('saveNudge');
+  if (!nudge) return;
+  const hasActiveQuery =
+    state.search.trim().length > 0
+    || getAllActive().size > 0
+    || String(state.answerQueryText || '').trim().length > 0;
+  const show = state.currentTab === 'all' && !hasActiveQuery && savedResorts.size < 2;
+  nudge.hidden = !show;
 }
 
 function syncDispatchTags() {
@@ -2334,6 +2390,14 @@ function setSavedState(btn, saved) {
     const txt = btn.querySelector('.d-btn-text');
     if (txt) txt.textContent = 'Save';
     else btn.textContent = 'Save';
+  }
+
+  const saveNudgeBtn = document.getElementById('saveNudgeBtn');
+  if (saveNudgeBtn) {
+    saveNudgeBtn.addEventListener('click', () => {
+      const ticker = document.getElementById('resortTicker');
+      if (ticker) scrollToSectionWithHeaderOffset(ticker);
+    });
   }
 }
 
