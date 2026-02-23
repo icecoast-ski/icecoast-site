@@ -920,10 +920,13 @@ function getLocalLeadList() {
 function updateLocalStatus() {
   const statusEl = document.getElementById('localStatus');
   if (!statusEl) return;
+  const ctaEl = document.getElementById('localCta');
   if (!state.localMode || !state.userLocation) {
+    if (ctaEl) ctaEl.hidden = false;
     statusEl.textContent = '';
     return;
   }
+  if (ctaEl) ctaEl.hidden = true;
   const geocodedCount = state.resorts.filter((r) => Number.isFinite(r.lat) && Number.isFinite(r.lon)).length;
   if (geocodedCount === 0) {
     statusEl.textContent = 'Location saved, but resort coordinates are missing from this data feed.';
@@ -942,12 +945,54 @@ function updateLocalStatus() {
   statusEl.textContent = `Location verified: ${placeDisplay}. Top local pick right now is ${top.name} (${totals.snow24.toFixed(1)}" / 24h${dist ? ` · ${dist}` : ''}). Saved view is ranked by your location.`;
 }
 
-function setLocalLocation(lat, lon, label = '') {
+function triggerLocationConfirmedAnimation(anchorEl, label = '') {
+  const placeDisplay = String(label || '').toLowerCase() === 'you' || !String(label || '').trim()
+    ? 'your home base'
+    : String(label).trim();
+
+  const masthead = document.querySelector('.masthead');
+  const mastheadRect = masthead ? masthead.getBoundingClientRect() : null;
+  const toast = document.createElement('div');
+  toast.className = 'save-toast';
+  toast.textContent = `✓ Location confirmed · ${placeDisplay}`;
+  toast.style.left = `${Math.max(12, window.innerWidth - 260)}px`;
+  toast.style.top = `${Math.max(8, (mastheadRect ? mastheadRect.bottom : 0) + 6)}px`;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 760);
+
+  if (!anchorEl) return;
+  const rect = anchorEl.getBoundingClientRect();
+  const cx = rect.left + rect.width / 2;
+  const cy = rect.top + rect.height / 2;
+  [0, 45, 90, 135, 180, 225, 270, 315].forEach((angle) => {
+    const rad = (angle * Math.PI) / 180;
+    const dist = 20 + Math.random() * 16;
+    const p = document.createElement('div');
+    p.className = 'save-particle';
+    p.style.cssText = `
+      left: ${cx - 2.5}px;
+      top: ${cy - 2.5}px;
+      --tx: ${Math.cos(rad) * dist}px;
+      --ty: ${Math.sin(rad) * dist}px;
+      animation-delay: ${Math.random() * 0.05}s;
+    `;
+    document.body.appendChild(p);
+    setTimeout(() => p.remove(), 650);
+  });
+}
+
+function setLocalLocation(lat, lon, label = '', opts = {}) {
   if (!Number.isFinite(lat) || !Number.isFinite(lon)) return;
   state.localMode = true;
   state.userLocation = { lat, lon };
   state.locationLabel = label;
   saveLocalProfile();
+  const localCta = document.getElementById('localCta');
+  if (localCta) localCta.hidden = true;
+  if (opts && opts.announce) {
+    triggerHaptic(14);
+    triggerLocationConfirmedAnimation(opts.anchorEl || null, label);
+  }
   renderTicker();
   updateSavedTab();
 }
@@ -2465,7 +2510,7 @@ function attachUi() {
         (pos) => {
           const lat = Number(pos.coords.latitude);
           const lon = Number(pos.coords.longitude);
-          setLocalLocation(lat, lon, 'you');
+          setLocalLocation(lat, lon, 'you', { announce: true, anchorEl: useLocationBtn });
         },
         (err) => {
           if (!localStatus) return;
@@ -2491,10 +2536,36 @@ function attachUi() {
   updateLocalStatus();
 }
 
-const savedResorts = new Set(JSON.parse(localStorage.getItem('brief_saved_resorts') || '[]'));
+function parseSavedArray(raw) {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed
+      .map((v) => String(v || '').trim())
+      .filter(Boolean);
+  } catch (_err) {
+    return [];
+  }
+}
+
+function loadSavedResortsFromStorage() {
+  const merged = new Set([
+    ...parseSavedArray(localStorage.getItem('brief_saved_resorts')),
+    ...parseSavedArray(localStorage.getItem('brief_favorites'))
+  ]);
+  return merged;
+}
+
+const savedResorts = loadSavedResortsFromStorage();
+state.favorites = new Set(savedResorts);
 
 function persistSavedResorts() {
-  localStorage.setItem('brief_saved_resorts', JSON.stringify(Array.from(savedResorts)));
+  const payload = JSON.stringify(Array.from(savedResorts));
+  localStorage.setItem('brief_saved_resorts', payload);
+  // Backward-compat: keep legacy key in sync so older admin/site pages don't drift.
+  localStorage.setItem('brief_favorites', payload);
+  state.favorites = new Set(savedResorts);
 }
 
 function setSavedState(btn, saved) {
