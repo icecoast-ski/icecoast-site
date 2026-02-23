@@ -2521,6 +2521,10 @@ function updateSavedTab() {
   initPwaNudge();
   initShareCard();
   initAskTheBrief();
+  const deepLinkResortId = getDeepLinkResortId();
+  if (deepLinkResortId) {
+    window.requestAnimationFrame(() => jumpToResortCard(deepLinkResortId));
+  }
 })();
 
 /* ═══════════════════════════════════════════════
@@ -2616,12 +2620,20 @@ function showShareCard(resort) {
   const wind     = getWindHoldStatus(resort);
   const condLabel = resort.conditions + (resort.pow === 'on' ? ' — Pow On Now' : resort.pow === 'building' ? ' — Storm Building' : '');
   const dateStr  = new Date().toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
+  const shareImage =
+    (typeof resort.shareImage === 'string' && resort.shareImage.trim())
+    || (typeof resort.image === 'string' && resort.image.trim())
+    || (typeof resort.imageUrl === 'string' && resort.imageUrl.trim())
+    || (typeof resort.heroImage === 'string' && resort.heroImage.trim())
+    || (typeof resort.photo === 'string' && resort.photo.trim())
+    || '';
 
   const overlay = document.createElement('div');
   overlay.className = 'share-overlay';
   overlay.innerHTML = `
     <div class="share-card">
       <div class="sc-logo">ice<em>coast</em></div>
+      ${shareImage ? `<div class="sc-image-wrap"><img class="sc-image" src="${shareImage}" alt="${resort.name} conditions image" loading="lazy" decoding="async"></div>` : ''}
       <div class="sc-name">${resort.name}</div>
       <div class="sc-cond">${condLabel}</div>
       <div class="sc-stats">
@@ -2657,10 +2669,14 @@ function showShareCard(resort) {
     const verdict = resort.rating >= 4 ? '🟢 Go.' : resort.rating <= 2 ? '🔴 Skip.' : '🟡 Solid.';
     const trailInfo = getTrailPct(resort);
     const trailLine = trailInfo ? ` ${trailInfo.pct}% trails open.` : '';
-    const text = `${verdict} ${resort.name}\n${totals.snow24 > 0 ? totals.snow24 + '" fresh · ' : ''}${resort.conditions} · ${resort.temp}°F · Wind ${resort.wind} mph\n${wind.short}${trailLine}\n\nicecoast.ski — live East Coast conditions`;
+    const shareOrigin = /^https?:\/\/(localhost|127\.0\.0\.1)/i.test(window.location.origin)
+      ? window.location.origin
+      : 'https://icecoast.ski';
+    const resortUrl = `${shareOrigin}/?resort=${encodeURIComponent(resort.id)}`;
+    const text = `${verdict} ${resort.name}\n${totals.snow24 > 0 ? totals.snow24 + '" fresh · ' : ''}${resort.conditions} · ${resort.temp}°F · Wind ${resort.wind} mph\n${wind.short}${trailLine}\n\n${resortUrl}`;
     try {
       if (navigator.share) {
-        await navigator.share({ title: `${resort.name} — icecoast conditions`, text, url: 'https://icecoast.ski' });
+        await navigator.share({ title: `${resort.name} — icecoast conditions`, text, url: resortUrl });
       } else {
         await navigator.clipboard.writeText(text);
         const btn = overlay.querySelector('#scShare');
@@ -2888,6 +2904,22 @@ function jumpToResortCard(resortId) {
     focus();
     setTimeout(focus, 120);
   });
+}
+
+function getDeepLinkResortId() {
+  try {
+    const url = new URL(window.location.href);
+    const fromQuery = (url.searchParams.get('resort') || '').trim();
+    if (fromQuery) return fromQuery;
+    const hash = String(url.hash || '').replace(/^#/, '').trim();
+    if (!hash) return '';
+    const match = hash.match(/(?:^|&)resort=([a-z0-9-]+)/i);
+    if (match && match[1]) return match[1];
+    if (/^[a-z0-9-]+$/i.test(hash)) return hash;
+    return '';
+  } catch (_) {
+    return '';
+  }
 }
 
 function dismissDispatchAnswer() {
