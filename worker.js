@@ -620,6 +620,73 @@ async function applyPowWatchOverrides(cachedData, env) {
   return changed ? nextData : cachedData;
 }
 
+function pickAfdSummaryText(record) {
+  if (!record || typeof record !== "object") return null;
+  const candidates = [
+    record.afdBrief,
+    record.afdBlip,
+    record.afdSummary,
+    record.powBrief,
+    record.summary,
+    record.text,
+  ];
+  for (const value of candidates) {
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return null;
+}
+
+async function applyAfdBriefsFromKv(cachedData, env) {
+  if (!cachedData || typeof cachedData !== "object") return cachedData;
+  const resortIds = Object.keys(cachedData).filter(
+    (k) => k !== "_metadata" && cachedData[k] && typeof cachedData[k] === "object",
+  );
+  if (!resortIds.length) return cachedData;
+
+  const afdRows = await Promise.all(
+    resortIds.map(async (resortId) => {
+      const row = await env.ICECOASTDATA.get(`powWatch:${resortId}:afd`, "json");
+      return [resortId, row];
+    }),
+  );
+
+  let changed = false;
+  const nextData = { ...cachedData };
+  for (const [resortId, afdRow] of afdRows) {
+    if (!afdRow || typeof afdRow !== "object") continue;
+    const summary = pickAfdSummaryText(afdRow);
+    if (!summary) continue;
+
+    const current = cachedData[resortId];
+    if (!current || typeof current !== "object") continue;
+    const currentPowWatch =
+      current.powWatch && typeof current.powWatch === "object" ? current.powWatch : {};
+
+    nextData[resortId] = {
+      ...current,
+      powWatch: {
+        ...currentPowWatch,
+        afdBrief: summary,
+        afdBriefSource:
+          (typeof afdRow.afdBriefSource === "string" && afdRow.afdBriefSource.trim())
+            ? afdRow.afdBriefSource.trim()
+            : ((typeof afdRow.powBriefSource === "string" && afdRow.powBriefSource.trim())
+              ? afdRow.powBriefSource.trim()
+              : "nws_afd_ai"),
+        afdBriefUpdatedAt:
+          (typeof afdRow.afdBriefUpdatedAt === "string" && afdRow.afdBriefUpdatedAt.trim())
+            ? afdRow.afdBriefUpdatedAt.trim()
+            : ((typeof afdRow.powBriefUpdatedAt === "string" && afdRow.powBriefUpdatedAt.trim())
+              ? afdRow.powBriefUpdatedAt.trim()
+              : null),
+      },
+    };
+    changed = true;
+  }
+
+  return changed ? nextData : cachedData;
+}
+
 export default {
   async fetch(request, env) {
     const url = new URL(request.url);
@@ -1275,10 +1342,11 @@ export default {
       }
 
       const dataWithOverrides = await applyPowWatchOverrides(cachedData, env);
+      const dataWithAfd = await applyAfdBriefsFromKv(dataWithOverrides, env);
       const senditSummary = await loadSendItSummary(env);
       const metadata =
-        dataWithOverrides && typeof dataWithOverrides === "object"
-          ? dataWithOverrides._metadata
+        dataWithAfd && typeof dataWithAfd === "object"
+          ? dataWithAfd._metadata
           : null;
       let staleMinutes = null;
       if (metadata && metadata.lastUpdated) {
@@ -1290,7 +1358,7 @@ export default {
 
       return jsonResponse(
         {
-          data: dataWithOverrides,
+          data: dataWithAfd,
           snapshot: {
             lastUpdated: metadata?.lastUpdated || null,
             staleMinutes,
