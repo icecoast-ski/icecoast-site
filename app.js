@@ -2702,12 +2702,33 @@ function runDispatchAnswer(query) {
   state.answerQueryText = String(query || '');
   setAnswerActiveUI(true);
   answerBox.hidden = false;
+  const jumpBtn = inner.querySelector('.ask-jump-btn[data-resort-id]');
+  const syncJumpButton = (resortId, resortName) => {
+    if (!jumpBtn || !resortId) return;
+    jumpBtn.setAttribute('data-resort-id', resortId);
+    jumpBtn.textContent = `Jump to ${resortName || 'resort'} ↓`;
+    jumpBtn.setAttribute('aria-label', `Jump to ${resortName || 'resort'}`);
+  };
+
+  inner.querySelectorAll('.ask-cmp-col[data-resort-id]').forEach((col) => {
+    col.addEventListener('click', (event) => {
+      event.preventDefault();
+      const resortId = col.getAttribute('data-resort-id');
+      const resortName = col.getAttribute('data-resort-name') || 'resort';
+      if (!resortId) return;
+      inner.querySelectorAll('.ask-cmp-col[data-resort-id]').forEach((c) => c.classList.remove('selected'));
+      col.classList.add('selected');
+      syncJumpButton(resortId, resortName);
+    });
+  });
+
   inner.querySelectorAll('.ask-jump-btn[data-resort-id]').forEach((btn) => {
     btn.addEventListener('click', (event) => {
       event.preventDefault();
       const resortId = btn.getAttribute('data-resort-id');
       if (!resortId) return;
-      jumpToResortCard(resortId);
+      dismissDispatchAnswer();
+      window.requestAnimationFrame(() => jumpToResortCard(resortId));
     });
   });
   renderTicker();
@@ -2932,13 +2953,13 @@ function buildCompareAnswer(a, b) {
   let html = `<div class="ask-answer">`;
   html += `<div class="ask-answer-head"><span class="ask-verdict go">${winner.name}.</span> ${reason}.</div>`;
   html += `<div class="ask-compare-winner">Smarter move: <strong>${winner.name}</strong></div>`;
-  html += `<button class="ask-jump-btn" data-resort-id="${winner.id}" aria-label="Jump to ${winner.name}">Jump to resort ↓</button>`;
+  html += `<button class="ask-jump-btn" data-resort-id="${winner.id}" aria-label="Jump to ${winner.name}">Jump to ${winner.name} ↓</button>`;
   html += `<div class="ask-compare-grid">`;
-  html += `<div class="ask-cmp-col${winner === a ? ' winner' : ''}"><div class="ask-cmp-name">${a.name}</div>`;
+  html += `<div class="ask-cmp-col${winner === a ? ' winner selected' : ''}" data-resort-id="${a.id}" data-resort-name="${a.name}" role="button" tabindex="0" aria-label="Select ${a.name}"><div class="ask-cmp-name">${a.name}</div>`;
   html += `<div class="ask-cmp-row">${aT.snow24}" fresh · ${a.conditions} · ${a.temp}°F</div>`;
   html += `<div class="ask-cmp-row">${aW.detail}</div>`;
   html += `${aH ? `<div class="ask-cmp-row">~${Math.round(aH * 60)} min drive</div>` : ''}</div>`;
-  html += `<div class="ask-cmp-col${winner === b ? ' winner' : ''}"><div class="ask-cmp-name">${b.name}</div>`;
+  html += `<div class="ask-cmp-col${winner === b ? ' winner selected' : ''}" data-resort-id="${b.id}" data-resort-name="${b.name}" role="button" tabindex="0" aria-label="Select ${b.name}"><div class="ask-cmp-name">${b.name}</div>`;
   html += `<div class="ask-cmp-row">${bT.snow24}" fresh · ${b.conditions} · ${b.temp}°F</div>`;
   html += `<div class="ask-cmp-row">${bW.detail}</div>`;
   html += `${bH ? `<div class="ask-cmp-row">~${Math.round(bH * 60)} min drive</div>` : ''}</div>`;

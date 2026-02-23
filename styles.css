@@ -2659,12 +2659,19 @@ body.storm-mode .share-card {
   padding: 0.5rem;
   border: 1px solid var(--rule);
   background: var(--paper);
+  cursor: pointer;
+  transition: border-color 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
 }
 .ask-cmp-col.winner {
   border-color: var(--pow);
   background: rgba(26,94,245,0.04);
   box-shadow: 0 0 0 1px rgba(26,94,245,0.18);
   position: relative;
+}
+.ask-cmp-col.selected {
+  border-color: var(--pow);
+  background: rgba(26,94,245,0.06);
+  box-shadow: 0 0 0 2px rgba(26,94,245,0.2);
 }
 .ask-cmp-col.winner::before {
   content: "✓ Move";
