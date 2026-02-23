@@ -16,6 +16,10 @@ html { font-size: 17px; }
   --pow:        #1a5ef5;
   --pow-pale:   #e8efff;
   --building:   #7c3aed;
+  --graph-accent: #7c3aed;
+  --graph-fill: linear-gradient(180deg, #8f7dff 0%, #1a5ef5 72%);
+  --graph-fill-soft: linear-gradient(180deg, rgba(143,125,255,0.72) 0%, rgba(26,94,245,0.74) 72%);
+  --graph-glow: rgba(124,58,237,0.2);
   --quiet:      #64748b;
   --send:       #15803d;
   --avoid:      #dc2626;
@@ -952,14 +956,22 @@ body.building-mode .brief {
 
 .forecast-bar {
   width: 100%;
-  background: var(--pow);
-  border-radius: 2px 2px 0 0;
+  background: var(--graph-fill);
+  border: 1px solid rgba(255,255,255,0.35);
+  border-bottom: 0;
+  border-radius: 3px 3px 0 0;
   min-height: 2px;
-  opacity: 0.7;
-  transition: height 0.4s var(--smooth);
+  opacity: 0.85;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.45), 0 4px 12px var(--graph-glow);
+  transition: height 0.35s var(--smooth), filter 0.2s ease, box-shadow 0.2s ease;
   cursor: pointer;
 }
-.forecast-bar.trace { background: var(--rule-heavy); opacity: 0.4; }
+.forecast-bar.trace {
+  background: linear-gradient(180deg, rgba(74,79,92,0.55) 0%, rgba(74,79,92,0.33) 100%);
+  border-color: rgba(15,17,23,0.16);
+  opacity: 0.5;
+  box-shadow: none;
+}
 
 .forecast-day-lbl {
   font-family: var(--mono);
@@ -1263,7 +1275,10 @@ body.building-mode .brief {
   gap: 2px;
   width: 100%;
   max-width: 220px;
-  height: 28px;
+  height: 30px;
+  padding: 2px 2px 0;
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(26,94,245,0.07), rgba(124,58,237,0.03));
 }
 
 .rr72-bar {
@@ -1271,13 +1286,19 @@ body.building-mode .brief {
   width: 100%;
   min-height: 3px;
   border-radius: 2px 2px 0 0;
-  background: rgba(26, 94, 245, 0.65);
+  background: var(--graph-fill-soft);
+  border: 1px solid rgba(255,255,255,0.26);
+  border-bottom: 0;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.35);
   cursor: pointer;
+  transition: filter 0.15s ease, opacity 0.15s ease;
 }
 
 .rr72-bar.trace {
-  background: var(--rule-heavy);
-  opacity: 0.45;
+  background: linear-gradient(180deg, rgba(74,79,92,0.5) 0%, rgba(74,79,92,0.28) 100%);
+  border-color: rgba(15,17,23,0.14);
+  opacity: 0.5;
+  box-shadow: none;
 }
 
 .rr72-total {
@@ -1850,19 +1871,31 @@ body.building-mode .brief {
   gap: 3px;
   height: 40px;
   margin-bottom: 0.3rem;
+  padding: 2px 2px 0;
+  border-radius: 6px;
+  background: linear-gradient(180deg, rgba(26,94,245,0.08), rgba(124,58,237,0.03));
 }
 .sp-bar {
   flex: 1;
-  background: var(--pow);
-  opacity: 0.75;
+  background: var(--graph-fill-soft);
+  opacity: 0.86;
+  border: 1px solid rgba(255,255,255,0.28);
+  border-bottom: 0;
   border-radius: 1px 1px 0 0;
   min-height: 2px;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, filter 0.15s ease;
   cursor: pointer;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.33);
 }
-.sp-bar.sp-trace { background: var(--rule-heavy); opacity: 0.4; min-height: 1px; }
+.sp-bar.sp-trace {
+  background: linear-gradient(180deg, rgba(74,79,92,0.5) 0%, rgba(74,79,92,0.28) 100%);
+  border-color: rgba(15,17,23,0.14);
+  opacity: 0.45;
+  min-height: 1px;
+  box-shadow: none;
+}
 .sp-bar.sp-past  { opacity: 0.3; }
-.sp-bar.sp-now   { opacity: 1; box-shadow: 0 0 0 1px var(--pow); }
+.sp-bar.sp-now   { opacity: 1; box-shadow: 0 0 0 1px var(--pow), 0 0 0 4px rgba(124,58,237,0.12); }
 .det-spark-range {
   font-family: var(--mono);
   font-size: 0.5rem;
@@ -1893,7 +1926,8 @@ body.building-mode .brief {
 }
 
 .is-active-bar {
-  box-shadow: 0 0 0 1px var(--pow);
+  box-shadow: 0 0 0 1px var(--pow), 0 0 0 4px rgba(124,58,237,0.16);
+  filter: saturate(1.08) brightness(1.03);
   opacity: 1 !important;
 }
 
@@ -1907,8 +1941,8 @@ body.building-mode .brief {
   font-weight: 700;
   letter-spacing: 0.04em;
   color: var(--paper);
-  background: var(--ink);
-  border: 1px solid var(--rule-heavy);
+  background: linear-gradient(180deg, #21243a 0%, #151726 100%);
+  border: 1px solid rgba(124,58,237,0.4);
   border-radius: 999px;
   padding: 4px 9px;
   white-space: nowrap;
@@ -1916,7 +1950,7 @@ body.building-mode .brief {
   pointer-events: none;
   opacity: 0;
   transition: opacity 0.12s ease;
-  box-shadow: 0 3px 10px rgba(0,0,0,0.14);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.18);
 }
 .snow-bar-pill.on {
   opacity: 1;
