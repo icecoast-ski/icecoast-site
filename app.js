@@ -107,41 +107,6 @@ function updateDailyHistorySnapshots() {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(-45)));
 }
 
-function getSnowDeltaSinceYesterday(resort) {
-  let history = [];
-  try { history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch(_) { history = []; }
-  if (!Array.isArray(history) || history.length < 2) return null;
-  const sorted = history
-    .filter(h => h && typeof h.date === 'string' && h.rows && Number.isFinite(Number(h.rows[resort.id])))
-    .sort((a, b) => String(a.date).localeCompare(String(b.date)));
-  if (sorted.length < 2) return null;
-  const latest = sorted[sorted.length - 1];
-  const prev   = sorted[sorted.length - 2];
-  const curr   = Number(latest.rows[resort.id] || 0);
-  const old    = Number(prev.rows[resort.id] || 0);
-  const delta  = parseFloat((curr - old).toFixed(1));
-  if (Math.abs(delta) < 0.5) return null;
-  return { delta, prevDate: prev.date };
-}
-
-function buildDeltaBanner(source) {
-  const changes = [];
-  source.forEach(r => {
-    const d = getSnowDeltaSinceYesterday(r);
-    if (!d) return;
-    changes.push({ name: r.name, delta: d.delta });
-  });
-  if (!changes.length) return '';
-  const gains  = changes.filter(c => c.delta > 0).sort((a,b) => b.delta - a.delta);
-  const losses = changes.filter(c => c.delta < 0);
-  let parts = [];
-  gains.slice(0, 2).forEach(c => parts.push(`<span class="delta-gain">${c.name} +${c.delta}"</span>`));
-  losses.slice(0, 1).forEach(c => parts.push(`<span class="delta-loss">${c.name} ${c.delta}"</span>`));
-  if (!parts.length) return '';
-  return `<div class="saved-delta-banner"><span class="saved-delta-label">Since yesterday</span>${parts.join('')}</div>`;
-}
-
-
 function getBestInDaysLabel(resort) {
   let history = [];
   try {
@@ -893,8 +858,8 @@ function setLocalLocation(lat, lon, label = '') {
   state.userLocation = { lat, lon };
   state.locationLabel = label;
   saveLocalProfile();
-  updateSavedTab();
   renderTicker();
+  updateSavedTab();
 }
 
 function updateLeadStories(list) {
@@ -1056,15 +1021,15 @@ function updateDispatchQuickHints() {
 
   const hintSets = (storm.isStormMode || heavyCount >= 5)
     ? [
-      { q: "where's the pow?", t: "where's the pow" },
-      { q: 'best within 3hr', t: 'best within 3hr' },
+      { q: "where's the pow?", t: "where's the pow", hot: true },
+      { q: 'best within 3hr', t: 'best within 3hr', hot: true },
       { q: 'jay vs killington', t: 'jay vs kill' },
       { q: 'ikon VT low wind', t: 'ikon VT low wind' }
     ]
     : (windyCount >= 6
       ? [
-        { q: 'low wind risk', t: 'low wind risk' },
-        { q: 'which lifts are running', t: 'which lifts are running' },
+        { q: 'low wind risk', t: 'low wind risk', hot: true },
+        { q: 'which lifts are running', t: 'which lifts are running', hot: true },
         { q: 'best within 3hr', t: 'best within 3hr' },
         { q: 'jay vs killington', t: 'jay vs kill' }
       ]
@@ -1072,13 +1037,14 @@ function updateDispatchQuickHints() {
         { q: "when's the next storm", t: "when's next storm" },
         { q: 'best grooming', t: 'best grooming' },
         { q: 'best within 3hr', t: 'best within 3hr' },
-        { q: "where's the snow?", t: "where's the snow" }
+        { q: "where's the snow?", t: "where's the snow", hot: true }
       ]);
 
   quick.forEach((btn, idx) => {
     const h = hintSets[idx] || hintSets[hintSets.length - 1];
     btn.dataset.q = h.q;
     btn.textContent = h.t;
+    btn.classList.toggle('hot', Boolean(h.hot));
   });
 }
 
@@ -1310,6 +1276,7 @@ function getStormModeSnapshot(resorts) {
 
   return {
     isStormMode: trigger,
+    isBuildingMode: !trigger && (snow4.length >= 2 || snow6.length >= 1 || top10Sum >= 18),
     count4: snow4.length,
     count6: snow6.length,
     states4: Array.from(states4),
@@ -1331,9 +1298,7 @@ function applyStormModeUI(storm) {
   if (!body || !hero || !title || !deck || !meta || !leadRule || !tickerRule) return;
 
   body.classList.toggle('storm-mode', storm.isStormMode);
-  // Building-mode: not full storm but conditions loading — subtle blue tint on masthead
-  const buildingCount = (state.resorts || []).filter(r => r.pow === 'building').length;
-  body.classList.toggle('building-mode', !storm.isStormMode && buildingCount >= 4);
+  body.classList.toggle('building-mode', !storm.isStormMode && Boolean(storm.isBuildingMode));
   hero.hidden = !storm.isStormMode;
 
   if (!storm.isStormMode) {
@@ -1374,6 +1339,24 @@ function getPatrolTimestamp(resort) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + timeStr;
 }
 
+function getYesterdayDelta(resort) {
+  let history = [];
+  try {
+    history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  } catch (_err) {
+    history = [];
+  }
+  if (!Array.isArray(history) || history.length < 2) return null;
+  const sorted = history
+    .filter((h) => h && typeof h.date === 'string' && h.rows && Number.isFinite(Number(h.rows[resort.id])))
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  if (sorted.length < 2) return null;
+  const today = Number(sorted[sorted.length - 1].rows[resort.id] || 0);
+  const prev = Number(sorted[sorted.length - 2].rows[resort.id] || 0);
+  if (!Number.isFinite(today) || !Number.isFinite(prev)) return null;
+  return Number((today - prev).toFixed(1));
+}
+
 function getRainAtBaseWarning(resort) {
   if (resort?.powWatch?.snowLevel?.rainPossibleAtBase) {
     const level = resort.powWatch.snowLevel.current;
@@ -1394,6 +1377,10 @@ function buildResortMarkup(r, rank, options = {}) {
   const rainWarn = getRainAtBaseWarning(r);
   const snowCls = displayTotals.snow24 >= 4 ? ' snow' : displayTotals.snow24 === 0 ? ' ice' : '';
   const passStr = (r.passes || []).map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(' · ') || '—';
+  const dailyDelta = options.showDelta ? getYesterdayDelta(r) : null;
+  const deltaLabel = dailyDelta === null
+    ? ''
+    : (dailyDelta === 0 ? ' · no change' : ` · ${dailyDelta > 0 ? '+' : ''}${dailyDelta}" vs yesterday`);
   const inline72h = buildInline72hChart(r, displayTotals);
   const inline72hHtml = rank <= 10 ? inline72h : '';
   const detailId = `${options.detailPrefix || 'detail'}-${r.id}`;
@@ -1418,20 +1405,16 @@ function buildResortMarkup(r, rank, options = {}) {
   const ratingTitle = 'Based on 24h snow, wind, temp, conditions, and trail count';
 
   // DETAIL PANEL — restructured: critical info first, secondary below
-  const bigSnowHtml = displayTotals.snow24 > 0
-    ? `<span class="det-snow-big">${displayTotals.snow24}"</span> <span class="det-snow-period">/ 24h</span>`
-    : '';
-
   const criticalHtml = `
     <div class="det-critical">
       <div class="det-critical-col">
-        <div class="det-conditions-main">${r.conditions}${bigSnowHtml ? `<span class="det-conditions-snow">${bigSnowHtml}</span>` : ''}</div>
+        <div class="det-conditions-main">${r.conditions}</div>
         <div class="det-quick-stats">
           <div class="det-stat-group">
             <span class="det-stat-group-label">Snow</span>
-            <span>24h <strong>${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '0"'}</strong></span>
-            <span>48h <strong>${displayTotals.snow48 > 0 ? `${displayTotals.snow48}"` : '0"'}</strong></span>
-            <span>72h <strong>${displayTotals.snow72 > 0 ? `${displayTotals.snow72.toFixed(1)}"` : '0"'}</strong></span>
+            <span>24h <strong class="det-num-snow">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '0"'}</strong></span>
+            <span>48h <strong class="det-num-snow">${displayTotals.snow48 > 0 ? `${displayTotals.snow48}"` : '0"'}</strong></span>
+            <span>72h <strong class="det-num-snow">${displayTotals.snow72 > 0 ? `${displayTotals.snow72.toFixed(1)}"` : '0"'}</strong></span>
           </div>
           <div class="det-stat-group">
             <span class="det-stat-group-label">Weather</span>
@@ -1491,7 +1474,7 @@ function buildResortMarkup(r, rank, options = {}) {
       <div class="rr-rank">${rank}</div>
       <div class="rr-name-col">
         <div class="rr-name">${r.name}</div>
-        <div class="rr-meta">${r.loc} · ${passStr}${bestBadge ? ` · ${bestBadge}` : ''}</div>
+        <div class="rr-meta">${r.loc} · ${passStr}${bestBadge ? ` · ${bestBadge}` : ''}${deltaLabel}</div>
         <div class="rr-mobile-scan">
           <span class="rrm-snow">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '—'}</span>
           <span class="rrm-sep">·</span>
@@ -1503,7 +1486,7 @@ function buildResortMarkup(r, rank, options = {}) {
       </div>
       <div class="rr-cond">
         <span class="rr-cond-main">${r.conditions}</span>
-        <span class="rr-cond-sub ${windClass}">Wind: ${windLabel}</span>
+        <span class="rr-cond-sub ${windClass}">Wind hold risk: ${windLabel}</span>
       </div>
       <div class="rr-stat${snowCls}">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '—'}</div>
       <div class="rr-stat">${r.temp}°</div>
@@ -1585,26 +1568,18 @@ function bindResortInteractions(root, defaultExpandCount = 0) {
       const id = btn.getAttribute('data-drive');
       const resort = state.resorts.find((r) => r.id === id);
       if (!resort) return;
-      // Enhanced launch sequence
-      btn.classList.add('launching');
-      const originalText = btn.querySelector('.d-btn-text') || btn;
       const textEl = btn.querySelector('.d-btn-text');
-      if (textEl) {
-        textEl.textContent = 'Loading maps…';
-      } else {
-        btn.textContent = 'Loading maps…';
-      }
+      const priorText = textEl ? textEl.textContent : btn.textContent;
+      if (textEl) textEl.textContent = 'Loading maps...';
+      else btn.textContent = 'Loading maps...';
+      btn.classList.add('launching');
       setTimeout(() => {
         btn.classList.remove('launching');
-        if (textEl) textEl.textContent = originalText._originalContent || 'Go →';
-      }, 700);
-      // Store original for restore
-      if (textEl && !textEl._originalContent) textEl._originalContent = textEl.textContent;
-      // Open maps after the beat
-      setTimeout(() => {
+        if (textEl) textEl.textContent = priorText;
+        else btn.textContent = priorText;
         const q = encodeURIComponent(`${resort.name} ski resort`);
         window.open(`https://www.google.com/maps/search/?api=1&query=${q}`, '_blank', 'noopener,noreferrer');
-      }, 200);
+      }, 220);
     });
   });
 
@@ -1889,8 +1864,7 @@ function renderSavedMorningBrief() {
     </div>`;
 
   const top = source.slice(0, 6);
-  const deltaBannerHtml = buildDeltaBanner(top);
-  listEl.innerHTML = savedHeaderHtml + deltaBannerHtml + top.map((r, i) => buildResortMarkup(r, i + 1, { detailPrefix: 'saved' })).join('');
+  listEl.innerHTML = savedHeaderHtml + top.map((r, i) => buildResortMarkup(r, i + 1, { detailPrefix: 'saved', showDelta: true })).join('');
   bindResortInteractions(listEl, 0);
   bindSnowBarInteractions(listEl);
 
@@ -1919,7 +1893,14 @@ function renderSavedMorningBrief() {
 
   const pair = getComparablePair(top);
   const compare = pair ? getWorthExtraHourLine(pair[0], pair[1]) : '';
-  compareEl.textContent = compare;
+  const deltas = top.map((r) => getYesterdayDelta(r)).filter((v) => Number.isFinite(v));
+  let deltaSummary = '';
+  if (deltas.length) {
+    const moved = deltas.filter((d) => Math.abs(d) >= 0.5).length;
+    const avg = deltas.reduce((sum, d) => sum + d, 0) / deltas.length;
+    deltaSummary = `Since yesterday: ${moved}/${deltas.length} changed · avg ${avg >= 0 ? '+' : ''}${avg.toFixed(1)}"`;
+  }
+  compareEl.innerHTML = [deltaSummary, compare].filter(Boolean).map((x) => `<span>${x}</span>`).join(' · ');
 }
 
 function attachUi() {
@@ -1934,6 +1915,20 @@ function attachUi() {
   const useLocationBtn = document.getElementById('useLocationBtn');
   const localStatus = document.getElementById('localStatus');
   const mobileMq = window.matchMedia('(max-width: 640px)');
+  const placeholderSets = {
+    desktop: [
+      'Try: best ikon within 2hr',
+      'Try: Jay vs Killington today',
+      "Try: where's the pow?"
+    ],
+    mobile: [
+      'Try: best ikon within 2hr',
+      'Try: jay vs killington',
+      "Try: where's the pow?"
+    ]
+  };
+  let placeholderIndex = 0;
+  let placeholderTimer = null;
 
   const NL_COMMANDS = [
     { match: /\b(pow|powder|fresh|nuking)\b/i, cmd: 'pow' },
@@ -1979,50 +1974,28 @@ function attachUi() {
     window.requestAnimationFrame(syncDispatchCaret);
   }
 
-  const DISPATCH_PLACEHOLDER_EXAMPLES = [
-    'Try: best ikon within 2hr',
-    'Try: Jay vs Killington today',
-    'Try: where\'s the pow?',
-    'Try: low wind risk VT',
-    'Try: best grooming NH',
-    'Try: storm coming this week?',
-  ];
-  let _placeholderIdx = 0;
-  let _placeholderInterval = null;
-
-  function cyclePlaceholder() {
-    if (!input || document.activeElement === input || input.value.trim()) return;
-    _placeholderIdx = (_placeholderIdx + 1) % DISPATCH_PLACEHOLDER_EXAMPLES.length;
-    // Fade animation
-    input.classList.remove('placeholder-cycling');
-    void input.offsetWidth; // reflow
-    input.classList.add('placeholder-cycling');
-    input.placeholder = DISPATCH_PLACEHOLDER_EXAMPLES[_placeholderIdx];
-    setTimeout(() => input.classList.remove('placeholder-cycling'), 500);
-  }
-
-  function startPlaceholderCycle() {
-    if (_placeholderInterval) return;
-    _placeholderInterval = setInterval(cyclePlaceholder, 3200);
+  function updateDispatchPlaceholder() {
+    if (!input) return;
+    const set = mobileMq.matches ? placeholderSets.mobile : placeholderSets.desktop;
+    const text = set[placeholderIndex % set.length];
+    input.placeholder = text;
   }
 
   function stopPlaceholderCycle() {
-    if (_placeholderInterval) { clearInterval(_placeholderInterval); _placeholderInterval = null; }
+    if (placeholderTimer) {
+      clearInterval(placeholderTimer);
+      placeholderTimer = null;
+    }
   }
 
-  function updateDispatchPlaceholder() {
-    if (!input) return;
-    if (document.activeElement === input || input.value.trim()) {
-      stopPlaceholderCycle();
-      input.placeholder = mobileMq.matches
-        ? 'Search resorts. Enter to ask.'
-        : 'Search resorts and filters. Press Enter to ask.';
-      return;
-    }
-    if (!_placeholderInterval) {
-      input.placeholder = DISPATCH_PLACEHOLDER_EXAMPLES[0];
-      startPlaceholderCycle();
-    }
+  function startPlaceholderCycle() {
+    stopPlaceholderCycle();
+    updateDispatchPlaceholder();
+    placeholderTimer = setInterval(() => {
+      if (!input || document.activeElement === input || input.value.trim().length > 0) return;
+      placeholderIndex += 1;
+      updateDispatchPlaceholder();
+    }, 3600);
   }
 
   function preventMobileFocusJump() {
@@ -2035,15 +2008,12 @@ function attachUi() {
 
   input.addEventListener('focus', () => {
     stopPlaceholderCycle();
-    input.placeholder = mobileMq.matches
-      ? 'Search resorts. Enter to ask.'
-      : 'Search resorts and filters. Press Enter to ask.';
     preventMobileFocusJump();
     syncDispatchCaretRaf();
   });
   input.addEventListener('blur', () => {
     syncDispatchCaret();
-    if (!input.value.trim()) setTimeout(updateDispatchPlaceholder, 400);
+    if (!input.value.trim().length) startPlaceholderCycle();
   });
   input.addEventListener('click', syncDispatchCaretRaf);
   input.addEventListener('keyup', syncDispatchCaretRaf);
@@ -2051,8 +2021,11 @@ function attachUi() {
   document.addEventListener('selectionchange', () => {
     if (document.activeElement === input) syncDispatchCaretRaf();
   });
-  mobileMq.addEventListener('change', updateDispatchPlaceholder);
-  updateDispatchPlaceholder();
+  mobileMq.addEventListener('change', () => {
+    placeholderIndex += 1;
+    updateDispatchPlaceholder();
+  });
+  startPlaceholderCycle();
   setAskModeUI(false);
 
   if (askBtn) {
@@ -2065,13 +2038,14 @@ function attachUi() {
 
   input.addEventListener('input', (e) => {
     const val = e.target.value || '';
-    if (val.trim()) stopPlaceholderCycle();
     state.search = val;
     state.nlHints = new Set();
     NL_COMMANDS.forEach((cmd) => { if (cmd.match.test(val)) state.nlHints.add(cmd.cmd); });
     clearBtn.classList.toggle('on', val.trim().length > 0 || state.activeHints.size > 0);
     const hasText = val.trim().length > 0;
     setAskModeUI(hasText);
+    if (hasText) stopPlaceholderCycle();
+    else if (document.activeElement !== input) startPlaceholderCycle();
     const changedFromAnswer = state.answerQueryText
       && val.trim().toLowerCase() !== state.answerQueryText.trim().toLowerCase();
     if (changedFromAnswer || (!hasText && state.answerQueryText)) {
@@ -2109,7 +2083,7 @@ function attachUi() {
     dismissDispatchAnswer();
     syncDispatchTags();
     syncDispatchCaretRaf();
-    setTimeout(updateDispatchPlaceholder, 200);
+    if (!input.value.trim().length && document.activeElement !== input) startPlaceholderCycle();
   });
 
   if (expandBtn && drawer) {
@@ -2379,12 +2353,19 @@ function triggerSave(btn) {
 function updateSavedTab() {
   const tab = document.querySelector('.m-tab[data-tab="favorites"]');
   if (!tab) return;
+  const isLocalModeLabel = state.localMode && (getLocalLeadList() || []).length;
+  const localLabel = isLocalModeLabel ? 'Local' : 'Saved';
+  const showSavedCount = !isLocalModeLabel && savedResorts.size > 0;
   const existing = tab.querySelector('.saved-badge');
   if (existing) existing.remove();
-  // Label switches to "Local" when location mode is active
-  const label = (state.localMode && state.userLocation) ? 'Local' : 'Saved';
-  tab.textContent = savedResorts.size > 0 && !state.localMode ? label + ' ' : label;
-  if (savedResorts.size > 0 && !state.localMode) {
+  if (showSavedCount) {
+    const badge = document.createElement('span');
+    badge.className = 'saved-badge';
+    badge.textContent = savedResorts.size;
+    tab.appendChild(badge);
+  }
+  tab.textContent = showSavedCount ? `${localLabel} ` : localLabel;
+  if (showSavedCount) {
     const badge = document.createElement('span');
     badge.className = 'saved-badge';
     badge.textContent = savedResorts.size;
@@ -2670,6 +2651,20 @@ function isAskQuery(text) {
   return score >= 2;
 }
 
+function getNextUpdateHint() {
+  const now = Date.now();
+  const loadedTs = Date.parse(String(state.loadedAt || ''));
+  let nextTs = Number.isFinite(loadedTs) ? loadedTs + (15 * 60 * 1000) : now;
+  if (nextTs <= now) {
+    const d = new Date(now);
+    const minutes = d.getMinutes();
+    const add = 15 - (minutes % 15 || 15);
+    d.setMinutes(minutes + add, 0, 0);
+    nextTs = d.getTime();
+  }
+  return `Next update ~${fmtClock(new Date(nextTs))}`;
+}
+
 function runDispatchAnswer(query) {
   const answerBox = document.getElementById('dispatchAnswer');
   const inner     = document.getElementById('dispatchAnswerInner');
@@ -2837,6 +2832,7 @@ function answerQuery(query, resorts) {
   if (bestBadge) html += `<div class="ask-badge">${bestBadge}</div>`;
   if (top.terrainNote) html += `<div class="ask-terrain">${top.terrainNote}</div>`;
   if (drive) html += `<div class="ask-drive">${drive}</div>`;
+  html += `<div class="ask-next-update">${getNextUpdateHint()}</div>`;
 
   // Runner up
   if (pool.length >= 2) {
@@ -2880,18 +2876,20 @@ function buildCompareAnswer(a, b) {
 
   let html = `<div class="ask-answer">`;
   html += `<div class="ask-answer-head"><span class="ask-verdict go">${winner.name}.</span> ${reason}.</div>`;
+  html += `<div class="ask-compare-winner">Smarter move: <strong>${winner.name}</strong></div>`;
   html += `<button class="ask-jump-btn" data-resort-id="${winner.id}" aria-label="Jump to ${winner.name}">Jump to resort ↓</button>`;
   html += `<div class="ask-compare-grid">`;
-  html += `<div class="ask-cmp-col${winner === a ? ' winner' : ''}"><div class="ask-cmp-name">${a.name}${winner === a ? ' <span class="ask-cmp-winner-badge">✓ Pick</span>' : ''}</div>`;
+  html += `<div class="ask-cmp-col${winner === a ? ' winner' : ''}"><div class="ask-cmp-name">${a.name}</div>`;
   html += `<div class="ask-cmp-row">${aT.snow24}" fresh · ${a.conditions} · ${a.temp}°F</div>`;
   html += `<div class="ask-cmp-row">${aW.detail}</div>`;
   html += `${aH ? `<div class="ask-cmp-row">~${Math.round(aH * 60)} min drive</div>` : ''}</div>`;
-  html += `<div class="ask-cmp-col${winner === b ? ' winner' : ''}"><div class="ask-cmp-name">${b.name}${winner === b ? ' <span class="ask-cmp-winner-badge">✓ Pick</span>' : ''}</div>`;
+  html += `<div class="ask-cmp-col${winner === b ? ' winner' : ''}"><div class="ask-cmp-name">${b.name}</div>`;
   html += `<div class="ask-cmp-row">${bT.snow24}" fresh · ${b.conditions} · ${b.temp}°F</div>`;
   html += `<div class="ask-cmp-row">${bW.detail}</div>`;
   html += `${bH ? `<div class="ask-cmp-row">~${Math.round(bH * 60)} min drive</div>` : ''}</div>`;
   html += `</div>`;
   if (compare) html += `<div class="ask-drive">${compare}</div>`;
+  html += `<div class="ask-next-update">${getNextUpdateHint()}</div>`;
   html += `</div>`;
   return { html, focusIds: [a.id, b.id] };
 }
