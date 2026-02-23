@@ -107,41 +107,6 @@ function updateDailyHistorySnapshots() {
   localStorage.setItem(HISTORY_KEY, JSON.stringify(history.slice(-45)));
 }
 
-function getSnowDeltaSinceYesterday(resort) {
-  let history = [];
-  try { history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]'); } catch(_) { history = []; }
-  if (!Array.isArray(history) || history.length < 2) return null;
-  const sorted = history
-    .filter(h => h && typeof h.date === 'string' && h.rows && Number.isFinite(Number(h.rows[resort.id])))
-    .sort((a, b) => String(a.date).localeCompare(String(b.date)));
-  if (sorted.length < 2) return null;
-  const latest = sorted[sorted.length - 1];
-  const prev   = sorted[sorted.length - 2];
-  const curr   = Number(latest.rows[resort.id] || 0);
-  const old    = Number(prev.rows[resort.id] || 0);
-  const delta  = parseFloat((curr - old).toFixed(1));
-  if (Math.abs(delta) < 0.5) return null;
-  return { delta, prevDate: prev.date };
-}
-
-function buildDeltaBanner(source) {
-  const changes = [];
-  source.forEach(r => {
-    const d = getSnowDeltaSinceYesterday(r);
-    if (!d) return;
-    changes.push({ name: r.name, delta: d.delta });
-  });
-  if (!changes.length) return '';
-  const gains  = changes.filter(c => c.delta > 0).sort((a,b) => b.delta - a.delta);
-  const losses = changes.filter(c => c.delta < 0);
-  let parts = [];
-  gains.slice(0, 2).forEach(c => parts.push(`<span class="delta-gain">${c.name} +${c.delta}"</span>`));
-  losses.slice(0, 1).forEach(c => parts.push(`<span class="delta-loss">${c.name} ${c.delta}"</span>`));
-  if (!parts.length) return '';
-  return `<div class="saved-delta-banner"><span class="saved-delta-label">Since yesterday</span>${parts.join('')}</div>`;
-}
-
-
 function getBestInDaysLabel(resort) {
   let history = [];
   try {
@@ -893,8 +858,8 @@ function setLocalLocation(lat, lon, label = '') {
   state.userLocation = { lat, lon };
   state.locationLabel = label;
   saveLocalProfile();
-  updateSavedTab();
   renderTicker();
+  updateSavedTab();
 }
 
 function updateLeadStories(list) {
@@ -966,7 +931,7 @@ function updateLeadStories(list) {
 }
 
 function getSnowSignalPill(pow) {
-  if (pow === 'on') return '<span class="rr-signal rr-signal-on" title="Active: fresh snow is currently in play">Active</span>';
+  if (pow === 'on') return '<span class="rr-signal rr-signal-on" title="On now: fresh snow is currently in play">On Now</span>';
   if (pow === 'building') return '<span class="rr-signal rr-signal-building" title="Building: storm is trending in, better later window">Building</span>';
   return '<span class="rr-signal rr-signal-quiet" title="Quiet: lower snowfall signal right now">Quiet</span>';
 }
@@ -978,6 +943,15 @@ function getRatingBlocks(rating, pow) {
     blocks += `<div class="rat-sq${cls ? ` ${cls}` : ''}"></div>`;
   }
   return `<div class="rr-rating">${blocks}</div>`;
+}
+
+function getV1RatingTerm(rating) {
+  const r = Number(rating) || 0;
+  if (r >= 5) return 'Nuking!';
+  if (r >= 4) return 'Shredable!';
+  if (r >= 3) return 'Rippable!';
+  if (r >= 2) return 'Spicy Snow!';
+  return 'Ice Coast AF!';
 }
 
 function getForecastIconSrc(icon) {
@@ -1310,6 +1284,7 @@ function getStormModeSnapshot(resorts) {
 
   return {
     isStormMode: trigger,
+    isBuildingMode: !trigger && (snow4.length >= 2 || snow6.length >= 1 || top10Sum >= 18),
     count4: snow4.length,
     count6: snow6.length,
     states4: Array.from(states4),
@@ -1331,9 +1306,7 @@ function applyStormModeUI(storm) {
   if (!body || !hero || !title || !deck || !meta || !leadRule || !tickerRule) return;
 
   body.classList.toggle('storm-mode', storm.isStormMode);
-  // Building-mode: not full storm but conditions loading — subtle blue tint on masthead
-  const buildingCount = (state.resorts || []).filter(r => r.pow === 'building').length;
-  body.classList.toggle('building-mode', !storm.isStormMode && buildingCount >= 4);
+  body.classList.toggle('building-mode', !storm.isStormMode && Boolean(storm.isBuildingMode));
   hero.hidden = !storm.isStormMode;
 
   if (!storm.isStormMode) {
@@ -1374,6 +1347,24 @@ function getPatrolTimestamp(resort) {
   return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) + ' ' + timeStr;
 }
 
+function getYesterdayDelta(resort) {
+  let history = [];
+  try {
+    history = JSON.parse(localStorage.getItem(HISTORY_KEY) || '[]');
+  } catch (_err) {
+    history = [];
+  }
+  if (!Array.isArray(history) || history.length < 2) return null;
+  const sorted = history
+    .filter((h) => h && typeof h.date === 'string' && h.rows && Number.isFinite(Number(h.rows[resort.id])))
+    .sort((a, b) => String(a.date).localeCompare(String(b.date)));
+  if (sorted.length < 2) return null;
+  const today = Number(sorted[sorted.length - 1].rows[resort.id] || 0);
+  const prev = Number(sorted[sorted.length - 2].rows[resort.id] || 0);
+  if (!Number.isFinite(today) || !Number.isFinite(prev)) return null;
+  return Number((today - prev).toFixed(1));
+}
+
 function getRainAtBaseWarning(resort) {
   if (resort?.powWatch?.snowLevel?.rainPossibleAtBase) {
     const level = resort.powWatch.snowLevel.current;
@@ -1394,6 +1385,10 @@ function buildResortMarkup(r, rank, options = {}) {
   const rainWarn = getRainAtBaseWarning(r);
   const snowCls = displayTotals.snow24 >= 4 ? ' snow' : displayTotals.snow24 === 0 ? ' ice' : '';
   const passStr = (r.passes || []).map((p) => p.charAt(0).toUpperCase() + p.slice(1)).join(' · ') || '—';
+  const dailyDelta = options.showDelta ? getYesterdayDelta(r) : null;
+  const deltaLabel = dailyDelta === null
+    ? ''
+    : (dailyDelta === 0 ? ' · no change' : ` · ${dailyDelta > 0 ? '+' : ''}${dailyDelta}" vs yesterday`);
   const inline72h = buildInline72hChart(r, displayTotals);
   const inline72hHtml = rank <= 10 ? inline72h : '';
   const detailId = `${options.detailPrefix || 'detail'}-${r.id}`;
@@ -1406,10 +1401,8 @@ function buildResortMarkup(r, rank, options = {}) {
       ${powCtx.powAlert.event} in effect through ${powCtx.alertExpiryLabel}
     </div>` : '';
   const windLabel = wind.level === 'high' ? 'High' : wind.level === 'med' ? 'Moderate' : 'Low';
-  const verdict = r.verdict || (r.rating >= 4 ? 'Shredable!' : r.rating <= 2 ? 'Manage Expectations' : 'Solid Day');
-  const verdictCls = ['Shredable!', 'Worth It'].includes(verdict)
-    ? 'verdict-go'
-    : (verdict === 'Go Tomorrow' ? 'verdict-wait' : 'verdict-meh');
+  const verdict = getV1RatingTerm(r.rating);
+  const verdictCls = r.rating >= 4 ? 'verdict-go' : (r.rating >= 3 ? 'verdict-wait' : 'verdict-meh');
   const trailPctStr = trailInfo ? `${trailInfo.pct}% open (${trailInfo.open}/${trailInfo.total})` : '';
   const windClass = wind.level === 'high' ? 'wind-high' : wind.level === 'med' ? 'wind-med' : 'wind-low';
   const isSaved = savedResorts.has(r.id);
@@ -1418,20 +1411,16 @@ function buildResortMarkup(r, rank, options = {}) {
   const ratingTitle = 'Based on 24h snow, wind, temp, conditions, and trail count';
 
   // DETAIL PANEL — restructured: critical info first, secondary below
-  const bigSnowHtml = displayTotals.snow24 > 0
-    ? `<span class="det-snow-big">${displayTotals.snow24}"</span> <span class="det-snow-period">/ 24h</span>`
-    : '';
-
   const criticalHtml = `
     <div class="det-critical">
       <div class="det-critical-col">
-        <div class="det-conditions-main">${r.conditions}${bigSnowHtml ? `<span class="det-conditions-snow">${bigSnowHtml}</span>` : ''}</div>
+        <div class="det-conditions-main">${r.conditions}</div>
         <div class="det-quick-stats">
           <div class="det-stat-group">
             <span class="det-stat-group-label">Snow</span>
-            <span>24h <strong>${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '0"'}</strong></span>
-            <span>48h <strong>${displayTotals.snow48 > 0 ? `${displayTotals.snow48}"` : '0"'}</strong></span>
-            <span>72h <strong>${displayTotals.snow72 > 0 ? `${displayTotals.snow72.toFixed(1)}"` : '0"'}</strong></span>
+            <span>24h <strong class="det-num-snow">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '0"'}</strong></span>
+            <span>48h <strong class="det-num-snow">${displayTotals.snow48 > 0 ? `${displayTotals.snow48}"` : '0"'}</strong></span>
+            <span>72h <strong class="det-num-snow">${displayTotals.snow72 > 0 ? `${displayTotals.snow72.toFixed(1)}"` : '0"'}</strong></span>
           </div>
           <div class="det-stat-group">
             <span class="det-stat-group-label">Weather</span>
@@ -1491,7 +1480,7 @@ function buildResortMarkup(r, rank, options = {}) {
       <div class="rr-rank">${rank}</div>
       <div class="rr-name-col">
         <div class="rr-name">${r.name}</div>
-        <div class="rr-meta">${r.loc} · ${passStr}${bestBadge ? ` · ${bestBadge}` : ''}</div>
+        <div class="rr-meta">${r.loc} · ${passStr}${bestBadge ? ` · ${bestBadge}` : ''}${deltaLabel}</div>
         <div class="rr-mobile-scan">
           <span class="rrm-snow">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '—'}</span>
           <span class="rrm-sep">·</span>
@@ -1503,7 +1492,7 @@ function buildResortMarkup(r, rank, options = {}) {
       </div>
       <div class="rr-cond">
         <span class="rr-cond-main">${r.conditions}</span>
-        <span class="rr-cond-sub ${windClass}">Wind: ${windLabel}</span>
+        <span class="rr-cond-sub ${windClass}">Wind hold risk: ${windLabel}</span>
       </div>
       <div class="rr-stat${snowCls}">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '—'}</div>
       <div class="rr-stat">${r.temp}°</div>
@@ -1523,13 +1512,15 @@ function buildResortMarkup(r, rank, options = {}) {
         <div class="det-col">${sparkHtml}</div>
       </div>
       <div class="det-footer">
-        <div class="det-rating-zone" title="${ratingTitle}">
-          <div class="det-rating-label">ICECOAST RATING <span class="det-rating-hint">(?)</span></div>
-          <div class="det-stars">${[1, 2, 3, 4, 5].map((n) => `<div class="det-star${n <= r.rating ? (r.pow === 'on' ? ' on pow-on' : ' on') : ''}"></div>`).join('')}</div>
-          <div class="det-rating-basis">Based on snow, wind, temp, conditions</div>
+        <div class="det-footer-left">
+          <div class="det-rating-zone" title="${ratingTitle}">
+            <div class="det-rating-label">ICECOAST RATING <span class="det-rating-hint">(?)</span></div>
+            <div class="det-stars">${[1, 2, 3, 4, 5].map((n) => `<div class="det-star${n <= r.rating ? (r.pow === 'on' ? ' on pow-on' : ' on') : ''}"></div>`).join('')}</div>
+            <div class="det-rating-basis">Based on snow, wind, temp, conditions</div>
+          </div>
+          ${patrolTs ? `<div class="det-patrol-ts">Last patrol report: ${patrolTs}</div>` : ''}
         </div>
         <div class="det-verdict ${verdictCls}">${verdict}</div>
-        ${patrolTs ? `<div class="det-patrol-ts">Last patrol report: ${patrolTs}</div>` : ''}
       </div>
       <div class="detail-actions">
         <button class="d-btn d-btn-go primary" data-drive="${r.id}"><span class="d-btn-text">Go →</span></button>
@@ -1587,8 +1578,8 @@ function bindResortInteractions(root, defaultExpandCount = 0) {
       if (!resort) return;
       // Enhanced launch sequence
       btn.classList.add('launching');
-      const originalText = btn.querySelector('.d-btn-text') || btn;
       const textEl = btn.querySelector('.d-btn-text');
+      const originalText = textEl ? textEl.textContent : btn.textContent;
       if (textEl) {
         textEl.textContent = 'Loading maps…';
       } else {
@@ -1596,10 +1587,9 @@ function bindResortInteractions(root, defaultExpandCount = 0) {
       }
       setTimeout(() => {
         btn.classList.remove('launching');
-        if (textEl) textEl.textContent = originalText._originalContent || 'Go →';
+        if (textEl) textEl.textContent = originalText;
+        else btn.textContent = originalText;
       }, 700);
-      // Store original for restore
-      if (textEl && !textEl._originalContent) textEl._originalContent = textEl.textContent;
       // Open maps after the beat
       setTimeout(() => {
         const q = encodeURIComponent(`${resort.name} ski resort`);
@@ -1836,6 +1826,19 @@ function renderSavedMorningBrief() {
     .sort((a, b) => getDisplayPowTotals(b).snow24 - getDisplayPowTotals(a).snow24);
   const useLocal = state.localMode && localRanked.length > 0;
   const source = useLocal ? localRanked : savedRanked;
+  const hasActiveQuery = state.currentTab !== 'favorites'
+    && (
+      state.search.trim().length > 0
+      || getAllActive().size > 0
+      || String(state.answerQueryText || '').trim().length > 0
+    );
+
+  if (hasActiveQuery) {
+    wrap.hidden = true;
+    listEl.innerHTML = '';
+    compareEl.textContent = '';
+    return;
+  }
 
   if (!source.length) {
     wrap.hidden = true;
@@ -1858,7 +1861,7 @@ function renderSavedMorningBrief() {
   });
 
   wrap.hidden = false;
-  if (titleEl) titleEl.textContent = useLocal ? 'Your Mountains Today · Local Top 6' : 'Your Mountains Today';
+  if (titleEl) titleEl.textContent = 'Your Mountains Today';
 
   // Build sorting header for saved brief (mirrors main ticker header)
   const savedHeaderHtml = `
@@ -1889,8 +1892,7 @@ function renderSavedMorningBrief() {
     </div>`;
 
   const top = source.slice(0, 6);
-  const deltaBannerHtml = buildDeltaBanner(top);
-  listEl.innerHTML = savedHeaderHtml + deltaBannerHtml + top.map((r, i) => buildResortMarkup(r, i + 1, { detailPrefix: 'saved' })).join('');
+  listEl.innerHTML = savedHeaderHtml + top.map((r, i) => buildResortMarkup(r, i + 1, { detailPrefix: 'saved', showDelta: true })).join('');
   bindResortInteractions(listEl, 0);
   bindSnowBarInteractions(listEl);
 
@@ -1919,7 +1921,14 @@ function renderSavedMorningBrief() {
 
   const pair = getComparablePair(top);
   const compare = pair ? getWorthExtraHourLine(pair[0], pair[1]) : '';
-  compareEl.textContent = compare;
+  const deltas = top.map((r) => getYesterdayDelta(r)).filter((v) => Number.isFinite(v));
+  let deltaSummary = '';
+  if (deltas.length) {
+    const moved = deltas.filter((d) => Math.abs(d) >= 0.5).length;
+    const avg = deltas.reduce((sum, d) => sum + d, 0) / deltas.length;
+    deltaSummary = `Since yesterday: ${moved}/${deltas.length} changed · avg ${avg >= 0 ? '+' : ''}${avg.toFixed(1)}"`;
+  }
+  compareEl.innerHTML = [deltaSummary, compare].filter(Boolean).map((x) => `<span>${x}</span>`).join(' · ');
 }
 
 function attachUi() {
@@ -1934,6 +1943,16 @@ function attachUi() {
   const useLocationBtn = document.getElementById('useLocationBtn');
   const localStatus = document.getElementById('localStatus');
   const mobileMq = window.matchMedia('(max-width: 640px)');
+  const DISPATCH_PLACEHOLDER_EXAMPLES = [
+    'Try: best ikon within 2hr',
+    'Try: Jay vs Killington today',
+    "Try: where's the pow?",
+    'Try: low wind risk VT',
+    'Try: best grooming NH',
+    'Try: storm coming this week?'
+  ];
+  let _placeholderIdx = 0;
+  let _placeholderInterval = null;
 
   const NL_COMMANDS = [
     { match: /\b(pow|powder|fresh|nuking)\b/i, cmd: 'pow' },
@@ -1979,37 +1998,6 @@ function attachUi() {
     window.requestAnimationFrame(syncDispatchCaret);
   }
 
-  const DISPATCH_PLACEHOLDER_EXAMPLES = [
-    'Try: best ikon within 2hr',
-    'Try: Jay vs Killington today',
-    'Try: where\'s the pow?',
-    'Try: low wind risk VT',
-    'Try: best grooming NH',
-    'Try: storm coming this week?',
-  ];
-  let _placeholderIdx = 0;
-  let _placeholderInterval = null;
-
-  function cyclePlaceholder() {
-    if (!input || document.activeElement === input || input.value.trim()) return;
-    _placeholderIdx = (_placeholderIdx + 1) % DISPATCH_PLACEHOLDER_EXAMPLES.length;
-    // Fade animation
-    input.classList.remove('placeholder-cycling');
-    void input.offsetWidth; // reflow
-    input.classList.add('placeholder-cycling');
-    input.placeholder = DISPATCH_PLACEHOLDER_EXAMPLES[_placeholderIdx];
-    setTimeout(() => input.classList.remove('placeholder-cycling'), 500);
-  }
-
-  function startPlaceholderCycle() {
-    if (_placeholderInterval) return;
-    _placeholderInterval = setInterval(cyclePlaceholder, 3200);
-  }
-
-  function stopPlaceholderCycle() {
-    if (_placeholderInterval) { clearInterval(_placeholderInterval); _placeholderInterval = null; }
-  }
-
   function updateDispatchPlaceholder() {
     if (!input) return;
     if (document.activeElement === input || input.value.trim()) {
@@ -2025,6 +2013,23 @@ function attachUi() {
     }
   }
 
+  function stopPlaceholderCycle() {
+    if (_placeholderInterval) { clearInterval(_placeholderInterval); _placeholderInterval = null; }
+  }
+
+  function startPlaceholderCycle() {
+    if (_placeholderInterval) return;
+    _placeholderInterval = setInterval(() => {
+      if (!input || document.activeElement === input || input.value.trim()) return;
+      _placeholderIdx = (_placeholderIdx + 1) % DISPATCH_PLACEHOLDER_EXAMPLES.length;
+      input.classList.remove('placeholder-cycling');
+      void input.offsetWidth;
+      input.classList.add('placeholder-cycling');
+      input.placeholder = DISPATCH_PLACEHOLDER_EXAMPLES[_placeholderIdx];
+      setTimeout(() => input.classList.remove('placeholder-cycling'), 500);
+    }, 3200);
+  }
+
   function preventMobileFocusJump() {
     if (!mobileMq.matches) return;
     const currentY = window.scrollY;
@@ -2035,9 +2040,6 @@ function attachUi() {
 
   input.addEventListener('focus', () => {
     stopPlaceholderCycle();
-    input.placeholder = mobileMq.matches
-      ? 'Search resorts. Enter to ask.'
-      : 'Search resorts and filters. Press Enter to ask.';
     preventMobileFocusJump();
     syncDispatchCaretRaf();
   });
@@ -2052,7 +2054,7 @@ function attachUi() {
     if (document.activeElement === input) syncDispatchCaretRaf();
   });
   mobileMq.addEventListener('change', updateDispatchPlaceholder);
-  updateDispatchPlaceholder();
+  startPlaceholderCycle();
   setAskModeUI(false);
 
   if (askBtn) {
@@ -2065,13 +2067,13 @@ function attachUi() {
 
   input.addEventListener('input', (e) => {
     const val = e.target.value || '';
-    if (val.trim()) stopPlaceholderCycle();
     state.search = val;
     state.nlHints = new Set();
     NL_COMMANDS.forEach((cmd) => { if (cmd.match.test(val)) state.nlHints.add(cmd.cmd); });
     clearBtn.classList.toggle('on', val.trim().length > 0 || state.activeHints.size > 0);
     const hasText = val.trim().length > 0;
     setAskModeUI(hasText);
+    if (hasText) stopPlaceholderCycle();
     const changedFromAnswer = state.answerQueryText
       && val.trim().toLowerCase() !== state.answerQueryText.trim().toLowerCase();
     if (changedFromAnswer || (!hasText && state.answerQueryText)) {
@@ -2379,12 +2381,17 @@ function triggerSave(btn) {
 function updateSavedTab() {
   const tab = document.querySelector('.m-tab[data-tab="favorites"]');
   if (!tab) return;
+  const showSavedCount = savedResorts.size > 0;
   const existing = tab.querySelector('.saved-badge');
   if (existing) existing.remove();
-  // Label switches to "Local" when location mode is active
-  const label = (state.localMode && state.userLocation) ? 'Local' : 'Saved';
-  tab.textContent = savedResorts.size > 0 && !state.localMode ? label + ' ' : label;
-  if (savedResorts.size > 0 && !state.localMode) {
+  if (showSavedCount) {
+    const badge = document.createElement('span');
+    badge.className = 'saved-badge';
+    badge.textContent = savedResorts.size;
+    tab.appendChild(badge);
+  }
+  tab.textContent = showSavedCount ? 'Saved ' : 'Saved';
+  if (showSavedCount) {
     const badge = document.createElement('span');
     badge.className = 'saved-badge';
     badge.textContent = savedResorts.size;
@@ -2441,7 +2448,7 @@ function buildAnswer(resorts) {
 
   if (top.pow === 'on' && topTotals.snow24 >= 6) {
     const lore  = getLeadLore(top);
-    const extra = powOnCount > 1 ? `${powOnCount} resorts with active pow.` : 'Drive now.';
+    const extra = powOnCount > 1 ? `${powOnCount} resorts with pow on now.` : 'Drive now.';
     return { verdict: 'Go.', cls: 'go', text: `${top.name} ${lore.verb} — ${topTotals.snow24}" in 24h. ${extra}` };
   }
 
@@ -2506,7 +2513,7 @@ function updateAnswerBar() {
 function showShareCard(resort) {
   const totals   = getDisplayPowTotals(resort);
   const wind     = getWindHoldStatus(resort);
-  const condLabel = resort.conditions + (resort.pow === 'on' ? ' — Pow Active' : resort.pow === 'building' ? ' — Storm Building' : '');
+  const condLabel = resort.conditions + (resort.pow === 'on' ? ' — Pow On Now' : resort.pow === 'building' ? ' — Storm Building' : '');
   const dateStr  = new Date().toLocaleDateString('en-US', { weekday:'short', month:'short', day:'numeric' });
 
   const overlay = document.createElement('div');
@@ -2668,6 +2675,20 @@ function isAskQuery(text) {
   if (tokenCount >= 3 && /\b(best|top|where|compare|vs|within|hour|hr|drive|wind|lift|worth|storm)\b/i.test(t)) score += 1;
 
   return score >= 2;
+}
+
+function getNextUpdateHint() {
+  const now = Date.now();
+  const loadedTs = Date.parse(String(state.loadedAt || ''));
+  let nextTs = Number.isFinite(loadedTs) ? loadedTs + (15 * 60 * 1000) : now;
+  if (nextTs <= now) {
+    const d = new Date(now);
+    const minutes = d.getMinutes();
+    const add = 15 - (minutes % 15 || 15);
+    d.setMinutes(minutes + add, 0, 0);
+    nextTs = d.getTime();
+  }
+  return `Next update ~${fmtClock(new Date(nextTs))}`;
 }
 
 function runDispatchAnswer(query) {
@@ -2837,6 +2858,7 @@ function answerQuery(query, resorts) {
   if (bestBadge) html += `<div class="ask-badge">${bestBadge}</div>`;
   if (top.terrainNote) html += `<div class="ask-terrain">${top.terrainNote}</div>`;
   if (drive) html += `<div class="ask-drive">${drive}</div>`;
+  html += `<div class="ask-next-update">${getNextUpdateHint()}</div>`;
 
   // Runner up
   if (pool.length >= 2) {
@@ -2880,18 +2902,20 @@ function buildCompareAnswer(a, b) {
 
   let html = `<div class="ask-answer">`;
   html += `<div class="ask-answer-head"><span class="ask-verdict go">${winner.name}.</span> ${reason}.</div>`;
+  html += `<div class="ask-compare-winner">Smarter move: <strong>${winner.name}</strong></div>`;
   html += `<button class="ask-jump-btn" data-resort-id="${winner.id}" aria-label="Jump to ${winner.name}">Jump to resort ↓</button>`;
   html += `<div class="ask-compare-grid">`;
-  html += `<div class="ask-cmp-col${winner === a ? ' winner' : ''}"><div class="ask-cmp-name">${a.name}${winner === a ? ' <span class="ask-cmp-winner-badge">✓ Pick</span>' : ''}</div>`;
+  html += `<div class="ask-cmp-col${winner === a ? ' winner' : ''}"><div class="ask-cmp-name">${a.name}</div>`;
   html += `<div class="ask-cmp-row">${aT.snow24}" fresh · ${a.conditions} · ${a.temp}°F</div>`;
   html += `<div class="ask-cmp-row">${aW.detail}</div>`;
   html += `${aH ? `<div class="ask-cmp-row">~${Math.round(aH * 60)} min drive</div>` : ''}</div>`;
-  html += `<div class="ask-cmp-col${winner === b ? ' winner' : ''}"><div class="ask-cmp-name">${b.name}${winner === b ? ' <span class="ask-cmp-winner-badge">✓ Pick</span>' : ''}</div>`;
+  html += `<div class="ask-cmp-col${winner === b ? ' winner' : ''}"><div class="ask-cmp-name">${b.name}</div>`;
   html += `<div class="ask-cmp-row">${bT.snow24}" fresh · ${b.conditions} · ${b.temp}°F</div>`;
   html += `<div class="ask-cmp-row">${bW.detail}</div>`;
   html += `${bH ? `<div class="ask-cmp-row">~${Math.round(bH * 60)} min drive</div>` : ''}</div>`;
   html += `</div>`;
   if (compare) html += `<div class="ask-drive">${compare}</div>`;
+  html += `<div class="ask-next-update">${getNextUpdateHint()}</div>`;
   html += `</div>`;
   return { html, focusIds: [a.id, b.id] };
 }
