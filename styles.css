@@ -2457,23 +2457,8 @@ body.storm-mode .share-card {
   flex-shrink: 0;
 }
 
-.d-qhint {
-  font-family: var(--mono);
-  font-size: 0.5rem;
-  font-weight: 500;
-  letter-spacing: 0.04em;
-  padding: 3px 8px;
-  border: 1px solid var(--rule);
-  background: transparent;
-  color: var(--ink-faint);
-  cursor: pointer;
-  transition: all 0.12s;
-  white-space: nowrap;
-}
-.d-qhint:hover {
-  background: var(--ink);
-  color: var(--paper);
-  border-color: var(--ink);
+.d-qhint-base-placeholder {
+  /* base moved to bottom of file */
 }
 
 /* ═══════════════════════════════════════════════════════
@@ -2657,8 +2642,165 @@ body.storm-mode .dispatch-answer { background: var(--paper-warm); border-top-col
 body.storm-mode .d-qhint { border-color: var(--rule); color: var(--ink-faint); }
 body.storm-mode .d-qhint:hover { background: var(--pow); color: #fff; border-color: var(--pow); }
 
-/* Mobile responsive for new components */
-@media (max-width: 540px) {
+/* ═══════════════════════════════════════
+   SAVED DELTA BANNER — what changed overnight
+═══════════════════════════════════════ */
+.saved-delta-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+  padding: 0.38rem 0.6rem;
+  background: var(--pow-pale);
+  border-left: 3px solid var(--pow);
+  margin-bottom: 0.55rem;
+  font-family: var(--mono);
+  font-size: 0.54rem;
+  letter-spacing: 0.04em;
+}
+
+.saved-delta-label {
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-size: 0.46rem;
+  flex-shrink: 0;
+}
+
+.delta-gain {
+  color: var(--send);
+  font-weight: 700;
+}
+.delta-loss {
+  color: var(--red);
+  font-weight: 700;
+}
+
+/* ═══════════════════════════════════════
+   BUILDING MODE — softer mid-state tint
+═══════════════════════════════════════ */
+body.building-mode .masthead {
+  border-bottom-color: rgba(26, 94, 245, 0.35);
+  box-shadow: 0 2px 0 rgba(26, 94, 245, 0.12);
+  transition: border-bottom-color 0.6s ease, box-shadow 0.6s ease;
+}
+
+body.building-mode .nameplate-logo em {
+  color: var(--building);
+}
+
+body.building-mode .dispatch-quick-hints {
+  border-top-color: rgba(124, 58, 237, 0.25);
+}
+
+body.building-mode .section-rule {
+  border-top-color: rgba(124, 58, 237, 0.35);
+}
+
+/* ═══════════════════════════════════════
+   QUICK HINTS — more presence
+═══════════════════════════════════════ */
+.d-qhint {
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 4px 10px;
+  border: 1px solid var(--rule-heavy);
+  background: var(--paper-warm);
+  color: var(--ink-soft);
+  cursor: pointer;
+  transition: all 0.12s;
+  white-space: nowrap;
+  position: relative;
+}
+.d-qhint:hover {
+  background: var(--ink);
+  color: var(--paper);
+  border-color: var(--ink);
+  transform: translateY(-1px);
+}
+.d-qhint:active {
+  transform: translateY(0);
+}
+
+/* ═══════════════════════════════════════
+   DISPATCH PLACEHOLDER FADE
+═══════════════════════════════════════ */
+.dispatch-input.placeholder-cycling::placeholder {
+  animation: placeholderFade 0.5s ease-in-out;
+}
+@keyframes placeholderFade {
+  0%   { opacity: 0; }
+  100% { opacity: 1; }
+}
+
+/* ═══════════════════════════════════════
+   GO BUTTON — enhanced launch
+═══════════════════════════════════════ */
+.d-btn-go.launching {
+  background: var(--send) !important;
+  border-color: var(--send) !important;
+}
+.rr-act-go.launching {
+  background: var(--send) !important;
+  border-color: var(--send) !important;
+}
+
+/* ═══════════════════════════════════════
+   COMPARE WINNER BADGE
+═══════════════════════════════════════ */
+.ask-cmp-col.winner {
+  border-color: var(--pow);
+  border-width: 2px;
+  background: rgba(26,94,245,0.06);
+  box-shadow: 0 0 0 1px rgba(26,94,245,0.15);
+}
+.ask-cmp-winner-badge {
+  display: inline-flex;
+  align-items: center;
+  font-family: var(--mono);
+  font-size: 0.42rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: white;
+  background: var(--pow);
+  padding: 1px 5px;
+  margin-left: 5px;
+  vertical-align: middle;
+  line-height: 1.6;
+}
+
+/* ═══════════════════════════════════════
+   DETAIL PANEL — Playfair for snow number
+═══════════════════════════════════════ */
+.det-conditions-snow {
+  display: inline-block;
+  margin-left: 0.5rem;
+}
+.det-snow-big {
+  font-family: var(--serif);
+  font-size: 1.55rem;
+  font-weight: 900;
+  font-style: italic;
+  color: var(--pow);
+  letter-spacing: -0.03em;
+  line-height: 1;
+  vertical-align: baseline;
+}
+.det-snow-period {
+  font-family: var(--mono);
+  font-size: 0.52rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-left: 2px;
+  vertical-align: baseline;
+}
+
+
   .answer-bar { padding: 0.45rem 1rem; }
   .answer-text { font-size: 0.57rem; }
   .share-card { width: 100%; }
