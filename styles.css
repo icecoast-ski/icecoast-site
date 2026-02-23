@@ -1268,17 +1268,22 @@ body.building-mode .brief {
   margin-top: 3px;
 }
 
+.rr72-track {
+  width: 100%;
+  max-width: 220px;
+}
+
 .rr72-bars {
   display: grid;
   grid-template-columns: repeat(24, minmax(0, 1fr));
   align-items: end;
   gap: 2px;
   width: 100%;
-  max-width: 220px;
   height: 30px;
   padding: 2px 2px 0;
   border-radius: 6px;
   background: linear-gradient(180deg, rgba(26,94,245,0.07), rgba(124,58,237,0.03));
+  border: 1px solid rgba(15,17,23,0.08);
 }
 
 .rr72-bar {
@@ -1315,18 +1320,19 @@ body.building-mode .brief {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   width: 100%;
-  max-width: 220px;
   order: 2;
-  margin-top: 3px;
+  margin-top: 4px;
+  padding: 0 2px;
 }
 
 .rr72-day {
   font-family: var(--mono);
-  font-size: 0.5rem;
-  font-weight: 600;
-  letter-spacing: 0.11em;
+  font-size: 0.48rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--ink-faint);
+  opacity: 0.92;
 }
 .rr72-day:first-child { text-align: left; }
 .rr72-day:nth-child(2) { text-align: center; }
@@ -1342,6 +1348,11 @@ body.building-mode .brief {
   order: 3;
   flex: 1 0 100%;
   width: 100%;
+}
+
+.rr72-total,
+.rr72-readout {
+  margin-left: 2px;
 }
 
 /* Condition pill */
@@ -1759,7 +1770,7 @@ body.building-mode .brief {
 /* Body — 3 column grid */
 .det-body {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: 1fr;
   gap: 0;
   border-bottom: 1px solid var(--rule);
 }
@@ -2207,7 +2218,9 @@ body.building-mode .brief {
   .rr-name-col { grid-column: 2 / 4; }
   .rr-cond { grid-column: 2; font-size: 0.55rem; }
   .rr-mobile-scan { display: inline-flex; align-items: center; gap: 0.28rem; }
+  .rr72-track { max-width: none; }
   .rr72-bars { max-width: none; height: 24px; }
+  .rr72-days { max-width: none; }
   .rr72-total { font-size: 0.56rem; }
   .rr-stat { display: none; }
   .rr-pow { grid-column: 3; grid-row: 2; align-self: center; }

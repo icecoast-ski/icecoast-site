@@ -348,7 +348,7 @@ function getPowDisplayContext(resort) {
       const h = Math.max(8, Math.round((Math.max(0, v) / maxSeriesVal) * 44));
       const start = idx * 3;
       const end = start + 3;
-      return `<div class="sp-bar${v <= 0 ? ' sp-trace' : ''}" style="height:${h}px" data-bar-val="${Number(v || 0).toFixed(2)}" data-bar-label="${start}h-${end}h" title="${start}h-${end}h: ${Number(v || 0).toFixed(2)}&quot;" tabindex="0" role="button"></div>`;
+      return `<div class="sp-bar${v <= 0 ? ' sp-trace' : ''}" style="height:${h}px" data-bar-val="${Number(v || 0).toFixed(2)}" data-bar-label="${start}h-${end}h" title="${Number(v || 0).toFixed(2)}&quot;" tabindex="0" role="button"></div>`;
     }).join('')
     : '<div class="sp-bar sp-trace" style="height:2px"></div>';
 
@@ -583,7 +583,7 @@ function buildForecastBars(containerId, days) {
   el.innerHTML = days.map((d) => {
     const h = Math.max((d.snow / max) * 40, d.snow > 0 ? 4 : 0);
     const trace = d.snow <= 0.1;
-    return `<div class="forecast-day"><div class="forecast-bar-wrap"><div class="forecast-bar${trace ? ' trace' : ''}" style="height:${h}px" data-bar-val="${Number(d.snow || 0).toFixed(1)}" data-bar-label="${d.day}" title="${d.day}: ${Number(d.snow || 0).toFixed(1)}&quot;" tabindex="0" role="button"></div></div><div class="forecast-day-lbl">${d.day}</div><div class="forecast-day-amt">${d.snow > 0 ? `${d.snow}"` : '—'}</div></div>`;
+    return `<div class="forecast-day"><div class="forecast-bar-wrap"><div class="forecast-bar${trace ? ' trace' : ''}" style="height:${h}px" data-bar-val="${Number(d.snow || 0).toFixed(1)}" data-bar-label="${d.day}" title="${Number(d.snow || 0).toFixed(1)}&quot;" tabindex="0" role="button"></div></div><div class="forecast-day-lbl">${d.day}</div><div class="forecast-day-amt">${d.snow > 0 ? `${d.snow}"` : '—'}</div></div>`;
   }).join('');
 }
 
@@ -1265,14 +1265,14 @@ function buildInline72hChart(resort, totals) {
     const h = Math.max(3, Math.round((v / maxBin) * 26));
     const start = idx * 3;
     const end = start + 3;
-    return `<span class="rr72-bar${v <= 0.05 ? ' trace' : ''}" style="height:${h}px" data-bar-val="${Number(v || 0).toFixed(2)}" data-bar-label="${start}h-${end}h" title="${start}h-${end}h: ${Number(v || 0).toFixed(2)}&quot;" tabindex="0" role="button"></span>`;
+    return `<span class="rr72-bar${v <= 0.05 ? ' trace' : ''}" style="height:${h}px" data-bar-val="${Number(v || 0).toFixed(2)}" data-bar-label="${start}h-${end}h" title="${Number(v || 0).toFixed(2)}&quot;" tabindex="0" role="button"></span>`;
   }).join('');
   const forecastDays = Array.isArray(resort?.forecast) ? resort.forecast.slice(0, 3).map((d) => String(d?.day || '').trim()).filter(Boolean) : [];
   const dayLabels = forecastDays.length === 3
     ? forecastDays
     : [0, 1, 2].map((offset) => new Date(Date.now() + (offset * 24 * 60 * 60 * 1000))
       .toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase());
-  return `<div class="rr-72h" aria-label="72 hour snowfall trend"><div class="rr72-bars">${bars}</div><div class="rr72-days" aria-hidden="true"><span class="rr72-day">${dayLabels[0]}</span><span class="rr72-day">${dayLabels[1]}</span><span class="rr72-day">${dayLabels[2]}</span></div><div class="rr72-total">${totals.snow72.toFixed(1)}" / 72h</div><div class="rr72-readout" aria-live="polite">Hover or tap a bar to inspect snowfall.</div></div>`;
+  return `<div class="rr-72h" aria-label="72 hour snowfall trend"><div class="rr72-track"><div class="rr72-bars">${bars}</div><div class="rr72-days" aria-hidden="true"><span class="rr72-day">${dayLabels[0]}</span><span class="rr72-day">${dayLabels[1]}</span><span class="rr72-day">${dayLabels[2]}</span></div></div><div class="rr72-total">${totals.snow72.toFixed(1)}" / 72h</div><div class="rr72-readout" aria-live="polite">Hover or tap a bar to inspect snowfall.</div></div>`;
 }
 
 function getComparablePair(list) {
@@ -1701,8 +1701,7 @@ function bindSnowBarInteractions(root = document) {
     bar.dataset.barBound = '1';
     const updateReadout = (sticky = false) => {
       const val = bar.dataset.barVal || '0.00';
-      const label = bar.dataset.barLabel || 'Block';
-      const msg = `${label}: ${val}"`;
+      const msg = `${val}"`;
       const sparkSection = bar.closest('.det-section');
       const row72 = bar.closest('.rr-72h');
       const leadStory = bar.closest('.lead-story');
