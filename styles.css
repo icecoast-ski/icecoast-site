@@ -1311,6 +1311,27 @@ body.building-mode .brief {
   order: 2;
 }
 
+.rr72-days {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  width: 100%;
+  max-width: 220px;
+  order: 2;
+  margin-top: 3px;
+}
+
+.rr72-day {
+  font-family: var(--mono);
+  font-size: 0.5rem;
+  font-weight: 600;
+  letter-spacing: 0.11em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+.rr72-day:first-child { text-align: left; }
+.rr72-day:nth-child(2) { text-align: center; }
+.rr72-day:last-child { text-align: right; }
+
 .rr72-readout {
   font-family: var(--mono);
   font-size: 0.58rem;

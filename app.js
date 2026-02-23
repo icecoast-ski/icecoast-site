@@ -1267,7 +1267,12 @@ function buildInline72hChart(resort, totals) {
     const end = start + 3;
     return `<span class="rr72-bar${v <= 0.05 ? ' trace' : ''}" style="height:${h}px" data-bar-val="${Number(v || 0).toFixed(2)}" data-bar-label="${start}h-${end}h" title="${start}h-${end}h: ${Number(v || 0).toFixed(2)}&quot;" tabindex="0" role="button"></span>`;
   }).join('');
-  return `<div class="rr-72h" aria-label="72 hour snowfall trend"><div class="rr72-bars">${bars}</div><div class="rr72-total">${totals.snow72.toFixed(1)}" / 72h</div><div class="rr72-readout" aria-live="polite">Hover or tap a bar to inspect snowfall.</div></div>`;
+  const forecastDays = Array.isArray(resort?.forecast) ? resort.forecast.slice(0, 3).map((d) => String(d?.day || '').trim()).filter(Boolean) : [];
+  const dayLabels = forecastDays.length === 3
+    ? forecastDays
+    : [0, 1, 2].map((offset) => new Date(Date.now() + (offset * 24 * 60 * 60 * 1000))
+      .toLocaleDateString('en-US', { weekday: 'short' }).toUpperCase());
+  return `<div class="rr-72h" aria-label="72 hour snowfall trend"><div class="rr72-bars">${bars}</div><div class="rr72-days" aria-hidden="true"><span class="rr72-day">${dayLabels[0]}</span><span class="rr72-day">${dayLabels[1]}</span><span class="rr72-day">${dayLabels[2]}</span></div><div class="rr72-total">${totals.snow72.toFixed(1)}" / 72h</div><div class="rr72-readout" aria-live="polite">Hover or tap a bar to inspect snowfall.</div></div>`;
 }
 
 function getComparablePair(list) {
@@ -1503,19 +1508,6 @@ function buildResortMarkup(r, rank, options = {}) {
           </div>`).join('')}
       </div>
     </div>`;
-  const sparkHtml = `
-    <div class="det-section">
-      <div class="det-section-head">
-        <span class="det-section-label">72h Snowfall</span>
-        <span class="det-spark-range">3h blocks</span>
-      </div>
-      <div class="det-sparkline">${powCtx.chartBars}</div>
-      <div class="det-spark-readout" aria-live="polite">Hover or tap a bar to inspect snowfall.</div>
-      <div class="det-spark-footer">
-        <span>Total: <strong>${displayTotals.snow72.toFixed(1)}"</strong></span>
-        ${powCtx.maxSeriesVal > 0.1 ? `<span>Peak: <strong>${powCtx.maxSeriesVal.toFixed(1)}"</strong></span>` : ''}
-      </div>
-    </div>`;
   const passPriceHtml = `
     <div class="detail-pass-price">
       <span class="detail-pass">${passStr !== '—' ? `${passStr} Pass` : 'No Pass Required'}</span>
@@ -1555,7 +1547,6 @@ function buildResortMarkup(r, rank, options = {}) {
       ${alertsHtml}
       <div class="det-body">
         <div class="det-col">${forecastHtml}</div>
-        <div class="det-col">${sparkHtml}</div>
       </div>
       <div class="det-footer">
         <div class="det-footer-left">
