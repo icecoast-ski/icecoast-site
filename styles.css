@@ -16,11 +16,11 @@ html { font-size: 17px; }
   --pow:        #1a5ef5;
   --pow-pale:   #e8efff;
   --building:   #7c3aed;
-  --graph-accent: #7c3aed;
-  --graph-fill: linear-gradient(180deg, #9f8cff 0%, #7c3aed 86%);
-  --graph-fill-soft: linear-gradient(180deg, rgba(159,140,255,0.78) 0%, rgba(124,58,237,0.78) 86%);
-  --graph-track: rgba(124,58,237,0.08);
-  --graph-glow: rgba(124,58,237,0.14);
+  --graph-accent: #1a5ef5;
+  --graph-fill: #1a5ef5;
+  --graph-fill-soft: rgba(26,94,245,0.9);
+  --graph-track: transparent;
+  --graph-glow: rgba(26,94,245,0.12);
   --quiet:      #64748b;
   --send:       #15803d;
   --avoid:      #dc2626;
@@ -958,15 +958,15 @@ body.building-mode .brief {
 .forecast-bar {
   width: 100%;
   background: var(--graph-fill);
-  border-radius: 2px 2px 0 0;
+  border-radius: 0;
   min-height: 2px;
-  opacity: 0.9;
-  box-shadow: 0 2px 8px var(--graph-glow);
-  transition: height 0.35s var(--smooth), filter 0.2s ease, box-shadow 0.2s ease;
+  opacity: 0.92;
+  box-shadow: none;
+  transition: height 0.25s var(--smooth), opacity 0.15s ease;
   cursor: pointer;
 }
 .forecast-bar.trace {
-  background: rgba(74,79,92,0.38);
+  background: rgba(74,79,92,0.28);
   opacity: 0.45;
   box-shadow: none;
 }
@@ -1032,7 +1032,10 @@ body.building-mode .brief {
 .th-sortbtn {
   display: inline-flex;
   align-items: center;
-  gap: 0.28rem;
+  justify-content: space-between;
+  gap: 0.34rem;
+  width: 100%;
+  min-height: 1.15rem;
   border: none;
   background: transparent;
   padding: 0;
@@ -1048,21 +1051,25 @@ body.building-mode .brief {
 .sort-triangle {
   width: 0;
   height: 0;
-  border-left: 4px solid transparent;
-  border-right: 4px solid transparent;
-  border-top: 6px solid var(--rule-heavy);
-  opacity: 0.35;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  border-top: 7px solid var(--rule-heavy);
+  opacity: 0.5;
   transform: translateY(1px);
-  transition: opacity 0.14s, border-top-color 0.14s, transform 0.14s;
+  transition: opacity 0.14s, border-top-color 0.14s, transform 0.14s, filter 0.14s;
 }
 
 .th-sortbtn.active .sort-triangle {
   border-top-color: var(--pow);
   opacity: 1;
+  filter: drop-shadow(0 0 1px rgba(26,94,245,0.35));
 }
 
 .th-sortbtn.asc .sort-triangle {
   transform: rotate(180deg) translateY(-1px);
+}
+.th-sortbtn.desc .sort-triangle {
+  transform: translateY(1px);
 }
 
 /* Resort row */
@@ -1081,12 +1088,13 @@ body.building-mode .brief {
 .resort-row::after {
   content: "▾";
   position: absolute;
-  right: 0.14rem;
-  bottom: 0.16rem;
+  right: 0.12rem;
+  bottom: 0.14rem;
   font-family: var(--mono);
-  font-size: 0.58rem;
+  font-size: 0.84rem;
+  font-weight: 700;
   color: var(--ink-faint);
-  opacity: 0;
+  opacity: 0.42;
   transform: translateY(-1px);
   transition: opacity 0.14s ease, transform 0.14s ease, color 0.14s ease;
   pointer-events: none;
@@ -1096,7 +1104,7 @@ body.building-mode .brief {
 .resort-row:active { background: rgba(26,94,245,0.07); }
 .resort-row:hover::after,
 .resort-row:focus-visible::after {
-  opacity: 0.75;
+  opacity: 0.92;
   transform: translateY(0);
 }
 .resort-row.expanded::after {
@@ -1302,25 +1310,25 @@ body.building-mode .brief {
   gap: 2px;
   width: 100%;
   height: 30px;
-  padding: 2px 2px 0;
-  border-radius: 6px;
+  padding: 0;
+  border-radius: 0;
   background: var(--graph-track);
-  border: 1px solid rgba(124,58,237,0.16);
+  border: 1px solid var(--rule);
 }
 
 .rr72-bar {
   display: block;
   width: 100%;
   min-height: 3px;
-  border-radius: 2px 2px 0 0;
+  border-radius: 0;
   background: var(--graph-fill-soft);
-  box-shadow: 0 1px 5px rgba(124,58,237,0.14);
+  box-shadow: none;
   cursor: pointer;
-  transition: filter 0.15s ease, opacity 0.15s ease;
+  transition: opacity 0.15s ease;
 }
 
 .rr72-bar.trace {
-  background: rgba(74,79,92,0.35);
+  background: rgba(74,79,92,0.26);
   opacity: 0.5;
   box-shadow: none;
 }
@@ -1434,7 +1442,7 @@ body.building-mode .brief {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 56px;
+  min-width: 72px;
   padding: 3px 7px;
   border: 1px solid var(--rule-heavy);
   font-family: var(--mono);
@@ -1451,14 +1459,14 @@ body.building-mode .brief {
   background: rgba(26, 94, 245, 0.08);
 }
 .rr-signal-building {
-  color: var(--ink-soft);
-  border-color: var(--rule-heavy);
-  background: rgba(15, 17, 23, 0.04);
+  color: var(--building);
+  border-color: rgba(124,58,237,0.45);
+  background: rgba(124,58,237,0.1);
 }
 .rr-signal-quiet {
   color: var(--ink-faint);
   border-color: var(--rule);
-  background: transparent;
+  background: rgba(15,17,23,0.03);
 }
 
 /* Rating squares — 5 tiny blocks instead of stars */
@@ -1922,29 +1930,29 @@ body.building-mode .brief {
   gap: 3px;
   height: 40px;
   margin-bottom: 0.3rem;
-  padding: 2px 2px 0;
-  border-radius: 6px;
+  padding: 0;
+  border-radius: 0;
   background: var(--graph-track);
-  border: 1px solid rgba(124,58,237,0.16);
+  border: 1px solid var(--rule);
 }
 .sp-bar {
   flex: 1;
   background: var(--graph-fill-soft);
-  opacity: 0.9;
-  border-radius: 1px 1px 0 0;
+  opacity: 0.92;
+  border-radius: 0;
   min-height: 2px;
-  transition: opacity 0.15s, filter 0.15s ease;
+  transition: opacity 0.15s ease;
   cursor: pointer;
-  box-shadow: 0 1px 5px rgba(124,58,237,0.14);
+  box-shadow: none;
 }
 .sp-bar.sp-trace {
-  background: rgba(74,79,92,0.35);
+  background: rgba(74,79,92,0.26);
   opacity: 0.45;
   min-height: 1px;
   box-shadow: none;
 }
 .sp-bar.sp-past  { opacity: 0.3; }
-.sp-bar.sp-now   { opacity: 1; box-shadow: 0 0 0 1px var(--graph-accent), 0 0 0 3px rgba(124,58,237,0.13); }
+.sp-bar.sp-now   { opacity: 1; box-shadow: inset 0 0 0 1px var(--graph-accent); }
 .det-spark-range {
   font-family: var(--mono);
   font-size: 0.5rem;
@@ -1975,8 +1983,7 @@ body.building-mode .brief {
 }
 
 .is-active-bar {
-  box-shadow: 0 0 0 1px var(--graph-accent), 0 0 0 3px rgba(124,58,237,0.18);
-  filter: saturate(1.08) brightness(1.03);
+  box-shadow: inset 0 0 0 1px var(--graph-accent);
   opacity: 1 !important;
 }
 
@@ -2245,9 +2252,10 @@ body.building-mode .brief {
   .rr-actions { grid-column: 2 / 4; grid-row: 3; justify-self: start; }
   .rr-act-btn { font-size: 0.52rem; padding: 4px 8px; }
   .resort-row::after {
-    opacity: 0.5;
+    opacity: 0.72;
     right: 0.04rem;
     bottom: 0.08rem;
+    font-size: 0.9rem;
   }
 
   .resort-detail { padding-left: 1.6rem; }

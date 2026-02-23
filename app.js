@@ -946,9 +946,9 @@ function updateLeadStories(list) {
 }
 
 function getSnowSignalPill(pow) {
-  if (pow === 'on') return '<span class="rr-signal rr-signal-on" title="On now: fresh snow is currently in play">On Now</span>';
-  if (pow === 'building') return '<span class="rr-signal rr-signal-building" title="Building: storm is trending in, better later window">Building</span>';
-  return '<span class="rr-signal rr-signal-quiet" title="Quiet: lower snowfall signal right now">Quiet</span>';
+  if (pow === 'on') return '<span class="rr-signal rr-signal-on" title="Snow now: best immediate snowfall signal">Snow now</span>';
+  if (pow === 'building') return '<span class="rr-signal rr-signal-building" title="Storm next: snowfall is building later">Storm next</span>';
+  return '<span class="rr-signal rr-signal-quiet" title="Quiet: lighter snowfall right now">Quiet</span>';
 }
 
 function getRatingBlocks(rating, pow) {
@@ -2269,7 +2269,9 @@ function attachUi() {
   });
 
   document.querySelectorAll('.th-sortbtn[data-sort]').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (event) => {
+      event.preventDefault();
+      event.stopPropagation();
       const key = btn.dataset.sort;
       if (!key) return;
       if (state.sortKey === key) {
