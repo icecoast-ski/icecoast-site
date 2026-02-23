@@ -1250,6 +1250,7 @@ body.building-mode .brief {
 
 .rr-72h {
   display: flex;
+  flex-wrap: wrap;
   align-items: flex-end;
   gap: 0.36rem;
   margin-top: 3px;
@@ -1286,6 +1287,7 @@ body.building-mode .brief {
   text-transform: uppercase;
   color: var(--ink-faint);
   white-space: nowrap;
+  order: 2;
 }
 
 .rr72-readout {
@@ -1295,6 +1297,9 @@ body.building-mode .brief {
   letter-spacing: 0.04em;
   color: var(--ink-soft);
   margin-top: 4px;
+  order: 3;
+  flex: 1 0 100%;
+  width: 100%;
 }
 
 /* Condition pill */
