@@ -636,6 +636,183 @@ function pickAfdSummaryText(record) {
   return null;
 }
 
+function toFiniteSnowInches(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return null;
+  if (n < 0 || n > 60) return null;
+  return Number(n.toFixed(1));
+}
+
+function sumSnowSeries24(series) {
+  if (!Array.isArray(series) || !series.length) return null;
+  const first24 = series.slice(0, 24);
+  const total = first24.reduce((sum, value) => {
+    const n = Number(value);
+    return Number.isFinite(n) ? sum + Math.max(0, n) : sum;
+  }, 0);
+  if (!Number.isFinite(total)) return null;
+  return Number(total.toFixed(1));
+}
+
+function getByPath(obj, path) {
+  if (!obj || typeof obj !== "object") return null;
+  const parts = path.split(".");
+  let cur = obj;
+  for (const part of parts) {
+    if (!cur || typeof cur !== "object" || !(part in cur)) return null;
+    cur = cur[part];
+  }
+  return cur;
+}
+
+function extractNwsSnow24Candidate(diagRow) {
+  if (!diagRow || typeof diagRow !== "object") return null;
+
+  const observedPaths = [
+    "observed.snow24",
+    "observations.snow24",
+    "obs.snow24",
+    "snowfall.observed24h",
+    "snowfall24hObserved",
+    "snow24Observed",
+    "past24hSnow",
+    "past24h.snow",
+    "last24hSnow",
+    "lsr.snow24",
+  ];
+  for (const path of observedPaths) {
+    const candidate = toFiniteSnowInches(getByPath(diagRow, path));
+    if (candidate !== null) {
+      return { value: candidate, source: "nws_observed", label: "NWS observed" };
+    }
+  }
+
+  const estimatedPaths = [
+    "nws.snow24",
+    "nwsEstimate.snow24",
+    "estimated.snow24",
+    "forecast.snow24",
+    "snowfall.estimated24h",
+    "snow24Estimated",
+    "totals.snow24",
+  ];
+  for (const path of estimatedPaths) {
+    const candidate = toFiniteSnowInches(getByPath(diagRow, path));
+    if (candidate !== null) {
+      return { value: candidate, source: "nws_estimated", label: "NWS estimated" };
+    }
+  }
+
+  return null;
+}
+
+function needsSnow24Fallback(row) {
+  if (!row || typeof row !== "object") return false;
+  const manual = Boolean(row._manualSnowOverride);
+  if (manual) return false;
+  const reported =
+    toFiniteSnowInches(row?.snowfall24h) ??
+    toFiniteSnowInches(row?.snowfall?.["24h"]) ??
+    toFiniteSnowInches(row?.powWatch?.totals?.snow24);
+  if (reported === null) return true;
+  if (reported > 0) return false;
+  const cond = String(row?.conditions || row?.weather?.condition || "").toLowerCase();
+  return cond.includes("powder") || cond.includes("snow");
+}
+
+function applySnow24FallbackToRow(row, fallback) {
+  if (!row || typeof row !== "object" || !fallback) return row;
+  const next = { ...row };
+  const currentPowWatch =
+    row.powWatch && typeof row.powWatch === "object" ? row.powWatch : {};
+  const currentTotals =
+    currentPowWatch.totals && typeof currentPowWatch.totals === "object"
+      ? currentPowWatch.totals
+      : {};
+  const snow24 = toFiniteSnowInches(fallback.value);
+  if (snow24 === null) return row;
+  const snow48 = Math.max(
+    snow24,
+    toFiniteSnowInches(currentTotals.snow48) ?? snow24,
+  );
+  const snow72 = Math.max(
+    snow48,
+    toFiniteSnowInches(currentTotals.snow72) ?? snow48,
+  );
+
+  next.powWatch = {
+    ...currentPowWatch,
+    totals: {
+      ...currentTotals,
+      snow24,
+      snow48,
+      snow72,
+    },
+    snow24Source: fallback.source,
+    snow24SourceLabel: fallback.label,
+    snow24Estimated: fallback.source !== "nws_observed",
+  };
+  return next;
+}
+
+async function applySnow24Fallbacks(cachedData, env) {
+  if (!cachedData || typeof cachedData !== "object") return cachedData;
+  const resortIds = Object.keys(cachedData).filter(
+    (k) => k !== "_metadata" && cachedData[k] && typeof cachedData[k] === "object",
+  );
+  if (!resortIds.length) return cachedData;
+
+  const diagRows = await Promise.all(
+    resortIds.map(async (resortId) => {
+      const row = await env.ICECOASTDATA.get(`powWatch:${resortId}:diagnostics`, "json");
+      return [resortId, row];
+    }),
+  );
+  const diagMap = new Map(diagRows);
+
+  let changed = false;
+  let fallbackCount = 0;
+  const nextData = { ...cachedData };
+
+  for (const resortId of resortIds) {
+    const row = cachedData[resortId];
+    if (!needsSnow24Fallback(row)) continue;
+
+    let fallback = extractNwsSnow24Candidate(diagMap.get(resortId));
+    if (!fallback) {
+      const modelSeries24 = sumSnowSeries24(row?.powWatch?.hourly?.snowSeries24);
+      if (toFiniteSnowInches(modelSeries24) !== null) {
+        fallback = {
+          value: modelSeries24,
+          source: "model_estimated",
+          label: "Model estimate",
+        };
+      }
+    }
+    if (!fallback) continue;
+
+    const nextRow = applySnow24FallbackToRow(row, fallback);
+    if (nextRow !== row) {
+      nextData[resortId] = nextRow;
+      fallbackCount += 1;
+      changed = true;
+    }
+  }
+
+  if (changed) {
+    const meta =
+      cachedData._metadata && typeof cachedData._metadata === "object"
+        ? cachedData._metadata
+        : {};
+    nextData._metadata = {
+      ...meta,
+      snow24FallbackCount: fallbackCount,
+    };
+  }
+
+  return changed ? nextData : cachedData;
+}
+
 async function applyAfdBriefsFromKv(cachedData, env) {
   if (!cachedData || typeof cachedData !== "object") return cachedData;
   const resortIds = Object.keys(cachedData).filter(
@@ -1343,10 +1520,11 @@ export default {
 
       const dataWithOverrides = await applyPowWatchOverrides(cachedData, env);
       const dataWithAfd = await applyAfdBriefsFromKv(dataWithOverrides, env);
+      const dataWithSnowFallbacks = await applySnow24Fallbacks(dataWithAfd, env);
       const senditSummary = await loadSendItSummary(env);
       const metadata =
-        dataWithAfd && typeof dataWithAfd === "object"
-          ? dataWithAfd._metadata
+        dataWithSnowFallbacks && typeof dataWithSnowFallbacks === "object"
+          ? dataWithSnowFallbacks._metadata
           : null;
       let staleMinutes = null;
       if (metadata && metadata.lastUpdated) {
@@ -1358,7 +1536,7 @@ export default {
 
       return jsonResponse(
         {
-          data: dataWithAfd,
+          data: dataWithSnowFallbacks,
           snapshot: {
             lastUpdated: metadata?.lastUpdated || null,
             staleMinutes,

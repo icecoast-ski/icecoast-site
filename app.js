@@ -328,12 +328,44 @@ function getPowDisplayContext(resort) {
   const windHoldRiskLevelRaw = String(powWatch?.windHoldRisk?.level || 'LOW').toUpperCase();
   const afdBriefText = typeof powWatch?.afdBrief === 'string' ? powWatch.afdBrief.trim() : '';
   const powBriefText = typeof powWatch?.powBrief === 'string' ? powWatch.powBrief.trim() : '';
-  const fallbackBlipParts = [];
-  if (nwsAlertEvent) fallbackBlipParts.push(`${nwsAlertEvent} active.`);
-  if (snowLevelLine) fallbackBlipParts.push(String(snowLevelLine).replace(/^Snow Level:\s*/i, ''));
-  if (windHoldRiskLevelRaw === 'HIGH') fallbackBlipParts.push('Wind hold risk is elevated this cycle.');
-  const fallbackPowBrief = fallbackBlipParts.join(' ');
-  const displayPowBrief = afdBriefText || powBriefText || fallbackPowBrief;
+  const splitSentences = (text) => String(text || '')
+    .replace(/\s+/g, ' ')
+    .trim()
+    .match(/[^.!?]+[.!?]?/g) || [];
+  const clampTwoSentences = (text) => splitSentences(text).slice(0, 2).join(' ').trim();
+  const isThinText = (text) => {
+    const t = String(text || '').trim();
+    if (!t) return true;
+    if (t.length < 56) return true;
+    const generic = /(storm warning|winter storm warning|elevated wind risk|wind hold risk|steady)$/i;
+    return generic.test(t) && t.length < 90;
+  };
+
+  // Build a richer NWS-style fallback from structured live data.
+  const summaryLines = [];
+  const stormNow = totals.snow24 > 0 ? `${totals.snow24.toFixed(1)}"` : '0"';
+  const storm72 = totals.snow72 > 0 ? `${totals.snow72.toFixed(1)}"` : '0"';
+  if (nwsAlertEvent) {
+    summaryLines.push(`${nwsAlertEvent} remains in effect. ${stormNow} in the past 24h with ${storm72} projected over 72h.`);
+  } else if (totals.snow72 >= 2 || totals.snow24 >= 1) {
+    summaryLines.push(`${stormNow} in the past 24h with ${storm72} projected over 72h.`);
+  }
+
+  if (snowLevelLine) {
+    summaryLines.push(String(snowLevelLine).replace(/^Snow Level:\s*/i, 'Snow level near '));
+  }
+
+  if (windHoldRiskLevelRaw === 'HIGH') {
+    summaryLines.push('Summit winds are a key variable today with elevated lift-hold potential.');
+  } else if (windHoldRiskLevelRaw === 'MEDIUM') {
+    summaryLines.push('Watch summit winds for intermittent lift impacts.');
+  }
+
+  const synthesizedPowBrief = clampTwoSentences(summaryLines.join(' '));
+  const preferredText = !isThinText(afdBriefText)
+    ? afdBriefText
+    : (!isThinText(powBriefText) ? powBriefText : '');
+  const displayPowBrief = clampTwoSentences(preferredText || synthesizedPowBrief || afdBriefText || powBriefText);
   const displayPowBriefLabel = 'NWS Summary';
 
   const snowSeries72 = Array.isArray(powWatch?.hourly?.snowSeries72)
@@ -417,6 +449,9 @@ function mapLiveToBrief(id, live, catalogMap) {
   const snow24 = num(totals.snow24, num(live?.snowfall?.['24h'], num(live?.snowfall24h, 0)));
   const snow48 = num(totals.snow48, num(live?.snowfall?.['48h'], snow24));
   const snow72 = num(totals.snow72, snow48);
+  const snow24Source = String(powWatch?.snow24Source || live?.snow24Source || '').trim();
+  const snow24SourceLabel = String(powWatch?.snow24SourceLabel || live?.snow24SourceLabel || '').trim();
+  const snow24Estimated = Boolean(powWatch?.snow24Estimated || live?.snow24Estimated);
   const temp = Math.round(num(live?.weather?.temp, 0));
   const wind = parseWindMph(live?.weather?.wind);
   const pow = derivePowState(powWatch, snow24);
@@ -442,6 +477,9 @@ function mapLiveToBrief(id, live, catalogMap) {
     snow24: Number(snow24.toFixed(1)),
     snow48: Number(snow48.toFixed(1)),
     snow72: Number(snow72.toFixed(1)),
+    snow24Source,
+    snow24SourceLabel,
+    snow24Estimated,
     temp,
     wind,
     feelsLike: toNumOrNull(live?.weather?.feelsLike) ?? toNumOrNull(live?.weather?.feelsLikeF) ?? temp,
@@ -545,6 +583,9 @@ function applyManualOverridesToResorts() {
     if (Number.isFinite(Number(ov.snowfall24h))) {
       next.snow24 = Number(Number(ov.snowfall24h).toFixed(1));
       if (next.powWatch?.totals) next.powWatch.totals.snow24 = next.snow24;
+      next.snow24Source = 'manual';
+      next.snow24SourceLabel = 'Manual patrol';
+      next.snow24Estimated = false;
       hasManualSnowOverride = true;
     }
     if (Number.isFinite(Number(ov.snowfall48h))) {
@@ -1492,6 +1533,10 @@ function buildResortMarkup(r, rank, options = {}) {
   const trailPctStr = trailInfo ? `${trailInfo.pct}% open (${trailInfo.open}/${trailInfo.total})` : '';
   const windClass = wind.level === 'high' ? 'wind-high' : wind.level === 'med' ? 'wind-med' : 'wind-low';
   const isSaved = savedResorts.has(r.id);
+  const snowSourceLabel = r.snow24SourceLabel || '';
+  const snowValueTitle = snowSourceLabel
+    ? `${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '0"'} · ${snowSourceLabel}${r.snow24Estimated ? ' (estimated)' : ''}`
+    : '';
 
   // Rating tooltip
   const ratingTitle = 'Based on 24h snow, wind, temp, conditions, and trail count';
@@ -1525,6 +1570,7 @@ function buildResortMarkup(r, rank, options = {}) {
 
   const alertsHtml = [
     rainWarn ? `<div class="det-rain-warning">⚠ ${rainWarn}</div>` : '',
+    snowSourceLabel ? `<div class="det-nws-brief"><strong>24h Snow Source:</strong> ${snowSourceLabel}${r.snow24Estimated ? ' (estimated)' : ''}</div>` : '',
     warningHtml,
     powCtx.displayPowBrief ? `<div class="det-nws-brief"><strong>${powCtx.displayPowBriefLabel || 'NWS Summary'}:</strong> ${powCtx.displayPowBrief}</div>` : '',
     r.terrainNote ? `<div class="det-terrain-note"><strong>Terrain:</strong> ${r.terrainNote}</div>` : '',
@@ -1567,7 +1613,7 @@ function buildResortMarkup(r, rank, options = {}) {
         <span class="rr-cond-main">${r.conditions}</span>
         <span class="rr-cond-sub ${windClass}">Wind hold risk: ${windLabel}</span>
       </div>
-      <div class="rr-stat${snowCls}">${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '—'}</div>
+      <div class="rr-stat${snowCls}"${snowValueTitle ? ` title="${snowValueTitle}"` : ''}>${displayTotals.snow24 > 0 ? `${displayTotals.snow24}"` : '—'}</div>
       <div class="rr-stat">${r.temp}°</div>
       ${getRatingBlocks(r.rating, r.pow)}
       <div class="rr-pow">${getSnowSignalPill(r.pow)}</div>
