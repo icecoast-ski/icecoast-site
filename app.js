@@ -52,6 +52,14 @@ const state = {
   source: 'fallback'
 };
 
+function triggerHaptic(ms = 10) {
+  try {
+    if (navigator.vibrate) navigator.vibrate(ms);
+  } catch (_err) {
+    // No-op on unsupported devices.
+  }
+}
+
 function saveFavorites() {
   localStorage.setItem('brief_favorites', JSON.stringify(Array.from(state.favorites)));
 }
@@ -485,6 +493,32 @@ async function loadResorts() {
   }
 }
 
+function renderBootLoading() {
+  const leadStories = document.querySelectorAll('.lead-story');
+  if (leadStories.length >= 2) {
+    leadStories.forEach((story) => {
+      story.classList.add('loading-block');
+      story.innerHTML = `
+        <div class="loading-kicker">Pulling the morning brief...</div>
+        <div class="loading-line w-70"></div>
+        <div class="loading-line w-50"></div>
+        <div class="loading-bars">
+          <span></span><span></span><span></span><span></span><span></span>
+        </div>`;
+    });
+  }
+  const ticker = document.getElementById('resortTicker');
+  if (ticker) {
+    ticker.innerHTML = Array.from({ length: 8 }).map(() => `
+      <div class="loading-row">
+        <span class="loading-cell w-10"></span>
+        <span class="loading-cell w-42"></span>
+        <span class="loading-cell w-22"></span>
+        <span class="loading-cell w-14"></span>
+      </div>`).join('');
+  }
+}
+
 function applyManualOverridesToResorts() {
   const raw = window.MANUAL_RESORT_OVERRIDES;
   const overrides = (raw && typeof raw === 'object') ? raw : {};
@@ -901,6 +935,7 @@ function updateLeadStories(list) {
 
   function fillStory(storyEl, resort, modeLabel, lore) {
     if (!storyEl || !resort) return;
+    storyEl.classList.remove('loading-block');
     const signalEl = storyEl.querySelector('.lead-signal');
     const headlineEl = storyEl.querySelector('.lead-headline');
     const deckEl = storyEl.querySelector('.lead-deck');
@@ -1901,6 +1936,34 @@ function updateSaveNudge() {
   nudge.hidden = !show;
 }
 
+function initDispatchHotkeys() {
+  const input = document.getElementById('resortSearch');
+  if (!input) return;
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== '/') return;
+    const tag = (event.target && event.target.tagName) ? String(event.target.tagName).toLowerCase() : '';
+    const isEditable = event.target && (event.target.isContentEditable || tag === 'input' || tag === 'textarea' || tag === 'select');
+    if (isEditable) return;
+    event.preventDefault();
+    input.focus({ preventScroll: true });
+    syncDispatchCaretRaf();
+  });
+}
+
+function initFirstVisitHintPulse() {
+  const hints = document.getElementById('dispatchQuickHints');
+  if (!hints) return;
+  const seenKey = 'ic_dispatch_hint_pulse_seen';
+  if (localStorage.getItem(seenKey) === '1') return;
+  setTimeout(() => {
+    if (state.search.trim()) return;
+    if (document.getElementById('dispatchAnswer') && !document.getElementById('dispatchAnswer').hidden) return;
+    hints.classList.add('pulse-onboard');
+    localStorage.setItem(seenKey, '1');
+    setTimeout(() => hints.classList.remove('pulse-onboard'), 2200);
+  }, 3000);
+}
+
 function syncDispatchTags() {
   const zone = document.getElementById('activeDispatch');
   const tags = [];
@@ -2280,6 +2343,7 @@ function attachUi() {
 
   function bindChip(btn) {
     btn.addEventListener('click', () => {
+      triggerHaptic(8);
       const cmd = btn.dataset.cmd;
       if (btn.classList.contains('fired')) {
         btn.classList.remove('fired');
@@ -2369,6 +2433,14 @@ function attachUi() {
     });
   }
 
+  const saveNudgeBtn = document.getElementById('saveNudgeBtn');
+  if (saveNudgeBtn) {
+    saveNudgeBtn.addEventListener('click', () => {
+      const ticker = document.getElementById('resortTicker');
+      if (ticker) scrollToSectionWithHeaderOffset(ticker);
+    });
+  }
+
   updateExpandBtnBadge();
   updateLocalStatus();
 }
@@ -2391,14 +2463,6 @@ function setSavedState(btn, saved) {
     if (txt) txt.textContent = 'Save';
     else btn.textContent = 'Save';
   }
-
-  const saveNudgeBtn = document.getElementById('saveNudgeBtn');
-  if (saveNudgeBtn) {
-    saveNudgeBtn.addEventListener('click', () => {
-      const ticker = document.getElementById('resortTicker');
-      if (ticker) scrollToSectionWithHeaderOffset(ticker);
-    });
-  }
 }
 
 function setMiniSavedState(btn, saved) {
@@ -2415,6 +2479,7 @@ function syncMiniSaveButtons(id, saved) {
 
 function toggleMiniSave(btn, id, name) {
   if (!id) return;
+  triggerHaptic(10);
   if (savedResorts.has(id)) {
     // Unsave — shake + remove
     savedResorts.delete(id);
@@ -2487,6 +2552,7 @@ function triggerSave(btn) {
   const id = btn.dataset.resortId;
   const name = btn.dataset.resortName;
   const alreadySaved = savedResorts.has(id);
+  triggerHaptic(10);
 
   if (alreadySaved) {
     savedResorts.delete(id);
@@ -2567,6 +2633,7 @@ function updateSavedTab() {
 }
 
 (async function boot() {
+  renderBootLoading();
   loadLocalProfile();
   await loadResorts();
   applyManualOverridesToResorts();
@@ -2587,6 +2654,8 @@ function updateSavedTab() {
   initPwaNudge();
   initShareCard();
   initAskTheBrief();
+  initDispatchHotkeys();
+  initFirstVisitHintPulse();
   const deepLinkResortId = getDeepLinkResortId();
   if (deepLinkResortId) {
     window.requestAnimationFrame(() => jumpToResortCard(deepLinkResortId));
@@ -2699,7 +2768,9 @@ function showShareCard(resort) {
   overlay.innerHTML = `
     <div class="share-card">
       <div class="sc-logo">ice<em>coast</em></div>
-      ${shareImage ? `<div class="sc-image-wrap"><img class="sc-image" src="${shareImage}" alt="${resort.name} conditions image" loading="lazy" decoding="async"></div>` : ''}
+      ${shareImage
+        ? `<div class="sc-image-wrap"><img class="sc-image" src="${shareImage}" alt="${resort.name} conditions image" loading="lazy" decoding="async"></div>`
+        : `<div class="sc-image-wrap sc-image-fallback"><div class="sc-image-fallback-name">${resort.name}</div><div class="sc-image-fallback-meta">${totals.snow24 > 0 ? `${totals.snow24}" fresh` : 'No fresh snow'} · ${resort.temp}°F · ${wind.short}</div></div>`}
       <div class="sc-name">${resort.name}</div>
       <div class="sc-cond">${condLabel}</div>
       <div class="sc-stats">
@@ -2732,6 +2803,7 @@ function showShareCard(resort) {
   overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
 
   overlay.querySelector('#scShare').onclick = async () => {
+    triggerHaptic(8);
     const verdict = resort.rating >= 4 ? '🟢 Go.' : resort.rating <= 2 ? '🔴 Skip.' : '🟡 Solid.';
     const trailInfo = getTrailPct(resort);
     const trailLine = trailInfo ? ` ${trailInfo.pct}% trails open.` : '';
@@ -2834,6 +2906,7 @@ function initAskTheBrief() {
   // Bind quick-ask hint buttons
   document.querySelectorAll('.d-qhint').forEach((btn) => {
     btn.addEventListener('click', () => {
+      triggerHaptic(8);
       const q = btn.dataset.q;
       input.value = q;
       input.dispatchEvent(new Event('input'));
