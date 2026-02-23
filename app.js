@@ -88,6 +88,8 @@ function loadLocalProfile() {
     state.localMode = true;
     state.userLocation = { lat, lon };
     state.locationLabel = typeof parsed.locationLabel === 'string' ? parsed.locationLabel : '';
+    const localCta = document.getElementById('localCta');
+    if (localCta) localCta.hidden = true;
   } catch (_err) {
     // Ignore corrupted local profile.
   }
@@ -953,12 +955,11 @@ function triggerLocationConfirmedAnimation(anchorEl, label = '') {
   const masthead = document.querySelector('.masthead');
   const mastheadRect = masthead ? masthead.getBoundingClientRect() : null;
   const toast = document.createElement('div');
-  toast.className = 'save-toast';
+  toast.className = 'location-confirm-toast';
   toast.textContent = `✓ Location confirmed · ${placeDisplay}`;
-  toast.style.left = `${Math.max(12, window.innerWidth - 260)}px`;
-  toast.style.top = `${Math.max(8, (mastheadRect ? mastheadRect.bottom : 0) + 6)}px`;
+  toast.style.top = `${Math.max(8, (mastheadRect ? mastheadRect.bottom : 0) + 8)}px`;
   document.body.appendChild(toast);
-  setTimeout(() => toast.remove(), 760);
+  setTimeout(() => toast.remove(), 950);
 
   if (!anchorEl) return;
   const rect = anchorEl.getBoundingClientRect();
@@ -2759,12 +2760,10 @@ function updateSavedTab() {
   tickClock();
   setInterval(tickClock, 30000);
   attachUi();
-  if (savedResorts.size >= 3) {
-    state.currentTab = 'favorites';
-    const favTab = document.querySelector('.m-tab[data-tab="favorites"]');
-    document.querySelectorAll('.m-tab[data-tab]').forEach((b) => b.classList.remove('active'));
-    if (favTab) favTab.classList.add('active');
-  }
+  state.currentTab = 'all';
+  const allTab = document.querySelector('.m-tab[data-tab="all"]');
+  document.querySelectorAll('.m-tab[data-tab]').forEach((b) => b.classList.remove('active'));
+  if (allTab) allTab.classList.add('active');
   updateSavedTab();
   renderTicker();
   syncDispatchTags();

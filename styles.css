@@ -1651,6 +1651,28 @@ body.building-mode .brief {
   animation: toastUp 0.65s var(--smooth) forwards;
 }
 
+.location-confirm-toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  font-family: var(--mono);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--ink);
+  border: 1px solid var(--rule-heavy);
+  padding: 4px 10px;
+  pointer-events: none;
+  z-index: 10020;
+  white-space: nowrap;
+  max-width: min(92vw, 420px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  animation: toastUp 0.85s var(--smooth) forwards;
+}
+
 .saved-badge {
   display: inline-flex;
   align-items: center;
