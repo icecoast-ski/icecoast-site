@@ -3,7 +3,7 @@
  * Generated from admin.html
  */
 window.MANUAL_RESORT_OVERRIDES_META = {
-  "updatedAt": "2026-02-23T14:19:04.799Z"
+  "updatedAt": "2026-02-23T14:23:30.459Z"
 };
 window.MANUAL_RESORT_OVERRIDES = {
   "blue-mountain": {
@@ -64,8 +64,8 @@ window.MANUAL_RESORT_OVERRIDES = {
     "_patrolUpdatedAt": "2026-02-23T13:38:14.832Z"
   },
   "hunter": {
-    "conditions": "Powder",
-    "icecoastRating": 5,
+    "conditions": "Packed Powder",
+    "icecoastRating": 4,
     "dynamicPricing": false,
     "trails": {
       "open": 59
@@ -73,9 +73,9 @@ window.MANUAL_RESORT_OVERRIDES = {
     "lifts": {
       "total": 13
     },
-    "snowfall24h": 1,
-    "snowfall48h": 2,
-    "_patrolUpdatedAt": "2026-02-23T13:36:48.360Z"
+    "snowfall24h": 3,
+    "snowfall48h": 0,
+    "_patrolUpdatedAt": "2026-02-23T14:23:30.458Z"
   },
   "jay-peak": {
     "conditions": "Packed Powder",
