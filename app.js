@@ -2723,10 +2723,39 @@ function jumpToResortCard(resortId) {
     renderTicker();
   }
 
-  const focus = () => {
+  const clearSearchOnly = () => {
+    const input = document.getElementById('resortSearch');
+    const clearBtn = document.getElementById('clearSearch');
+    state.search = '';
+    state.nlHints = new Set();
+    if (input) input.value = '';
+    if (clearBtn) clearBtn.classList.remove('on');
+  };
+
+  const clearAllFilters = () => {
+    clearSearchOnly();
+    state.activeHints.clear();
+    document.querySelectorAll('.d-hint.fired, .d-chip.fired').forEach((b) => b.classList.remove('fired'));
+    updateExpandBtnBadge();
+    syncDispatchTags();
+  };
+
+  const focus = (attempt = 0) => {
     const ticker = document.getElementById('resortTicker');
     if (!ticker) return;
     const row = ticker.querySelector(`.resort-row[data-resort="${resortId}"]`);
+    if (!row && attempt === 0) {
+      // Ask/query text can leave ticker filtered to 0 rows (e.g. "jay vs kill").
+      clearSearchOnly();
+      renderTicker();
+      return focus(1);
+    }
+    if (!row && attempt === 1) {
+      // If chips still hide the target resort, clear all filters for this explicit jump action.
+      clearAllFilters();
+      renderTicker();
+      return focus(2);
+    }
     if (!row) return;
     ticker.querySelectorAll('.resort-row.expanded').forEach((r) => r.classList.remove('expanded'));
     row.classList.add('expanded');
