@@ -332,7 +332,7 @@ function getPowDisplayContext(resort) {
   const maxSeriesVal = chartSource.length ? Math.max(...chartSource, 0.1) : 0.1;
   const chartBars = chartSource.length
     ? chartSource.map((v, idx) => {
-      const h = Math.max(6, Math.round((Math.max(0, v) / maxSeriesVal) * 34));
+      const h = Math.max(8, Math.round((Math.max(0, v) / maxSeriesVal) * 44));
       const start = idx * 3;
       const end = start + 3;
       return `<div class="sp-bar${v <= 0 ? ' sp-trace' : ''}" style="height:${h}px" data-bar-val="${Number(v || 0).toFixed(2)}" data-bar-label="${start}h-${end}h" title="${start}h-${end}h: ${Number(v || 0).toFixed(2)}&quot;" tabindex="0" role="button"></div>`;
@@ -567,7 +567,7 @@ function buildForecastBars(containerId, days) {
   }
   const max = Math.max(...days.map((d) => d.snow), 0.1);
   el.innerHTML = days.map((d) => {
-    const h = Math.max((d.snow / max) * 28, d.snow > 0 ? 3 : 0);
+    const h = Math.max((d.snow / max) * 40, d.snow > 0 ? 4 : 0);
     const trace = d.snow <= 0.1;
     return `<div class="forecast-day"><div class="forecast-bar-wrap"><div class="forecast-bar${trace ? ' trace' : ''}" style="height:${h}px" data-bar-val="${Number(d.snow || 0).toFixed(1)}" data-bar-label="${d.day}" title="${d.day}: ${Number(d.snow || 0).toFixed(1)}&quot;" tabindex="0" role="button"></div></div><div class="forecast-day-lbl">${d.day}</div><div class="forecast-day-amt">${d.snow > 0 ? `${d.snow}"` : '—'}</div></div>`;
   }).join('');
@@ -1216,12 +1216,12 @@ function buildInline72hChart(resort, totals) {
   }
   const maxBin = Math.max(...bins, 0.1);
   const bars = bins.map((v, idx) => {
-    const h = Math.max(2, Math.round((v / maxBin) * 16));
+    const h = Math.max(3, Math.round((v / maxBin) * 26));
     const start = idx * 3;
     const end = start + 3;
     return `<span class="rr72-bar${v <= 0.05 ? ' trace' : ''}" style="height:${h}px" data-bar-val="${Number(v || 0).toFixed(2)}" data-bar-label="${start}h-${end}h" title="${start}h-${end}h: ${Number(v || 0).toFixed(2)}&quot;" tabindex="0" role="button"></span>`;
   }).join('');
-  return `<div class="rr-72h" aria-label="72 hour snowfall trend"><div class="rr72-bars">${bars}</div><div class="rr72-total">${totals.snow72.toFixed(1)}" / 72h</div><div class="rr72-readout" aria-live="polite">Hover or tap bars for snowfall.</div></div>`;
+  return `<div class="rr-72h" aria-label="72 hour snowfall trend"><div class="rr72-bars">${bars}</div><div class="rr72-total">${totals.snow72.toFixed(1)}" / 72h</div><div class="rr72-readout" aria-live="polite">Hover or tap a bar to inspect snowfall.</div></div>`;
 }
 
 function getComparablePair(list) {
@@ -1464,7 +1464,7 @@ function buildResortMarkup(r, rank, options = {}) {
         <span class="det-spark-range">3h blocks</span>
       </div>
       <div class="det-sparkline">${powCtx.chartBars}</div>
-      <div class="det-spark-readout" aria-live="polite">Hover or tap bars for snowfall.</div>
+      <div class="det-spark-readout" aria-live="polite">Hover or tap a bar to inspect snowfall.</div>
       <div class="det-spark-footer">
         <span>Total: <strong>${displayTotals.snow72.toFixed(1)}"</strong></span>
         ${powCtx.maxSeriesVal > 0.1 ? `<span>Peak: <strong>${powCtx.maxSeriesVal.toFixed(1)}"</strong></span>` : ''}
@@ -1638,7 +1638,7 @@ function bindSnowBarInteractions(root = document) {
         if (!readout) {
           readout = document.createElement('div');
           readout.className = 'lead-forecast-readout';
-          readout.textContent = 'Hover or tap bars for snowfall.';
+          readout.textContent = 'Hover or tap a bar to inspect snowfall.';
           const row = leadStory.querySelector('.forecast-row');
           if (row) row.insertAdjacentElement('afterend', readout);
         }

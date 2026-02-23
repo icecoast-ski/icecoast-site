@@ -2,7 +2,7 @@
    RESET + TOKENS
 ═══════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { font-size: 16px; }
+html { font-size: 17px; }
 
 :root {
   --ink:        #0f1117;
@@ -930,7 +930,7 @@ body.building-mode .brief {
 /* Forecast bar — sparkline-style */
 .forecast-row {
   display: flex;
-  gap: 4px;
+  gap: 6px;
   margin-top: 0.7rem;
   align-items: flex-end;
 }
@@ -945,7 +945,7 @@ body.building-mode .brief {
 
 .forecast-bar-wrap {
   width: 100%;
-  height: 30px;
+  height: 44px;
   display: flex;
   align-items: flex-end;
 }
@@ -963,14 +963,14 @@ body.building-mode .brief {
 
 .forecast-day-lbl {
   font-family: var(--mono);
-  font-size: 0.46rem;
+  font-size: 0.52rem;
   letter-spacing: 0.06em;
   text-transform: uppercase;
   color: var(--ink-faint);
 }
 .forecast-day-amt {
   font-family: var(--mono);
-  font-size: 0.55rem;
+  font-size: 0.64rem;
   font-weight: 600;
   color: var(--ink-soft);
 }
@@ -1259,17 +1259,17 @@ body.building-mode .brief {
   display: grid;
   grid-template-columns: repeat(24, minmax(0, 1fr));
   align-items: end;
-  gap: 1px;
+  gap: 2px;
   width: 100%;
-  max-width: 170px;
-  height: 18px;
+  max-width: 220px;
+  height: 28px;
 }
 
 .rr72-bar {
   display: block;
   width: 100%;
-  min-height: 2px;
-  border-radius: 1px 1px 0 0;
+  min-height: 3px;
+  border-radius: 2px 2px 0 0;
   background: rgba(26, 94, 245, 0.65);
   cursor: pointer;
 }
@@ -1281,7 +1281,7 @@ body.building-mode .brief {
 
 .rr72-total {
   font-family: var(--mono);
-  font-size: 0.54rem;
+  font-size: 0.6rem;
   letter-spacing: 0.05em;
   text-transform: uppercase;
   color: var(--ink-faint);
@@ -1290,10 +1290,11 @@ body.building-mode .brief {
 
 .rr72-readout {
   font-family: var(--mono);
-  font-size: 0.5rem;
+  font-size: 0.58rem;
+  font-weight: 600;
   letter-spacing: 0.04em;
-  color: var(--ink-faint);
-  margin-top: 2px;
+  color: var(--ink-soft);
+  margin-top: 4px;
 }
 
 /* Condition pill */
@@ -1841,8 +1842,8 @@ body.building-mode .brief {
 .det-sparkline {
   display: flex;
   align-items: flex-end;
-  gap: 2px;
-  height: 26px;
+  gap: 3px;
+  height: 40px;
   margin-bottom: 0.3rem;
 }
 .sp-bar {
@@ -1859,7 +1860,7 @@ body.building-mode .brief {
 .sp-bar.sp-now   { opacity: 1; box-shadow: 0 0 0 1px var(--pow); }
 .det-spark-range {
   font-family: var(--mono);
-  font-size: 0.44rem;
+  font-size: 0.5rem;
   color: var(--ink-faint);
   letter-spacing: 0.04em;
 }
@@ -1867,7 +1868,7 @@ body.building-mode .brief {
   display: flex;
   justify-content: space-between;
   font-family: var(--mono);
-  font-size: 0.52rem;
+  font-size: 0.58rem;
   color: var(--ink-soft);
 }
 .det-spark-footer strong { color: var(--ink); }
@@ -1875,10 +1876,15 @@ body.building-mode .brief {
 .det-spark-readout,
 .lead-forecast-readout {
   font-family: var(--mono);
-  font-size: 0.52rem;
+  font-size: 0.6rem;
+  font-weight: 600;
   letter-spacing: 0.04em;
-  color: var(--ink-faint);
-  margin-top: 0.25rem;
+  color: var(--ink-soft);
+  margin-top: 0.35rem;
+  background: var(--paper-warm);
+  border: 1px solid var(--rule);
+  display: inline-block;
+  padding: 2px 8px;
 }
 
 .is-active-bar {
@@ -2116,8 +2122,8 @@ body.building-mode .brief {
   .rr-name-col { grid-column: 2 / 4; }
   .rr-cond { grid-column: 2; font-size: 0.55rem; }
   .rr-mobile-scan { display: inline-flex; align-items: center; gap: 0.28rem; }
-  .rr72-bars { max-width: none; height: 15px; }
-  .rr72-total { font-size: 0.5rem; }
+  .rr72-bars { max-width: none; height: 24px; }
+  .rr72-total { font-size: 0.56rem; }
   .rr-stat { display: none; }
   .rr-pow { grid-column: 3; grid-row: 2; align-self: center; }
   .rr-rating { display: none; }
